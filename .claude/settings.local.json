@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:the-odds-api.com)",
+      "Bash(curl:*)",
+      "WebFetch(domain:www.football-data.org)",
+      "Bash(python:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(tasklist)",
+      "Bash(del server.py)",
+      "Bash(dir:*)",
+      "Bash(prepare-for-upload.bat)",
+      "Bash(cmd /c \"C:\\Prosjekter\\tippekonkurranse\\prepare-for-upload.bat\")",
+      "Read(//c/Prosjekter/mtg-samling/**)",
+      "Bash(git init)",
+      "Bash(git add .)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

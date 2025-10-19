@@ -1,0 +1,30 @@
+# Testfiler
+test-*.html
+test-*.js
+
+# Gamle filer
+app.js
+user-manager.js
+api-service-odds.js
+
+# Deployment filer
+DEPLOYMENT.md
+FILER-FOR-OPPLASTING.txt
+prepare-for-upload.bat
+prepare-for-upload.ps1
+prepare-upload.ps1
+upload-til-server/
+
+# Screenshots
+screenshots/
+
+# Python server (kun for lokal testing)
+server.py
+__pycache__/
+
+# Vercel
+.vercel
+
+# OS filer
+.DS_Store
+Thumbs.db

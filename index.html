@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tippekonkurranse - Fotball</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚽ Tippekonkurranse</h1>
+            <div class="user-section">
+                <div class="current-user">
+                    <span>Innlogget som: <strong id="currentUsername">Ikke innlogget</strong></span>
+                    <div id="authSection">
+                        <button onclick="showAuthModal('signin')" class="btn-small">Logg inn</button>
+                        <button onclick="showAuthModal('signup')" class="btn-small">Registrer</button>
+                    </div>
+                    <button id="signOutBtn" onclick="signOut()" class="btn-small" style="display: none;">Logg ut</button>
+                </div>
+            </div>
+            <div class="score-display">
+                <h2>Dine poeng: <span id="totalScore">0</span></h2>
+            </div>
+            <nav class="nav-buttons">
+                <a href="live.html" class="nav-btn">📋 Mine tips</a>
+                <a href="competitions.html" class="nav-btn">🏆 Konkurranser</a>
+                <a href="leaderboard.html" class="nav-btn">📊 Toppliste</a>
+            </nav>
+        </header>
+
+        <!-- Auth Modal -->
+        <div id="authModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeAuthModal()">&times;</span>
+
+                <!-- Sign In Form -->
+                <div id="signinForm" style="display: none;">
+                    <h2>Logg inn</h2>
+                    <div class="auth-form">
+                        <input type="email" id="signinEmail" placeholder="E-post" required>
+                        <input type="password" id="signinPassword" placeholder="Passord" required>
+                        <button onclick="handleSignIn()">Logg inn</button>
+                        <p class="auth-switch">
+                            <a href="#" onclick="showAuthModal('reset'); return false;">Glemt passord?</a>
+                        </p>
+                        <p class="auth-switch">Har du ikke konto? <a href="#" onclick="showAuthModal('signup'); return false;">Registrer deg</a></p>
+                    </div>
+                </div>
+
+                <!-- Reset Password Form -->
+                <div id="resetForm" style="display: none;">
+                    <h2>Tilbakestill passord</h2>
+                    <div class="auth-form">
+                        <p style="color: #718096; margin-bottom: 15px; font-size: 14px;">Vi sender deg en e-post med lenke for å tilbakestille passordet ditt.</p>
+                        <input type="email" id="resetEmail" placeholder="E-post" required>
+                        <button onclick="handleResetPassword()">Send tilbakestillingslenke</button>
+                        <p class="auth-switch">Husker du passordet? <a href="#" onclick="showAuthModal('signin'); return false;">Logg inn</a></p>
+                    </div>
+                </div>
+
+                <!-- Sign Up Form -->
+                <div id="signupForm" style="display: none;">
+                    <h2>Registrer ny bruker</h2>
+                    <div class="auth-form">
+                        <input type="text" id="signupName" placeholder="Navn" required maxlength="30">
+                        <input type="email" id="signupEmail" placeholder="E-post" required>
+                        <input type="password" id="signupPassword" placeholder="Passord (min 6 tegn)" required minlength="6">
+                        <button onclick="handleSignUp()">Registrer</button>
+                        <p class="auth-switch">Har du allerede konto? <a href="#" onclick="showAuthModal('signin'); return false;">Logg inn</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main>
+            <!-- League Filter -->
+            <section class="league-filter">
+                <h3>🏆 Velg ligaer</h3>
+                <div class="league-checkboxes">
+                    <div class="league-checkbox">
+                        <input type="checkbox" id="league-all" checked onchange="toggleAllLeagues(this)">
+                        <label for="league-all">Alle ligaer</label>
+                    </div>
+                    <div class="league-checkbox">
+                        <input type="checkbox" id="league-39" class="league-filter-checkbox" checked onchange="filterLeagues()">
+                        <label for="league-39">Premier League</label>
+                    </div>
+                    <div class="league-checkbox">
+                        <input type="checkbox" id="league-2" class="league-filter-checkbox" checked onchange="filterLeagues()">
+                        <label for="league-2">Champions League</label>
+                    </div>
+                    <div class="league-checkbox">
+                        <input type="checkbox" id="league-140" class="league-filter-checkbox" checked onchange="filterLeagues()">
+                        <label for="league-140">La Liga</label>
+                    </div>
+                    <div class="league-checkbox">
+                        <input type="checkbox" id="league-78" class="league-filter-checkbox" checked onchange="filterLeagues()">
+                        <label for="league-78">Bundesliga</label>
+                    </div>
+                    <div class="league-checkbox">
+                        <input type="checkbox" id="league-135" class="league-filter-checkbox" checked onchange="filterLeagues()">
+                        <label for="league-135">Serie A</label>
+                    </div>
+                    <div class="league-checkbox">
+                        <input type="checkbox" id="league-1" class="league-filter-checkbox" checked onchange="filterLeagues()">
+                        <label for="league-1">World Cup</label>
+                    </div>
+                </div>
+            </section>
+
+            <section class="matches-section">
+                <h2>Legg inn tips</h2>
+                <button onclick="refreshData()" class="refresh-btn">🔄 Hent nye kamper</button>
+                <div id="loadingMessage" class="loading-message">Laster kamper...</div>
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <div id="matchesList"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-auth.js"></script>
+    <script src="api-config.js"></script>
+    <script src="api-service.js"></script>
+    <script src="app-firebase.js"></script>
+</body>
+</html>
