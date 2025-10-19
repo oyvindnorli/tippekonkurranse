@@ -495,19 +495,37 @@ async function loadCompetitionMatches() {
             1: 'World Cup'
         };
 
+        console.log('🔍 Total scores fetched:', scores.length);
+        console.log('🔍 First match structure:', scores[0]);
+        console.log('🔍 Competition leagues:', competitionLeagues);
+        console.log('🔍 Competition dates:', startDate, 'to', endDate);
+
         const competitionMatches = scores.filter(match => {
             const matchDate = new Date(match.commence_time || match.date);
 
+            console.log('🔍 Checking match:', match.homeTeam, 'vs', match.awayTeam, 'Date:', matchDate, 'League:', match.league);
+
             // Check if match is within date range
             if (matchDate < startDate || matchDate > endDate) {
+                console.log('  ❌ Outside date range');
                 return false;
             }
 
             // Check if match is in one of the competition leagues
-            return competitionLeagues.some(leagueId => {
+            const isInLeague = competitionLeagues.some(leagueId => {
                 const leagueName = leagueNames[leagueId];
-                return match.league && match.league.includes(leagueName);
+                const matches = match.league && match.league.includes(leagueName);
+                console.log('  🔍 Checking league', leagueId, '-', leagueName, ':', matches);
+                return matches;
             });
+
+            if (!isInLeague) {
+                console.log('  ❌ Not in selected leagues');
+            } else {
+                console.log('  ✅ Match included!');
+            }
+
+            return isInLeague;
         });
 
         console.log('📥 Competition matches:', competitionMatches.length);
