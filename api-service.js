@@ -402,13 +402,15 @@ class FootballApiService {
             let allMatches = [];
             const fixtureIds = new Set(); // Track unique fixture IDs
 
-            // Get date range - last 7 days to today
+            // Get date range - last 7 days to next 7 days
             const today = new Date();
             const weekAgo = new Date();
             weekAgo.setDate(today.getDate() - 7);
+            const weekAhead = new Date();
+            weekAhead.setDate(today.getDate() + 7);
 
             const fromDate = weekAgo.toISOString().split('T')[0];
-            const toDate = today.toISOString().split('T')[0];
+            const toDate = weekAhead.toISOString().split('T')[0];
 
             console.log(`📅 Fetching matches from ${fromDate} to ${toDate}`);
 
