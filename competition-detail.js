@@ -34,9 +34,19 @@ function init() {
                 } else {
                     usernameElement.textContent = user.email;
                 }
+                // Show user section with fade-in
+                const currentUserDiv = usernameElement.closest('.current-user');
+                if (currentUserDiv) {
+                    currentUserDiv.classList.add('loaded');
+                }
             }).catch(error => {
                 console.warn('Could not fetch displayName:', error);
                 usernameElement.textContent = user.email;
+                // Show user section even on error
+                const currentUserDiv = usernameElement.closest('.current-user');
+                if (currentUserDiv) {
+                    currentUserDiv.classList.add('loaded');
+                }
             });
 
             authSection.style.display = 'none';
@@ -46,6 +56,11 @@ function init() {
             usernameElement.textContent = 'Ikke innlogget';
             authSection.style.display = 'block';
             signOutBtn.style.display = 'none';
+            // Show user section with fade-in even when logged out
+            const currentUserDiv = usernameElement.closest('.current-user');
+            if (currentUserDiv) {
+                currentUserDiv.classList.add('loaded');
+            }
         }
     });
 }

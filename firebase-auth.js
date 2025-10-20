@@ -192,9 +192,19 @@ function onUserLoggedIn(user) {
             } else {
                 currentUsername.textContent = user.email;
             }
+            // Show user section with fade-in
+            const currentUserDiv = currentUsername.closest('.current-user');
+            if (currentUserDiv) {
+                currentUserDiv.classList.add('loaded');
+            }
         }).catch(error => {
             console.warn('Could not fetch displayName:', error);
             currentUsername.textContent = user.email;
+            // Show user section even on error
+            const currentUserDiv = currentUsername.closest('.current-user');
+            if (currentUserDiv) {
+                currentUserDiv.classList.add('loaded');
+            }
         });
     }
 

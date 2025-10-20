@@ -375,9 +375,19 @@ function initializeMyTipsPage() {
                 } else {
                     usernameElement.textContent = user.email;
                 }
+                // Show user section with fade-in
+                const currentUserDiv = usernameElement.closest('.current-user');
+                if (currentUserDiv) {
+                    currentUserDiv.classList.add('loaded');
+                }
             }).catch(error => {
                 console.warn('Could not fetch displayName:', error);
                 usernameElement.textContent = user.email;
+                // Show user section even on error
+                const currentUserDiv = usernameElement.closest('.current-user');
+                if (currentUserDiv) {
+                    currentUserDiv.classList.add('loaded');
+                }
             });
 
             document.getElementById('signOutBtn').style.display = 'inline-block';
