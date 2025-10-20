@@ -551,7 +551,8 @@ function renderCompetitionMatches(matches) {
     // Group by date
     const matchesByDate = {};
     matches.forEach(match => {
-        const date = new Date(match.date).toLocaleDateString('no-NO');
+        const matchDate = new Date(match.commence_time || match.date);
+        const date = matchDate.toLocaleDateString('no-NO');
         if (!matchesByDate[date]) {
             matchesByDate[date] = [];
         }
@@ -583,7 +584,8 @@ function createCompetitionMatchCard(match) {
         card.classList.add('has-tip');
     }
 
-    const time = new Date(match.date).toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
+    const matchTime = new Date(match.commence_time || match.date);
+    const time = matchTime.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
     const homeLogo = match.homeLogo || footballApi.getTeamLogo(match.homeTeam);
     const awayLogo = match.awayLogo || footballApi.getTeamLogo(match.awayTeam);
 
