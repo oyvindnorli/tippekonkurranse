@@ -454,7 +454,7 @@ class FootballApiService {
                 }
             }
 
-            console.log(`📊 Total unique matches in last 7 days: ${allMatches.length}`);
+            console.log(`📊 Total unique matches fetched: ${allMatches.length}`);
             return this.transformScoresData(allMatches);
         } catch (error) {
             console.error('Error fetching scores:', error);

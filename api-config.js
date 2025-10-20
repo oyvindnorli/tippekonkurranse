@@ -15,7 +15,7 @@ const API_CONFIG = {
         135, // Serie A
         1    // World Cup
     ],
-    SEASON: 2024, // Current season (2024/2025)
+    SEASON: 2025, // Current season year
     MAX_MATCHES: 20, // Maximum number of matches to show
 
     // Cache settings (24 hours to save API calls)

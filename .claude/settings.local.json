@@ -15,7 +15,18 @@
       "Bash(cmd /c \"C:\\Prosjekter\\tippekonkurranse\\prepare-for-upload.bat\")",
       "Read(//c/Prosjekter/mtg-samling/**)",
       "Bash(git init)",
-      "Bash(git add .)"
+      "Bash(git add .)",
+      "Bash(git commit -m \"Initial commit - Tippekonkurranse med VM-støtte\")",
+      "Bash(git branch -M main)",
+      "Bash(git push -u origin main)",
+      "Bash(git remote set-url origin https://github.com/oyvindnorli/tippekonkurranse.git)",
+      "Bash(git add api-config.js)",
+      "Bash(git commit -m \"Fix: Sett SEASON til 2024 for 2024/2025-sesongen\")",
+      "Bash(git push)",
+      "Bash(git add api-service.js)",
+      "Bash(git commit -m \"Fix: Hent også fremtidige kamper (7 dager frem) for konkurranser\")",
+      "Bash(git add competition-detail.js)",
+      "Bash(git commit -m \"Debug: Legg til logging for å feilsøke konkurransekamper\")"
     ],
     "deny": [],
     "ask": []
