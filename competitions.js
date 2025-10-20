@@ -248,6 +248,12 @@ async function createCompetition() {
         const startDate = new Date(document.getElementById('startDate').value);
         const endDate = new Date(document.getElementById('endDate').value);
 
+        // Set time to start of day for startDate (00:00)
+        startDate.setHours(0, 0, 0, 0);
+
+        // Set time to end of day for endDate (23:59:59)
+        endDate.setHours(23, 59, 59, 999);
+
         // Validation
         if (!name) {
             throw new Error('Navn på konkurranse er påkrevd');
