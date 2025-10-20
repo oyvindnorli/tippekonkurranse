@@ -300,12 +300,23 @@ async function loadLeaderboard() {
         for (const doc of participantsSnapshot.docs) {
             const participant = doc.data();
 
+            // Get user display name from users collection
+            let displayName = participant.userName; // fallback
+            try {
+                const userDoc = await db.collection('users').doc(participant.userId).get();
+                if (userDoc.exists) {
+                    displayName = userDoc.data().displayName || participant.userName;
+                }
+            } catch (error) {
+                console.warn('Could not fetch user displayName:', error);
+            }
+
             // Calculate points for this participant
             const points = await calculateParticipantPoints(participant.userId);
 
             participants.push({
                 userId: participant.userId,
-                userName: participant.userName,
+                userName: displayName,
                 totalPoints: points
             });
         }
