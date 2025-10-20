@@ -542,7 +542,13 @@ function renderMatches() {
             timeHeader.className = 'time-header';
             // Clean time format - extract only HH:MM if it contains more
             const cleanTime = time.includes(',') ? time.split(',').pop().trim() : time;
-            timeHeader.textContent = cleanTime;
+
+            // Get league info from first match in this time group
+            const firstMatch = upcomingMatches[0];
+            const leagueLogo = firstMatch.leagueLogo ? `<img src="${firstMatch.leagueLogo}" alt="${firstMatch.league}" class="league-logo-small" onerror="this.style.display='none'">` : '';
+            const leagueName = firstMatch.league ? `<span class="league-name">${firstMatch.league}</span>` : '';
+
+            timeHeader.innerHTML = `<strong>${cleanTime}</strong> ${leagueLogo} ${leagueName}`;
             dateGroup.appendChild(timeHeader);
 
             // Render all upcoming matches for this time
@@ -580,16 +586,12 @@ function renderMatches() {
 
                 matchCard.innerHTML = `
                     <div class="match-info">
-                        <div class="league-info">
-                            ${match.leagueLogo ? `<img src="${match.leagueLogo}" alt="${match.league}" class="league-logo-small" onerror="this.style.display='none'">` : ''}
-                            <span class="league-name">${match.league || ''}</span>
-                        </div>
-
                         <div class="match-teams">
                             <div class="team home">
-                                ${homeLogo ? `<img src="${homeLogo}" alt="${match.homeTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
                                 <span class="team-name-large">${match.homeTeam}</span>
+                                ${homeLogo ? `<img src="${homeLogo}" alt="${match.homeTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
                             </div>
+                            <span class="vs-separator">-</span>
                             <div class="team away">
                                 ${awayLogo ? `<img src="${awayLogo}" alt="${match.awayTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
                                 <span class="team-name-large">${match.awayTeam}</span>
@@ -598,20 +600,22 @@ function renderMatches() {
 
                         ${match.odds ? `
                             <div class="odds">
-                                <div class="odd-item">
-                                    <span class="odd-label">Hjemme</span>
-                                    <span class="odd-value">${match.odds.H ? match.odds.H.toFixed(2) : '2.00'}</span>
-                                </div>
-                                <div class="odd-item">
-                                    <span class="odd-label">Uavgjort</span>
-                                    <span class="odd-value">${match.odds.U ? match.odds.U.toFixed(2) : '3.00'}</span>
-                                </div>
-                                <div class="odd-item">
-                                    <span class="odd-label">Borte</span>
-                                    <span class="odd-value">${match.odds.B ? match.odds.B.toFixed(2) : '3.50'}</span>
+                                <div class="odds-row">
+                                    <div class="odd-item">
+                                        <span class="odd-label">H:</span>
+                                        <span class="odd-value">${match.odds.H ? match.odds.H.toFixed(2) : '2.00'}</span>
+                                    </div>
+                                    <div class="odd-item">
+                                        <span class="odd-label">U:</span>
+                                        <span class="odd-value">${match.odds.U ? match.odds.U.toFixed(2) : '3.00'}</span>
+                                    </div>
+                                    <div class="odd-item">
+                                        <span class="odd-label">B:</span>
+                                        <span class="odd-value">${match.odds.B ? match.odds.B.toFixed(2) : '3.50'}</span>
+                                    </div>
                                 </div>
                             </div>
-                        ` : ''}
+                        ` : '<div class="odds"><div class="odds-row"><span style="font-size: 11px; color: #94a3b8;">Ingen odds</span></div></div>'}
 
                         <div class="tip-input-section">
                             <span class="tip-label">Ditt tips</span>
