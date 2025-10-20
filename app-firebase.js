@@ -586,18 +586,6 @@ function renderMatches() {
 
                 matchCard.innerHTML = `
                     <div class="match-info">
-                        <div class="match-teams">
-                            <div class="team home">
-                                <span class="team-name-large">${match.homeTeam}</span>
-                                ${homeLogo ? `<img src="${homeLogo}" alt="${match.homeTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
-                            </div>
-                            <span class="vs-separator">-</span>
-                            <div class="team away">
-                                ${awayLogo ? `<img src="${awayLogo}" alt="${match.awayTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
-                                <span class="team-name-large">${match.awayTeam}</span>
-                            </div>
-                        </div>
-
                         ${match.odds ? `
                             <div class="odds">
                                 <div class="odds-row">
@@ -616,6 +604,18 @@ function renderMatches() {
                                 </div>
                             </div>
                         ` : '<div class="odds"><div class="odds-row"><span style="font-size: 11px; color: #94a3b8;">Ingen odds</span></div></div>'}
+
+                        <div class="match-teams">
+                            <div class="team home">
+                                <span class="team-name-large">${match.homeTeam}</span>
+                                ${homeLogo ? `<img src="${homeLogo}" alt="${match.homeTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
+                            </div>
+                            <span class="vs-separator">-</span>
+                            <div class="team away">
+                                ${awayLogo ? `<img src="${awayLogo}" alt="${match.awayTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
+                                <span class="team-name-large">${match.awayTeam}</span>
+                            </div>
+                        </div>
 
                         <div class="tip-input-section">
                             <span class="tip-label">Ditt tips</span>

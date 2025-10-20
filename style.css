@@ -337,7 +337,7 @@ main {
 
 .match-info {
     display: grid;
-    grid-template-columns: 200px 1fr auto;
+    grid-template-columns: auto 1fr auto;
     gap: 24px;
     align-items: center;
 }
@@ -350,7 +350,8 @@ main {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 0 0 200px;
+    flex: 1;
+    justify-content: center;
 }
 
 .team {
@@ -420,7 +421,7 @@ main {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
-    min-width: 200px;
+    min-width: 180px;
 }
 
 .odds::before {
