@@ -269,6 +269,36 @@ function applyLeagueFilter() {
     renderMatches();
 }
 
+// Cache matches in localStorage for faster loading
+function getCachedMatches() {
+    try {
+        const cached = localStorage.getItem('cachedMatches');
+        const cacheTime = localStorage.getItem('cachedMatchesTime');
+
+        if (cached && cacheTime) {
+            const age = Date.now() - parseInt(cacheTime);
+            // Cache valid for 5 minutes
+            if (age < 5 * 60 * 1000) {
+                console.log('✅ Using cached matches (age:', Math.round(age / 1000), 'seconds)');
+                return JSON.parse(cached);
+            }
+        }
+    } catch (error) {
+        console.warn('⚠️ Could not load cached matches:', error);
+    }
+    return null;
+}
+
+function setCachedMatches(matches) {
+    try {
+        localStorage.setItem('cachedMatches', JSON.stringify(matches));
+        localStorage.setItem('cachedMatchesTime', Date.now().toString());
+        console.log('💾 Cached', matches.length, 'matches');
+    } catch (error) {
+        console.warn('⚠️ Could not cache matches:', error);
+    }
+}
+
 // Load matches from API
 async function loadMatches() {
     const loadingMessage = document.getElementById('loadingMessage');
@@ -278,45 +308,65 @@ async function loadMatches() {
         loadingMessage.style.display = 'block';
         errorMessage.style.display = 'none';
 
-        // Fetch upcoming matches from API
-        allMatches = await footballApi.getUpcomingFixtures();
+        // Try to load from cache first for instant display
+        const cachedMatches = getCachedMatches();
+        if (cachedMatches && cachedMatches.length > 0) {
+            allMatches = cachedMatches;
+            applyLeagueFilter();
 
-        // Also fetch completed matches for score calculation
-        try {
-            const completedMatches = await footballApi.fetchScores();
-            console.log('📊 Loaded completed matches for scoring:', completedMatches.length);
+            // Load user tips in parallel
+            const tipsPromise = currentUser ? loadUserTips() : Promise.resolve();
 
-            // Deduplicate before adding - use a Set to track unique IDs
-            const existingIds = new Set(allMatches.map(m => String(m.id)));
-            const uniqueCompletedMatches = completedMatches.filter(m => {
-                const id = String(m.id);
-                if (existingIds.has(id)) {
-                    console.log(`🔄 Skipping duplicate completed match: ${m.homeTeam} vs ${m.awayTeam}`);
-                    return false;
-                }
-                existingIds.add(id);
-                return true;
-            });
+            // Render immediately with cached data
+            renderMatches();
 
-            console.log(`✅ Adding ${uniqueCompletedMatches.length} unique completed matches (${completedMatches.length} total)`);
+            await tipsPromise;
+            updateTotalScore();
 
-            // Add completed matches to allMatches for score calculation
-            // but they won't be shown in the UI (filtered out in rendering)
-            allMatches = allMatches.concat(uniqueCompletedMatches);
-        } catch (error) {
-            console.warn('⚠️ Could not load completed matches:', error);
+            console.log('⚡ Rendered cached matches, fetching fresh data in background...');
         }
+
+        // Fetch fresh data from API (in parallel)
+        const [upcomingMatches, completedMatches] = await Promise.all([
+            footballApi.getUpcomingFixtures(),
+            footballApi.fetchScores().catch(error => {
+                console.warn('⚠️ Could not load completed matches:', error);
+                return [];
+            })
+        ]);
+
+        console.log('📊 Loaded matches:', upcomingMatches.length, 'upcoming,', completedMatches.length, 'completed');
+
+        // Deduplicate matches
+        const existingIds = new Set(upcomingMatches.map(m => String(m.id)));
+        const uniqueCompletedMatches = completedMatches.filter(m => {
+            const id = String(m.id);
+            if (existingIds.has(id)) {
+                return false;
+            }
+            existingIds.add(id);
+            return true;
+        });
+
+        console.log(`✅ Adding ${uniqueCompletedMatches.length} unique completed matches`);
+
+        // Combine all matches
+        allMatches = upcomingMatches.concat(uniqueCompletedMatches);
+
+        // Cache the fresh data
+        setCachedMatches(allMatches);
 
         // Apply initial filter
         applyLeagueFilter();
 
-        // Load user tips first before rendering
-        if (currentUser) {
+        // Load user tips if not already loaded
+        if (currentUser && !cachedMatches) {
             await loadUserTips();
         }
 
         loadingMessage.style.display = 'none';
 
+        // Re-render with fresh data
         renderMatches();
         updateTotalScore();
     } catch (error) {
