@@ -384,7 +384,7 @@ main {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100px;
+    max-width: 180px;
 }
 
 .vs-separator {
@@ -1642,11 +1642,36 @@ main {
 @media (max-width: 768px) {
     .match-info {
         grid-template-columns: 1fr;
-        gap: 14px;
+        gap: 12px;
+    }
+
+    .match-teams {
+        width: 100%;
+        gap: 8px;
+    }
+
+    .team-name-large {
+        font-size: 12px;
+        max-width: 120px;
+    }
+
+    .team-logo-large {
+        width: 20px;
+        height: 20px;
     }
 
     .odds {
-        grid-template-columns: repeat(3, 1fr);
+        min-width: auto;
+        width: 100%;
+    }
+
+    .odds-row {
+        justify-content: space-around;
+    }
+
+    .tip-input-section {
+        min-width: auto;
+        width: 100%;
     }
 
     .tip-section {
