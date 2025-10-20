@@ -361,7 +361,20 @@ function init() {
     initializeFirebase();
     // Initialize league checkboxes from saved preferences
     initializeLeagueCheckboxes();
-    loadMatches();
+
+    // Wait for auth state before loading matches
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in, load matches
+            loadMatches();
+        } else {
+            // User is not signed in, show message
+            const matchesList = document.getElementById('matchesList');
+            if (matchesList) {
+                matchesList.innerHTML = '<div class="no-matches"><p>Du må være innlogget for å se kamper og legge inn tips.</p><p><a href="index.html" class="btn-primary">Logg inn</a></p></div>';
+            }
+        }
+    });
 }
 
 // Group matches by date
