@@ -13,7 +13,19 @@ function init() {
         const signOutBtn = document.getElementById('signOutBtn');
 
         if (user) {
-            usernameElement.textContent = user.email;
+            // Fetch displayName from Firestore users collection
+            const db = firebase.firestore();
+            db.collection('users').doc(user.uid).get().then(doc => {
+                if (doc.exists) {
+                    usernameElement.textContent = doc.data().displayName || user.email;
+                } else {
+                    usernameElement.textContent = user.email;
+                }
+            }).catch(error => {
+                console.warn('Could not fetch displayName:', error);
+                usernameElement.textContent = user.email;
+            });
+
             authSection.style.display = 'none';
             signOutBtn.style.display = 'inline-block';
             loadCompetitions();

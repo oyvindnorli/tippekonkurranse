@@ -181,10 +181,21 @@ function onUserLoggedIn(user) {
         authModal.style.display = 'none';
     }
 
-    // Update UI
+    // Update UI - fetch displayName from Firestore
     const currentUsername = document.getElementById('currentUsername');
     if (currentUsername) {
-        currentUsername.textContent = user.displayName || user.email;
+        // Fetch displayName from users collection
+        const db = firebase.firestore();
+        db.collection('users').doc(user.uid).get().then(doc => {
+            if (doc.exists) {
+                currentUsername.textContent = doc.data().displayName || user.email;
+            } else {
+                currentUsername.textContent = user.email;
+            }
+        }).catch(error => {
+            console.warn('Could not fetch displayName:', error);
+            currentUsername.textContent = user.email;
+        });
     }
 
     const authSection = document.getElementById('authSection');
