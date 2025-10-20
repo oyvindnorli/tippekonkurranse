@@ -255,14 +255,13 @@ main {
 }
 
 .date-header {
-    padding: 10px 16px;
-    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-    font-size: 12px;
+    padding: 12px 0 8px 0;
+    background: transparent;
+    font-size: 11px;
     font-weight: 700;
-    color: #1a1d29;
+    color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    border-top: 1px solid #e5e7eb;
+    letter-spacing: 1px;
     border-bottom: 1px solid #e5e7eb;
 }
 
@@ -275,49 +274,47 @@ main {
     border-bottom: 1px solid #f3f4f6;
 }
 
-/* Match cards - Redesigned for clarity */
+/* Match cards - Modern compact design */
 .match-card {
     background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 16px 20px;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 1px solid #e5e7eb;
     transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .match-card:hover {
-    background: #fafbfc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
 }
 
 .match-card.has-tip {
-    background: linear-gradient(90deg, #f0fdfa 0%, #ffffff 100%);
-    border-left: 4px solid #10b981;
-    padding-left: 16px;
+    background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 100%);
+    border-left: 3px solid #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
 }
 
 .match-info {
     display: grid;
-    grid-template-columns: auto 1fr auto auto;
-    gap: 24px;
+    grid-template-columns: 40px 1fr auto;
+    gap: 14px;
     align-items: center;
 }
 
 .league-info {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    min-width: 50px;
+    width: 40px;
 }
 
 .match-teams {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
     flex: 1;
-    background: #f9fafb;
-    padding: 12px 16px;
-    border-radius: 10px;
-    border: 1.5px solid #e5e7eb;
 }
 
 .team {
@@ -335,86 +332,77 @@ main {
 }
 
 .team-logo-large {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     object-fit: contain;
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.12));
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
     flex-shrink: 0;
 }
 
 .team-name-large {
-    font-size: 14px;
-    font-weight: 700;
-    color: #0f172a;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
 }
 
 .vs-separator {
-    font-size: 11px;
-    color: #94a3b8;
-    font-weight: 600;
-    text-align: center;
-    padding: 0 8px;
-    text-align: center;
-    min-width: 20px;
+    display: none; /* Remove VS separator for cleaner look */
 }
 
 /* League badge - Compact */
 .league-badge {
-    font-size: 9px;
-    color: #0284c7;
+    font-size: 8px;
+    color: #64748b;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    gap: 2px;
     font-weight: 600;
-    min-width: 50px;
 }
 
 .league-logo {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
     object-fit: contain;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
-/* Odds display - Clear card-based design */
+/* Odds display - Compact inline design */
 .odds {
     display: flex !important;
-    flex-direction: column;
-    gap: 8px;
-    background: #ffffff;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1.5px solid #e5e7eb;
-    min-width: 140px;
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
 }
 
 .odds::before {
     content: 'ODDS';
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
-    color: #6b7280;
-    letter-spacing: 0.8px;
-    margin-bottom: 4px;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+    margin-right: 4px;
 }
 
 .odd-item {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
-    background: #f9fafb;
-    border-radius: 8px;
-    border: 1.5px solid #e5e7eb;
+    gap: 3px;
+    padding: 6px 10px;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
     transition: all 0.2s ease;
     cursor: pointer;
+    min-width: 48px;
 }
 
 .odd-item:hover {
     background: #22d3ee;
     border-color: #22d3ee;
-    transform: translateX(3px);
-    box-shadow: 0 2px 8px rgba(34, 211, 238, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
 }
 
 .odd-item:hover .odd-label,
@@ -423,9 +411,9 @@ main {
 }
 
 .odd-label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    color: #6b7280;
+    color: #64748b;
     min-width: 30px;
 }
 
@@ -435,64 +423,61 @@ main {
 }
 
 .odd-value {
-    font-size: 16px;
-    font-weight: 800;
+    font-size: 14px;
+    font-weight: 700;
     color: #0f172a;
-    text-align: right;
 }
 
-/* Score input - Prominent and clear */
+/* Score input - Compact inline design */
 .tip-input-section {
-    background: linear-gradient(135deg, #ecfeff 0%, #ffffff 100%);
-    padding: 14px 16px;
-    border-radius: 10px;
-    border: 2px solid #22d3ee;
+    background: #ffffff;
+    padding: 0;
+    border-radius: 0;
+    border: none;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
-    min-width: 180px;
+    align-items: center;
 }
 
 .tip-label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
-    color: #0891b2;
+    color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    text-align: center;
+    letter-spacing: 0.5px;
 }
 
 .tip-score-input {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .score-input-group {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: #ffffff;
-    padding: 4px;
-    border-radius: 8px;
-    border: 2px solid #e5e7eb;
+    gap: 4px;
+    background: #f8fafc;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
 }
 
 .score-btn {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border: none;
-    background: #f3f4f6;
-    border-radius: 6px;
+    background: #e2e8f0;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
-    color: #6b7280;
+    color: #64748b;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
 }
 
 .score-btn:hover:not(:disabled) {
@@ -511,11 +496,11 @@ main {
 }
 
 .score-display {
-    min-width: 32px;
-    height: 28px;
+    min-width: 28px;
+    height: 24px;
     text-align: center;
-    font-size: 18px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 700;
     color: #0f172a;
     display: flex;
     align-items: center;
