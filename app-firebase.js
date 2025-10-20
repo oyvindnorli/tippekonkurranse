@@ -244,7 +244,14 @@ function applyLeagueFilter() {
     if (selectedLeagues.size === 0) {
         matches = [];
     } else {
+        const now = new Date();
         matches = allMatches.filter(match => {
+            // Filter out matches that have already started
+            const matchDate = new Date(match.commence_time || match.date);
+            if (matchDate < now) {
+                return false; // Skip past matches
+            }
+
             // Check if match league name matches any selected league
             const matchLeague = match.league;
             for (const leagueId of selectedLeagues) {
