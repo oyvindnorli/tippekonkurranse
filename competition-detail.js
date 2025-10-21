@@ -170,6 +170,16 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
         joinBtn.style.display = 'none';
     }
 
+    // Show/hide share button based on competition status
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+        if (status === 'completed') {
+            shareBtn.style.display = 'none';
+        } else {
+            shareBtn.style.display = 'inline-block';
+        }
+    }
+
     // Show delete button only for creator
     const deleteBtn = document.getElementById('deleteBtn');
     if (deleteBtn) {
