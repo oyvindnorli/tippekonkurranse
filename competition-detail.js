@@ -584,7 +584,7 @@ function renderLeaderboard(participants) {
 
         row.innerHTML = `
             <div class="leaderboard-position">${positionEmoji}</div>
-            <div class="leaderboard-name">${participant.userName}</div>
+            <div class="leaderboard-name leaderboard-name-clickable" onclick="viewUserTips('${participant.userId}', '${participant.userName}')" style="cursor: pointer;">${participant.userName}</div>
             <div class="leaderboard-score">${participant.totalPoints.toFixed(2)}</div>
         `;
 
@@ -745,6 +745,107 @@ function createCompetitionMatchCard(match) {
     `;
 
     return card;
+}
+
+// View user's tips and points
+async function viewUserTips(userId, userName) {
+    // Check if competition has started
+    const startDate = competition.startDate.toDate();
+    const now = new Date();
+
+    if (now < startDate) {
+        alert('Tips kan først ses når konkurransen har startet');
+        return;
+    }
+
+    const modal = document.getElementById('userTipsModal');
+    const modalTitle = document.getElementById('userTipsModalTitle');
+    const modalContent = document.getElementById('userTipsModalContent');
+
+    modalTitle.textContent = `${userName} sine tips og poeng`;
+    modalContent.innerHTML = '<div class="loading-message">Laster tips...</div>';
+    modal.style.display = 'block';
+
+    try {
+        const db = firebase.firestore();
+
+        // Get user's tips
+        const tipsSnapshot = await db.collection('tips')
+            .where('userId', '==', userId)
+            .get();
+
+        const tips = [];
+        tipsSnapshot.forEach(doc => {
+            tips.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Get match results for competition
+        const matchResults = await fetchMatchResultsForCompetition();
+
+        // Build tips display
+        let html = '';
+        let totalPoints = 0;
+
+        if (Object.keys(matchResults).length === 0) {
+            html = '<p style="text-align: center; padding: 20px; color: #64748b;">Ingen kamper har startet ennå</p>';
+        } else {
+            Object.keys(matchResults).forEach(matchId => {
+                const result = matchResults[matchId];
+                const tip = tips.find(t => String(t.matchId) === String(matchId));
+
+                if (result && result.completed) {
+                    const points = tip ? calculateMatchPoints(tip, result) : 0;
+                    totalPoints += points;
+
+                    html += `
+                        <div class="user-tip-row" style="display: flex; align-items: center; padding: 12px; margin-bottom: 8px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px;">
+                                    ${result.homeTeam} - ${result.awayTeam}
+                                </div>
+                                <div style="font-size: 13px; color: #64748b;">
+                                    Resultat: ${result.homeScore}-${result.awayScore}
+                                    ${tip ? `| Tips: ${tip.homeScore}-${tip.awayScore}` : '| Ikke tippet'}
+                                </div>
+                            </div>
+                            <div style="font-size: 16px; font-weight: 700; color: ${points > 0 ? '#10b981' : '#94a3b8'}; min-width: 60px; text-align: right;">
+                                ${points > 0 ? '+' : ''}${points.toFixed(2)}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            html = `
+                <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 2px solid #10b981;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 14px; color: #065f46; font-weight: 600; margin-bottom: 4px;">Totale poeng</div>
+                        <div style="font-size: 32px; color: #059669; font-weight: 800;">${totalPoints.toFixed(2)}</div>
+                    </div>
+                </div>
+                ${html}
+            `;
+        }
+
+        modalContent.innerHTML = html;
+
+    } catch (error) {
+        console.error('Failed to load user tips:', error);
+        modalContent.innerHTML = '<p style="text-align: center; padding: 20px; color: #ef4444;">Kunne ikke laste tips</p>';
+    }
+}
+
+// Close user tips modal
+function closeUserTipsModal() {
+    document.getElementById('userTipsModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('userTipsModal');
+    if (event.target === modal) {
+        closeUserTipsModal();
+    }
 }
 
 // Initialize when DOM is ready

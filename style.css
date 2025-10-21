@@ -717,6 +717,11 @@ main {
     color: #1f2937;
 }
 
+.leaderboard-name-clickable:hover {
+    color: #22d3ee;
+    text-decoration: underline;
+}
+
 .leaderboard-score {
     font-size: 15px;
     font-weight: 700;
