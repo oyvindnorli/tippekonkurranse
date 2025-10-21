@@ -303,9 +303,20 @@ async function loadLeaderboard() {
             // Calculate points for this participant
             const points = await calculateParticipantPoints(participant.userId);
 
+            // Fetch actual displayName from users collection
+            let userName = participant.userName;
+            try {
+                const userDoc = await db.collection('users').doc(participant.userId).get();
+                if (userDoc.exists && userDoc.data().displayName) {
+                    userName = userDoc.data().displayName;
+                }
+            } catch (error) {
+                console.warn('Could not fetch user displayName:', error);
+            }
+
             participants.push({
                 userId: participant.userId,
-                userName: participant.userName,
+                userName: userName,
                 totalPoints: points
             });
         }
@@ -346,7 +357,8 @@ async function calculateParticipantPoints(userId) {
             const tip = tips.find(t => String(t.matchId) === String(matchId));
             const result = matchResults[matchId];
 
-            if (tip && result && result.completed) {
+            // Count points for both completed and live matches (if they have a score)
+            if (tip && result && result.result && result.result.home !== null && result.result.away !== null) {
                 const points = calculateMatchPoints(tip, result);
                 totalPoints += points;
             }
@@ -584,7 +596,8 @@ function createCompetitionMatchCard(match) {
     let tipDisplay = '';
     if (hasTip) {
         let points = 0;
-        if (match.result && match.completed) {
+        // Calculate points for both live and completed matches (if result exists)
+        if (match.result && match.result.home !== null && match.result.away !== null) {
             points = calculateMatchPoints(userTip, match);
         }
 
@@ -592,7 +605,7 @@ function createCompetitionMatchCard(match) {
             <div class="match-tip-display">
                 <span class="tip-label">Ditt tips:</span>
                 <span class="tip-score">${userTip.homeScore} - ${userTip.awayScore}</span>
-                ${match.completed ? `<span class="tip-points">${points.toFixed(2)} poeng</span>` : ''}
+                ${match.result ? `<span class="tip-points">${points.toFixed(2)} poeng${match.completed ? '' : ' (live)'}</span>` : ''}
             </div>
         `;
     } else {
