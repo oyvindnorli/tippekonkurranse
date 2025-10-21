@@ -58,15 +58,52 @@ async function loadCompetitions() {
 
         loadingMessage.style.display = 'none';
 
+        // Fetch match results to check if competitions are actually finished
+        const scores = await footballApi.fetchScores();
+
         // Categorize competitions
         const now = new Date();
-        const active = competitions.filter(c => {
+        const active = [];
+        const upcoming = [];
+        const completed = [];
+
+        competitions.forEach(c => {
             const start = c.startDate.toDate();
             const end = c.endDate.toDate();
-            return start <= now && now <= end;
+
+            // Upcoming: hasn't started yet
+            if (start > now) {
+                upcoming.push(c);
+                return;
+            }
+
+            // Check if all matches in competition are finished
+            const extendedEnd = new Date(end);
+            extendedEnd.setDate(extendedEnd.getDate() + 1);
+
+            const competitionMatches = scores.filter(match => {
+                const matchDate = new Date(match.commence_time || match.date);
+                if (matchDate < start || matchDate > extendedEnd) return false;
+
+                // Check if match is in competition leagues
+                const leagueNames = { 39: 'Premier League', 2: 'UEFA Champions League', 140: 'La Liga', 78: 'Bundesliga', 135: 'Serie A', 1: 'World Cup' };
+                const leagues = c.leagues || [];
+                return leagues.some(leagueId => {
+                    const leagueName = leagueNames[leagueId];
+                    return match.league && match.league.includes(leagueName);
+                });
+            });
+
+            // Check if all matches are completed
+            const allMatchesCompleted = competitionMatches.length > 0 &&
+                competitionMatches.every(match => match.completed);
+
+            if (allMatchesCompleted || end < now) {
+                completed.push(c);
+            } else {
+                active.push(c);
+            }
         });
-        const upcoming = competitions.filter(c => c.startDate.toDate() > now);
-        const completed = competitions.filter(c => c.endDate.toDate() < now);
 
         renderCompetitions(active, 'activeCompetitionsList');
         renderCompetitions(upcoming, 'upcomingCompetitionsList');
