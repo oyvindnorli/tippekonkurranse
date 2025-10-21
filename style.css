@@ -41,7 +41,7 @@ header h1 {
     min-height: 28px; /* Ensure consistent height */
 }
 
-.current-user {
+.user-section .current-user {
     display: inline-flex;
     align-items: center;
     gap: 12px;
@@ -51,11 +51,11 @@ header h1 {
     transition: opacity 0.2s ease;
 }
 
-.current-user.loaded {
+.user-section .current-user.loaded {
     opacity: 1;
 }
 
-.current-user strong {
+.user-section .current-user strong {
     color: #22d3ee;
     font-weight: 600;
 }
