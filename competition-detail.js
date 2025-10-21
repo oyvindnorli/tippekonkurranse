@@ -377,8 +377,10 @@ async function fetchMatchResultsForCompetition() {
     try {
         const results = {};
 
-        // Fetch scores from API for today
+        // Fetch scores from API (last 7 days)
         const scores = await footballApi.fetchScores();
+
+        console.log(`📊 Total scores fetched from API: ${scores.length}`);
 
         // Filter matches that are:
         // 1. Within competition date range
@@ -387,33 +389,37 @@ async function fetchMatchResultsForCompetition() {
         const endDate = competition.endDate.toDate();
         const leagues = competition.leagues || [];
 
+        console.log(`📅 Competition period: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`);
+        console.log(`🏆 Competition leagues:`, leagues);
+
+        const leagueNames = {
+            39: 'Premier League',
+            2: 'UEFA Champions League',
+            140: 'La Liga',
+            78: 'Bundesliga',
+            135: 'Serie A',
+            1: 'World Cup'
+        };
+
         scores.forEach(match => {
             const matchDate = new Date(match.date);
 
             // Check if match is within date range
             if (matchDate >= startDate && matchDate <= endDate) {
                 // Check if match is in one of the competition leagues
-                // We need to match by league name since API returns league names
-                const leagueNames = {
-                    39: 'Premier League',
-                    2: 'UEFA Champions League',
-                    140: 'La Liga',
-                    78: 'Bundesliga',
-                    135: 'Serie A',
-                    1: 'World Cup'
-                };
-
                 const isInLeague = leagues.some(leagueId => {
                     const leagueName = leagueNames[leagueId];
                     return match.league && match.league.includes(leagueName);
                 });
 
-                if (isInLeague) {
+                if (isInLeague && match.result) {
                     results[match.id] = match;
+                    console.log(`✅ Match included: ${match.homeTeam} vs ${match.awayTeam} (${match.result.home}-${match.result.away}) - ${match.completed ? 'Completed' : 'Live'}`);
                 }
             }
         });
 
+        console.log(`📈 Total matches for leaderboard calculation: ${Object.keys(results).length}`);
         return results;
 
     } catch (error) {
