@@ -402,10 +402,15 @@ async function fetchMatchResultsForCompetition() {
         };
 
         scores.forEach(match => {
-            const matchDate = new Date(match.date);
+            // Use commence_time (when match started) instead of date
+            const matchDate = new Date(match.commence_time || match.date);
 
-            // Check if match is within date range
-            if (matchDate >= startDate && matchDate <= endDate) {
+            // Extend end date by 1 day to include matches that start late
+            const extendedEndDate = new Date(endDate);
+            extendedEndDate.setDate(extendedEndDate.getDate() + 1);
+
+            // Check if match is within date range (with 1 day buffer)
+            if (matchDate >= startDate && matchDate <= extendedEndDate) {
                 // Check if match is in one of the competition leagues
                 const isInLeague = leagues.some(leagueId => {
                     const leagueName = leagueNames[leagueId];
