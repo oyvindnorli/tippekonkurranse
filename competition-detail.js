@@ -63,14 +63,14 @@ async function loadCompetition() {
         // Load user tips
         await loadUserTips();
 
-        // Render competition details
-        renderCompetitionDetails();
+        // Load and render matches first (needed to determine if competition is finished)
+        const allMatchesCompleted = await loadCompetitionMatches();
+
+        // Render competition details (with match completion status)
+        renderCompetitionDetails(allMatchesCompleted);
 
         // Load and render leaderboard
         await loadLeaderboard();
-
-        // Load and render matches
-        await loadCompetitionMatches();
 
         loadingMessage.style.display = 'none';
         detailsSection.style.display = 'block';
@@ -106,7 +106,7 @@ async function loadUserTips() {
 }
 
 // Render competition details
-function renderCompetitionDetails() {
+function renderCompetitionDetails(allMatchesCompleted = false) {
     document.getElementById('competitionName').textContent = competition.name;
     document.getElementById('competitionDescription').textContent = competition.description || 'Ingen beskrivelse';
     document.getElementById('creatorName').textContent = competition.creatorName;
@@ -139,10 +139,17 @@ function renderCompetitionDetails() {
     let statusClass = 'status-upcoming';
 
     if (now >= startDate && now <= endDate) {
-        status = 'active';
-        statusText = '🔴 Aktiv';
-        statusClass = 'status-active';
-    } else if (now > endDate) {
+        // Check if all matches are completed even if we're within the date range
+        if (allMatchesCompleted) {
+            status = 'completed';
+            statusText = '✅ Fullført';
+            statusClass = 'status-completed';
+        } else {
+            status = 'active';
+            statusText = '🔴 Aktiv';
+            statusClass = 'status-active';
+        }
+    } else if (now > endDate || allMatchesCompleted) {
         status = 'completed';
         statusText = '✅ Fullført';
         statusClass = 'status-completed';
@@ -537,14 +544,20 @@ async function loadCompetitionMatches() {
 
         if (competitionMatches.length === 0) {
             matchesList.innerHTML = '<div class="no-matches">Ingen kamper funnet i denne perioden for valgte ligaer</div>';
-            return;
+            return false; // No matches, so can't be completed
         }
 
         renderCompetitionMatches(competitionMatches);
 
+        // Check if all matches are completed
+        const allCompleted = competitionMatches.every(match => match.completed);
+        console.log(`🏁 All matches completed: ${allCompleted}`);
+        return allCompleted;
+
     } catch (error) {
         console.error('Failed to load competition matches:', error);
         matchesList.innerHTML = '<div class="error-message">Kunne ikke laste kamper</div>';
+        return false;
     }
 }
 
