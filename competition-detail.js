@@ -133,7 +133,7 @@ async function loadUserTips() {
 }
 
 // Render competition details
-function renderCompetitionDetails() {
+async function renderCompetitionDetails() {
     document.getElementById('competitionName').textContent = competition.name;
     document.getElementById('competitionDescription').textContent = competition.description || 'Ingen beskrivelse';
     document.getElementById('creatorName').textContent = competition.creatorName;
@@ -159,20 +159,25 @@ function renderCompetitionDetails() {
     document.getElementById('matchCount').textContent = leaguesText;
     document.getElementById('participantCount').textContent = `${competition.participants.length} deltakere`;
 
-    // Determine status
+    // Determine status - check if all matches are completed
     const now = new Date();
     let status = 'upcoming';
     let statusText = '📅 Kommende';
     let statusClass = 'status-upcoming';
 
-    if (now >= startDate && now <= endDate) {
-        status = 'active';
-        statusText = '🔴 Aktiv';
-        statusClass = 'status-active';
-    } else if (now > endDate) {
-        status = 'completed';
-        statusText = '✅ Fullført';
-        statusClass = 'status-completed';
+    if (now >= startDate) {
+        // Check if all matches in the competition period are completed
+        const allMatchesCompleted = await checkAllMatchesCompleted();
+
+        if (allMatchesCompleted) {
+            status = 'completed';
+            statusText = '✅ Fullført';
+            statusClass = 'status-completed';
+        } else {
+            status = 'active';
+            statusText = '🔴 Aktiv';
+            statusClass = 'status-active';
+        }
     }
 
     const statusBadge = document.getElementById('competitionStatus');
@@ -200,6 +205,64 @@ function renderCompetitionDetails() {
         } else {
             deleteBtn.style.display = 'none';
         }
+    }
+}
+
+// Check if all matches in competition period are completed
+async function checkAllMatchesCompleted() {
+    try {
+        const scores = await footballApi.fetchScores();
+        const startDate = competition.startDate.toDate();
+        const endDate = competition.endDate.toDate();
+        const competitionLeagues = competition.leagues || [];
+
+        const leagueNames = {
+            39: 'Premier League',
+            2: 'Champions League',
+            140: 'La Liga',
+            78: 'Bundesliga',
+            135: 'Serie A',
+            1: 'World Cup'
+        };
+
+        // Get all matches in competition period and leagues
+        const competitionMatches = scores.filter(match => {
+            const matchDate = new Date(match.commence_time || match.date);
+
+            // Check date range
+            if (matchDate < startDate || matchDate > endDate) {
+                return false;
+            }
+
+            // Check league
+            const matchLeague = match.league;
+            for (const leagueId of competitionLeagues) {
+                const leagueName = leagueNames[leagueId];
+                if (matchLeague && (matchLeague.includes(leagueName) ||
+                    leagueName.includes(matchLeague) ||
+                    matchLeague.toLowerCase().includes(leagueName.toLowerCase()))) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        console.log(`🏁 Competition has ${competitionMatches.length} matches`);
+
+        // If no matches found, competition is not completed yet
+        if (competitionMatches.length === 0) {
+            return false;
+        }
+
+        // Check if all matches are completed
+        const allCompleted = competitionMatches.every(match => match.completed || match.result);
+        console.log(`🏁 All matches completed: ${allCompleted}`);
+
+        return allCompleted;
+
+    } catch (error) {
+        console.error('Failed to check match completion:', error);
+        return false;
     }
 }
 
@@ -323,9 +386,12 @@ async function loadLeaderboard() {
             .where('competitionId', '==', competitionId)
             .get();
 
+        console.log(`📥 Found ${participantsSnapshot.size} participants in competition`);
+
         const participants = [];
         for (const doc of participantsSnapshot.docs) {
             const participant = doc.data();
+            console.log('📥 Processing participant:', participant);
 
             // Get user display name from users collection
             let displayName = participant.userName; // fallback
@@ -340,6 +406,7 @@ async function loadLeaderboard() {
 
             // Calculate points for this participant
             const points = await calculateParticipantPoints(participant.userId);
+            console.log(`💰 ${displayName}: ${points} points`);
 
             participants.push({
                 userId: participant.userId,
@@ -351,7 +418,7 @@ async function loadLeaderboard() {
         // Sort by points (descending)
         participants.sort((a, b) => b.totalPoints - a.totalPoints);
 
-        console.log('📊 Leaderboard:', participants);
+        console.log('📊 Final Leaderboard:', participants);
         renderLeaderboard(participants);
 
     } catch (error) {
