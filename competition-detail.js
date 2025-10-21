@@ -494,12 +494,111 @@ function renderLeaderboard(participants) {
 
         row.innerHTML = `
             <div class="leaderboard-position">${positionEmoji}</div>
-            <div class="leaderboard-name">${participant.userName}</div>
+            <div class="leaderboard-name" style="cursor: pointer;" onclick="showUserTips('${participant.userId}', '${participant.userName.replace(/'/g, "\\'")}')">
+                ${participant.userName}
+            </div>
             <div class="leaderboard-score">${participant.totalPoints.toFixed(2)}</div>
         `;
 
         leaderboardList.appendChild(row);
     });
+}
+
+// Show user tips modal
+async function showUserTips(userId, userName) {
+    try {
+        const db = firebase.firestore();
+
+        // Get user's tips
+        const tipsSnapshot = await db.collection('tips')
+            .where('userId', '==', userId)
+            .get();
+
+        const tips = [];
+        tipsSnapshot.forEach(doc => {
+            tips.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Fetch match results for competition
+        const matchResults = await fetchMatchResultsForCompetition();
+
+        // Build modal content
+        let modalContent = `
+            <div style="padding: 20px;">
+                <h2 style="margin-top: 0;">Tips fra ${userName}</h2>
+                <div style="margin-bottom: 20px;">
+                    <strong>Total poeng: ${await calculateParticipantPoints(userId)} poeng</strong>
+                </div>
+        `;
+
+        // Group tips by match
+        const matchTips = [];
+        Object.keys(matchResults).forEach(matchId => {
+            const match = matchResults[matchId];
+            const tip = tips.find(t => String(t.matchId) === String(matchId));
+
+            if (tip && match.result) {
+                const points = calculateMatchPoints(tip, match);
+                matchTips.push({
+                    match: match,
+                    tip: tip,
+                    points: points
+                });
+            }
+        });
+
+        if (matchTips.length === 0) {
+            modalContent += '<p>Ingen tips funnet for denne konkurransen</p>';
+        } else {
+            matchTips.forEach(({ match, tip, points }) => {
+                const pointsColor = points > 0 ? 'color: #22c55e; font-weight: bold;' : 'color: #64748b;';
+                modalContent += `
+                    <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #f8fafc;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <strong>${match.homeTeam} vs ${match.awayTeam}</strong>
+                            <span style="${pointsColor}">${points.toFixed(2)} poeng</span>
+                        </div>
+                        <div style="display: flex; gap: 20px; font-size: 14px;">
+                            <div>Tips: <strong>${tip.homeScore} - ${tip.awayScore}</strong></div>
+                            <div>Resultat: <strong>${match.result.home} - ${match.result.away}</strong></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        modalContent += `
+                <button onclick="closeUserTipsModal()" style="margin-top: 20px; padding: 10px 20px; background: #22d3ee; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    Lukk
+                </button>
+            </div>
+        `;
+
+        // Create and show modal
+        let modal = document.getElementById('userTipsModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'userTipsModal';
+            modal.className = 'modal';
+            modal.style.display = 'none';
+            document.body.appendChild(modal);
+        }
+
+        modal.innerHTML = `<div class="modal-content" style="max-width: 600px;">${modalContent}</div>`;
+        modal.style.display = 'block';
+
+    } catch (error) {
+        console.error('Failed to load user tips:', error);
+        alert('Kunne ikke laste brukerens tips');
+    }
+}
+
+// Close user tips modal
+function closeUserTipsModal() {
+    const modal = document.getElementById('userTipsModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // Load and render competition matches
@@ -658,6 +757,14 @@ function createCompetitionMatchCard(match) {
 
     return card;
 }
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('userTipsModal');
+    if (modal && event.target === modal) {
+        closeUserTipsModal();
+    }
+});
 
 // Initialize when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
