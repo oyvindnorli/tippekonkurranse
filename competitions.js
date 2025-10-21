@@ -13,29 +13,7 @@ function init() {
         const signOutBtn = document.getElementById('signOutBtn');
 
         if (user) {
-            // Fetch displayName from Firestore users collection
-            const db = firebase.firestore();
-            db.collection('users').doc(user.uid).get().then(doc => {
-                if (doc.exists) {
-                    usernameElement.textContent = doc.data().displayName || user.email;
-                } else {
-                    usernameElement.textContent = user.email;
-                }
-                // Show user section with fade-in
-                const currentUserDiv = usernameElement.closest('.current-user');
-                if (currentUserDiv) {
-                    currentUserDiv.classList.add('loaded');
-                }
-            }).catch(error => {
-                console.warn('Could not fetch displayName:', error);
-                usernameElement.textContent = user.email;
-                // Show user section even on error
-                const currentUserDiv = usernameElement.closest('.current-user');
-                if (currentUserDiv) {
-                    currentUserDiv.classList.add('loaded');
-                }
-            });
-
+            usernameElement.textContent = user.email;
             authSection.style.display = 'none';
             signOutBtn.style.display = 'inline-block';
             loadCompetitions();
@@ -43,11 +21,6 @@ function init() {
             usernameElement.textContent = 'Ikke innlogget';
             authSection.style.display = 'block';
             signOutBtn.style.display = 'none';
-            // Show user section with fade-in even when logged out
-            const currentUserDiv = usernameElement.closest('.current-user');
-            if (currentUserDiv) {
-                currentUserDiv.classList.add('loaded');
-            }
         }
     });
 }
@@ -274,12 +247,6 @@ async function createCompetition() {
         const description = document.getElementById('competitionDescription').value.trim();
         const startDate = new Date(document.getElementById('startDate').value);
         const endDate = new Date(document.getElementById('endDate').value);
-
-        // Set time to start of day for startDate (00:00)
-        startDate.setHours(0, 0, 0, 0);
-
-        // Set time to end of day for endDate (23:59:59)
-        endDate.setHours(23, 59, 59, 999);
 
         // Validation
         if (!name) {

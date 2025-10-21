@@ -366,30 +366,8 @@ function initializeMyTipsPage() {
         if (user) {
             currentUser = user;
 
-            // Update UI - fetch displayName from Firestore
-            const usernameElement = document.getElementById('currentUsername');
-            const db = firebase.firestore();
-            db.collection('users').doc(user.uid).get().then(doc => {
-                if (doc.exists) {
-                    usernameElement.textContent = doc.data().displayName || user.email;
-                } else {
-                    usernameElement.textContent = user.email;
-                }
-                // Show user section with fade-in
-                const currentUserDiv = usernameElement.closest('.current-user');
-                if (currentUserDiv) {
-                    currentUserDiv.classList.add('loaded');
-                }
-            }).catch(error => {
-                console.warn('Could not fetch displayName:', error);
-                usernameElement.textContent = user.email;
-                // Show user section even on error
-                const currentUserDiv = usernameElement.closest('.current-user');
-                if (currentUserDiv) {
-                    currentUserDiv.classList.add('loaded');
-                }
-            });
-
+            // Update UI
+            document.getElementById('currentUsername').textContent = user.displayName || user.email;
             document.getElementById('signOutBtn').style.display = 'inline-block';
 
             // Load tips and scores

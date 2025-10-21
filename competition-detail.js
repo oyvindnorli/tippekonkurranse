@@ -26,29 +26,7 @@ function init() {
         const signOutBtn = document.getElementById('signOutBtn');
 
         if (user) {
-            // Fetch displayName from Firestore users collection
-            const db = firebase.firestore();
-            db.collection('users').doc(user.uid).get().then(doc => {
-                if (doc.exists) {
-                    usernameElement.textContent = doc.data().displayName || user.email;
-                } else {
-                    usernameElement.textContent = user.email;
-                }
-                // Show user section with fade-in
-                const currentUserDiv = usernameElement.closest('.current-user');
-                if (currentUserDiv) {
-                    currentUserDiv.classList.add('loaded');
-                }
-            }).catch(error => {
-                console.warn('Could not fetch displayName:', error);
-                usernameElement.textContent = user.email;
-                // Show user section even on error
-                const currentUserDiv = usernameElement.closest('.current-user');
-                if (currentUserDiv) {
-                    currentUserDiv.classList.add('loaded');
-                }
-            });
-
+            usernameElement.textContent = user.email;
             authSection.style.display = 'none';
             signOutBtn.style.display = 'inline-block';
             loadCompetition();
@@ -56,11 +34,6 @@ function init() {
             usernameElement.textContent = 'Ikke innlogget';
             authSection.style.display = 'block';
             signOutBtn.style.display = 'none';
-            // Show user section with fade-in even when logged out
-            const currentUserDiv = usernameElement.closest('.current-user');
-            if (currentUserDiv) {
-                currentUserDiv.classList.add('loaded');
-            }
         }
     });
 }
@@ -133,7 +106,7 @@ async function loadUserTips() {
 }
 
 // Render competition details
-async function renderCompetitionDetails() {
+function renderCompetitionDetails() {
     document.getElementById('competitionName').textContent = competition.name;
     document.getElementById('competitionDescription').textContent = competition.description || 'Ingen beskrivelse';
     document.getElementById('creatorName').textContent = competition.creatorName;
@@ -159,25 +132,20 @@ async function renderCompetitionDetails() {
     document.getElementById('matchCount').textContent = leaguesText;
     document.getElementById('participantCount').textContent = `${competition.participants.length} deltakere`;
 
-    // Determine status - check if all matches are completed
+    // Determine status
     const now = new Date();
     let status = 'upcoming';
     let statusText = '📅 Kommende';
     let statusClass = 'status-upcoming';
 
-    if (now >= startDate) {
-        // Check if all matches in the competition period are completed
-        const allMatchesCompleted = await checkAllMatchesCompleted();
-
-        if (allMatchesCompleted) {
-            status = 'completed';
-            statusText = '✅ Fullført';
-            statusClass = 'status-completed';
-        } else {
-            status = 'active';
-            statusText = '🔴 Aktiv';
-            statusClass = 'status-active';
-        }
+    if (now >= startDate && now <= endDate) {
+        status = 'active';
+        statusText = '🔴 Aktiv';
+        statusClass = 'status-active';
+    } else if (now > endDate) {
+        status = 'completed';
+        statusText = '✅ Fullført';
+        statusClass = 'status-completed';
     }
 
     const statusBadge = document.getElementById('competitionStatus');
@@ -195,16 +163,6 @@ async function renderCompetitionDetails() {
         joinBtn.style.display = 'none';
     }
 
-    // Hide share button for completed competitions
-    const shareBtn = document.getElementById('shareBtn');
-    if (shareBtn) {
-        if (status === 'completed') {
-            shareBtn.style.display = 'none';
-        } else {
-            shareBtn.style.display = 'inline-block';
-        }
-    }
-
     // Show delete button only for creator
     const deleteBtn = document.getElementById('deleteBtn');
     if (deleteBtn) {
@@ -215,64 +173,6 @@ async function renderCompetitionDetails() {
         } else {
             deleteBtn.style.display = 'none';
         }
-    }
-}
-
-// Check if all matches in competition period are completed
-async function checkAllMatchesCompleted() {
-    try {
-        const scores = await footballApi.fetchScores();
-        const startDate = competition.startDate.toDate();
-        const endDate = competition.endDate.toDate();
-        const competitionLeagues = competition.leagues || [];
-
-        const leagueNames = {
-            39: 'Premier League',
-            2: 'Champions League',
-            140: 'La Liga',
-            78: 'Bundesliga',
-            135: 'Serie A',
-            1: 'World Cup'
-        };
-
-        // Get all matches in competition period and leagues
-        const competitionMatches = scores.filter(match => {
-            const matchDate = new Date(match.commence_time || match.date);
-
-            // Check date range
-            if (matchDate < startDate || matchDate > endDate) {
-                return false;
-            }
-
-            // Check league
-            const matchLeague = match.league;
-            for (const leagueId of competitionLeagues) {
-                const leagueName = leagueNames[leagueId];
-                if (matchLeague && (matchLeague.includes(leagueName) ||
-                    leagueName.includes(matchLeague) ||
-                    matchLeague.toLowerCase().includes(leagueName.toLowerCase()))) {
-                    return true;
-                }
-            }
-            return false;
-        });
-
-        console.log(`🏁 Competition has ${competitionMatches.length} matches`);
-
-        // If no matches found, competition is not completed yet
-        if (competitionMatches.length === 0) {
-            return false;
-        }
-
-        // Check if all matches are completed
-        const allCompleted = competitionMatches.every(match => match.completed || match.result);
-        console.log(`🏁 All matches completed: ${allCompleted}`);
-
-        return allCompleted;
-
-    } catch (error) {
-        console.error('Failed to check match completion:', error);
-        return false;
     }
 }
 
@@ -396,31 +296,16 @@ async function loadLeaderboard() {
             .where('competitionId', '==', competitionId)
             .get();
 
-        console.log(`📥 Found ${participantsSnapshot.size} participants in competition`);
-
         const participants = [];
         for (const doc of participantsSnapshot.docs) {
             const participant = doc.data();
-            console.log('📥 Processing participant:', participant);
-
-            // Get user display name from users collection
-            let displayName = participant.userName; // fallback
-            try {
-                const userDoc = await db.collection('users').doc(participant.userId).get();
-                if (userDoc.exists) {
-                    displayName = userDoc.data().displayName || participant.userName;
-                }
-            } catch (error) {
-                console.warn('Could not fetch user displayName:', error);
-            }
 
             // Calculate points for this participant
             const points = await calculateParticipantPoints(participant.userId);
-            console.log(`💰 ${displayName}: ${points} points`);
 
             participants.push({
                 userId: participant.userId,
-                userName: displayName,
+                userName: participant.userName,
                 totalPoints: points
             });
         }
@@ -428,7 +313,7 @@ async function loadLeaderboard() {
         // Sort by points (descending)
         participants.sort((a, b) => b.totalPoints - a.totalPoints);
 
-        console.log('📊 Final Leaderboard:', participants);
+        console.log('📊 Leaderboard:', participants);
         renderLeaderboard(participants);
 
     } catch (error) {
@@ -556,8 +441,6 @@ function getOutcome(homeScore, awayScore) {
 function renderLeaderboard(participants) {
     const leaderboardList = document.getElementById('leaderboardList');
 
-    console.log('🎨 Rendering leaderboard with', participants.length, 'participants');
-
     if (participants.length === 0) {
         leaderboardList.innerHTML = '<div class="no-participants">Ingen deltakere ennå</div>';
         return;
@@ -566,15 +449,12 @@ function renderLeaderboard(participants) {
     leaderboardList.innerHTML = '';
 
     participants.forEach((participant, index) => {
-        console.log(`🎨 Rendering participant ${index + 1}:`, participant.userName);
-
         const row = document.createElement('div');
         row.className = 'leaderboard-row';
 
         const user = firebase.auth().currentUser;
         if (user && participant.userId === user.uid) {
             row.classList.add('current-user');
-            console.log(`👤 ${participant.userName} is current user`);
         }
 
         let positionEmoji = `${index + 1}.`;
@@ -584,15 +464,12 @@ function renderLeaderboard(participants) {
 
         row.innerHTML = `
             <div class="leaderboard-position">${positionEmoji}</div>
-            <div class="leaderboard-name leaderboard-name-clickable" onclick="viewUserTips('${participant.userId}', '${participant.userName}')" style="cursor: pointer;">${participant.userName}</div>
+            <div class="leaderboard-name">${participant.userName}</div>
             <div class="leaderboard-score">${participant.totalPoints.toFixed(2)}</div>
         `;
 
         leaderboardList.appendChild(row);
-        console.log(`✅ Appended row for ${participant.userName} to leaderboardList`);
     });
-
-    console.log('🎨 Final leaderboardList children count:', leaderboardList.children.length);
 }
 
 // Load and render competition matches
@@ -656,8 +533,7 @@ function renderCompetitionMatches(matches) {
     // Group by date
     const matchesByDate = {};
     matches.forEach(match => {
-        const matchDate = new Date(match.commence_time || match.date);
-        const date = matchDate.toLocaleDateString('no-NO');
+        const date = new Date(match.date).toLocaleDateString('no-NO');
         if (!matchesByDate[date]) {
             matchesByDate[date] = [];
         }
@@ -689,8 +565,7 @@ function createCompetitionMatchCard(match) {
         card.classList.add('has-tip');
     }
 
-    const matchTime = new Date(match.commence_time || match.date);
-    const time = matchTime.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
+    const time = new Date(match.date).toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
     const homeLogo = match.homeLogo || footballApi.getTeamLogo(match.homeTeam);
     const awayLogo = match.awayLogo || footballApi.getTeamLogo(match.awayTeam);
 
@@ -745,107 +620,6 @@ function createCompetitionMatchCard(match) {
     `;
 
     return card;
-}
-
-// View user's tips and points
-async function viewUserTips(userId, userName) {
-    // Check if competition has started
-    const startDate = competition.startDate.toDate();
-    const now = new Date();
-
-    if (now < startDate) {
-        alert('Tips kan først ses når konkurransen har startet');
-        return;
-    }
-
-    const modal = document.getElementById('userTipsModal');
-    const modalTitle = document.getElementById('userTipsModalTitle');
-    const modalContent = document.getElementById('userTipsModalContent');
-
-    modalTitle.textContent = `${userName} sine tips og poeng`;
-    modalContent.innerHTML = '<div class="loading-message">Laster tips...</div>';
-    modal.style.display = 'block';
-
-    try {
-        const db = firebase.firestore();
-
-        // Get user's tips
-        const tipsSnapshot = await db.collection('tips')
-            .where('userId', '==', userId)
-            .get();
-
-        const tips = [];
-        tipsSnapshot.forEach(doc => {
-            tips.push({ id: doc.id, ...doc.data() });
-        });
-
-        // Get match results for competition
-        const matchResults = await fetchMatchResultsForCompetition();
-
-        // Build tips display
-        let html = '';
-        let totalPoints = 0;
-
-        if (Object.keys(matchResults).length === 0) {
-            html = '<p style="text-align: center; padding: 20px; color: #64748b;">Ingen kamper har startet ennå</p>';
-        } else {
-            Object.keys(matchResults).forEach(matchId => {
-                const result = matchResults[matchId];
-                const tip = tips.find(t => String(t.matchId) === String(matchId));
-
-                if (result && result.completed) {
-                    const points = tip ? calculateMatchPoints(tip, result) : 0;
-                    totalPoints += points;
-
-                    html += `
-                        <div class="user-tip-row" style="display: flex; align-items: center; padding: 12px; margin-bottom: 8px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px;">
-                                    ${result.homeTeam} - ${result.awayTeam}
-                                </div>
-                                <div style="font-size: 13px; color: #64748b;">
-                                    Resultat: ${result.homeScore}-${result.awayScore}
-                                    ${tip ? `| Tips: ${tip.homeScore}-${tip.awayScore}` : '| Ikke tippet'}
-                                </div>
-                            </div>
-                            <div style="font-size: 16px; font-weight: 700; color: ${points > 0 ? '#10b981' : '#94a3b8'}; min-width: 60px; text-align: right;">
-                                ${points > 0 ? '+' : ''}${points.toFixed(2)}
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-
-            html = `
-                <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 2px solid #10b981;">
-                    <div style="text-align: center;">
-                        <div style="font-size: 14px; color: #065f46; font-weight: 600; margin-bottom: 4px;">Totale poeng</div>
-                        <div style="font-size: 32px; color: #059669; font-weight: 800;">${totalPoints.toFixed(2)}</div>
-                    </div>
-                </div>
-                ${html}
-            `;
-        }
-
-        modalContent.innerHTML = html;
-
-    } catch (error) {
-        console.error('Failed to load user tips:', error);
-        modalContent.innerHTML = '<p style="text-align: center; padding: 20px; color: #ef4444;">Kunne ikke laste tips</p>';
-    }
-}
-
-// Close user tips modal
-function closeUserTipsModal() {
-    document.getElementById('userTipsModal').style.display = 'none';
-}
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('userTipsModal');
-    if (event.target === modal) {
-        closeUserTipsModal();
-    }
 }
 
 // Initialize when DOM is ready

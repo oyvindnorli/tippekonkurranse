@@ -402,15 +402,13 @@ class FootballApiService {
             let allMatches = [];
             const fixtureIds = new Set(); // Track unique fixture IDs
 
-            // Get date range - last 7 days to next 7 days
+            // Get date range - last 7 days to today
             const today = new Date();
             const weekAgo = new Date();
             weekAgo.setDate(today.getDate() - 7);
-            const weekAhead = new Date();
-            weekAhead.setDate(today.getDate() + 7);
 
             const fromDate = weekAgo.toISOString().split('T')[0];
-            const toDate = weekAhead.toISOString().split('T')[0];
+            const toDate = today.toISOString().split('T')[0];
 
             console.log(`📅 Fetching matches from ${fromDate} to ${toDate}`);
 
@@ -454,7 +452,7 @@ class FootballApiService {
                 }
             }
 
-            console.log(`📊 Total unique matches fetched: ${allMatches.length}`);
+            console.log(`📊 Total unique matches in last 7 days: ${allMatches.length}`);
             return this.transformScoresData(allMatches);
         } catch (error) {
             console.error('Error fetching scores:', error);
