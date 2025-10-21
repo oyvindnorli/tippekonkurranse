@@ -556,6 +556,8 @@ function getOutcome(homeScore, awayScore) {
 function renderLeaderboard(participants) {
     const leaderboardList = document.getElementById('leaderboardList');
 
+    console.log('🎨 Rendering leaderboard with', participants.length, 'participants');
+
     if (participants.length === 0) {
         leaderboardList.innerHTML = '<div class="no-participants">Ingen deltakere ennå</div>';
         return;
@@ -564,12 +566,15 @@ function renderLeaderboard(participants) {
     leaderboardList.innerHTML = '';
 
     participants.forEach((participant, index) => {
+        console.log(`🎨 Rendering participant ${index + 1}:`, participant.userName);
+
         const row = document.createElement('div');
         row.className = 'leaderboard-row';
 
         const user = firebase.auth().currentUser;
         if (user && participant.userId === user.uid) {
             row.classList.add('current-user');
+            console.log(`👤 ${participant.userName} is current user`);
         }
 
         let positionEmoji = `${index + 1}.`;
@@ -584,7 +589,10 @@ function renderLeaderboard(participants) {
         `;
 
         leaderboardList.appendChild(row);
+        console.log(`✅ Appended row for ${participant.userName} to leaderboardList`);
     });
+
+    console.log('🎨 Final leaderboardList children count:', leaderboardList.children.length);
 }
 
 // Load and render competition matches
