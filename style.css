@@ -47,6 +47,12 @@ header h1 {
     gap: 12px;
     font-size: 13px;
     color: rgba(255, 255, 255, 0.85);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.user-section .current-user.loaded {
+    opacity: 1;
 }
 
 .user-section .current-user strong {
