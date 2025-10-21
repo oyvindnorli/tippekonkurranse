@@ -233,6 +233,11 @@ function onUserLoggedOut() {
     const currentUsername = document.getElementById('currentUsername');
     if (currentUsername) {
         currentUsername.textContent = 'Ikke innlogget';
+        // Make sure the user section is visible even when logged out
+        const currentUserDiv = currentUsername.closest('.current-user');
+        if (currentUserDiv) {
+            currentUserDiv.classList.add('loaded');
+        }
     }
 
     const authSection = document.getElementById('authSection');

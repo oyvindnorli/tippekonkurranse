@@ -414,6 +414,12 @@ function initializeLeagueCheckboxes() {
 
 // Initialize the app
 function init() {
+    // Show auth buttons by default (will be hidden by onUserLoggedIn if user is logged in)
+    const authSection = document.getElementById('authSection');
+    if (authSection) {
+        authSection.style.display = 'block';
+    }
+
     // Initialize Firebase first
     initializeFirebase();
     // Initialize league checkboxes from saved preferences
@@ -805,6 +811,24 @@ function refreshData() {
     userTips = [];
     location.reload();
 }
+
+// Close auth modal when clicking outside of it (but not on modal content)
+window.onclick = function(event) {
+    const modal = document.getElementById('authModal');
+    if (event.target === modal) {
+        closeAuthModal();
+    }
+};
+
+// Prevent modal content clicks from closing the modal
+window.addEventListener('DOMContentLoaded', () => {
+    const modalContent = document.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+    }
+});
 
 // Add button to simulate results for testing (can be removed later)
 window.addEventListener('DOMContentLoaded', () => {
