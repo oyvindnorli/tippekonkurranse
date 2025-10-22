@@ -11,6 +11,7 @@ function init() {
         const usernameElement = document.getElementById('currentUsername');
         const authSection = document.getElementById('authSection');
         const signOutBtn = document.getElementById('signOutBtn');
+        const loadingMessage = document.getElementById('loadingMessage');
 
         if (user) {
             usernameElement.textContent = user.email;
@@ -21,6 +22,10 @@ function init() {
             usernameElement.textContent = 'Ikke innlogget';
             authSection.style.display = 'block';
             signOutBtn.style.display = 'none';
+            // Hide loading message when not logged in
+            if (loadingMessage) {
+                loadingMessage.style.display = 'none';
+            }
         }
     });
 }
