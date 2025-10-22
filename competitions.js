@@ -68,7 +68,10 @@ async function loadCompetitions() {
         const completed = [];
 
         competitions.forEach(c => {
-            const start = c.startDate.toDate();
+            const start = new Date(c.startDate.toDate());
+            // Set start date to beginning of day
+            start.setHours(0, 0, 0, 0);
+
             const end = new Date(c.endDate.toDate());
             // Set end date to end of day to include matches starting late
             end.setHours(23, 59, 59, 999);

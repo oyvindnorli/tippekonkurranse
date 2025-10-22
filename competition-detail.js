@@ -416,7 +416,10 @@ async function fetchMatchResultsForCompetition() {
         // Filter matches that are:
         // 1. Within competition date range
         // 2. In competition leagues
-        const startDate = competition.startDate.toDate();
+        const startDate = new Date(competition.startDate.toDate());
+        // Set start date to beginning of day (00:00:00)
+        startDate.setHours(0, 0, 0, 0);
+
         const endDate = new Date(competition.endDate.toDate());
         // Set end date to end of day (23:59:59) to include matches starting late in the day
         endDate.setHours(23, 59, 59, 999);
@@ -639,7 +642,10 @@ async function loadCompetitionMatches() {
             const scores = await footballApi.fetchScores();
 
             // Filter to competition date range and leagues
-            const startDate = competition.startDate.toDate();
+            const startDate = new Date(competition.startDate.toDate());
+            // Set start date to beginning of day (00:00:00)
+            startDate.setHours(0, 0, 0, 0);
+
             const endDate = new Date(competition.endDate.toDate());
             // Set end date to end of day (23:59:59) to include matches starting late in the day
             endDate.setHours(23, 59, 59, 999);
