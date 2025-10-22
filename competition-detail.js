@@ -514,9 +514,19 @@ function renderLeaderboard(participants) {
         else if (index === 1) positionEmoji = '🥈';
         else if (index === 2) positionEmoji = '🥉';
 
+        // Check if competition has started
+        const startDate = new Date(competition.startDate.toDate());
+        startDate.setHours(0, 0, 0, 0);
+        const now = new Date();
+        const hasStarted = now >= startDate;
+
+        // Make name clickable only if competition has started
+        const nameStyle = hasStarted ? 'cursor: pointer;' : 'cursor: default; opacity: 0.7;';
+        const nameOnClick = hasStarted ? `onclick="showUserTips('${participant.userId}', '${participant.userName.replace(/'/g, "\\'")}')"` : '';
+
         row.innerHTML = `
             <div class="leaderboard-position">${positionEmoji}</div>
-            <div class="leaderboard-name" style="cursor: pointer;" onclick="showUserTips('${participant.userId}', '${participant.userName.replace(/'/g, "\\'")}')">
+            <div class="leaderboard-name" style="${nameStyle}" ${nameOnClick}>
                 ${participant.userName}
             </div>
             <div class="leaderboard-score">${participant.totalPoints.toFixed(2)}</div>
@@ -529,6 +539,16 @@ function renderLeaderboard(participants) {
 // Show user tips modal
 async function showUserTips(userId, userName) {
     try {
+        // Check if competition has started
+        const startDate = new Date(competition.startDate.toDate());
+        startDate.setHours(0, 0, 0, 0);
+        const now = new Date();
+
+        if (now < startDate) {
+            alert('Du kan ikke se andres tips før konkurransen har startet!');
+            return;
+        }
+
         const db = firebase.firestore();
 
         // Get user's tips
