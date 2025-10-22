@@ -14,8 +14,8 @@ const API_CONFIG = {
     SEASON: new Date().getFullYear(), // Current season
     MAX_MATCHES: 20, // Maximum number of matches to show
 
-    // Cache settings (2 hours to get new fixtures faster)
-    CACHE_DURATION: 2 * 60 * 60 * 1000, // 2 hours in milliseconds
+    // Cache settings (15 minutes - you have Pro plan with 7500 requests/day)
+    CACHE_DURATION: 15 * 60 * 1000, // 15 minutes in milliseconds
 
     // The Odds API (backup) - Get your free API key from: https://the-odds-api.com/
     ODDS_API_KEY: 'bb337ba5cf1a4fda9826d6ef3833297c',
