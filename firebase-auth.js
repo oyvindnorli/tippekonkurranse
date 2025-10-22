@@ -237,10 +237,14 @@ function onUserLoggedIn(user) {
 function onUserLoggedOut() {
     console.log('User logged out');
 
-    // Don't show auth modal automatically - let user click login button instead
-    // document.getElementById('authModal').style.display = 'block';
+    // Redirect to home page after logout (except if already on index.html)
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    if (currentPage !== 'index.html' && currentPage !== '') {
+        window.location.href = 'index.html';
+        return;
+    }
 
-    // Update UI
+    // Update UI on index.html
     const usernameDisplay = document.getElementById('usernameDisplay');
     if (usernameDisplay) {
         usernameDisplay.style.display = 'none';
@@ -255,6 +259,16 @@ function onUserLoggedOut() {
     const mainNavButtons = document.getElementById('mainNavButtons');
     if (mainNavButtons) {
         mainNavButtons.style.display = 'none';
+    }
+
+    // Show welcome section, hide main content
+    const welcomeSection = document.getElementById('welcomeSection');
+    const mainContent = document.getElementById('mainContent');
+    if (welcomeSection) {
+        welcomeSection.style.display = 'block';
+    }
+    if (mainContent) {
+        mainContent.style.display = 'none';
     }
 
     // Clear data
