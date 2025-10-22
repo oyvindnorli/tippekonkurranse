@@ -277,6 +277,7 @@ class FootballApiService {
                 status: fixture.fixture.status.short,
                 league: fixture.league.name,
                 leagueLogo: fixture.league.logo,
+                round: fixture.league.round, // e.g. "Regular Season - 10"
                 venue: fixture.fixture.venue.name,
                 city: fixture.fixture.venue.city,
                 result: null, // No result yet for upcoming matches
@@ -507,6 +508,7 @@ class FootballApiService {
                 result: result,
                 league: match.league.name,
                 leagueLogo: match.league.logo,
+                round: match.league.round, // e.g. "Regular Season - 10"
                 elapsed: match.fixture.status.elapsed,
                 last_update: new Date().toISOString()
             };
