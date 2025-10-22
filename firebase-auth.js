@@ -218,6 +218,12 @@ function onUserLoggedIn(user) {
         signOutBtn.style.display = 'inline-block';
     }
 
+    // Show navigation buttons
+    const mainNavButtons = document.getElementById('mainNavButtons');
+    if (mainNavButtons) {
+        mainNavButtons.style.display = 'flex';
+    }
+
     // Load user data
     loadFirebaseData();
 }
@@ -248,6 +254,12 @@ function onUserLoggedOut() {
     const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
         signOutBtn.style.display = 'none';
+    }
+
+    // Hide navigation buttons
+    const mainNavButtons = document.getElementById('mainNavButtons');
+    if (mainNavButtons) {
+        mainNavButtons.style.display = 'none';
     }
 
     // Clear data
