@@ -429,12 +429,8 @@ async function fetchMatchResultsForCompetition() {
             // Use commence_time (when match started) instead of date
             const matchDate = new Date(match.commence_time || match.date);
 
-            // Extend end date by 1 day to include matches that start late
-            const extendedEndDate = new Date(endDate);
-            extendedEndDate.setDate(extendedEndDate.getDate() + 1);
-
-            // Check if match is within date range (with 1 day buffer)
-            if (matchDate >= startDate && matchDate <= extendedEndDate) {
+            // Check if match starts within competition date range
+            if (matchDate >= startDate && matchDate <= endDate) {
                 // Check if match is in one of the competition leagues
                 const isInLeague = leagues.some(leagueId => {
                     const leagueName = leagueNames[leagueId];
@@ -641,15 +637,11 @@ async function loadCompetitionMatches() {
             1: 'World Cup'
         };
 
-        // Extend end date by 1 day to include matches that start late
-        const extendedEndDate = new Date(endDate);
-        extendedEndDate.setDate(extendedEndDate.getDate() + 1);
-
         const competitionMatches = scores.filter(match => {
             const matchDate = new Date(match.commence_time || match.date);
 
-            // Check if match is within date range (with 1 day buffer)
-            if (matchDate < startDate || matchDate > extendedEndDate) {
+            // Check if match starts within competition date range
+            if (matchDate < startDate || matchDate > endDate) {
                 return false;
             }
 
@@ -661,7 +653,7 @@ async function loadCompetitionMatches() {
         });
 
         console.log('📥 Competition matches:', competitionMatches.length);
-        console.log(`📅 Looking for matches between ${startDate.toLocaleDateString()} and ${extendedEndDate.toLocaleDateString()}`);
+        console.log(`📅 Looking for matches between ${startDate.toLocaleDateString()} and ${endDate.toLocaleDateString()}`);
         console.log(`🔍 Total scores available from API: ${scores.length}`);
 
         if (competitionMatches.length === 0) {

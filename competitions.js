@@ -78,12 +78,9 @@ async function loadCompetitions() {
             }
 
             // Check if all matches in competition are finished
-            const extendedEnd = new Date(end);
-            extendedEnd.setDate(extendedEnd.getDate() + 1);
-
             const competitionMatches = scores.filter(match => {
                 const matchDate = new Date(match.commence_time || match.date);
-                if (matchDate < start || matchDate > extendedEnd) return false;
+                if (matchDate < start || matchDate > end) return false;
 
                 // Check if match is in competition leagues
                 const leagueNames = { 39: 'Premier League', 2: 'UEFA Champions League', 140: 'La Liga', 78: 'Bundesliga', 135: 'Serie A', 1: 'World Cup' };
