@@ -417,7 +417,10 @@ async function fetchMatchResultsForCompetition() {
         // 1. Within competition date range
         // 2. In competition leagues
         const startDate = competition.startDate.toDate();
-        const endDate = competition.endDate.toDate();
+        const endDate = new Date(competition.endDate.toDate());
+        // Set end date to end of day (23:59:59) to include matches starting late in the day
+        endDate.setHours(23, 59, 59, 999);
+
         const leagues = competition.leagues || [];
 
         const leagueNames = {
@@ -637,7 +640,10 @@ async function loadCompetitionMatches() {
 
             // Filter to competition date range and leagues
             const startDate = competition.startDate.toDate();
-            const endDate = competition.endDate.toDate();
+            const endDate = new Date(competition.endDate.toDate());
+            // Set end date to end of day (23:59:59) to include matches starting late in the day
+            endDate.setHours(23, 59, 59, 999);
+
             const competitionLeagues = competition.leagues || [];
 
             const leagueNames = {
