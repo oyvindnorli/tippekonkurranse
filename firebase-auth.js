@@ -183,6 +183,8 @@ function onUserLoggedIn(user) {
 
     // Update UI - fetch displayName from Firestore
     const currentUsername = document.getElementById('currentUsername');
+    const usernameDisplay = document.getElementById('usernameDisplay');
+
     if (currentUsername) {
         // Fetch displayName from users collection
         const db = firebase.firestore();
@@ -192,6 +194,10 @@ function onUserLoggedIn(user) {
             } else {
                 currentUsername.textContent = user.email;
             }
+            // Show username display
+            if (usernameDisplay) {
+                usernameDisplay.style.display = 'inline';
+            }
             // Show user section with fade-in
             const currentUserDiv = currentUsername.closest('.current-user');
             if (currentUserDiv) {
@@ -200,17 +206,16 @@ function onUserLoggedIn(user) {
         }).catch(error => {
             console.warn('Could not fetch displayName:', error);
             currentUsername.textContent = user.email;
+            // Show username display even on error
+            if (usernameDisplay) {
+                usernameDisplay.style.display = 'inline';
+            }
             // Show user section even on error
             const currentUserDiv = currentUsername.closest('.current-user');
             if (currentUserDiv) {
                 currentUserDiv.classList.add('loaded');
             }
         });
-    }
-
-    const authSection = document.getElementById('authSection');
-    if (authSection) {
-        authSection.style.display = 'none';
     }
 
     const signOutBtn = document.getElementById('signOutBtn');
@@ -236,19 +241,9 @@ function onUserLoggedOut() {
     // document.getElementById('authModal').style.display = 'block';
 
     // Update UI
-    const currentUsername = document.getElementById('currentUsername');
-    if (currentUsername) {
-        currentUsername.textContent = 'Ikke innlogget';
-        // Make sure the user section is visible even when logged out
-        const currentUserDiv = currentUsername.closest('.current-user');
-        if (currentUserDiv) {
-            currentUserDiv.classList.add('loaded');
-        }
-    }
-
-    const authSection = document.getElementById('authSection');
-    if (authSection) {
-        authSection.style.display = 'block';
+    const usernameDisplay = document.getElementById('usernameDisplay');
+    if (usernameDisplay) {
+        usernameDisplay.style.display = 'none';
     }
 
     const signOutBtn = document.getElementById('signOutBtn');

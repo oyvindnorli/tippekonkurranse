@@ -13,11 +13,7 @@
             <h1>⚽ Tippekonkurranse</h1>
             <div class="user-section">
                 <div class="current-user">
-                    <span>Innlogget som: <strong id="currentUsername">Ikke innlogget</strong></span>
-                    <div id="authSection">
-                        <button onclick="showAuthModal('signin')" class="btn-small">Logg inn</button>
-                        <button onclick="showAuthModal('signup')" class="btn-small">Registrer</button>
-                    </div>
+                    <span id="usernameDisplay" style="display: none;">Innlogget som: <strong id="currentUsername"></strong></span>
                     <button id="signOutBtn" onclick="signOut()" class="btn-small" style="display: none;">Logg ut</button>
                 </div>
             </div>
