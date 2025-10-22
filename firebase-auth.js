@@ -223,10 +223,11 @@ function onUserLoggedIn(user) {
         signOutBtn.style.display = 'inline-block';
     }
 
-    // Show navigation buttons
+    // Show navigation buttons with transition
     const mainNavButtons = document.getElementById('mainNavButtons');
     if (mainNavButtons) {
         mainNavButtons.style.display = 'flex';
+        mainNavButtons.style.opacity = '1';
     }
 
     // Load user data

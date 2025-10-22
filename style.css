@@ -104,24 +104,39 @@ header h1 {
     justify-content: center;
     gap: 10px;
     flex-wrap: wrap;
+    min-height: 42px; /* Fixed height to prevent header jump */
 }
 
 .nav-btn {
     display: inline-block;
     padding: 9px 20px;
-    background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
-    color: #ffffff;
+    background: rgba(34, 211, 238, 0.15);
+    color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     border-radius: 6px;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 13px;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+    border: 1px solid rgba(34, 211, 238, 0.2);
 }
 
 .nav-btn:hover {
+    background: rgba(34, 211, 238, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(34, 211, 238, 0.4);
+}
+
+.nav-btn.active {
+    background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.4);
+    border-color: transparent;
+}
+
+.nav-btn.active:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(34, 211, 238, 0.4);
+    box-shadow: 0 6px 16px rgba(34, 211, 238, 0.5);
 }
 
 /* Main content */
