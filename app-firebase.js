@@ -427,19 +427,25 @@ function init() {
 
     // Wait for auth state before loading matches
     firebase.auth().onAuthStateChanged((user) => {
-        const loadingMessage = document.getElementById('loadingMessage');
+        const welcomeSection = document.getElementById('welcomeSection');
+        const mainContent = document.getElementById('mainContent');
 
         if (user) {
-            // User is signed in, load matches
+            // User is signed in, show main content and load matches
+            if (welcomeSection) {
+                welcomeSection.style.display = 'none';
+            }
+            if (mainContent) {
+                mainContent.style.display = 'block';
+            }
             loadMatches();
         } else {
-            // User is not signed in, hide loading and show message
-            if (loadingMessage) {
-                loadingMessage.style.display = 'none';
+            // User is not signed in, show welcome section
+            if (welcomeSection) {
+                welcomeSection.style.display = 'block';
             }
-            const matchesList = document.getElementById('matchesList');
-            if (matchesList) {
-                matchesList.innerHTML = '<div class="no-matches"><p>Du må være innlogget for å se kamper og legge inn tips.</p><p><a href="index.html" class="btn-primary">Logg inn</a></p></div>';
+            if (mainContent) {
+                mainContent.style.display = 'none';
             }
         }
     });

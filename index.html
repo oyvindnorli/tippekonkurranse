@@ -73,32 +73,66 @@
         </div>
 
         <main>
-            <!-- League Filter -->
-            <section class="league-filter">
-                <h3>🏆 Velg ligaer</h3>
-                <div class="league-checkboxes">
-                    <div class="league-checkbox">
-                        <input type="checkbox" id="league-all" checked onchange="toggleAllLeagues(this)">
-                        <label for="league-all">Begge ligaer</label>
+            <!-- Welcome Section (shown when not logged in) -->
+            <section id="welcomeSection" class="welcome-section">
+                <div class="welcome-content">
+                    <h2>⚽ Velkommen til Tippekonkurranse</h2>
+                    <p>Konkurrér med venner og familie om hvem som er best til å tippe fotballkamper!</p>
+
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <span class="feature-icon">🎯</span>
+                            <h3>Tipp kamper</h3>
+                            <p>Legg inn tips på Premier League og Champions League kamper</p>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🏆</span>
+                            <h3>Opprett konkurranser</h3>
+                            <p>Lag egne konkurranser og inviter venner til å delta</p>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">📊</span>
+                            <h3>Følg resultater</h3>
+                            <p>Se live-poeng og tabeller mens kampene pågår</p>
+                        </div>
                     </div>
-                    <div class="league-checkbox">
-                        <input type="checkbox" id="league-39" class="league-filter-checkbox" checked onchange="filterLeagues()">
-                        <label for="league-39">Premier League</label>
-                    </div>
-                    <div class="league-checkbox">
-                        <input type="checkbox" id="league-2" class="league-filter-checkbox" checked onchange="filterLeagues()">
-                        <label for="league-2">Champions League</label>
+
+                    <div class="welcome-actions">
+                        <button onclick="showAuthModal('signin')" class="btn-primary btn-large">Logg inn</button>
+                        <button onclick="showAuthModal('signup')" class="btn-secondary btn-large">Registrer deg</button>
                     </div>
                 </div>
             </section>
 
-            <section class="matches-section">
-                <h2>Legg inn tips</h2>
-                <button onclick="refreshData()" class="refresh-btn">🔄 Hent nye kamper</button>
-                <div id="loadingMessage" class="loading-message">Laster kamper...</div>
-                <div id="errorMessage" class="error-message" style="display: none;"></div>
-                <div id="matchesList"></div>
-            </section>
+            <!-- Main Content (shown when logged in) -->
+            <div id="mainContent" style="display: none;">
+                <!-- League Filter -->
+                <section class="league-filter">
+                    <h3>🏆 Velg ligaer</h3>
+                    <div class="league-checkboxes">
+                        <div class="league-checkbox">
+                            <input type="checkbox" id="league-all" checked onchange="toggleAllLeagues(this)">
+                            <label for="league-all">Begge ligaer</label>
+                        </div>
+                        <div class="league-checkbox">
+                            <input type="checkbox" id="league-39" class="league-filter-checkbox" checked onchange="filterLeagues()">
+                            <label for="league-39">Premier League</label>
+                        </div>
+                        <div class="league-checkbox">
+                            <input type="checkbox" id="league-2" class="league-filter-checkbox" checked onchange="filterLeagues()">
+                            <label for="league-2">Champions League</label>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="matches-section">
+                    <h2>Legg inn tips</h2>
+                    <button onclick="refreshData()" class="refresh-btn">🔄 Hent nye kamper</button>
+                    <div id="loadingMessage" class="loading-message">Laster kamper...</div>
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+                    <div id="matchesList"></div>
+                </section>
+            </div>
         </main>
     </div>
 
