@@ -9,11 +9,7 @@ const API_CONFIG = {
     //            135 (Serie A), 61 (Ligue 1), 2 (Champions League), 1 (World Cup), etc.
     LEAGUES: [
         39,  // Premier League
-        2,   // Champions League
-        140, // La Liga
-        78,  // Bundesliga
-        135, // Serie A
-        1    // World Cup
+        2    // Champions League
     ],
     SEASON: new Date().getFullYear(), // Current season
     MAX_MATCHES: 20, // Maximum number of matches to show
