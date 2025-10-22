@@ -1,5 +1,5 @@
 // Competitions functionality
-let selectedLeagues = new Set([39, 2, 140, 78, 135]); // Default: all leagues
+let selectedLeagues = new Set([39, 2]); // Default: Premier League and Champions League
 
 // Initialize page
 function init() {
@@ -214,7 +214,7 @@ function showCreateCompetitionModal() {
     document.getElementById('endDate').valueAsDate = nextWeek;
 
     // Reset to all leagues selected
-    selectedLeagues = new Set([39, 2, 140, 78, 135]);
+    selectedLeagues = new Set([39, 2]);
     document.querySelectorAll('.comp-league-checkbox').forEach(cb => {
         cb.checked = true;
     });

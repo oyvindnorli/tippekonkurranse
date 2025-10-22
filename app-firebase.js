@@ -17,8 +17,8 @@ function loadSelectedLeagues() {
     } catch (error) {
         console.warn('⚠️ Could not load league preferences:', error);
     }
-    // Default: all leagues selected
-    return new Set([39, 2, 140, 78, 135]);
+    // Default: Premier League and Champions League
+    return new Set([39, 2]);
 }
 
 function saveSelectedLeagues() {
