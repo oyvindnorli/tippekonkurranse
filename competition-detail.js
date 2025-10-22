@@ -22,19 +22,11 @@ function init() {
 
     // Wait for auth state to be ready
     firebase.auth().onAuthStateChanged((user) => {
-        const usernameElement = document.getElementById('currentUsername');
-        const authSection = document.getElementById('authSection');
-        const signOutBtn = document.getElementById('signOutBtn');
-
         if (user) {
-            usernameElement.textContent = user.email;
-            authSection.style.display = 'none';
-            signOutBtn.style.display = 'inline-block';
             loadCompetition();
         } else {
-            usernameElement.textContent = 'Ikke innlogget';
-            authSection.style.display = 'block';
-            signOutBtn.style.display = 'none';
+            // Redirect to home page if not logged in
+            window.location.href = 'index.html';
         }
     });
 }

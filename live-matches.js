@@ -130,6 +130,13 @@ function renderLiveMatches() {
     const currentlyLive = liveMatches.filter(m => !m.completed);
     const finished = liveMatches.filter(m => m.completed);
 
+    // Sort finished matches by date (newest first)
+    finished.sort((a, b) => {
+        const dateA = new Date(a.commence_time || a.date);
+        const dateB = new Date(b.commence_time || b.date);
+        return dateB - dateA; // Newest first
+    });
+
     // Render live matches first
     if (currentlyLive.length > 0) {
         const liveSection = document.createElement('div');
@@ -147,7 +154,7 @@ function renderLiveMatches() {
         liveMatchesList.appendChild(liveSection);
     }
 
-    // Render finished matches
+    // Render finished matches grouped by date
     if (finished.length > 0) {
         const finishedSection = document.createElement('div');
         finishedSection.className = 'finished-section';
@@ -157,7 +164,25 @@ function renderLiveMatches() {
         finishedHeader.innerHTML = '✅ Ferdige kamper';
         finishedSection.appendChild(finishedHeader);
 
+        // Group by date
+        let currentDate = null;
         finished.forEach(match => {
+            const matchDate = new Date(match.commence_time || match.date);
+            const dateString = matchDate.toLocaleDateString('no-NO', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long'
+            });
+
+            // Add date header if new date
+            if (dateString !== currentDate) {
+                const dateHeader = document.createElement('div');
+                dateHeader.className = 'date-header';
+                dateHeader.textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+                finishedSection.appendChild(dateHeader);
+                currentDate = dateString;
+            }
+
             finishedSection.appendChild(createLiveMatchCard(match, false));
         });
 
