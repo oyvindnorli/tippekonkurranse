@@ -2,6 +2,7 @@
 let competitionId = null;
 let competition = null;
 let userTips = [];
+let competitionMatches = []; // Store competition matches globally
 
 // Initialize page
 function init() {
@@ -514,15 +515,16 @@ function renderLeaderboard(participants) {
         else if (index === 1) positionEmoji = '🥈';
         else if (index === 2) positionEmoji = '🥉';
 
-        // Check if competition has started
-        const startDate = new Date(competition.startDate.toDate());
-        startDate.setHours(0, 0, 0, 0);
+        // Check if at least one match has started or is completed
         const now = new Date();
-        const hasStarted = now >= startDate;
+        const anyMatchStarted = competitionMatches.some(match => {
+            const matchDate = new Date(match.commence_time || match.date);
+            return matchDate <= now;
+        });
 
-        // Make name clickable only if competition has started
-        const nameStyle = hasStarted ? 'cursor: pointer;' : 'cursor: default; opacity: 0.7;';
-        const nameOnClick = hasStarted ? `onclick="showUserTips('${participant.userId}', '${participant.userName.replace(/'/g, "\\'")}')"` : '';
+        // Make name clickable only if at least one match has started
+        const nameStyle = anyMatchStarted ? 'cursor: pointer;' : 'cursor: default; opacity: 0.7;';
+        const nameOnClick = anyMatchStarted ? `onclick="showUserTips('${participant.userId}', '${participant.userName.replace(/'/g, "\\'")}')"` : '';
 
         row.innerHTML = `
             <div class="leaderboard-position">${positionEmoji}</div>
@@ -539,13 +541,15 @@ function renderLeaderboard(participants) {
 // Show user tips modal
 async function showUserTips(userId, userName) {
     try {
-        // Check if competition has started
-        const startDate = new Date(competition.startDate.toDate());
-        startDate.setHours(0, 0, 0, 0);
+        // Check if at least one match has started
         const now = new Date();
+        const anyMatchStarted = competitionMatches.some(match => {
+            const matchDate = new Date(match.commence_time || match.date);
+            return matchDate <= now;
+        });
 
-        if (now < startDate) {
-            alert('Du kan ikke se andres tips før konkurransen har startet!');
+        if (!anyMatchStarted) {
+            alert('Du kan ikke se andres tips før første kamp har startet!');
             return;
         }
 
@@ -658,7 +662,7 @@ async function loadCompetitionMatches() {
 
     try {
         const db = firebase.firestore();
-        let competitionMatches = [];
+        competitionMatches = []; // Reset global variable
 
         // Check if competition has cached matches
         if (competition.cachedMatches && competition.cachedMatches.length > 0) {
