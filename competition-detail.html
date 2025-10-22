@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Konkurranse detaljer - Tippekonkurranse</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="style.css?v=20251021">
+    <link rel="stylesheet" href="style.css?v=20251021b">
 </head>
 <body>
     <div class="container">
@@ -13,14 +13,11 @@
             <h1>⚽ Tippekonkurranse</h1>
             <div class="user-section">
                 <div class="current-user">
-                    <span>Innlogget som: <strong id="currentUsername">Ikke innlogget</strong></span>
-                    <div id="authSection">
-                        <button onclick="window.location.href='index.html'" class="btn-small">Logg inn</button>
-                    </div>
+                    <span id="usernameDisplay" style="display: none;">Innlogget som: <strong id="currentUsername"></strong></span>
                     <button id="signOutBtn" onclick="signOut()" class="btn-small" style="display: none;">Logg ut</button>
                 </div>
             </div>
-            <nav class="nav-buttons">
+            <nav class="nav-buttons" id="mainNavButtons" style="display: none;">
                 <a href="competitions.html" class="nav-btn">← Tilbake til konkurranser</a>
                 <a href="index.html" class="nav-btn">🏠 Mine tips</a>
             </nav>
