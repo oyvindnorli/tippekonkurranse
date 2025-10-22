@@ -154,9 +154,19 @@ function createCompetitionCard(competition) {
     };
 
     const leagues = competition.leagues || competition.matchIds || [];
-    const leaguesList = Array.isArray(leagues) && typeof leagues[0] === 'number'
+    let leaguesList = Array.isArray(leagues) && typeof leagues[0] === 'number'
         ? leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ')
         : 'Alle ligaer';
+
+    // Add round info if Premier League rounds are specified
+    if (competition.plRounds && leagues.includes(39)) {
+        const roundText = competition.plRounds.start === competition.plRounds.end
+            ? `Runde ${competition.plRounds.start}`
+            : `Runde ${competition.plRounds.start}-${competition.plRounds.end}`;
+
+        // Replace "Premier League" with "Premier League (Runde X-Y)"
+        leaguesList = leaguesList.replace('Premier League', `Premier League (${roundText})`);
+    }
 
     card.innerHTML = `
         <div class="competition-header">
@@ -217,6 +227,16 @@ function showCreateCompetitionModal() {
         cb.checked = true;
     });
     document.getElementById('comp-league-all').checked = true;
+
+    // Show PL round selection since PL is selected by default
+    const plRoundSelection = document.getElementById('plRoundSelection');
+    if (plRoundSelection) {
+        plRoundSelection.style.display = 'block';
+    }
+
+    // Clear round inputs
+    document.getElementById('plRoundStart').value = '';
+    document.getElementById('plRoundEnd').value = '';
 }
 
 // Close create competition modal
@@ -239,14 +259,19 @@ function toggleAllCompLeagues(checkbox) {
 function updateCompLeagues() {
     const leagueCheckboxes = document.querySelectorAll('.comp-league-checkbox');
     const allCheckbox = document.getElementById('comp-league-all');
+    const plRoundSelection = document.getElementById('plRoundSelection');
 
     selectedLeagues.clear();
     let allChecked = true;
+    let plSelected = false;
 
     leagueCheckboxes.forEach(cb => {
         if (cb.checked) {
             const leagueId = parseInt(cb.id.replace('comp-league-', ''));
             selectedLeagues.add(leagueId);
+            if (leagueId === 39) {
+                plSelected = true;
+            }
         } else {
             allChecked = false;
         }
@@ -254,6 +279,11 @@ function updateCompLeagues() {
 
     // Update "All" checkbox state
     allCheckbox.checked = allChecked;
+
+    // Show/hide Premier League round selection
+    if (plRoundSelection) {
+        plRoundSelection.style.display = plSelected ? 'block' : 'none';
+    }
 
     console.log('Selected leagues:', Array.from(selectedLeagues));
 }
@@ -285,6 +315,10 @@ async function createCompetition() {
         const startDate = new Date(document.getElementById('startDate').value);
         const endDate = new Date(document.getElementById('endDate').value);
 
+        // Get Premier League round selection (if any)
+        const plRoundStart = document.getElementById('plRoundStart').value;
+        const plRoundEnd = document.getElementById('plRoundEnd').value;
+
         // Validation
         if (!name) {
             throw new Error('Navn på konkurranse er påkrevd');
@@ -296,6 +330,18 @@ async function createCompetition() {
 
         if (endDate < startDate) {
             throw new Error('Sluttdato kan ikke være før startdato');
+        }
+
+        // Validate round numbers if provided
+        if (plRoundStart && plRoundEnd) {
+            const startRound = parseInt(plRoundStart);
+            const endRound = parseInt(plRoundEnd);
+            if (startRound > endRound) {
+                throw new Error('Fra-runde kan ikke være høyere enn til-runde');
+            }
+            if (startRound < 1 || endRound > 38) {
+                throw new Error('Runder må være mellom 1 og 38');
+            }
         }
 
         // Create competition document
@@ -310,6 +356,14 @@ async function createCompetition() {
             endDate: firebase.firestore.Timestamp.fromDate(endDate),
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
+
+        // Add Premier League rounds if specified
+        if (selectedLeagues.has(39) && plRoundStart && plRoundEnd) {
+            competitionData.plRounds = {
+                start: parseInt(plRoundStart),
+                end: parseInt(plRoundEnd)
+            };
+        }
 
         const db = firebase.firestore();
         const docRef = await db.collection('competitions').add(competitionData);

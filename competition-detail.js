@@ -120,7 +120,17 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
     };
 
     const leagues = competition.leagues || [];
-    const leaguesText = leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ') || 'Alle ligaer';
+    let leaguesText = leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ') || 'Alle ligaer';
+
+    // Add round info if Premier League rounds are specified
+    if (competition.plRounds && leagues.includes(39)) {
+        const roundText = competition.plRounds.start === competition.plRounds.end
+            ? `Runde ${competition.plRounds.start}`
+            : `Runde ${competition.plRounds.start}-${competition.plRounds.end}`;
+
+        // Replace "Premier League" with "Premier League (Runde X-Y)"
+        leaguesText = leaguesText.replace('Premier League', `Premier League (${roundText})`);
+    }
 
     document.getElementById('matchCount').textContent = leaguesText;
     document.getElementById('participantCount').textContent = `${competition.participants.length} deltakere`;
@@ -694,10 +704,31 @@ async function loadCompetitionMatches() {
                 }
 
                 // Check if match is in one of the competition leagues
-                return competitionLeagues.some(leagueId => {
+                const matchInLeague = competitionLeagues.some(leagueId => {
                     const leagueName = leagueNames[leagueId];
                     return match.league && match.league.includes(leagueName);
                 });
+
+                if (!matchInLeague) {
+                    return false;
+                }
+
+                // If Premier League rounds are specified, filter by round
+                if (competition.plRounds && match.league && match.league.includes('Premier League')) {
+                    if (match.round) {
+                        // Extract round number from string like "Regular Season - 10"
+                        const roundMatch = match.round.match(/(\d+)/);
+                        if (roundMatch) {
+                            const roundNumber = parseInt(roundMatch[1]);
+                            // Check if round is within specified range
+                            if (roundNumber < competition.plRounds.start || roundNumber > competition.plRounds.end) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
             });
 
             console.log('📥 Competition matches from API:', competitionMatches.length);

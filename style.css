@@ -1261,6 +1261,50 @@ main {
     border-radius: 8px;
 }
 
+.round-selection {
+    display: flex;
+    gap: 16px;
+    padding: 12px;
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.round-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.round-input-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.round-input-group input {
+    padding: 8px 12px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.round-input-group input:focus {
+    outline: none;
+    border-color: #22d3ee;
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+}
+
+.form-help-text {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 4px 0 8px 0;
+    font-style: italic;
+}
+
 .matches-selection {
     max-height: 300px;
     overflow-y: auto;
