@@ -575,6 +575,10 @@ async function showUserTips(userId, userName) {
 
         // Group tips by match
         const matchTips = [];
+        const userTipCount = tips.filter(t =>
+            Object.keys(matchResults).includes(String(t.matchId))
+        ).length;
+
         Object.keys(matchResults).forEach(matchId => {
             const match = matchResults[matchId];
             const tip = tips.find(t => String(t.matchId) === String(matchId));
@@ -590,7 +594,11 @@ async function showUserTips(userId, userName) {
         });
 
         if (matchTips.length === 0) {
-            modalContent += '<p>Ingen tips funnet for denne konkurransen</p>';
+            if (userTipCount > 0) {
+                modalContent += '<p style="color: #64748b; font-style: italic;">Ingen kamper har startet ennå. Tips vises når kampene er i gang.</p>';
+            } else {
+                modalContent += '<p style="color: #64748b;">Ingen tips funnet for denne konkurransen</p>';
+            }
         } else {
             matchTips.forEach(({ match, tip, points }) => {
                 const pointsColor = points > 0 ? 'color: #22c55e; font-weight: bold;' : 'color: #64748b;';
