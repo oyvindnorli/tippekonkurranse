@@ -140,7 +140,7 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
 
     if (now >= startDate && now <= endDate) {
         // Check if all matches are completed even if we're within the date range
-        if (allMatchesCompleted) {
+        if (allMatchesCompleted === true) {
             status = 'completed';
             statusText = '✅ Fullført';
             statusClass = 'status-completed';
@@ -149,10 +149,17 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
             statusText = '🔴 Aktiv';
             statusClass = 'status-active';
         }
-    } else if (now > endDate || allMatchesCompleted) {
-        status = 'completed';
-        statusText = '✅ Fullført';
-        statusClass = 'status-completed';
+    } else if (now > endDate) {
+        // Only mark as completed if date has passed OR all matches are completed
+        if (allMatchesCompleted === true || allMatchesCompleted === null) {
+            status = 'completed';
+            statusText = '✅ Fullført';
+            statusClass = 'status-completed';
+        } else {
+            status = 'active';
+            statusText = '🔴 Aktiv';
+            statusClass = 'status-active';
+        }
     }
 
     const statusBadge = document.getElementById('competitionStatus');
@@ -634,11 +641,15 @@ async function loadCompetitionMatches() {
             1: 'World Cup'
         };
 
+        // Extend end date by 1 day to include matches that start late
+        const extendedEndDate = new Date(endDate);
+        extendedEndDate.setDate(extendedEndDate.getDate() + 1);
+
         const competitionMatches = scores.filter(match => {
             const matchDate = new Date(match.commence_time || match.date);
 
-            // Check if match is within date range
-            if (matchDate < startDate || matchDate > endDate) {
+            // Check if match is within date range (with 1 day buffer)
+            if (matchDate < startDate || matchDate > extendedEndDate) {
                 return false;
             }
 
@@ -653,14 +664,14 @@ async function loadCompetitionMatches() {
 
         if (competitionMatches.length === 0) {
             matchesList.innerHTML = '<div class="no-matches">Ingen kamper funnet i denne perioden for valgte ligaer</div>';
-            return false; // No matches, so can't be completed
+            return null; // No matches found - status indeterminate
         }
 
         renderCompetitionMatches(competitionMatches);
 
         // Check if all matches are completed
         const allCompleted = competitionMatches.every(match => match.completed);
-        console.log(`🏁 All matches completed: ${allCompleted}`);
+        console.log(`🏁 All matches completed: ${allCompleted} (${competitionMatches.length} matches)`);
         return allCompleted;
 
     } catch (error) {
