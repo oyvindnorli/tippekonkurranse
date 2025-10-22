@@ -401,10 +401,17 @@ async function fetchMatchResultsForCompetition() {
     try {
         const results = {};
 
-        // Fetch scores from API (last 7 days)
-        const scores = await footballApi.fetchScores();
+        // Use cached matches if available, otherwise fetch from API
+        let scores;
+        if (competition.cachedMatches && competition.cachedMatches.length > 0) {
+            console.log('💾 Using cached matches for leaderboard calculation');
+            scores = competition.cachedMatches;
+        } else {
+            console.log('🔄 Fetching scores from API for leaderboard calculation');
+            scores = await footballApi.fetchScores();
+        }
 
-        console.log(`📊 Total scores fetched from API: ${scores.length}`);
+        console.log(`📊 Total scores available: ${scores.length}`);
 
         // Filter matches that are:
         // 1. Within competition date range
@@ -412,9 +419,6 @@ async function fetchMatchResultsForCompetition() {
         const startDate = competition.startDate.toDate();
         const endDate = competition.endDate.toDate();
         const leagues = competition.leagues || [];
-
-        console.log(`📅 Competition period: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`);
-        console.log(`🏆 Competition leagues:`, leagues);
 
         const leagueNames = {
             39: 'Premier League',
@@ -439,7 +443,6 @@ async function fetchMatchResultsForCompetition() {
 
                 if (isInLeague && match.result) {
                     results[match.id] = match;
-                    console.log(`✅ Match included: ${match.homeTeam} vs ${match.awayTeam} (${match.result.home}-${match.result.away}) - ${match.completed ? 'Completed' : 'Live'}`);
                 }
             }
         });
@@ -620,52 +623,52 @@ async function loadCompetitionMatches() {
     matchesList.innerHTML = '<div class="loading-message">Laster kamper...</div>';
 
     try {
-        // Fetch scores for live/completed matches
-        const scores = await footballApi.fetchScores();
+        const db = firebase.firestore();
+        let competitionMatches = [];
 
-        // Filter to competition date range and leagues
-        const startDate = competition.startDate.toDate();
-        const endDate = competition.endDate.toDate();
-        const competitionLeagues = competition.leagues || [];
+        // Check if competition has cached matches
+        if (competition.cachedMatches && competition.cachedMatches.length > 0) {
+            console.log('💾 Using cached matches from Firestore:', competition.cachedMatches.length);
+            competitionMatches = competition.cachedMatches;
+        } else {
+            console.log('🔄 Fetching matches from API...');
+            // Fetch scores for live/completed matches from API
+            const scores = await footballApi.fetchScores();
 
-        const leagueNames = {
-            39: 'Premier League',
-            2: 'UEFA Champions League',
-            140: 'La Liga',
-            78: 'Bundesliga',
-            135: 'Serie A',
-            1: 'World Cup'
-        };
+            // Filter to competition date range and leagues
+            const startDate = competition.startDate.toDate();
+            const endDate = competition.endDate.toDate();
+            const competitionLeagues = competition.leagues || [];
 
-        const competitionMatches = scores.filter(match => {
-            const matchDate = new Date(match.commence_time || match.date);
+            const leagueNames = {
+                39: 'Premier League',
+                2: 'UEFA Champions League',
+                140: 'La Liga',
+                78: 'Bundesliga',
+                135: 'Serie A',
+                1: 'World Cup'
+            };
 
-            // Check if match starts within competition date range
-            if (matchDate < startDate || matchDate > endDate) {
-                return false;
-            }
+            competitionMatches = scores.filter(match => {
+                const matchDate = new Date(match.commence_time || match.date);
 
-            // Check if match is in one of the competition leagues
-            return competitionLeagues.some(leagueId => {
-                const leagueName = leagueNames[leagueId];
-                return match.league && match.league.includes(leagueName);
+                // Check if match starts within competition date range
+                if (matchDate < startDate || matchDate > endDate) {
+                    return false;
+                }
+
+                // Check if match is in one of the competition leagues
+                return competitionLeagues.some(leagueId => {
+                    const leagueName = leagueNames[leagueId];
+                    return match.league && match.league.includes(leagueName);
+                });
             });
-        });
 
-        console.log('📥 Competition matches:', competitionMatches.length);
-        console.log(`📅 Looking for matches between ${startDate.toLocaleDateString()} and ${endDate.toLocaleDateString()}`);
-        console.log(`🔍 Total scores available from API: ${scores.length}`);
+            console.log('📥 Competition matches from API:', competitionMatches.length);
+        }
 
         if (competitionMatches.length === 0) {
-            matchesList.innerHTML = `
-                <div class="no-matches">
-                    <p>Ingen kamper funnet i denne perioden for valgte ligaer</p>
-                    <p style="font-size: 12px; color: #64748b; margin-top: 10px;">
-                        Note: API-et henter bare kamper fra siste 7 dager.
-                        Eldre konkurranser kan mangle kampdata.
-                    </p>
-                </div>
-            `;
+            matchesList.innerHTML = '<div class="no-matches">Ingen kamper funnet i denne perioden for valgte ligaer</div>';
             return null; // No matches found - status indeterminate
         }
 
@@ -674,6 +677,21 @@ async function loadCompetitionMatches() {
         // Check if all matches are completed
         const allCompleted = competitionMatches.every(match => match.completed);
         console.log(`🏁 All matches completed: ${allCompleted} (${competitionMatches.length} matches)`);
+
+        // If all matches are completed and we haven't cached yet, save to Firestore
+        if (allCompleted && !competition.cachedMatches) {
+            console.log('💾 Saving matches to Firestore cache...');
+            try {
+                await db.collection('competitions').doc(competitionId).update({
+                    cachedMatches: competitionMatches,
+                    cachedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('✅ Matches cached successfully');
+            } catch (error) {
+                console.warn('⚠️ Could not cache matches:', error);
+            }
+        }
+
         return allCompleted;
 
     } catch (error) {
