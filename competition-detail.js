@@ -661,9 +661,19 @@ async function loadCompetitionMatches() {
         });
 
         console.log('📥 Competition matches:', competitionMatches.length);
+        console.log(`📅 Looking for matches between ${startDate.toLocaleDateString()} and ${extendedEndDate.toLocaleDateString()}`);
+        console.log(`🔍 Total scores available from API: ${scores.length}`);
 
         if (competitionMatches.length === 0) {
-            matchesList.innerHTML = '<div class="no-matches">Ingen kamper funnet i denne perioden for valgte ligaer</div>';
+            matchesList.innerHTML = `
+                <div class="no-matches">
+                    <p>Ingen kamper funnet i denne perioden for valgte ligaer</p>
+                    <p style="font-size: 12px; color: #64748b; margin-top: 10px;">
+                        Note: API-et henter bare kamper fra siste 7 dager.
+                        Eldre konkurranser kan mangle kampdata.
+                    </p>
+                </div>
+            `;
             return null; // No matches found - status indeterminate
         }
 
