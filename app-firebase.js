@@ -427,11 +427,16 @@ function init() {
 
     // Wait for auth state before loading matches
     firebase.auth().onAuthStateChanged((user) => {
+        const loadingMessage = document.getElementById('loadingMessage');
+
         if (user) {
             // User is signed in, load matches
             loadMatches();
         } else {
-            // User is not signed in, show message
+            // User is not signed in, hide loading and show message
+            if (loadingMessage) {
+                loadingMessage.style.display = 'none';
+            }
             const matchesList = document.getElementById('matchesList');
             if (matchesList) {
                 matchesList.innerHTML = '<div class="no-matches"><p>Du må være innlogget for å se kamper og legge inn tips.</p><p><a href="index.html" class="btn-primary">Logg inn</a></p></div>';
