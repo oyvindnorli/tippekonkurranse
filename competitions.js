@@ -1,5 +1,8 @@
 // Competitions functionality
 let selectedLeagues = new Set([39, 2]); // Default: Premier League and Champions League
+let availableRounds = null; // Store fetched rounds
+let selectedPLRounds = new Set(); // Selected Premier League rounds
+let selectedCLRounds = new Set(); // Selected Champions League rounds
 
 // Initialize page
 function init() {
@@ -203,7 +206,7 @@ function formatDate(date) {
 }
 
 // Show create competition modal
-function showCreateCompetitionModal() {
+async function showCreateCompetitionModal() {
     const user = firebase.auth().currentUser;
     if (!user) {
         alert('Du må være innlogget for å opprette en konkurranse');
@@ -228,15 +231,130 @@ function showCreateCompetitionModal() {
     });
     document.getElementById('comp-league-all').checked = true;
 
-    // Show PL round selection since PL is selected by default
-    const plRoundSelection = document.getElementById('plRoundSelection');
-    if (plRoundSelection) {
-        plRoundSelection.style.display = 'block';
-    }
+    // Reset competition type to date-based
+    document.querySelector('input[name="competitionType"][value="date"]').checked = true;
+    toggleCompetitionType();
 
-    // Clear round inputs
-    document.getElementById('plRoundStart').value = '';
-    document.getElementById('plRoundEnd').value = '';
+    // Fetch available rounds if not already loaded
+    if (!availableRounds) {
+        await loadAvailableRounds();
+    }
+}
+
+// Toggle between date-based and round-based competition
+function toggleCompetitionType() {
+    const type = document.querySelector('input[name="competitionType"]:checked').value;
+    const dateSelection = document.getElementById('dateSelection');
+    const roundSelection = document.getElementById('roundSelection');
+    const leagueSelection = document.getElementById('leagueSelection');
+
+    if (type === 'date') {
+        dateSelection.style.display = 'grid';
+        roundSelection.style.display = 'none';
+        leagueSelection.style.display = 'block';
+
+        // Make date fields required
+        document.getElementById('startDate').required = true;
+        document.getElementById('endDate').required = true;
+    } else {
+        dateSelection.style.display = 'none';
+        roundSelection.style.display = 'block';
+        leagueSelection.style.display = 'none';
+
+        // Remove required from date fields
+        document.getElementById('startDate').required = false;
+        document.getElementById('endDate').required = false;
+    }
+}
+
+// Load available rounds from API
+async function loadAvailableRounds() {
+    try {
+        console.log('🔍 Loading available rounds...');
+        availableRounds = await footballApi.fetchAvailableRounds();
+
+        // Populate Premier League rounds
+        const plContainer = document.getElementById('plRoundsContainer');
+        if (availableRounds.premierLeague.length > 0) {
+            const checkboxGroup = document.createElement('div');
+            checkboxGroup.className = 'round-checkbox-group';
+
+            availableRounds.premierLeague.forEach(round => {
+                const item = document.createElement('div');
+                item.className = 'round-checkbox-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="pl-round-${round.value}" value="${round.value}" onchange="updateSelectedRounds('pl')">
+                    <label for="pl-round-${round.value}">${round.label}</label>
+                `;
+                checkboxGroup.appendChild(item);
+            });
+
+            plContainer.innerHTML = '';
+            plContainer.appendChild(checkboxGroup);
+        } else {
+            plContainer.innerHTML = '<div class="loading-rounds">Ingen runder funnet</div>';
+        }
+
+        // Populate Champions League rounds
+        const clContainer = document.getElementById('clRoundsContainer');
+        if (availableRounds.championsLeague.length > 0) {
+            const checkboxGroup = document.createElement('div');
+            checkboxGroup.className = 'round-checkbox-group';
+
+            availableRounds.championsLeague.forEach(round => {
+                const item = document.createElement('div');
+                item.className = 'round-checkbox-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="cl-round-${round.value.replace(/\s+/g, '-')}" value="${round.value}" onchange="updateSelectedRounds('cl')">
+                    <label for="cl-round-${round.value.replace(/\s+/g, '-')}">${round.label}</label>
+                `;
+                checkboxGroup.appendChild(item);
+            });
+
+            clContainer.innerHTML = '';
+            clContainer.appendChild(checkboxGroup);
+        } else {
+            clContainer.innerHTML = '<div class="loading-rounds">Ingen runder funnet</div>';
+        }
+
+        console.log('✅ Rounds loaded');
+    } catch (error) {
+        console.error('Failed to load rounds:', error);
+    }
+}
+
+// Toggle round league visibility
+function toggleRoundLeague(league) {
+    const checkbox = document.getElementById(league === 'pl' ? 'includePL' : 'includeCL');
+    const container = document.getElementById(league === 'pl' ? 'plRoundsContainer' : 'clRoundsContainer');
+
+    if (checkbox.checked) {
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+        // Uncheck all rounds in this league
+        container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
+        });
+        updateSelectedRounds(league);
+    }
+}
+
+// Update selected rounds
+function updateSelectedRounds(league) {
+    if (league === 'pl') {
+        selectedPLRounds.clear();
+        document.querySelectorAll('#plRoundsContainer input[type="checkbox"]:checked').forEach(cb => {
+            selectedPLRounds.add(parseInt(cb.value));
+        });
+        console.log('Selected PL rounds:', Array.from(selectedPLRounds));
+    } else {
+        selectedCLRounds.clear();
+        document.querySelectorAll('#clRoundsContainer input[type="checkbox"]:checked').forEach(cb => {
+            selectedCLRounds.add(cb.value);
+        });
+        console.log('Selected CL rounds:', Array.from(selectedCLRounds));
+    }
 }
 
 // Close create competition modal
@@ -312,57 +430,68 @@ async function createCompetition() {
 
         const name = document.getElementById('competitionName').value.trim();
         const description = document.getElementById('competitionDescription').value.trim();
-        const startDate = new Date(document.getElementById('startDate').value);
-        const endDate = new Date(document.getElementById('endDate').value);
-
-        // Get Premier League round selection (if any)
-        const plRoundStart = document.getElementById('plRoundStart').value;
-        const plRoundEnd = document.getElementById('plRoundEnd').value;
+        const competitionType = document.querySelector('input[name="competitionType"]:checked').value;
 
         // Validation
         if (!name) {
             throw new Error('Navn på konkurranse er påkrevd');
         }
 
-        if (selectedLeagues.size === 0) {
-            throw new Error('Du må velge minst én liga');
-        }
-
-        if (endDate < startDate) {
-            throw new Error('Sluttdato kan ikke være før startdato');
-        }
-
-        // Validate round numbers if provided
-        if (plRoundStart && plRoundEnd) {
-            const startRound = parseInt(plRoundStart);
-            const endRound = parseInt(plRoundEnd);
-            if (startRound > endRound) {
-                throw new Error('Fra-runde kan ikke være høyere enn til-runde');
-            }
-            if (startRound < 1 || endRound > 38) {
-                throw new Error('Runder må være mellom 1 og 38');
-            }
-        }
-
-        // Create competition document
-        const competitionData = {
+        let competitionData = {
             name,
             description,
             creatorId: user.uid,
             creatorName: user.displayName || user.email,
-            leagues: Array.from(selectedLeagues), // Store league IDs instead of match IDs
             participants: [user.uid], // Creator automatically joins
-            startDate: firebase.firestore.Timestamp.fromDate(startDate),
-            endDate: firebase.firestore.Timestamp.fromDate(endDate),
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            competitionType: competitionType // 'date' or 'round'
         };
 
-        // Add Premier League rounds if specified
-        if (selectedLeagues.has(39) && plRoundStart && plRoundEnd) {
-            competitionData.plRounds = {
-                start: parseInt(plRoundStart),
-                end: parseInt(plRoundEnd)
-            };
+        if (competitionType === 'date') {
+            // Date-based competition
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+
+            if (!startDate || !endDate) {
+                throw new Error('Startdato og sluttdato er påkrevd');
+            }
+
+            if (endDate < startDate) {
+                throw new Error('Sluttdato kan ikke være før startdato');
+            }
+
+            if (selectedLeagues.size === 0) {
+                throw new Error('Du må velge minst én liga');
+            }
+
+            competitionData.leagues = Array.from(selectedLeagues);
+            competitionData.startDate = firebase.firestore.Timestamp.fromDate(startDate);
+            competitionData.endDate = firebase.firestore.Timestamp.fromDate(endDate);
+
+        } else {
+            // Round-based competition
+            if (selectedPLRounds.size === 0 && selectedCLRounds.size === 0) {
+                throw new Error('Du må velge minst én runde');
+            }
+
+            const leagues = [];
+            const rounds = {};
+
+            if (selectedPLRounds.size > 0) {
+                leagues.push(39); // Premier League
+                rounds.premierLeague = Array.from(selectedPLRounds).sort((a, b) => a - b);
+            }
+
+            if (selectedCLRounds.size > 0) {
+                leagues.push(2); // Champions League
+                rounds.championsLeague = Array.from(selectedCLRounds);
+            }
+
+            competitionData.leagues = leagues;
+            competitionData.selectedRounds = rounds;
+
+            // For round-based, we don't set start/end dates initially
+            // They will be determined by the actual match dates
         }
 
         const db = firebase.firestore();

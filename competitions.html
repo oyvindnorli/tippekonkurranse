@@ -73,18 +73,62 @@
                     <textarea id="competitionDescription" placeholder="Beskrivelse av konkurransen..." rows="3"></textarea>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="startDate">Startdato *</label>
-                        <input type="date" id="startDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="endDate">Sluttdato *</label>
-                        <input type="date" id="endDate" required>
+                <div class="form-group">
+                    <label>Type konkurranse *</label>
+                    <div class="competition-type-selection">
+                        <label class="radio-option">
+                            <input type="radio" name="competitionType" value="date" checked onchange="toggleCompetitionType()">
+                            <span>📅 Datobasert (velg periode)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="competitionType" value="round" onchange="toggleCompetitionType()">
+                            <span>🎯 Rundebasert (velg spillerunde)</span>
+                        </label>
                     </div>
                 </div>
 
-                <div class="form-group">
+                <!-- Date-based selection -->
+                <div id="dateSelection" class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Startdato *</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">Sluttdato *</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+
+                <!-- Round-based selection -->
+                <div id="roundSelection" style="display: none;">
+                    <div class="form-group">
+                        <label>Velg ligaer og runder *</label>
+                        <p class="form-help-text">Velg hvilke runder du vil inkludere i konkurransen</p>
+
+                        <div class="round-league-section">
+                            <div class="round-league-header">
+                                <input type="checkbox" id="includePL" onchange="toggleRoundLeague('pl')">
+                                <label for="includePL">⚽ Premier League</label>
+                            </div>
+                            <div id="plRoundsContainer" class="rounds-container" style="display: none;">
+                                <div class="loading-rounds">Laster runder...</div>
+                            </div>
+                        </div>
+
+                        <div class="round-league-section">
+                            <div class="round-league-header">
+                                <input type="checkbox" id="includeCL" onchange="toggleRoundLeague('cl')">
+                                <label for="includeCL">🏆 Champions League</label>
+                            </div>
+                            <div id="clRoundsContainer" class="rounds-container" style="display: none;">
+                                <div class="loading-rounds">Laster runder...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- League selection (only for date-based competitions) -->
+                <div id="leagueSelection" class="form-group">
                     <label>Velg ligaer for konkurransen *</label>
                     <div class="league-selection">
                         <div class="league-checkbox">
@@ -98,22 +142,6 @@
                         <div class="league-checkbox">
                             <input type="checkbox" id="comp-league-2" class="comp-league-checkbox" checked onchange="updateCompLeagues()">
                             <label for="comp-league-2">Champions League</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Premier League Round Selection -->
-                <div class="form-group" id="plRoundSelection" style="display: none;">
-                    <label>Velg spillerunde i Premier League (valgfritt)</label>
-                    <p class="form-help-text">La stå tomt for å inkludere alle kamper i perioden</p>
-                    <div class="round-selection">
-                        <div class="round-input-group">
-                            <label for="plRoundStart">Fra runde:</label>
-                            <input type="number" id="plRoundStart" min="1" max="38" placeholder="1">
-                        </div>
-                        <div class="round-input-group">
-                            <label for="plRoundEnd">Til runde:</label>
-                            <input type="number" id="plRoundEnd" min="1" max="38" placeholder="38">
                         </div>
                     </div>
                 </div>

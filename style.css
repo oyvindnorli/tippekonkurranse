@@ -1305,6 +1305,121 @@ main {
     font-style: italic;
 }
 
+.competition-type-selection {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.radio-option:hover {
+    background: #ffffff;
+}
+
+.radio-option input[type="radio"] {
+    cursor: pointer;
+}
+
+.radio-option span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.round-league-section {
+    margin-bottom: 16px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.round-league-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #f9fafb;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.round-league-header:hover {
+    background: #f3f4f6;
+}
+
+.round-league-header input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.round-league-header label {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    color: #1f2937;
+    flex: 1;
+}
+
+.rounds-container {
+    padding: 12px 16px;
+    background: #ffffff;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.loading-rounds {
+    text-align: center;
+    padding: 12px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.round-checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+}
+
+.round-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.round-checkbox-item:hover {
+    background: #f3f4f6;
+    border-color: #22d3ee;
+}
+
+.round-checkbox-item input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.round-checkbox-item label {
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+    font-weight: 500;
+    flex: 1;
+}
+
 .matches-selection {
     max-height: 300px;
     overflow-y: auto;

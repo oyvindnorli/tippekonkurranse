@@ -750,6 +750,109 @@ class FootballApiService {
             }
         ]);
     }
+
+    /**
+     * Fetch available rounds for Premier League and Champions League
+     * Returns upcoming and recent rounds for competition creation
+     */
+    async fetchAvailableRounds() {
+        if (this.useMockData) {
+            return {
+                premierLeague: [
+                    { value: 10, label: 'Runde 10', status: 'upcoming' },
+                    { value: 11, label: 'Runde 11', status: 'upcoming' },
+                    { value: 12, label: 'Runde 12', status: 'upcoming' }
+                ],
+                championsLeague: [
+                    { value: 'League Stage - Matchday 3', label: 'Matchday 3', status: 'upcoming' },
+                    { value: 'League Stage - Matchday 4', label: 'Matchday 4', status: 'upcoming' }
+                ]
+            };
+        }
+
+        try {
+            console.log('🔍 Fetching available rounds...');
+
+            // Get fixtures for next 60 days to find upcoming rounds
+            const today = new Date();
+            const twoMonthsLater = new Date();
+            twoMonthsLater.setDate(today.getDate() + 60);
+
+            const fromDate = today.toISOString().split('T')[0];
+            const toDate = twoMonthsLater.toISOString().split('T')[0];
+
+            const plRounds = new Set();
+            const clRounds = new Set();
+
+            // Fetch fixtures for both leagues
+            for (const leagueId of API_CONFIG.LEAGUES) {
+                const url = `${API_CONFIG.BASE_URL}/fixtures?league=${leagueId}&season=${API_CONFIG.SEASON}&from=${fromDate}&to=${toDate}`;
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'x-rapidapi-host': 'v3.football.api-sports.io',
+                        'x-rapidapi-key': API_CONFIG.API_KEY
+                    }
+                });
+
+                if (!response.ok) continue;
+
+                const data = await response.json();
+
+                if (data.response && data.response.length > 0) {
+                    data.response.forEach(fixture => {
+                        const round = fixture.league.round;
+                        if (!round) return;
+
+                        if (leagueId === 39) {
+                            // Premier League - extract round number
+                            const match = round.match(/(\d+)/);
+                            if (match) {
+                                plRounds.add(parseInt(match[1]));
+                            }
+                        } else if (leagueId === 2) {
+                            // Champions League - store full round string
+                            clRounds.add(round);
+                        }
+                    });
+                }
+            }
+
+            // Convert to sorted arrays
+            const plRoundsArray = Array.from(plRounds)
+                .sort((a, b) => a - b)
+                .slice(0, 10) // Limit to next 10 rounds
+                .map(num => ({
+                    value: num,
+                    label: `Runde ${num}`,
+                    status: 'upcoming'
+                }));
+
+            const clRoundsArray = Array.from(clRounds)
+                .sort()
+                .slice(0, 10)
+                .map(round => ({
+                    value: round,
+                    label: round.replace('League Stage - ', '').replace('Matchday', 'MD'),
+                    status: 'upcoming'
+                }));
+
+            console.log('✅ Found rounds:', { pl: plRoundsArray.length, cl: clRoundsArray.length });
+
+            return {
+                premierLeague: plRoundsArray,
+                championsLeague: clRoundsArray
+            };
+
+        } catch (error) {
+            console.error('Failed to fetch available rounds:', error);
+            return {
+                premierLeague: [],
+                championsLeague: []
+            };
+        }
+    }
 }
 
 // Create a global instance
