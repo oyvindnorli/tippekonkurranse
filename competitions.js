@@ -268,21 +268,6 @@ async function showCreateCompetitionModal() {
     const modal = document.getElementById('createCompetitionModal');
     modal.style.display = 'block';
 
-    // Set default dates (next 7 days)
-    const today = new Date();
-    const nextWeek = new Date(today);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-
-    document.getElementById('startDate').valueAsDate = today;
-    document.getElementById('endDate').valueAsDate = nextWeek;
-
-    // Reset to all leagues selected
-    selectedLeagues = new Set([39, 2]);
-    document.querySelectorAll('.comp-league-checkbox').forEach(cb => {
-        cb.checked = true;
-    });
-    document.getElementById('comp-league-all').checked = true;
-
     // Fetch next rounds and display them
     await loadNextRounds();
 }
@@ -360,47 +345,7 @@ function closeCreateCompetitionModal() {
     document.getElementById('createCompetitionForm').reset();
 }
 
-// Toggle all leagues checkbox
-function toggleAllCompLeagues(checkbox) {
-    const leagueCheckboxes = document.querySelectorAll('.comp-league-checkbox');
-    leagueCheckboxes.forEach(cb => {
-        cb.checked = checkbox.checked;
-    });
-    updateCompLeagues();
-}
-
-// Update selected leagues
-function updateCompLeagues() {
-    const leagueCheckboxes = document.querySelectorAll('.comp-league-checkbox');
-    const allCheckbox = document.getElementById('comp-league-all');
-    const plRoundSelection = document.getElementById('plRoundSelection');
-
-    selectedLeagues.clear();
-    let allChecked = true;
-    let plSelected = false;
-
-    leagueCheckboxes.forEach(cb => {
-        if (cb.checked) {
-            const leagueId = parseInt(cb.id.replace('comp-league-', ''));
-            selectedLeagues.add(leagueId);
-            if (leagueId === 39) {
-                plSelected = true;
-            }
-        } else {
-            allChecked = false;
-        }
-    });
-
-    // Update "All" checkbox state
-    allCheckbox.checked = allChecked;
-
-    // Show/hide Premier League round selection
-    if (plRoundSelection) {
-        plRoundSelection.style.display = plSelected ? 'block' : 'none';
-    }
-
-    console.log('Selected leagues:', Array.from(selectedLeagues));
-}
+// OLD functions removed - no longer needed for simplified round selection
 
 // Create competition form submission
 document.addEventListener('DOMContentLoaded', () => {
