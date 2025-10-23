@@ -616,9 +616,19 @@ function renderMatches() {
                         </div>
 
                         ${match.odds ? `
-                            <div class="odds-compact">
-                                <span class="odds-label">Odds:</span>
-                                <span class="odds-values">${match.odds.H ? match.odds.H.toFixed(2) : '2.00'} · ${match.odds.U ? match.odds.U.toFixed(2) : '3.00'} · ${match.odds.B ? match.odds.B.toFixed(2) : '3.50'}</span>
+                            <div class="odds-buttons">
+                                <button class="odd-btn home-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''}>
+                                    <span class="odd-label">H</span>
+                                    <span class="odd-value">${match.odds.H ? match.odds.H.toFixed(2) : '2.00'}</span>
+                                </button>
+                                <button class="odd-btn draw-btn" data-match-id="${match.id}" data-type="draw" ${match.result ? 'disabled' : ''}>
+                                    <span class="odd-label">U</span>
+                                    <span class="odd-value">${match.odds.U ? match.odds.U.toFixed(2) : '3.00'}</span>
+                                </button>
+                                <button class="odd-btn away-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''}>
+                                    <span class="odd-label">B</span>
+                                    <span class="odd-value">${match.odds.B ? match.odds.B.toFixed(2) : '3.50'}</span>
+                                </button>
                             </div>
                         ` : ''}
 
@@ -642,8 +652,21 @@ function renderMatches() {
                 `;
                 dateGroup.appendChild(matchCard);
 
-                // Add event listeners for +/- buttons
+                // Add event listeners for odds buttons
                 if (!match.result) {
+                    const oddsButtons = matchCard.querySelectorAll('.odd-btn');
+                    oddsButtons.forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const matchId = btn.dataset.matchId;
+                            const type = btn.dataset.type;
+
+                            console.log('Odds button clicked:', { matchId, type });
+                            setScoreFromOdds(matchId, type);
+                        });
+                    });
+
+                    // Add event listeners for +/- buttons
                     const buttons = matchCard.querySelectorAll('.score-btn');
                     buttons.forEach(btn => {
                         btn.addEventListener('click', (e) => {
@@ -661,6 +684,37 @@ function renderMatches() {
 
         matchesList.appendChild(dateGroup);
     });
+}
+
+// Set score based on odds button clicked
+function setScoreFromOdds(matchId, type) {
+    const homeScoreElement = document.getElementById(`home-score-${matchId}`);
+    const awayScoreElement = document.getElementById(`away-score-${matchId}`);
+
+    if (!homeScoreElement || !awayScoreElement) {
+        console.error('Score elements not found for match', matchId);
+        return;
+    }
+
+    // Set scores based on which odds button was clicked
+    if (type === 'home') {
+        // Hjemmeseier: 1-0
+        homeScoreElement.textContent = '1';
+        awayScoreElement.textContent = '0';
+    } else if (type === 'draw') {
+        // Uavgjort: 0-0
+        homeScoreElement.textContent = '0';
+        awayScoreElement.textContent = '0';
+    } else if (type === 'away') {
+        // Borteseier: 0-1
+        homeScoreElement.textContent = '0';
+        awayScoreElement.textContent = '1';
+    }
+
+    // Auto-save the tip
+    const homeScore = parseInt(homeScoreElement.textContent);
+    const awayScore = parseInt(awayScoreElement.textContent);
+    submitTip(matchId, homeScore, awayScore);
 }
 
 // Update score with +/- buttons

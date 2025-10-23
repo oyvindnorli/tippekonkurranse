@@ -408,30 +408,58 @@ main {
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
-/* Odds display - Ultra compact inline */
-.odds-compact {
+/* Odds buttons - Clickable odds */
+.odds-buttons {
     display: flex;
+    gap: 8px;
+    width: 100%;
+    margin: 10px 0;
+}
+
+.odd-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    background: #f8fafc;
-    border-radius: 6px;
-    align-self: flex-start;
+    gap: 4px;
+    padding: 10px 8px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
 }
 
-.odds-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+.odd-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
 }
 
-.odds-values {
+.odd-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.odd-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.odd-label {
     font-size: 11px;
     font-weight: 600;
     color: #64748b;
-    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.odd-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 /* Score input - Compact box design */
@@ -1817,9 +1845,20 @@ main {
         font-size: 10px;
     }
 
-    .odds-compact {
-        width: 100%;
-        justify-content: center;
+    .odds-buttons {
+        gap: 6px;
+    }
+
+    .odd-btn {
+        padding: 8px 6px;
+    }
+
+    .odd-label {
+        font-size: 10px;
+    }
+
+    .odd-value {
+        font-size: 14px;
     }
 
     .tip-input-section {
