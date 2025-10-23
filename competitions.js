@@ -345,7 +345,23 @@ function closeCreateCompetitionModal() {
     document.getElementById('createCompetitionForm').reset();
 }
 
-// OLD functions removed - no longer needed for simplified round selection
+// Update competition name based on selected round
+function updateCompetitionName() {
+    const selectedRound = document.querySelector('input[name="selectedRound"]:checked');
+    const nameInput = document.getElementById('competitionName');
+
+    if (!selectedRound || !availableRounds) return;
+
+    const roundType = selectedRound.value;
+
+    if (roundType === 'pl' && availableRounds.premierLeague.length > 0) {
+        const nextRound = availableRounds.premierLeague[0];
+        nameInput.value = `Premier League ${nextRound.label}`;
+    } else if (roundType === 'cl' && availableRounds.championsLeague.length > 0) {
+        const nextRound = availableRounds.championsLeague[0];
+        nameInput.value = `Champions League ${nextRound.label}`;
+    }
+}
 
 // Create competition form submission
 document.addEventListener('DOMContentLoaded', () => {
