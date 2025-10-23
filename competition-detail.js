@@ -841,23 +841,54 @@ function renderCompetitionMatches(matches) {
     const matchesList = document.getElementById('competitionMatchesList');
     matchesList.innerHTML = '';
 
-    // Group by date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Group by date with relative labels
     const matchesByDate = {};
     matches.forEach(match => {
-        const date = new Date(match.commence_time || match.date).toLocaleDateString('no-NO');
-        if (!matchesByDate[date]) {
-            matchesByDate[date] = [];
+        const matchDate = new Date(match.commence_time || match.date);
+        matchDate.setHours(0, 0, 0, 0);
+
+        const daysDiff = Math.floor((matchDate - today) / (1000 * 60 * 60 * 24));
+
+        let dateLabel;
+        if (daysDiff === 0) {
+            dateLabel = 'I dag';
+        } else if (daysDiff === 1) {
+            dateLabel = 'I morgen';
+        } else if (daysDiff === -1) {
+            dateLabel = 'I går';
+        } else if (daysDiff < -1 && daysDiff > -7) {
+            // Last week
+            const weekday = matchDate.toLocaleDateString('nb-NO', { weekday: 'long' });
+            dateLabel = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+        } else {
+            // Format: "Fredag, 17. oktober"
+            const weekday = matchDate.toLocaleDateString('nb-NO', { weekday: 'long' });
+            const day = matchDate.getDate();
+            const month = matchDate.toLocaleDateString('nb-NO', { month: 'long' });
+            dateLabel = `${weekday.charAt(0).toUpperCase() + weekday.slice(1)}, ${day}. ${month}`;
         }
-        matchesByDate[date].push(match);
+
+        if (!matchesByDate[dateLabel]) {
+            matchesByDate[dateLabel] = { date: matchDate, matches: [] };
+        }
+        matchesByDate[dateLabel].matches.push(match);
     });
 
-    Object.keys(matchesByDate).sort().forEach(date => {
+    // Sort by actual date
+    const sortedDates = Object.keys(matchesByDate).sort((a, b) => {
+        return matchesByDate[a].date - matchesByDate[b].date;
+    });
+
+    sortedDates.forEach(dateLabel => {
         const dateHeader = document.createElement('div');
         dateHeader.className = 'date-header';
-        dateHeader.textContent = date;
+        dateHeader.textContent = dateLabel;
         matchesList.appendChild(dateHeader);
 
-        matchesByDate[date].forEach(match => {
+        matchesByDate[dateLabel].matches.forEach(match => {
             const card = createCompetitionMatchCard(match);
             matchesList.appendChild(card);
         });
