@@ -815,14 +815,6 @@ function simulateResult(matchId) {
     updateTotalScore();
 }
 
-// Refresh data from API (clears cache)
-function refreshData() {
-    footballApi.clearCache();
-    // Also clear any cached data to force fresh load
-    userTips = [];
-    location.reload();
-}
-
 // Close auth modal when clicking outside of it (but not on modal content)
 window.onclick = function(event) {
     const modal = document.getElementById('authModal');

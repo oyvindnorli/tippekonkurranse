@@ -232,25 +232,6 @@ main {
     border-bottom: 1px solid #e5e7eb;
 }
 
-.refresh-btn {
-    margin: 18px 20px;
-    padding: 11px 22px;
-    background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(34, 211, 238, 0.25);
-}
-
-.refresh-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.35);
-}
-
 .loading-message {
     text-align: center;
     padding: 40px 20px;
