@@ -707,8 +707,30 @@ async function loadCompetitionMatches() {
             competitionMatches = competition.cachedMatches;
         } else {
             console.log('🔄 Fetching matches from API...');
-            // Fetch scores for live/completed matches from API
-            const scores = await footballApi.fetchScores();
+
+            let allMatches = [];
+
+            // For round-based competitions, we need to fetch future matches too
+            if (competition.competitionType === 'round') {
+                // Fetch both historical and future matches (last 7 days to +60 days)
+                const today = new Date();
+                const weekAgo = new Date();
+                weekAgo.setDate(today.getDate() - 7);
+                const twoMonthsLater = new Date();
+                twoMonthsLater.setDate(today.getDate() + 60);
+
+                const fromDate = weekAgo.toISOString().split('T')[0];
+                const toDate = twoMonthsLater.toISOString().split('T')[0];
+
+                console.log(`📅 Fetching matches for rounds from ${fromDate} to ${toDate}`);
+
+                // Fetch fixtures (includes future matches)
+                const fixtures = await footballApi.fetchFixtures(fromDate, toDate);
+                allMatches = fixtures;
+            } else {
+                // For date-based, fetch scores (historical/live matches)
+                allMatches = await footballApi.fetchScores();
+            }
 
             const competitionLeagues = competition.leagues || [];
 
@@ -723,7 +745,7 @@ async function loadCompetitionMatches() {
 
             if (competition.competitionType === 'round') {
                 // Round-based competition - filter by selected rounds
-                competitionMatches = scores.filter(match => {
+                competitionMatches = allMatches.filter(match => {
                     // Check if match is in one of the competition leagues
                     const matchInLeague = competitionLeagues.some(leagueId => {
                         const leagueName = leagueNames[leagueId];
@@ -759,7 +781,7 @@ async function loadCompetitionMatches() {
                 const endDate = new Date(competition.endDate.toDate());
                 endDate.setHours(23, 59, 59, 999);
 
-                competitionMatches = scores.filter(match => {
+                competitionMatches = allMatches.filter(match => {
                     const matchDate = new Date(match.commence_time || match.date);
 
                     // Check if match starts within competition date range
