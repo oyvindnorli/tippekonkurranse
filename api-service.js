@@ -832,11 +832,22 @@ class FootballApiService {
             const clRoundsArray = Array.from(clRounds)
                 .sort()
                 .slice(0, 10)
-                .map(round => ({
-                    value: round,
-                    label: round.replace('League Stage - ', '').replace('Matchday', 'MD'),
-                    status: 'upcoming'
-                }));
+                .map(round => {
+                    // Extract matchday number from "League Stage - Matchday 4"
+                    const match = round.match(/Matchday (\d+)/);
+                    if (match) {
+                        return {
+                            value: round,
+                            label: `Runde ${match[1]}`,
+                            status: 'upcoming'
+                        };
+                    }
+                    return {
+                        value: round,
+                        label: round,
+                        status: 'upcoming'
+                    };
+                });
 
             console.log('✅ Found rounds:', { pl: plRoundsArray.length, cl: clRoundsArray.length });
 
