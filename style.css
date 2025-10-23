@@ -143,12 +143,7 @@ header h1 {
     box-shadow: 0 6px 16px rgba(34, 211, 238, 0.5);
 }
 
-/* Main content */
-main {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 25px 15px;
-}
+/* Main content - removed, now defined at top */
 
 @media (max-width: 768px) {
     main {
