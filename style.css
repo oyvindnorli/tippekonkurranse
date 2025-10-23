@@ -12,8 +12,8 @@ body {
 }
 
 .container {
-    max-width: 100%;
-    margin: 0;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 /* Header - Modern gradient */
@@ -313,7 +313,7 @@ main {
 .match-card {
     background: #ffffff;
     border-radius: 10px;
-    padding: 12px;
+    padding: 10px;
     margin-bottom: 8px;
     border: 1.5px solid #e5e7eb;
     transition: all 0.2s ease;
@@ -334,7 +334,7 @@ main {
 .match-info {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 }
 
 .league-info {
@@ -345,7 +345,7 @@ main {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 4px 0;
+    padding: 2px 0;
 }
 
 .team-row .team-logo {
@@ -443,7 +443,7 @@ main {
     display: flex;
     gap: 8px;
     width: 100%;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .odd-btn {
