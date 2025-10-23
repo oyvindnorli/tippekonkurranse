@@ -2030,7 +2030,7 @@ header h1 {
 }
 
 .feature-item {
-    padding: 30px 20px;
+    padding: 40px 30px;
     background: white;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -2043,20 +2043,20 @@ header h1 {
 }
 
 .feature-icon {
-    font-size: 48px;
+    font-size: 56px;
     display: block;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .feature-item h3 {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     color: #0f172a;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
 .feature-item p {
-    font-size: 15px;
+    font-size: 16px;
     color: #64748b;
     line-height: 1.6;
 }
