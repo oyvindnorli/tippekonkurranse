@@ -104,11 +104,6 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
     document.getElementById('competitionDescription').textContent = competition.description || 'Ingen beskrivelse';
     document.getElementById('creatorName').textContent = competition.creatorName;
 
-    const startDate = competition.startDate.toDate();
-    const endDate = competition.endDate.toDate();
-    document.getElementById('competitionPeriod').textContent =
-        `${formatDate(startDate)} - ${formatDate(endDate)}`;
-
     // Get league names
     const leagueNames = {
         39: 'Premier League',
@@ -120,16 +115,40 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
     };
 
     const leagues = competition.leagues || [];
-    let leaguesText = leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ') || 'Alle ligaer';
+    let leaguesText = '';
 
-    // Add round info if Premier League rounds are specified
-    if (competition.plRounds && leagues.includes(39)) {
-        const roundText = competition.plRounds.start === competition.plRounds.end
-            ? `Runde ${competition.plRounds.start}`
-            : `Runde ${competition.plRounds.start}-${competition.plRounds.end}`;
+    // Display period/rounds based on competition type
+    if (competition.competitionType === 'round') {
+        // Round-based competition
+        document.getElementById('competitionPeriod').textContent = '🎯 Rundebasert konkurranse';
 
-        // Replace "Premier League" with "Premier League (Runde X-Y)"
-        leaguesText = leaguesText.replace('Premier League', `Premier League (${roundText})`);
+        // Build leagues text with rounds
+        const parts = [];
+
+        if (competition.selectedRounds?.premierLeague) {
+            const rounds = competition.selectedRounds.premierLeague.sort((a, b) => a - b);
+            const roundText = rounds.length === 1
+                ? `Runde ${rounds[0]}`
+                : `Runde ${rounds[0]}-${rounds[rounds.length - 1]}`;
+            parts.push(`Premier League (${roundText})`);
+        }
+
+        if (competition.selectedRounds?.championsLeague) {
+            const rounds = competition.selectedRounds.championsLeague;
+            const roundText = rounds.map(r => r.replace('League Stage - ', '').replace('Matchday', 'MD')).join(', ');
+            parts.push(`Champions League (${roundText})`);
+        }
+
+        leaguesText = parts.join(' + ');
+
+    } else {
+        // Date-based competition
+        const startDate = competition.startDate.toDate();
+        const endDate = competition.endDate.toDate();
+        document.getElementById('competitionPeriod').textContent =
+            `${formatDate(startDate)} - ${formatDate(endDate)}`;
+
+        leaguesText = leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ') || 'Alle ligaer';
     }
 
     document.getElementById('matchCount').textContent = leaguesText;
@@ -137,6 +156,22 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
 
     // Determine status
     const now = new Date();
+    let startDate, endDate;
+
+    if (competition.competitionType === 'round') {
+        // For round-based, determine start/end from matches
+        if (competitionMatches.length > 0) {
+            const dates = competitionMatches.map(m => new Date(m.commence_time || m.date));
+            startDate = new Date(Math.min(...dates));
+            endDate = new Date(Math.max(...dates));
+        } else {
+            startDate = now;
+            endDate = now;
+        }
+    } else {
+        startDate = competition.startDate.toDate();
+        endDate = competition.endDate.toDate();
+    }
     let status = 'upcoming';
     let statusText = '📅 Kommende';
     let statusClass = 'status-upcoming';
@@ -675,15 +710,6 @@ async function loadCompetitionMatches() {
             // Fetch scores for live/completed matches from API
             const scores = await footballApi.fetchScores();
 
-            // Filter to competition date range and leagues
-            const startDate = new Date(competition.startDate.toDate());
-            // Set start date to beginning of day (00:00:00)
-            startDate.setHours(0, 0, 0, 0);
-
-            const endDate = new Date(competition.endDate.toDate());
-            // Set end date to end of day (23:59:59) to include matches starting late in the day
-            endDate.setHours(23, 59, 59, 999);
-
             const competitionLeagues = competition.leagues || [];
 
             const leagueNames = {
@@ -695,41 +721,61 @@ async function loadCompetitionMatches() {
                 1: 'World Cup'
             };
 
-            competitionMatches = scores.filter(match => {
-                const matchDate = new Date(match.commence_time || match.date);
+            if (competition.competitionType === 'round') {
+                // Round-based competition - filter by selected rounds
+                competitionMatches = scores.filter(match => {
+                    // Check if match is in one of the competition leagues
+                    const matchInLeague = competitionLeagues.some(leagueId => {
+                        const leagueName = leagueNames[leagueId];
+                        return match.league && match.league.includes(leagueName);
+                    });
 
-                // Check if match starts within competition date range
-                if (matchDate < startDate || matchDate > endDate) {
-                    return false;
-                }
+                    if (!matchInLeague || !match.round) {
+                        return false;
+                    }
 
-                // Check if match is in one of the competition leagues
-                const matchInLeague = competitionLeagues.some(leagueId => {
-                    const leagueName = leagueNames[leagueId];
-                    return match.league && match.league.includes(leagueName);
-                });
-
-                if (!matchInLeague) {
-                    return false;
-                }
-
-                // If Premier League rounds are specified, filter by round
-                if (competition.plRounds && match.league && match.league.includes('Premier League')) {
-                    if (match.round) {
-                        // Extract round number from string like "Regular Season - 10"
+                    // Check Premier League rounds
+                    if (competition.selectedRounds?.premierLeague && match.league.includes('Premier League')) {
                         const roundMatch = match.round.match(/(\d+)/);
                         if (roundMatch) {
                             const roundNumber = parseInt(roundMatch[1]);
-                            // Check if round is within specified range
-                            if (roundNumber < competition.plRounds.start || roundNumber > competition.plRounds.end) {
-                                return false;
-                            }
+                            return competition.selectedRounds.premierLeague.includes(roundNumber);
                         }
+                        return false;
                     }
-                }
 
-                return true;
-            });
+                    // Check Champions League rounds
+                    if (competition.selectedRounds?.championsLeague && match.league.includes('Champions League')) {
+                        return competition.selectedRounds.championsLeague.includes(match.round);
+                    }
+
+                    return false;
+                });
+            } else {
+                // Date-based competition - filter by date range
+                const startDate = new Date(competition.startDate.toDate());
+                startDate.setHours(0, 0, 0, 0);
+
+                const endDate = new Date(competition.endDate.toDate());
+                endDate.setHours(23, 59, 59, 999);
+
+                competitionMatches = scores.filter(match => {
+                    const matchDate = new Date(match.commence_time || match.date);
+
+                    // Check if match starts within competition date range
+                    if (matchDate < startDate || matchDate > endDate) {
+                        return false;
+                    }
+
+                    // Check if match is in one of the competition leagues
+                    const matchInLeague = competitionLeagues.some(leagueId => {
+                        const leagueName = leagueNames[leagueId];
+                        return match.league && match.league.includes(leagueName);
+                    });
+
+                    return matchInLeague;
+                });
+            }
 
             console.log('📥 Competition matches from API:', competitionMatches.length);
         }

@@ -69,42 +69,75 @@ async function loadCompetitions() {
         const completed = [];
 
         competitions.forEach(c => {
-            const start = new Date(c.startDate.toDate());
-            // Set start date to beginning of day
-            start.setHours(0, 0, 0, 0);
+            const leagueNames = { 39: 'Premier League', 2: 'UEFA Champions League', 140: 'La Liga', 78: 'Bundesliga', 135: 'Serie A', 1: 'World Cup' };
+            const leagues = c.leagues || [];
 
-            const end = new Date(c.endDate.toDate());
-            // Set end date to end of day to include matches starting late
-            end.setHours(23, 59, 59, 999);
+            let competitionMatches = [];
+            let start, end;
 
-            // Upcoming: hasn't started yet
-            if (start > now) {
-                upcoming.push(c);
-                return;
+            if (c.competitionType === 'round') {
+                // Round-based competition - filter by rounds
+                competitionMatches = scores.filter(match => {
+                    if (!match.round) return false;
+
+                    // Check PL rounds
+                    if (c.selectedRounds?.premierLeague && match.league?.includes('Premier League')) {
+                        const roundMatch = match.round.match(/(\d+)/);
+                        if (roundMatch) {
+                            const roundNumber = parseInt(roundMatch[1]);
+                            return c.selectedRounds.premierLeague.includes(roundNumber);
+                        }
+                    }
+
+                    // Check CL rounds
+                    if (c.selectedRounds?.championsLeague && match.league?.includes('Champions League')) {
+                        return c.selectedRounds.championsLeague.includes(match.round);
+                    }
+
+                    return false;
+                });
+
+                // Determine start/end from matches
+                if (competitionMatches.length > 0) {
+                    const dates = competitionMatches.map(m => new Date(m.commence_time || m.date));
+                    start = new Date(Math.min(...dates));
+                    end = new Date(Math.max(...dates));
+                } else {
+                    start = now;
+                    end = now;
+                }
+
+            } else {
+                // Date-based competition
+                start = new Date(c.startDate.toDate());
+                start.setHours(0, 0, 0, 0);
+
+                end = new Date(c.endDate.toDate());
+                end.setHours(23, 59, 59, 999);
+
+                competitionMatches = scores.filter(match => {
+                    const matchDate = new Date(match.commence_time || match.date);
+                    if (matchDate < start || matchDate > end) return false;
+
+                    return leagues.some(leagueId => {
+                        const leagueName = leagueNames[leagueId];
+                        return match.league && match.league.includes(leagueName);
+                    });
+                });
             }
 
-            // Check if all matches in competition are finished
-            const competitionMatches = scores.filter(match => {
-                const matchDate = new Date(match.commence_time || match.date);
-                if (matchDate < start || matchDate > end) return false;
-
-                // Check if match is in competition leagues
-                const leagueNames = { 39: 'Premier League', 2: 'UEFA Champions League', 140: 'La Liga', 78: 'Bundesliga', 135: 'Serie A', 1: 'World Cup' };
-                const leagues = c.leagues || [];
-                return leagues.some(leagueId => {
-                    const leagueName = leagueNames[leagueId];
-                    return match.league && match.league.includes(leagueName);
-                });
-            });
-
-            // Check if all matches are completed
-            const allMatchesCompleted = competitionMatches.length > 0 &&
-                competitionMatches.every(match => match.completed);
-
-            if (allMatchesCompleted || end < now) {
-                completed.push(c);
+            // Categorize competition
+            if (start > now) {
+                upcoming.push(c);
             } else {
-                active.push(c);
+                const allMatchesCompleted = competitionMatches.length > 0 &&
+                    competitionMatches.every(match => match.completed);
+
+                if (allMatchesCompleted || end < now) {
+                    completed.push(c);
+                } else {
+                    active.push(c);
+                }
             }
         });
 
@@ -141,8 +174,6 @@ function createCompetitionCard(competition) {
     const card = document.createElement('div');
     card.className = 'competition-card';
 
-    const startDate = competition.startDate.toDate();
-    const endDate = competition.endDate.toDate();
     const user = firebase.auth().currentUser;
     const isCreator = user && competition.creatorId === user.uid;
 
@@ -157,18 +188,39 @@ function createCompetitionCard(competition) {
     };
 
     const leagues = competition.leagues || competition.matchIds || [];
-    let leaguesList = Array.isArray(leagues) && typeof leagues[0] === 'number'
-        ? leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ')
-        : 'Alle ligaer';
+    let leaguesList = '';
+    let periodText = '';
 
-    // Add round info if Premier League rounds are specified
-    if (competition.plRounds && leagues.includes(39)) {
-        const roundText = competition.plRounds.start === competition.plRounds.end
-            ? `Runde ${competition.plRounds.start}`
-            : `Runde ${competition.plRounds.start}-${competition.plRounds.end}`;
+    if (competition.competitionType === 'round') {
+        // Round-based competition
+        periodText = '🎯 Rundebasert';
 
-        // Replace "Premier League" with "Premier League (Runde X-Y)"
-        leaguesList = leaguesList.replace('Premier League', `Premier League (${roundText})`);
+        const parts = [];
+        if (competition.selectedRounds?.premierLeague) {
+            const rounds = competition.selectedRounds.premierLeague.sort((a, b) => a - b);
+            const roundText = rounds.length === 1
+                ? `Runde ${rounds[0]}`
+                : `Runde ${rounds[0]}-${rounds[rounds.length - 1]}`;
+            parts.push(`PL (${roundText})`);
+        }
+
+        if (competition.selectedRounds?.championsLeague) {
+            const rounds = competition.selectedRounds.championsLeague;
+            const roundText = rounds.map(r => r.replace('League Stage - ', '').replace('Matchday', 'MD')).join(', ');
+            parts.push(`CL (${roundText})`);
+        }
+
+        leaguesList = parts.join(' + ');
+
+    } else {
+        // Date-based competition
+        const startDate = competition.startDate.toDate();
+        const endDate = competition.endDate.toDate();
+        periodText = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+
+        leaguesList = Array.isArray(leagues) && typeof leagues[0] === 'number'
+            ? leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ')
+            : 'Alle ligaer';
     }
 
     card.innerHTML = `
@@ -179,11 +231,11 @@ function createCompetitionCard(competition) {
         <p class="competition-description">${competition.description || 'Ingen beskrivelse'}</p>
         <div class="competition-info">
             <div class="info-item">
-                <span class="info-label">📅 Periode:</span>
-                <span class="info-value">${formatDate(startDate)} - ${formatDate(endDate)}</span>
+                <span class="info-label">📅 Type:</span>
+                <span class="info-value">${periodText}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">🏆 Ligaer:</span>
+                <span class="info-label">🏆 Ligaer/Runder:</span>
                 <span class="info-value">${leaguesList}</span>
             </div>
             <div class="info-item">
