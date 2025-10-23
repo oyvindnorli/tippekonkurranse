@@ -341,6 +341,36 @@ main {
     display: none; /* Hide league info in match card, shown in time-header */
 }
 
+.team-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+.team-row .team-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.team-row .team-name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.score-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f1f5f9;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
 .match-teams {
     display: flex;
     align-items: center;
@@ -413,7 +443,7 @@ main {
     display: flex;
     gap: 8px;
     width: 100%;
-    margin: 10px 0;
+    margin-bottom: 12px;
 }
 
 .odd-btn {
@@ -421,11 +451,11 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 10px 8px;
+    gap: 2px;
+    padding: 8px 6px;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
     font-family: inherit;
@@ -449,7 +479,7 @@ main {
 }
 
 .odd-label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: #64748b;
     text-transform: uppercase;
@@ -457,7 +487,7 @@ main {
 }
 
 .odd-value {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     color: #1e293b;
 }
@@ -1821,40 +1851,39 @@ main {
 
 @media (max-width: 768px) {
     .match-card {
-        padding: 14px;
+        padding: 12px;
     }
 
-    .match-teams {
+    .team-row {
         gap: 10px;
+        padding: 6px 0;
     }
 
-    .team {
-        max-width: 140px;
+    .team-row .team-logo {
+        width: 28px;
+        height: 28px;
     }
 
-    .team-name-large {
-        font-size: 13px;
+    .team-row .team-name {
+        font-size: 14px;
     }
 
-    .team-logo-large {
-        width: 24px;
-        height: 24px;
-    }
-
-    .vs-separator {
-        font-size: 10px;
+    .score-controls {
+        gap: 6px;
+        padding: 5px 8px;
     }
 
     .odds-buttons {
         gap: 6px;
+        margin-bottom: 10px;
     }
 
     .odd-btn {
-        padding: 8px 6px;
+        padding: 6px 4px;
     }
 
     .odd-label {
-        font-size: 10px;
+        font-size: 9px;
     }
 
     .odd-value {

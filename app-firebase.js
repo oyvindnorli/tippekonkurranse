@@ -603,18 +603,6 @@ function renderMatches() {
 
                 matchCard.innerHTML = `
                     <div class="match-info">
-                        <div class="match-teams">
-                            <div class="team home">
-                                ${homeLogo ? `<img src="${homeLogo}" alt="${match.homeTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
-                                <span class="team-name-large">${match.homeTeam}</span>
-                            </div>
-                            <span class="vs-separator">vs</span>
-                            <div class="team away">
-                                ${awayLogo ? `<img src="${awayLogo}" alt="${match.awayTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
-                                <span class="team-name-large">${match.awayTeam}</span>
-                            </div>
-                        </div>
-
                         ${match.odds ? `
                             <div class="odds-buttons">
                                 <button class="odd-btn home-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''}>
@@ -632,20 +620,23 @@ function renderMatches() {
                             </div>
                         ` : ''}
 
-                        <div class="tip-input-section">
-                            <span class="tip-label">Ditt tips:</span>
-                            <div class="tip-score-input">
-                                <div class="score-input-group">
-                                    <button class="score-btn minus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''}>−</button>
-                                    <span class="score-display" id="home-score-${match.id}">${homeScore}</span>
-                                    <button class="score-btn plus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''}>+</button>
-                                </div>
-                                <span class="score-separator">-</span>
-                                <div class="score-input-group">
-                                    <button class="score-btn minus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''}>−</button>
-                                    <span class="score-display" id="away-score-${match.id}">${awayScore}</span>
-                                    <button class="score-btn plus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''}>+</button>
-                                </div>
+                        <div class="team-row">
+                            ${homeLogo ? `<img src="${homeLogo}" alt="${match.homeTeam}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                            <span class="team-name">${match.homeTeam}</span>
+                            <div class="score-controls">
+                                <button class="score-btn minus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''}>−</button>
+                                <span class="score-display" id="home-score-${match.id}">${homeScore}</span>
+                                <button class="score-btn plus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''}>+</button>
+                            </div>
+                        </div>
+
+                        <div class="team-row">
+                            ${awayLogo ? `<img src="${awayLogo}" alt="${match.awayTeam}" class="team-logo" onerror="this.style.display='none'">` : ''}
+                            <span class="team-name">${match.awayTeam}</span>
+                            <div class="score-controls">
+                                <button class="score-btn minus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''}>−</button>
+                                <span class="score-display" id="away-score-${match.id}">${awayScore}</span>
+                                <button class="score-btn plus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''}>+</button>
                             </div>
                         </div>
                     </div>
