@@ -1351,6 +1351,64 @@ header h1 {
     color: #374151;
 }
 
+/* Simple round selection */
+.round-selection-simple {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.round-option {
+    position: relative;
+}
+
+.round-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.round-option label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #ffffff;
+}
+
+.round-option input[type="radio"]:checked + label {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.round-option label:hover {
+    border-color: #cbd5e1;
+    background: #f9fafb;
+}
+
+.round-icon {
+    font-size: 24px;
+}
+
+.round-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.round-text strong {
+    font-size: 15px;
+    color: #1e293b;
+}
+
+.round-detail {
+    font-size: 13px;
+    color: #64748b;
+}
+
 .round-league-section {
     margin-bottom: 16px;
     border: 1.5px solid #e5e7eb;
