@@ -28,7 +28,7 @@ main {
 header {
     background:
         linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%),
-        url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1920&h=400&fit=crop') center/cover;
+        url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1920&h=400&fit=crop') center/cover;
     padding: 20px 0;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     position: sticky;
