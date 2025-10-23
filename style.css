@@ -1998,8 +1998,61 @@ header h1 {
 /* Welcome Section */
 .welcome-section {
     max-width: 1350px;
-    margin: 60px auto;
+    margin: 0 auto;
     padding: 0 20px;
+}
+
+.hero-banner {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 50%, #7c3aed 100%);
+    border-radius: 24px;
+    padding: 80px 40px;
+    margin: 40px 0 60px;
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.hero-content {
+    position: relative;
+    text-align: center;
+    color: white;
+}
+
+.hero-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.hero-title {
+    font-size: 48px;
+    font-weight: 900;
+    margin-bottom: 16px;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.hero-subtitle {
+    font-size: 20px;
+    opacity: 0.95;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
 }
 
 .welcome-content {
@@ -2107,6 +2160,23 @@ header h1 {
 }
 
 @media (max-width: 768px) {
+    .hero-banner {
+        padding: 60px 30px;
+        border-radius: 16px;
+    }
+
+    .hero-icon {
+        font-size: 60px;
+    }
+
+    .hero-title {
+        font-size: 32px;
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+    }
+
     .welcome-content h2 {
         font-size: 28px;
     }
