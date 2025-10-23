@@ -48,13 +48,8 @@ header h1 {
     gap: 12px;
     font-size: 13px;
     color: rgba(255, 255, 255, 0.85);
-    opacity: 0;
-    transition: opacity 0.3s ease;
     min-height: 32px; /* Match user-section height */
-}
-
-.user-section .current-user.loaded {
-    opacity: 1;
+    /* Remove opacity transition - show immediately */
 }
 
 .user-section .current-user strong {
@@ -107,12 +102,7 @@ header h1 {
     gap: 10px;
     flex-wrap: wrap;
     min-height: 42px; /* Fixed height to prevent header jump */
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.nav-buttons.loaded {
-    opacity: 1;
+    /* Remove opacity transition - show immediately when display is set to flex */
 }
 
 .nav-btn {

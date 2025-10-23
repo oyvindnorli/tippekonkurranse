@@ -223,14 +223,10 @@ function onUserLoggedIn(user) {
         signOutBtn.style.display = 'inline-block';
     }
 
-    // Show navigation buttons with transition
+    // Show navigation buttons immediately
     const mainNavButtons = document.getElementById('mainNavButtons');
     if (mainNavButtons) {
         mainNavButtons.style.display = 'flex';
-        // Add loaded class after a small delay to trigger transition
-        setTimeout(() => {
-            mainNavButtons.classList.add('loaded');
-        }, 50);
     }
 
     // Load user data
@@ -262,10 +258,7 @@ function onUserLoggedOut() {
     // Hide navigation buttons
     const mainNavButtons = document.getElementById('mainNavButtons');
     if (mainNavButtons) {
-        mainNavButtons.classList.remove('loaded');
-        setTimeout(() => {
-            mainNavButtons.style.display = 'none';
-        }, 300); // Wait for fade-out transition
+        mainNavButtons.style.display = 'none';
     }
 
     // Show welcome section, hide main content
