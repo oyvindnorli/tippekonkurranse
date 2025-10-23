@@ -1997,7 +1997,7 @@ header h1 {
 
 /* Welcome Section */
 .welcome-section {
-    max-width: 1400px;
+    max-width: 1350px;
     margin: 60px auto;
     padding: 0 20px;
 }
@@ -2030,7 +2030,7 @@ header h1 {
 }
 
 .feature-item {
-    padding: 50px 40px;
+    padding: 30px 20px;
     background: white;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
