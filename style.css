@@ -1997,7 +1997,7 @@ header h1 {
 
 /* Welcome Section */
 .welcome-section {
-    max-width: 1200px;
+    max-width: 900px;
     margin: 60px auto;
     padding: 0 20px;
 }
@@ -2024,22 +2024,17 @@ header h1 {
 
 .feature-list {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 30px;
     margin-bottom: 60px;
 }
 
 .feature-item {
-    padding: 40px 30px;
+    padding: 30px 20px;
     background: white;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    min-height: 280px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
 }
 
 .feature-item:hover {
