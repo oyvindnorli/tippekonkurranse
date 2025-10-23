@@ -603,39 +603,27 @@ function renderMatches() {
 
                 matchCard.innerHTML = `
                     <div class="match-info">
-                        ${match.odds ? `
-                            <div class="odds">
-                                <div class="odds-row">
-                                    <div class="odd-item">
-                                        <span class="odd-label">H:</span>
-                                        <span class="odd-value">${match.odds.H ? match.odds.H.toFixed(2) : '2.00'}</span>
-                                    </div>
-                                    <div class="odd-item">
-                                        <span class="odd-label">U:</span>
-                                        <span class="odd-value">${match.odds.U ? match.odds.U.toFixed(2) : '3.00'}</span>
-                                    </div>
-                                    <div class="odd-item">
-                                        <span class="odd-label">B:</span>
-                                        <span class="odd-value">${match.odds.B ? match.odds.B.toFixed(2) : '3.50'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ` : '<div class="odds"><div class="odds-row"><span style="font-size: 11px; color: #94a3b8;">Ingen odds</span></div></div>'}
-
                         <div class="match-teams">
                             <div class="team home">
-                                <span class="team-name-large">${match.homeTeam}</span>
                                 ${homeLogo ? `<img src="${homeLogo}" alt="${match.homeTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
+                                <span class="team-name-large">${match.homeTeam}</span>
                             </div>
-                            <span class="vs-separator">-</span>
+                            <span class="vs-separator">vs</span>
                             <div class="team away">
                                 ${awayLogo ? `<img src="${awayLogo}" alt="${match.awayTeam}" class="team-logo-large" onerror="this.style.display='none'">` : ''}
                                 <span class="team-name-large">${match.awayTeam}</span>
                             </div>
                         </div>
 
+                        ${match.odds ? `
+                            <div class="odds-compact">
+                                <span class="odds-label">Odds:</span>
+                                <span class="odds-values">${match.odds.H ? match.odds.H.toFixed(2) : '2.00'} · ${match.odds.U ? match.odds.U.toFixed(2) : '3.00'} · ${match.odds.B ? match.odds.B.toFixed(2) : '3.50'}</span>
+                            </div>
+                        ` : ''}
+
                         <div class="tip-input-section">
-                            <span class="tip-label">Ditt tips</span>
+                            <span class="tip-label">Ditt tips:</span>
                             <div class="tip-score-input">
                                 <div class="score-input-group">
                                     <button class="score-btn minus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''}>−</button>

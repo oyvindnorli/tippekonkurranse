@@ -309,31 +309,32 @@ main {
     font-weight: 500;
 }
 
-/* Match cards - Horizontal compact layout */
+/* Match cards - Clean vertical layout */
 .match-card {
     background: #ffffff;
-    border-radius: 8px;
-    padding: 10px 16px;
-    margin-bottom: 6px;
-    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 8px;
+    border: 1.5px solid #e5e7eb;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .match-card:hover {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
 }
 
 .match-card.has-tip {
-    background: #f0fdfa;
-    border-left: 3px solid #10b981;
+    background: linear-gradient(135deg, #f0fdf4 0%, #f0fdfa 100%);
+    border: 2px solid #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
 }
 
 .match-info {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 24px;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .league-info {
@@ -341,51 +342,52 @@ main {
 }
 
 .match-teams {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
-    width: 500px;
+    flex-wrap: wrap;
 }
 
 .team {
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
+    flex: 1;
+    max-width: 200px;
 }
 
 .team.home {
     justify-content: flex-end;
-    text-align: right;
 }
 
 .team.away {
     justify-content: flex-start;
-    text-align: left;
 }
 
 .team-logo-large {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     object-fit: contain;
     flex-shrink: 0;
 }
 
 .team-name-large {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     color: #1e293b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 180px;
 }
 
 .vs-separator {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 600;
     color: #cbd5e1;
-    margin: 0 4px;
+    margin: 0 2px;
+    text-transform: lowercase;
 }
 
 /* League badge - Compact */
@@ -406,49 +408,30 @@ main {
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
-/* Odds display - Compact horizontal box */
-.odds {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 8px 12px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    min-width: 180px;
-}
-
-.odds::before {
-    content: 'ODDS';
-    font-size: 9px;
-    font-weight: 700;
-    color: #94a3b8;
-    letter-spacing: 0.5px;
-    margin-bottom: 2px;
-}
-
-.odds-row {
-    display: flex;
-    gap: 8px;
-}
-
-.odd-item {
+/* Odds display - Ultra compact inline */
+.odds-compact {
     display: flex;
     align-items: center;
-    gap: 4px;
-    flex: 1;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #f8fafc;
+    border-radius: 6px;
+    align-self: flex-start;
 }
 
-.odd-label {
+.odds-label {
     font-size: 10px;
     font-weight: 600;
-    color: #64748b;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
-.odd-value {
-    font-size: 13px;
-    font-weight: 700;
-    color: #0f172a;
+.odds-values {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    font-family: 'Courier New', monospace;
 }
 
 /* Score input - Compact box design */
@@ -1809,38 +1792,40 @@ main {
 }
 
 @media (max-width: 768px) {
-    .match-info {
-        grid-template-columns: 1fr;
-        gap: 12px;
+    .match-card {
+        padding: 14px;
     }
 
     .match-teams {
-        width: 100%;
-        gap: 8px;
+        gap: 10px;
+    }
+
+    .team {
+        max-width: 140px;
     }
 
     .team-name-large {
-        font-size: 12px;
-        max-width: 120px;
+        font-size: 13px;
     }
 
     .team-logo-large {
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
     }
 
-    .odds {
-        min-width: auto;
+    .vs-separator {
+        font-size: 10px;
+    }
+
+    .odds-compact {
         width: 100%;
-    }
-
-    .odds-row {
-        justify-content: space-around;
+        justify-content: center;
     }
 
     .tip-input-section {
-        min-width: auto;
-        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
     }
 
     .tip-section {
