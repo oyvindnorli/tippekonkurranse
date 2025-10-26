@@ -1,5 +1,5 @@
 // Preferences Management
-let currentUser = null;
+let preferencesUser = null;
 
 // Available leagues from API-Football
 const AVAILABLE_LEAGUES = [
@@ -23,7 +23,7 @@ const DEFAULT_LEAGUES = [39, 2];
 function init() {
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
-            currentUser = user;
+            preferencesUser = user;
             document.getElementById('mainContent').style.display = 'block';
             document.getElementById('authRequired').style.display = 'none';
             document.getElementById('mainNavButtons').style.display = 'flex';
@@ -42,7 +42,7 @@ function init() {
             // Load preferences
             loadPreferences();
         } else {
-            currentUser = null;
+            preferencesUser = null;
             document.getElementById('mainContent').style.display = 'none';
             document.getElementById('authRequired').style.display = 'flex';
             document.getElementById('mainNavButtons').style.display = 'none';
@@ -57,7 +57,7 @@ async function loadPreferences() {
         document.getElementById('leaguesContainer').style.display = 'none';
 
         const db = firebase.firestore();
-        const prefsDoc = await db.collection('userPreferences').doc(currentUser.uid).get();
+        const prefsDoc = await db.collection('userPreferences').doc(preferencesUser.uid).get();
 
         let selectedLeagues = DEFAULT_LEAGUES;
         if (prefsDoc.exists && prefsDoc.data().leagues) {
@@ -140,7 +140,7 @@ async function savePreferences() {
         }
 
         const db = firebase.firestore();
-        await db.collection('userPreferences').doc(currentUser.uid).set({
+        await db.collection('userPreferences').doc(preferencesUser.uid).set({
             leagues: selectedLeagues,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
