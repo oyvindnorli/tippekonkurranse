@@ -75,7 +75,7 @@ async function loadCompetitions() {
             let competitionMatches = [];
             let start, end;
 
-            if (c.competitionType === 'round') {
+            if (c.competitionType === 'round' && c.selectedRounds) {
                 // Round-based competition - filter by rounds
                 competitionMatches = scores.filter(match => {
                     if (!match.round) return false;
@@ -108,7 +108,7 @@ async function loadCompetitions() {
                 }
 
             } else {
-                // Date-based competition
+                // Date-based competition (or round-based without selectedRounds)
                 start = new Date(c.startDate.toDate());
                 start.setHours(0, 0, 0, 0);
 
@@ -191,7 +191,7 @@ function createCompetitionCard(competition) {
     let leaguesList = '';
     let periodText = '';
 
-    if (competition.competitionType === 'round') {
+    if (competition.competitionType === 'round' && competition.selectedRounds) {
         // Round-based competition
         periodText = '🎯 Rundebasert';
 
@@ -213,7 +213,7 @@ function createCompetitionCard(competition) {
         leaguesList = parts.join(' + ');
 
     } else {
-        // Date-based competition
+        // Date-based competition (or round-based without selectedRounds)
         const startDate = competition.startDate.toDate();
         const endDate = competition.endDate.toDate();
         periodText = `${formatDate(startDate)} - ${formatDate(endDate)}`;

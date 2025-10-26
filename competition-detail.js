@@ -118,7 +118,7 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
     let leaguesText = '';
 
     // Display period/rounds based on competition type
-    if (competition.competitionType === 'round') {
+    if (competition.competitionType === 'round' && competition.selectedRounds) {
         // Round-based competition
         document.getElementById('competitionPeriod').textContent = '🎯 Rundebasert konkurranse';
 
@@ -142,7 +142,7 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
         leaguesText = parts.join(' + ');
 
     } else {
-        // Date-based competition
+        // Date-based competition (or round-based without selectedRounds)
         const startDate = competition.startDate.toDate();
         const endDate = competition.endDate.toDate();
         document.getElementById('competitionPeriod').textContent =
@@ -743,7 +743,7 @@ async function loadCompetitionMatches() {
                 1: 'World Cup'
             };
 
-            if (competition.competitionType === 'round') {
+            if (competition.competitionType === 'round' && competition.selectedRounds) {
                 console.log('🎯 Round-based competition');
                 console.log('Selected rounds:', competition.selectedRounds);
                 console.log('Total matches fetched:', allMatches.length);
@@ -786,12 +786,15 @@ async function loadCompetitionMatches() {
                     return false;
                 });
             } else {
-                // Date-based competition - filter by date range
+                // Date-based competition (or round-based without selectedRounds) - filter by date range
+                console.log('📅 Using date-based filtering');
                 const startDate = new Date(competition.startDate.toDate());
                 startDate.setHours(0, 0, 0, 0);
 
                 const endDate = new Date(competition.endDate.toDate());
                 endDate.setHours(23, 59, 59, 999);
+
+                console.log(`Date range: ${startDate} to ${endDate}`);
 
                 competitionMatches = allMatches.filter(match => {
                     const matchDate = new Date(match.commence_time || match.date);
