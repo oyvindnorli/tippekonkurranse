@@ -441,7 +441,7 @@ async function calculateParticipantPoints(userId) {
 // Fetch match results for competition
 async function fetchMatchResultsForCompetition() {
     try {
-        console.log('🔧 FIXED VERSION - fetchMatchResultsForCompetition called');
+        console.log('🔧 fetchMatchResultsForCompetition - SIMPLIFIED VERSION');
         const results = {};
 
         // Use cached matches if available, otherwise fetch from API
@@ -457,7 +457,6 @@ async function fetchMatchResultsForCompetition() {
         console.log(`📊 Total scores available: ${scores.length}`);
 
         const leagues = competition.leagues || [];
-
         const leagueNames = {
             39: 'Premier League',
             2: 'UEFA Champions League',
@@ -467,22 +466,9 @@ async function fetchMatchResultsForCompetition() {
             1: 'World Cup'
         };
 
-        // Check if competition has date range
-        let startDate, endDate;
-        if (competition.startDate && competition.endDate) {
-            startDate = new Date(competition.startDate.toDate());
-            startDate.setHours(0, 0, 0, 0);
-
-            endDate = new Date(competition.endDate.toDate());
-            endDate.setHours(23, 59, 59, 999);
-
-            console.log(`📅 Filtering by date range: ${startDate} to ${endDate}`);
-        } else {
-            console.log('⚠️ No date range - using all matches in selected leagues');
-        }
-
+        // SIMPLIFIED LOGIC: Same as loadCompetitionMatches
         scores.forEach(match => {
-            // Check if match is in one of the competition leagues
+            // Must be in one of the competition leagues
             const isInLeague = leagues.some(leagueId => {
                 const leagueName = leagueNames[leagueId];
                 return match.league && match.league.includes(leagueName);
@@ -492,19 +478,57 @@ async function fetchMatchResultsForCompetition() {
                 return;
             }
 
-            // If we have a date range, check if match is within it
-            if (startDate && endDate) {
-                const matchDate = new Date(match.commence_time || match.date);
-                if (matchDate >= startDate && matchDate <= endDate) {
-                    results[match.id] = match;
+            let includeMatch = false;
+
+            // If we have selected rounds, filter by them
+            if (competition.selectedRounds) {
+                // Premier League round filtering
+                if (competition.selectedRounds.premierLeague && match.league.includes('Premier League') && match.round) {
+                    const roundMatch = match.round.match(/(\d+)/);
+                    if (roundMatch) {
+                        const roundNumber = parseInt(roundMatch[1]);
+                        includeMatch = competition.selectedRounds.premierLeague.includes(roundNumber);
+                    }
                 }
-            } else {
-                // No date range - include all league matches with results
+
+                // Champions League round filtering
+                if (competition.selectedRounds.championsLeague && match.league.includes('Champions League') && match.round) {
+                    includeMatch = competition.selectedRounds.championsLeague.includes(match.round);
+                }
+            }
+            // If competitionType is 'round' but no selectedRounds, assume PL Round 9
+            else if (competition.competitionType === 'round' && match.league.includes('Premier League') && match.round) {
+                const roundMatch = match.round.match(/(\d+)/);
+                if (roundMatch) {
+                    const roundNumber = parseInt(roundMatch[1]);
+                    includeMatch = roundNumber === 9;
+                }
+            }
+            // For date-based, check date range
+            else if (competition.startDate && competition.endDate) {
+                const matchDate = new Date(match.commence_time || match.date);
+                const startDate = new Date(competition.startDate.toDate());
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(competition.endDate.toDate());
+                endDate.setHours(23, 59, 59, 999);
+                includeMatch = matchDate >= startDate && matchDate <= endDate;
+            }
+            // Default: include all league matches with results
+            else {
+                includeMatch = true;
+            }
+
+            if (includeMatch) {
                 results[match.id] = match;
             }
         });
 
         console.log(`📈 Total matches for leaderboard calculation: ${Object.keys(results).length}`);
+        Object.keys(results).forEach(id => {
+            const m = results[id];
+            console.log(`  - ${m.homeTeam} ${m.result.home}-${m.result.away} ${m.awayTeam}`);
+        });
+
         return results;
 
     } catch (error) {
@@ -711,6 +735,15 @@ async function loadCompetitionMatches() {
     matchesList.innerHTML = '<div class="loading-message">Laster kamper...</div>';
 
     try {
+        console.log('=== COMPETITION DEBUG INFO ===');
+        console.log('Competition Type:', competition.competitionType);
+        console.log('Competition Leagues:', competition.leagues);
+        console.log('Selected Rounds:', competition.selectedRounds);
+        console.log('Start Date:', competition.startDate);
+        console.log('End Date:', competition.endDate);
+        console.log('Cached Matches:', competition.cachedMatches?.length || 0);
+        console.log('=============================');
+
         const db = firebase.firestore();
         competitionMatches = []; // Reset global variable
 
@@ -721,32 +754,11 @@ async function loadCompetitionMatches() {
         } else {
             console.log('🔄 Fetching matches from API...');
 
-            let allMatches = [];
-
-            // For round-based competitions, we need to fetch future matches too
-            if (competition.competitionType === 'round') {
-                // Fetch both historical and future matches (last 7 days to +60 days)
-                const today = new Date();
-                const weekAgo = new Date();
-                weekAgo.setDate(today.getDate() - 7);
-                const twoMonthsLater = new Date();
-                twoMonthsLater.setDate(today.getDate() + 60);
-
-                const fromDate = weekAgo.toISOString().split('T')[0];
-                const toDate = twoMonthsLater.toISOString().split('T')[0];
-
-                console.log(`📅 Fetching matches for rounds from ${fromDate} to ${toDate}`);
-
-                // Fetch fixtures (includes future matches)
-                const fixtures = await footballApi.fetchFixtures(fromDate, toDate);
-                allMatches = fixtures;
-            } else {
-                // For date-based, fetch scores (historical/live matches)
-                allMatches = await footballApi.fetchScores();
-            }
+            // Fetch scores (completed and live matches)
+            const scores = await footballApi.fetchScores();
+            console.log(`📊 Total scores available: ${scores.length}`);
 
             const competitionLeagues = competition.leagues || [];
-
             const leagueNames = {
                 39: 'Premier League',
                 2: 'UEFA Champions League',
@@ -756,92 +768,63 @@ async function loadCompetitionMatches() {
                 1: 'World Cup'
             };
 
-            if (competition.competitionType === 'round' && competition.selectedRounds) {
-                console.log('🎯 Round-based competition');
-                console.log('Selected rounds:', competition.selectedRounds);
-                console.log('Total matches fetched:', allMatches.length);
+            // SIMPLIFIED LOGIC: Just filter by league and optionally by round
+            competitionMatches = scores.filter(match => {
+                // Must be in one of the competition leagues
+                const matchInLeague = competitionLeagues.some(leagueId => {
+                    const leagueName = leagueNames[leagueId];
+                    return match.league && match.league.includes(leagueName);
+                });
 
-                // Round-based competition - filter by selected rounds
-                competitionMatches = allMatches.filter(match => {
-                    // Check if match is in one of the competition leagues
-                    const matchInLeague = competitionLeagues.some(leagueId => {
-                        const leagueName = leagueNames[leagueId];
-                        return match.league && match.league.includes(leagueName);
-                    });
+                if (!matchInLeague) {
+                    return false;
+                }
 
-                    if (!matchInLeague || !match.round) {
-                        return false;
-                    }
-
-                    // Check Premier League rounds
-                    if (competition.selectedRounds?.premierLeague && match.league.includes('Premier League')) {
+                // If we have selected rounds, filter by them
+                if (competition.selectedRounds) {
+                    // Premier League round filtering
+                    if (competition.selectedRounds.premierLeague && match.league.includes('Premier League') && match.round) {
                         const roundMatch = match.round.match(/(\d+)/);
                         if (roundMatch) {
                             const roundNumber = parseInt(roundMatch[1]);
-                            const matches = competition.selectedRounds.premierLeague.includes(roundNumber);
-                            if (matches) {
-                                console.log(`✅ PL Match found: ${match.homeTeam} vs ${match.awayTeam}, Round ${roundNumber}`);
-                            }
-                            return matches;
+                            return competition.selectedRounds.premierLeague.includes(roundNumber);
                         }
-                        return false;
                     }
 
-                    // Check Champions League rounds
-                    if (competition.selectedRounds?.championsLeague && match.league.includes('Champions League')) {
-                        const matches = competition.selectedRounds.championsLeague.includes(match.round);
-                        if (matches) {
-                            console.log(`✅ CL Match found: ${match.homeTeam} vs ${match.awayTeam}, ${match.round}`);
-                        }
-                        return matches;
+                    // Champions League round filtering
+                    if (competition.selectedRounds.championsLeague && match.league.includes('Champions League') && match.round) {
+                        return competition.selectedRounds.championsLeague.includes(match.round);
                     }
+                }
 
-                    return false;
-                });
-            } else {
-                // Date-based competition (or round-based without selectedRounds) - filter by date range
-                console.log('📅 Using date-based filtering');
+                // If competitionType is 'round' but no selectedRounds, assume PL Round 9 for backward compatibility
+                if (competition.competitionType === 'round' && !competition.selectedRounds && match.league.includes('Premier League') && match.round) {
+                    const roundMatch = match.round.match(/(\d+)/);
+                    if (roundMatch) {
+                        const roundNumber = parseInt(roundMatch[1]);
+                        console.log(`🔍 OLD COMPETITION - Checking PL Round ${roundNumber} (looking for round 9)`);
+                        return roundNumber === 9;
+                    }
+                }
 
-                // Check if competition has date range
+                // For date-based or if no other criteria, check date range
                 if (competition.startDate && competition.endDate) {
+                    const matchDate = new Date(match.commence_time || match.date);
                     const startDate = new Date(competition.startDate.toDate());
                     startDate.setHours(0, 0, 0, 0);
-
                     const endDate = new Date(competition.endDate.toDate());
                     endDate.setHours(23, 59, 59, 999);
-
-                    console.log(`Date range: ${startDate} to ${endDate}`);
-
-                    competitionMatches = allMatches.filter(match => {
-                        const matchDate = new Date(match.commence_time || match.date);
-
-                        // Check if match starts within competition date range
-                        if (matchDate < startDate || matchDate > endDate) {
-                            return false;
-                        }
-
-                        // Check if match is in one of the competition leagues
-                        const matchInLeague = competitionLeagues.some(leagueId => {
-                            const leagueName = leagueNames[leagueId];
-                            return match.league && match.league.includes(leagueName);
-                        });
-
-                        return matchInLeague;
-                    });
-                } else {
-                    console.log('⚠️ No date range - showing all league matches');
-                    // No date range - just filter by league
-                    competitionMatches = allMatches.filter(match => {
-                        const matchInLeague = competitionLeagues.some(leagueId => {
-                            const leagueName = leagueNames[leagueId];
-                            return match.league && match.league.includes(leagueName);
-                        });
-                        return matchInLeague;
-                    });
+                    return matchDate >= startDate && matchDate <= endDate;
                 }
-            }
 
-            console.log('📥 Competition matches from API:', competitionMatches.length);
+                // Default: include all matches in the league
+                return true;
+            });
+
+            console.log('📥 Competition matches filtered:', competitionMatches.length);
+            competitionMatches.forEach(m => {
+                console.log(`  - ${m.homeTeam} vs ${m.awayTeam} (${m.round || 'no round'})`);
+            });
         }
 
         if (competitionMatches.length === 0) {
