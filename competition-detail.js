@@ -441,6 +441,7 @@ async function calculateParticipantPoints(userId) {
 // Fetch match results for competition
 async function fetchMatchResultsForCompetition() {
     try {
+        console.log('🔧 FIXED VERSION - fetchMatchResultsForCompetition called');
         const results = {};
 
         // Use cached matches if available, otherwise fetch from API
