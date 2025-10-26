@@ -744,6 +744,10 @@ async function loadCompetitionMatches() {
             };
 
             if (competition.competitionType === 'round') {
+                console.log('🎯 Round-based competition');
+                console.log('Selected rounds:', competition.selectedRounds);
+                console.log('Total matches fetched:', allMatches.length);
+
                 // Round-based competition - filter by selected rounds
                 competitionMatches = allMatches.filter(match => {
                     // Check if match is in one of the competition leagues
@@ -761,14 +765,22 @@ async function loadCompetitionMatches() {
                         const roundMatch = match.round.match(/(\d+)/);
                         if (roundMatch) {
                             const roundNumber = parseInt(roundMatch[1]);
-                            return competition.selectedRounds.premierLeague.includes(roundNumber);
+                            const matches = competition.selectedRounds.premierLeague.includes(roundNumber);
+                            if (matches) {
+                                console.log(`✅ PL Match found: ${match.homeTeam} vs ${match.awayTeam}, Round ${roundNumber}`);
+                            }
+                            return matches;
                         }
                         return false;
                     }
 
                     // Check Champions League rounds
                     if (competition.selectedRounds?.championsLeague && match.league.includes('Champions League')) {
-                        return competition.selectedRounds.championsLeague.includes(match.round);
+                        const matches = competition.selectedRounds.championsLeague.includes(match.round);
+                        if (matches) {
+                            console.log(`✅ CL Match found: ${match.homeTeam} vs ${match.awayTeam}, ${match.round}`);
+                        }
+                        return matches;
                     }
 
                     return false;
@@ -840,6 +852,13 @@ async function loadCompetitionMatches() {
 function renderCompetitionMatches(matches) {
     const matchesList = document.getElementById('competitionMatchesList');
     matchesList.innerHTML = '';
+
+    console.log(`📋 Rendering ${matches.length} competition matches`);
+
+    if (matches.length === 0) {
+        matchesList.innerHTML = '<div class="no-matches">Ingen kamper funnet for denne konkurransen</div>';
+        return;
+    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
