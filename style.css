@@ -2203,3 +2203,209 @@ header h1 {
         width: 100%;
     }
 }
+
+/* ============================================
+   PREFERENCES / SETTINGS PAGE
+   ============================================ */
+
+.preferences-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.preferences-section {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preferences-section h2 {
+    margin: 0 0 10px 0;
+    color: #1f2937;
+    font-size: 24px;
+}
+
+.preferences-description {
+    color: #6b7280;
+    margin: 0 0 30px 0;
+    font-size: 14px;
+}
+
+.leagues-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.league-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #ffffff;
+}
+
+.league-card:hover {
+    border-color: #22d3ee;
+    box-shadow: 0 2px 8px rgba(34, 211, 238, 0.1);
+}
+
+.league-card.selected {
+    border-color: #22d3ee;
+    background: #f0fdff;
+}
+
+.league-card input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.league-card label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    margin: 0;
+    font-size: 14px;
+}
+
+.league-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.league-info {
+    flex: 1;
+}
+
+.league-name {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 2px;
+}
+
+.league-country {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.league-checkmark {
+    font-size: 20px;
+    color: #22d3ee;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.league-card.selected .league-checkmark {
+    opacity: 1;
+}
+
+.preferences-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: #22d3ee;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #06b6d4;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.save-message {
+    margin-top: 15px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.save-message.success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.save-message.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.save-message.warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.auth-required {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+}
+
+.auth-required-content {
+    text-align: center;
+    max-width: 400px;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.auth-required-content h2 {
+    margin: 0 0 15px 0;
+    color: #1f2937;
+}
+
+.auth-required-content p {
+    color: #6b7280;
+    margin: 0 0 25px 0;
+}
+
+@media (max-width: 768px) {
+    .preferences-section {
+        padding: 20px;
+    }
+
+    .leagues-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .preferences-actions {
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+    }
+}
