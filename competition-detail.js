@@ -143,10 +143,14 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
 
     } else {
         // Date-based competition (or round-based without selectedRounds)
-        const startDate = competition.startDate.toDate();
-        const endDate = competition.endDate.toDate();
-        document.getElementById('competitionPeriod').textContent =
-            `${formatDate(startDate)} - ${formatDate(endDate)}`;
+        if (competition.startDate && competition.endDate) {
+            const startDate = competition.startDate.toDate();
+            const endDate = competition.endDate.toDate();
+            document.getElementById('competitionPeriod').textContent =
+                `${formatDate(startDate)} - ${formatDate(endDate)}`;
+        } else {
+            document.getElementById('competitionPeriod').textContent = 'Ingen datoer satt';
+        }
 
         leaguesText = leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ') || 'Alle ligaer';
     }
@@ -451,17 +455,6 @@ async function fetchMatchResultsForCompetition() {
 
         console.log(`📊 Total scores available: ${scores.length}`);
 
-        // Filter matches that are:
-        // 1. Within competition date range
-        // 2. In competition leagues
-        const startDate = new Date(competition.startDate.toDate());
-        // Set start date to beginning of day (00:00:00)
-        startDate.setHours(0, 0, 0, 0);
-
-        const endDate = new Date(competition.endDate.toDate());
-        // Set end date to end of day (23:59:59) to include matches starting late in the day
-        endDate.setHours(23, 59, 59, 999);
-
         const leagues = competition.leagues || [];
 
         const leagueNames = {
@@ -473,21 +466,40 @@ async function fetchMatchResultsForCompetition() {
             1: 'World Cup'
         };
 
+        // Check if competition has date range
+        let startDate, endDate;
+        if (competition.startDate && competition.endDate) {
+            startDate = new Date(competition.startDate.toDate());
+            startDate.setHours(0, 0, 0, 0);
+
+            endDate = new Date(competition.endDate.toDate());
+            endDate.setHours(23, 59, 59, 999);
+
+            console.log(`📅 Filtering by date range: ${startDate} to ${endDate}`);
+        } else {
+            console.log('⚠️ No date range - using all matches in selected leagues');
+        }
+
         scores.forEach(match => {
-            // Use commence_time (when match started) instead of date
-            const matchDate = new Date(match.commence_time || match.date);
+            // Check if match is in one of the competition leagues
+            const isInLeague = leagues.some(leagueId => {
+                const leagueName = leagueNames[leagueId];
+                return match.league && match.league.includes(leagueName);
+            });
 
-            // Check if match starts within competition date range
-            if (matchDate >= startDate && matchDate <= endDate) {
-                // Check if match is in one of the competition leagues
-                const isInLeague = leagues.some(leagueId => {
-                    const leagueName = leagueNames[leagueId];
-                    return match.league && match.league.includes(leagueName);
-                });
+            if (!isInLeague || !match.result) {
+                return;
+            }
 
-                if (isInLeague && match.result) {
+            // If we have a date range, check if match is within it
+            if (startDate && endDate) {
+                const matchDate = new Date(match.commence_time || match.date);
+                if (matchDate >= startDate && matchDate <= endDate) {
                     results[match.id] = match;
                 }
+            } else {
+                // No date range - include all league matches with results
+                results[match.id] = match;
             }
         });
 
@@ -788,30 +800,44 @@ async function loadCompetitionMatches() {
             } else {
                 // Date-based competition (or round-based without selectedRounds) - filter by date range
                 console.log('📅 Using date-based filtering');
-                const startDate = new Date(competition.startDate.toDate());
-                startDate.setHours(0, 0, 0, 0);
 
-                const endDate = new Date(competition.endDate.toDate());
-                endDate.setHours(23, 59, 59, 999);
+                // Check if competition has date range
+                if (competition.startDate && competition.endDate) {
+                    const startDate = new Date(competition.startDate.toDate());
+                    startDate.setHours(0, 0, 0, 0);
 
-                console.log(`Date range: ${startDate} to ${endDate}`);
+                    const endDate = new Date(competition.endDate.toDate());
+                    endDate.setHours(23, 59, 59, 999);
 
-                competitionMatches = allMatches.filter(match => {
-                    const matchDate = new Date(match.commence_time || match.date);
+                    console.log(`Date range: ${startDate} to ${endDate}`);
 
-                    // Check if match starts within competition date range
-                    if (matchDate < startDate || matchDate > endDate) {
-                        return false;
-                    }
+                    competitionMatches = allMatches.filter(match => {
+                        const matchDate = new Date(match.commence_time || match.date);
 
-                    // Check if match is in one of the competition leagues
-                    const matchInLeague = competitionLeagues.some(leagueId => {
-                        const leagueName = leagueNames[leagueId];
-                        return match.league && match.league.includes(leagueName);
+                        // Check if match starts within competition date range
+                        if (matchDate < startDate || matchDate > endDate) {
+                            return false;
+                        }
+
+                        // Check if match is in one of the competition leagues
+                        const matchInLeague = competitionLeagues.some(leagueId => {
+                            const leagueName = leagueNames[leagueId];
+                            return match.league && match.league.includes(leagueName);
+                        });
+
+                        return matchInLeague;
                     });
-
-                    return matchInLeague;
-                });
+                } else {
+                    console.log('⚠️ No date range - showing all league matches');
+                    // No date range - just filter by league
+                    competitionMatches = allMatches.filter(match => {
+                        const matchInLeague = competitionLeagues.some(leagueId => {
+                            const leagueName = leagueNames[leagueId];
+                            return match.league && match.league.includes(leagueName);
+                        });
+                        return matchInLeague;
+                    });
+                }
             }
 
             console.log('📥 Competition matches from API:', competitionMatches.length);

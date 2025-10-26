@@ -109,21 +109,33 @@ async function loadCompetitions() {
 
             } else {
                 // Date-based competition (or round-based without selectedRounds)
-                start = new Date(c.startDate.toDate());
-                start.setHours(0, 0, 0, 0);
+                if (c.startDate && c.endDate) {
+                    start = new Date(c.startDate.toDate());
+                    start.setHours(0, 0, 0, 0);
 
-                end = new Date(c.endDate.toDate());
-                end.setHours(23, 59, 59, 999);
+                    end = new Date(c.endDate.toDate());
+                    end.setHours(23, 59, 59, 999);
 
-                competitionMatches = scores.filter(match => {
-                    const matchDate = new Date(match.commence_time || match.date);
-                    if (matchDate < start || matchDate > end) return false;
+                    competitionMatches = scores.filter(match => {
+                        const matchDate = new Date(match.commence_time || match.date);
+                        if (matchDate < start || matchDate > end) return false;
 
-                    return leagues.some(leagueId => {
-                        const leagueName = leagueNames[leagueId];
-                        return match.league && match.league.includes(leagueName);
+                        return leagues.some(leagueId => {
+                            const leagueName = leagueNames[leagueId];
+                            return match.league && match.league.includes(leagueName);
+                        });
                     });
-                });
+                } else {
+                    // No date range - use all matches in selected leagues
+                    start = now;
+                    end = now;
+                    competitionMatches = scores.filter(match => {
+                        return leagues.some(leagueId => {
+                            const leagueName = leagueNames[leagueId];
+                            return match.league && match.league.includes(leagueName);
+                        });
+                    });
+                }
             }
 
             // Categorize competition
@@ -214,9 +226,13 @@ function createCompetitionCard(competition) {
 
     } else {
         // Date-based competition (or round-based without selectedRounds)
-        const startDate = competition.startDate.toDate();
-        const endDate = competition.endDate.toDate();
-        periodText = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+        if (competition.startDate && competition.endDate) {
+            const startDate = competition.startDate.toDate();
+            const endDate = competition.endDate.toDate();
+            periodText = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+        } else {
+            periodText = 'Ingen datoer satt';
+        }
 
         leaguesList = Array.isArray(leagues) && typeof leagues[0] === 'number'
             ? leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ')
