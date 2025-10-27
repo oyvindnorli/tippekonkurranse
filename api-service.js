@@ -147,21 +147,37 @@ class FootballApiService {
             });
 
             if (!response.ok) {
-                console.warn(`Failed to fetch league odds: ${response.status}`);
+                console.error(`❌ Failed to fetch league odds: ${response.status} ${response.statusText}`);
+                if (response.status === 429) {
+                    console.error('⚠️ API RATE LIMIT EXCEEDED! You have used up your daily quota.');
+                }
                 return {};
             }
 
             const data = await response.json();
+
+            // Log API usage
+            if (data.requests) {
+                console.log(`📊 API Usage: ${data.requests.current}/${data.requests.limit_day} requests used today`);
+            }
+
             const oddsMap = {};
 
             if (data.response && data.response.length > 0) {
-                console.log(`✅ Found odds for ${data.response.length} fixtures in league ${leagueId}`);
+                console.log(`✅ Found odds for ${data.response.length} fixtures in league ${leagueId} on ${date}`);
 
                 data.response.forEach(oddsData => {
                     const fixtureId = oddsData.fixture.id;
                     const odds = this.transformOddsData(oddsData);
-                    oddsMap[fixtureId] = odds;
+                    if (odds) {
+                        oddsMap[fixtureId] = odds;
+                        console.log(`  💰 Fixture ${fixtureId}: H:${odds.H} U:${odds.U} B:${odds.B}`);
+                    } else {
+                        console.warn(`  ⚠️ No odds available for fixture ${fixtureId}`);
+                    }
                 });
+            } else {
+                console.warn(`⚠️ No odds data returned for league ${leagueId} on ${date}`);
             }
 
             return oddsMap;

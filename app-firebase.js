@@ -538,6 +538,12 @@ function init() {
             API_CONFIG.LEAGUES = Array.from(selectedLeagues);
             console.log('🔧 Updated API_CONFIG.LEAGUES:', API_CONFIG.LEAGUES);
 
+            // Clear API cache to fetch fresh data with new leagues
+            if (footballApi && footballApi.clearCache) {
+                footballApi.clearCache();
+                console.log('🗑️ Cleared API cache to fetch fresh data');
+            }
+
             // Show main content
             if (welcomeSection) {
                 welcomeSection.style.display = 'none';
