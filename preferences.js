@@ -21,6 +21,9 @@ const DEFAULT_LEAGUES = [39, 2];
 
 // Initialize
 function init() {
+    // Initialize Firebase first
+    initializeFirebase();
+
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
             preferencesUser = user;
