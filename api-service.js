@@ -681,6 +681,30 @@ class FootballApiService {
     }
 
     /**
+     * Format date range for round display
+     */
+    formatDateRange(startDate, endDate) {
+        const options = { day: 'numeric', month: 'short' };
+        const start = startDate.toLocaleDateString('no-NO', options);
+        const end = endDate.toLocaleDateString('no-NO', options);
+
+        // Same day
+        if (startDate.toDateString() === endDate.toDateString()) {
+            return start;
+        }
+
+        // Same month
+        if (startDate.getMonth() === endDate.getMonth()) {
+            const dayOptions = { day: 'numeric' };
+            const startDay = startDate.toLocaleDateString('no-NO', dayOptions);
+            return `${startDay}-${end}`;
+        }
+
+        // Different months
+        return `${start} - ${end}`;
+    }
+
+    /**
      * Fetch available rounds for Premier League and Champions League
      * Returns upcoming and recent rounds for competition creation
      */
@@ -710,8 +734,8 @@ class FootballApiService {
             const fromDate = today.toISOString().split('T')[0];
             const toDate = twoMonthsLater.toISOString().split('T')[0];
 
-            const plRounds = new Set();
-            const clRounds = new Set();
+            const plRoundsMap = new Map(); // Map<roundNumber, { fixtures: [...] }>
+            const clRoundsMap = new Map(); // Map<roundString, { fixtures: [...] }>
 
             // Fetch fixtures for both leagues
             for (const leagueId of API_CONFIG.LEAGUES) {
@@ -738,43 +762,63 @@ class FootballApiService {
                             // Premier League - extract round number
                             const match = round.match(/(\d+)/);
                             if (match) {
-                                plRounds.add(parseInt(match[1]));
+                                const roundNum = parseInt(match[1]);
+                                if (!plRoundsMap.has(roundNum)) {
+                                    plRoundsMap.set(roundNum, { fixtures: [] });
+                                }
+                                plRoundsMap.get(roundNum).fixtures.push(fixture);
                             }
                         } else if (leagueId === 2) {
                             // Champions League - store full round string
-                            clRounds.add(round);
+                            if (!clRoundsMap.has(round)) {
+                                clRoundsMap.set(round, { fixtures: [] });
+                            }
+                            clRoundsMap.get(round).fixtures.push(fixture);
                         }
                     });
                 }
             }
 
-            // Convert to sorted arrays
-            const plRoundsArray = Array.from(plRounds)
-                .sort((a, b) => a - b)
+            // Convert to sorted arrays with date ranges
+            const plRoundsArray = Array.from(plRoundsMap.entries())
+                .sort((a, b) => a[0] - b[0])
                 .slice(0, 10) // Limit to next 10 rounds
-                .map(num => ({
-                    value: num,
-                    label: `Runde ${num}`,
-                    status: 'upcoming'
-                }));
+                .map(([num, data]) => {
+                    // Find earliest and latest fixture dates
+                    const dates = data.fixtures.map(f => new Date(f.fixture.date));
+                    const startDate = new Date(Math.min(...dates));
+                    const endDate = new Date(Math.max(...dates));
 
-            const clRoundsArray = Array.from(clRounds)
-                .sort()
+                    return {
+                        value: num,
+                        label: `Runde ${num}`,
+                        status: 'upcoming',
+                        startDate: startDate,
+                        endDate: endDate,
+                        dateRange: this.formatDateRange(startDate, endDate)
+                    };
+                });
+
+            const clRoundsArray = Array.from(clRoundsMap.entries())
+                .sort((a, b) => a[0].localeCompare(b[0]))
                 .slice(0, 10)
-                .map(round => {
+                .map(([round, data]) => {
+                    // Find earliest and latest fixture dates
+                    const dates = data.fixtures.map(f => new Date(f.fixture.date));
+                    const startDate = new Date(Math.min(...dates));
+                    const endDate = new Date(Math.max(...dates));
+
                     // Extract matchday number from "League Stage - Matchday 4"
                     const match = round.match(/Matchday (\d+)/);
-                    if (match) {
-                        return {
-                            value: round,
-                            label: `Runde ${match[1]}`,
-                            status: 'upcoming'
-                        };
-                    }
+                    const label = match ? `Runde ${match[1]}` : round;
+
                     return {
                         value: round,
-                        label: round,
-                        status: 'upcoming'
+                        label: label,
+                        status: 'upcoming',
+                        startDate: startDate,
+                        endDate: endDate,
+                        dateRange: this.formatDateRange(startDate, endDate)
                     };
                 });
 

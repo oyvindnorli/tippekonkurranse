@@ -319,7 +319,7 @@ async function loadNextRounds() {
         const plNextRound = document.getElementById('plNextRound');
         if (availableRounds.premierLeague.length > 0) {
             const nextRound = availableRounds.premierLeague[0];
-            plNextRound.textContent = nextRound.label;
+            plNextRound.innerHTML = `${nextRound.label}<br><span class="round-date">${nextRound.dateRange}</span>`;
         } else {
             plNextRound.textContent = 'Ingen kommende runder';
         }
@@ -328,7 +328,7 @@ async function loadNextRounds() {
         const clNextRound = document.getElementById('clNextRound');
         if (availableRounds.championsLeague.length > 0) {
             const nextRound = availableRounds.championsLeague[0];
-            clNextRound.textContent = nextRound.label;
+            clNextRound.innerHTML = `${nextRound.label}<br><span class="round-date">${nextRound.dateRange}</span>`;
         } else {
             clNextRound.textContent = 'Ingen kommende runder';
         }
