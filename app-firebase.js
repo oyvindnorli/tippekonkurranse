@@ -202,7 +202,7 @@ function calculatePlayerScore(tips) {
         // Skip if odds are missing
         if (!tip.odds && !match.odds) {
             console.warn(`Skipping points calculation for match without odds: ${match.homeTeam} vs ${match.awayTeam}`);
-            continue;
+            return;
         }
 
         // Add odds to tip if missing (for mock players)
