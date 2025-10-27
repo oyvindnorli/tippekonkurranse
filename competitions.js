@@ -4,16 +4,37 @@ let availableRounds = null; // Store fetched rounds
 let selectedPLRounds = new Set(); // Selected Premier League rounds
 let selectedCLRounds = new Set(); // Selected Champions League rounds
 
+// Load user's league preferences from Firestore
+async function loadUserLeaguePreferences(userId) {
+    try {
+        const db = firebase.firestore();
+        const prefsDoc = await db.collection('userPreferences').doc(userId).get();
+
+        if (prefsDoc.exists && prefsDoc.data().leagues) {
+            const leagueArray = prefsDoc.data().leagues;
+            console.log('📂 Loaded user league preferences for competitions:', leagueArray);
+            return new Set(leagueArray);
+        }
+    } catch (error) {
+        console.warn('⚠️ Could not load league preferences:', error);
+    }
+    return new Set([39, 2]); // Default
+}
+
 // Initialize page
 function init() {
     // Initialize Firebase
     initializeFirebase();
 
     // Wait for auth state to be ready
-    firebase.auth().onAuthStateChanged((user) => {
+    firebase.auth().onAuthStateChanged(async (user) => {
         const loadingMessage = document.getElementById('loadingMessage');
 
         if (user) {
+            // Load user's league preferences first
+            selectedLeagues = await loadUserLeaguePreferences(user.uid);
+            console.log('✅ User preferences loaded for competitions:', Array.from(selectedLeagues));
+
             loadCompetitions();
         } else {
             // Hide loading message when not logged in

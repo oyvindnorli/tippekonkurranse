@@ -5,34 +5,58 @@ let allMatches = []; // Store all matches for filtering
 // User's tips - loaded from Firebase
 let userTips = [];
 
-// LocalStorage functions for league preferences
-function loadSelectedLeagues() {
+// Load league preferences from Firestore (user preferences)
+async function loadSelectedLeagues(userId) {
     try {
-        const saved = localStorage.getItem('selectedLeagues');
-        if (saved) {
-            const leagueArray = JSON.parse(saved);
-            console.log('📂 Loaded saved league preferences:', leagueArray);
+        if (!userId) {
+            console.log('⚠️ No user logged in, using default leagues');
+            return new Set([39, 2]); // Default: Premier League and Champions League
+        }
+
+        const db = firebase.firestore();
+        const prefsDoc = await db.collection('userPreferences').doc(userId).get();
+
+        if (prefsDoc.exists && prefsDoc.data().leagues) {
+            const leagueArray = prefsDoc.data().leagues;
+            console.log('📂 Loaded user league preferences from Firestore:', leagueArray);
             return new Set(leagueArray);
+        } else {
+            console.log('📂 No preferences found, using defaults');
+            return new Set([39, 2]); // Default: Premier League and Champions League
         }
     } catch (error) {
         console.warn('⚠️ Could not load league preferences:', error);
+        return new Set([39, 2]); // Default on error
     }
-    // Default: Premier League and Champions League
-    return new Set([39, 2]);
 }
 
-function saveSelectedLeagues() {
+// Save league preferences to Firestore
+async function saveSelectedLeagues() {
     try {
+        if (!currentUser) {
+            console.log('⚠️ No user logged in, cannot save preferences');
+            return;
+        }
+
         const leagueArray = Array.from(selectedLeagues);
-        localStorage.setItem('selectedLeagues', JSON.stringify(leagueArray));
-        console.log('💾 Saved league preferences:', leagueArray);
+        const db = firebase.firestore();
+
+        await db.collection('userPreferences').doc(currentUser.uid).set({
+            leagues: leagueArray,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        console.log('💾 Saved league preferences to Firestore:', leagueArray);
+
+        // Also update API_CONFIG.LEAGUES for immediate effect
+        API_CONFIG.LEAGUES = leagueArray;
     } catch (error) {
         console.warn('⚠️ Could not save league preferences:', error);
     }
 }
 
-// Selected leagues for filtering
-let selectedLeagues = loadSelectedLeagues();
+// Selected leagues for filtering (will be updated when user logs in)
+let selectedLeagues = new Set([39, 2]); // Default initially
 
 // Load user tips from Firebase
 async function loadUserTips() {
@@ -426,18 +450,32 @@ function init() {
     initializeLeagueCheckboxes();
 
     // Wait for auth state before loading matches
-    firebase.auth().onAuthStateChanged((user) => {
+    firebase.auth().onAuthStateChanged(async (user) => {
         const welcomeSection = document.getElementById('welcomeSection');
         const mainContent = document.getElementById('mainContent');
 
         if (user) {
-            // User is signed in, show main content and load matches
+            // User is signed in, load preferences first
+            console.log('👤 User logged in, loading preferences...');
+            selectedLeagues = await loadSelectedLeagues(user.uid);
+            console.log('✅ User preferences loaded, selected leagues:', Array.from(selectedLeagues));
+
+            // Update API_CONFIG.LEAGUES to use user's preferred leagues
+            API_CONFIG.LEAGUES = Array.from(selectedLeagues);
+            console.log('🔧 Updated API_CONFIG.LEAGUES:', API_CONFIG.LEAGUES);
+
+            // Update league checkboxes to reflect user preferences
+            initializeLeagueCheckboxes();
+
+            // Show main content
             if (welcomeSection) {
                 welcomeSection.style.display = 'none';
             }
             if (mainContent) {
                 mainContent.style.display = 'block';
             }
+
+            // Load matches with user's preferred leagues
             loadMatches();
         } else {
             // User is not signed in, show welcome section
