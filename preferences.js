@@ -17,6 +17,8 @@ const AVAILABLE_LEAGUES = [
 
     // English Cups & Lower Leagues
     { id: 40, name: 'Championship', country: 'England', icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    { id: 41, name: 'League One', country: 'England', icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+    { id: 42, name: 'League Two', country: 'England', icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
     { id: 45, name: 'FA Cup', country: 'England', icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
     { id: 48, name: 'League Cup', country: 'England', icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
 
