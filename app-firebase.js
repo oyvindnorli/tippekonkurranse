@@ -255,14 +255,106 @@ function filterLeagues() {
 
 // Apply league filter to matches
 function applyLeagueFilter() {
-    // Get league name from league ID mapping
+    // Get league name from league ID mapping (comprehensive list)
     const leagueNames = {
+        1: 'World Cup',
+        4: 'Euro Championship',
+        9: 'Copa America',
+        15: 'FIFA Club World Cup',
+        2: 'Champions League',
+        3: 'Europa League',
+        848: 'Conference League',
+        960: 'UEFA Nations League',
+        531: 'UEFA Super Cup',
         39: 'Premier League',
-        2: 'UEFA Champions League',
+        40: 'Championship',
+        41: 'League One',
+        42: 'League Two',
+        45: 'FA Cup',
+        48: 'League Cup',
+        46: 'FA Community Shield',
         140: 'La Liga',
+        141: 'La Liga 2',
+        143: 'Copa del Rey',
+        556: 'Super Cup',
         78: 'Bundesliga',
+        79: '2. Bundesliga',
+        80: '3. Liga',
+        81: 'DFB Pokal',
+        529: 'Super Cup',
         135: 'Serie A',
-        1: 'World Cup'
+        136: 'Serie B',
+        137: 'Coppa Italia',
+        547: 'Super Cup',
+        61: 'Ligue 1',
+        62: 'Ligue 2',
+        66: 'National',
+        65: 'Coupe de France',
+        526: 'Coupe de la Ligue',
+        527: 'Trophée des Champions',
+        88: 'Eredivisie',
+        89: 'Eerste Divisie',
+        90: 'KNVB Beker',
+        94: 'Primeira Liga',
+        95: 'Segunda Liga',
+        96: 'Taça de Portugal',
+        550: 'Super Cup',
+        144: 'Jupiler Pro League',
+        145: 'Challenger Pro League',
+        203: 'Süper Lig',
+        204: '1. Lig',
+        206: 'Turkish Cup',
+        197: 'Super League',
+        198: 'Super League 2',
+        235: 'Premier League',
+        236: 'FNL',
+        333: 'Premier League',
+        218: 'Bundesliga',
+        207: 'Super League',
+        208: 'Challenge League',
+        113: 'Allsvenskan',
+        114: 'Superettan',
+        103: 'Eliteserien',
+        104: 'OBOS-ligaen',
+        105: 'NM Cupen',
+        119: 'Superliga',
+        120: '1. Division',
+        244: 'Veikkausliiga',
+        106: 'Ekstraklasa',
+        345: 'Czech Liga',
+        271: 'NB I',
+        283: 'Liga I',
+        172: 'First League',
+        289: 'SuperLiga',
+        210: '1. HNL',
+        179: 'Premiership',
+        180: 'Championship',
+        357: 'Premier Division',
+        253: 'MLS',
+        254: 'USL Championship',
+        262: 'Liga MX',
+        263: 'Liga de Expansión MX',
+        71: 'Série A',
+        72: 'Série B',
+        73: 'Copa do Brasil',
+        128: 'Liga Profesional',
+        129: 'Copa Argentina',
+        265: 'Primera División',
+        239: 'Primera A',
+        13: 'Copa Libertadores',
+        11: 'Copa Sudamericana',
+        98: 'J1 League',
+        99: 'J2 League',
+        292: 'K League 1',
+        17: 'Super League',
+        188: 'A-League',
+        307: 'Pro League',
+        301: 'Pro League',
+        305: 'Stars League',
+        233: 'Premier League',
+        288: 'Premier Division',
+        12: 'CAF Champions League',
+        14: 'CAF Confederation Cup'
     };
 
     if (selectedLeagues.size === 0) {
@@ -280,6 +372,11 @@ function applyLeagueFilter() {
             const matchLeague = match.league;
             for (const leagueId of selectedLeagues) {
                 const leagueName = leagueNames[leagueId];
+                // Skip if league name not found in mapping
+                if (!leagueName) {
+                    console.warn(`⚠️ League ID ${leagueId} not found in leagueNames mapping`);
+                    continue;
+                }
                 if (matchLeague && (matchLeague.includes(leagueName) ||
                     leagueName.includes(matchLeague) ||
                     matchLeague.toLowerCase().includes(leagueName.toLowerCase()))) {
