@@ -204,10 +204,10 @@ class FootballApiService {
             }
 
             console.warn(`⚠️ No odds found for fixture ${fixtureId}`);
-            return { H: 2.0, U: 3.0, B: 3.5 }; // Default odds
+            return null; // No odds available
         } catch (error) {
             console.error(`❌ Error fetching odds for fixture ${fixtureId}:`, error);
-            return { H: 2.0, U: 3.0, B: 3.5 }; // Default odds
+            return null; // No odds available
         }
     }
 
@@ -281,7 +281,7 @@ class FootballApiService {
                 venue: fixture.fixture.venue.name,
                 city: fixture.fixture.venue.city,
                 result: null, // No result yet for upcoming matches
-                odds: { H: 2.0, U: 3.0, B: 3.5 } // Default odds (will be fetched separately if enabled)
+                odds: null // Odds will be fetched separately
             };
         });
     }
@@ -292,28 +292,33 @@ class FootballApiService {
     transformOddsData(apiOdds) {
         try {
             if (!apiOdds.bookmakers || apiOdds.bookmakers.length === 0) {
-                return { H: 2.0, U: 3.0, B: 3.5 }; // Default odds
+                return null; // No odds available
             }
 
             const bookmaker = apiOdds.bookmakers[0];
             const matchWinnerBet = bookmaker.bets.find(bet => bet.name === 'Match Winner');
 
             if (!matchWinnerBet || !matchWinnerBet.values) {
-                return { H: 2.0, U: 3.0, B: 3.5 };
+                return null; // No odds available
             }
 
             const homeOdds = matchWinnerBet.values.find(v => v.value === 'Home');
             const drawOdds = matchWinnerBet.values.find(v => v.value === 'Draw');
             const awayOdds = matchWinnerBet.values.find(v => v.value === 'Away');
 
+            // Only return odds if all three values are present
+            if (!homeOdds || !drawOdds || !awayOdds) {
+                return null;
+            }
+
             return {
-                H: homeOdds ? parseFloat(homeOdds.odd) : 2.0,
-                U: drawOdds ? parseFloat(drawOdds.odd) : 3.0,
-                B: awayOdds ? parseFloat(awayOdds.odd) : 3.5
+                H: parseFloat(homeOdds.odd),
+                U: parseFloat(drawOdds.odd),
+                B: parseFloat(awayOdds.odd)
             };
         } catch (error) {
             console.error('Error transforming odds data:', error);
-            return { H: 2.0, U: 3.0, B: 3.5 };
+            return null; // No odds available
         }
     }
 
@@ -511,8 +516,8 @@ class FootballApiService {
                 try {
                     fixture.odds = await this.fetchOddsForFixture(fixture.id);
 
-                    if (fixture.odds.H === 2.0 && fixture.odds.U === 3.0 && fixture.odds.B === 3.5) {
-                        console.warn(`⚠️ Using default odds for ${fixture.homeTeam} vs ${fixture.awayTeam}`);
+                    if (!fixture.odds) {
+                        console.warn(`⚠️ No odds available for ${fixture.homeTeam} vs ${fixture.awayTeam}`);
                         defaultCount++;
                     } else {
                         console.log(`✅ Odds for ${fixture.homeTeam} vs ${fixture.awayTeam}: H:${fixture.odds.H} U:${fixture.odds.U} B:${fixture.odds.B}`);
@@ -522,13 +527,13 @@ class FootballApiService {
                     await new Promise(resolve => setTimeout(resolve, 500));
                 } catch (error) {
                     console.error(`❌ Failed to fetch odds for ${fixture.homeTeam} vs ${fixture.awayTeam}:`, error);
-                    fixture.odds = { H: 2.0, U: 3.0, B: 3.5 };
+                    fixture.odds = null;
                     defaultCount++;
                 }
             }
         }
 
-        console.log(`📊 Odds fetch summary: ${successCount} with real odds, ${defaultCount} with default odds`);
+        console.log(`📊 Odds fetch summary: ${successCount} with odds, ${defaultCount} without odds`);
         if (defaultCount > 0) {
             console.warn(`⚠️ ${defaultCount} matches are missing odds from the API. This is normal for some leagues/bookmakers.`);
         }

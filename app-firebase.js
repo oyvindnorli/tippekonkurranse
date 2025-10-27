@@ -199,16 +199,17 @@ function calculatePlayerScore(tips) {
         const match = matches.find(m => String(m.id) === String(tip.matchId));
         if (!match) return;
 
+        // Skip if odds are missing
+        if (!tip.odds && !match.odds) {
+            console.warn(`Skipping points calculation for match without odds: ${match.homeTeam} vs ${match.awayTeam}`);
+            continue;
+        }
+
         // Add odds to tip if missing (for mock players)
         const tipWithOdds = {
             ...tip,
-            odds: tip.odds || match.odds || { H: 2.0, U: 3.0, B: 3.5 }
+            odds: tip.odds || match.odds
         };
-
-        // Ensure odds is an object with H, U, B properties
-        if (!tipWithOdds.odds || typeof tipWithOdds.odds !== 'object') {
-            tipWithOdds.odds = { H: 2.0, U: 3.0, B: 3.5 };
-        }
 
         totalScore += calculatePoints(tipWithOdds, match);
     });
@@ -681,15 +682,15 @@ function renderMatches() {
                             <div class="odds-buttons">
                                 <button class="odd-btn home-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''}>
                                     <span class="odd-label">H</span>
-                                    <span class="odd-value">${match.odds.H ? match.odds.H.toFixed(2) : '2.00'}</span>
+                                    <span class="odd-value">${match.odds.H.toFixed(2)}</span>
                                 </button>
                                 <button class="odd-btn draw-btn" data-match-id="${match.id}" data-type="draw" ${match.result ? 'disabled' : ''}>
                                     <span class="odd-label">U</span>
-                                    <span class="odd-value">${match.odds.U ? match.odds.U.toFixed(2) : '3.00'}</span>
+                                    <span class="odd-value">${match.odds.U.toFixed(2)}</span>
                                 </button>
                                 <button class="odd-btn away-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''}>
                                     <span class="odd-label">B</span>
-                                    <span class="odd-value">${match.odds.B ? match.odds.B.toFixed(2) : '3.50'}</span>
+                                    <span class="odd-value">${match.odds.B.toFixed(2)}</span>
                                 </button>
                             </div>
                         ` : ''}
