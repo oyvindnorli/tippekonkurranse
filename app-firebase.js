@@ -216,42 +216,7 @@ function calculatePlayerScore(tips) {
 }
 
 // Leaderboard is now on separate page (leaderboard.html)
-
-// Toggle all leagues checkbox
-function toggleAllLeagues(checkbox) {
-    const leagueCheckboxes = document.querySelectorAll('.league-filter-checkbox');
-    leagueCheckboxes.forEach(cb => {
-        cb.checked = checkbox.checked;
-    });
-    filterLeagues();
-}
-
-// Filter leagues based on checkboxes
-function filterLeagues() {
-    const leagueCheckboxes = document.querySelectorAll('.league-filter-checkbox');
-    const allCheckbox = document.getElementById('league-all');
-
-    selectedLeagues.clear();
-    let allChecked = true;
-
-    leagueCheckboxes.forEach(cb => {
-        if (cb.checked) {
-            const leagueId = parseInt(cb.id.replace('league-', ''));
-            selectedLeagues.add(leagueId);
-        } else {
-            allChecked = false;
-        }
-    });
-
-    // Update "All" checkbox state
-    allCheckbox.checked = allChecked;
-
-    // Save preferences to localStorage
-    saveSelectedLeagues();
-
-    // Filter and render matches
-    applyLeagueFilter();
-}
+// League selection is now done via preferences page
 
 // Apply league filter to matches
 function applyLeagueFilter() {
@@ -510,28 +475,7 @@ async function loadMatches() {
     }
 }
 
-// Initialize UI checkboxes based on saved preferences
-function initializeLeagueCheckboxes() {
-    const leagueCheckboxes = document.querySelectorAll('.league-filter-checkbox');
-    const allCheckbox = document.getElementById('league-all');
-
-    let allChecked = true;
-
-    leagueCheckboxes.forEach(cb => {
-        const leagueId = parseInt(cb.id.replace('league-', ''));
-        cb.checked = selectedLeagues.has(leagueId);
-
-        if (!cb.checked) {
-            allChecked = false;
-        }
-    });
-
-    if (allCheckbox) {
-        allCheckbox.checked = allChecked;
-    }
-
-    console.log('✅ Initialized league checkboxes from saved preferences');
-}
+// League checkboxes removed - preferences are now managed via preferences page
 
 // Initialize the app
 function init() {
@@ -543,8 +487,6 @@ function init() {
 
     // Initialize Firebase first
     initializeFirebase();
-    // Initialize league checkboxes from saved preferences
-    initializeLeagueCheckboxes();
 
     // Wait for auth state before loading matches
     firebase.auth().onAuthStateChanged(async (user) => {
@@ -560,9 +502,6 @@ function init() {
             // Update API_CONFIG.LEAGUES to use user's preferred leagues
             API_CONFIG.LEAGUES = Array.from(selectedLeagues);
             console.log('🔧 Updated API_CONFIG.LEAGUES:', API_CONFIG.LEAGUES);
-
-            // Update league checkboxes to reflect user preferences
-            initializeLeagueCheckboxes();
 
             // Show main content
             if (welcomeSection) {
