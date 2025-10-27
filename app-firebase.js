@@ -1,9 +1,13 @@
 // Match data - will be loaded from API or mock data
 let matches = [];
 let allMatches = []; // Store all matches for filtering
+let leagueFilteredMatches = []; // Matches after league filter, before date filter
 
 // User's tips - loaded from Firebase
 let userTips = [];
+
+// Date navigation
+let selectedDate = null; // null = show all dates, otherwise show only this date
 
 // Load league preferences from Firestore (user preferences)
 async function loadSelectedLeagues(userId) {
@@ -324,16 +328,9 @@ function applyLeagueFilter() {
     };
 
     if (selectedLeagues.size === 0) {
-        matches = [];
+        leagueFilteredMatches = [];
     } else {
-        const now = new Date();
-        matches = allMatches.filter(match => {
-            // Filter out matches that have already started
-            const matchDate = new Date(match.commence_time || match.date);
-            if (matchDate < now) {
-                return false; // Skip past matches
-            }
-
+        leagueFilteredMatches = allMatches.filter(match => {
             // Check if match league name matches any selected league
             const matchLeague = match.league;
             for (const leagueId of selectedLeagues) {
@@ -353,7 +350,10 @@ function applyLeagueFilter() {
         });
     }
 
-    renderMatches();
+    console.log(`🏆 League filter: ${leagueFilteredMatches.length} matches after filtering`);
+
+    // After applying league filter, apply date filter
+    applyDateFilter();
 }
 
 // Cache matches in localStorage for faster loading
@@ -513,6 +513,9 @@ function init() {
 
     // Initialize Firebase first
     initializeFirebase();
+
+    // Initialize date navigation
+    initDateNavigation();
 
     // Wait for auth state before loading matches
     firebase.auth().onAuthStateChanged(async (user) => {
@@ -948,11 +951,129 @@ function simulateResult(matchId) {
     updateTotalScore();
 }
 
+// Date navigation functions
+function changeDay(offset) {
+    if (!selectedDate) {
+        // If no date selected, start from today
+        selectedDate = new Date();
+        selectedDate.setHours(0, 0, 0, 0);
+    }
+
+    selectedDate.setDate(selectedDate.getDate() + offset);
+    updateDateDisplay();
+    applyDateFilter();
+}
+
+function showDatePicker() {
+    const modal = document.getElementById('datePickerModal');
+    const picker = document.getElementById('datePicker');
+
+    // Set current value
+    const dateToShow = selectedDate || new Date();
+    picker.value = dateToShow.toISOString().split('T')[0];
+
+    modal.style.display = 'block';
+}
+
+function closeDatePicker() {
+    const modal = document.getElementById('datePickerModal');
+    modal.style.display = 'none';
+}
+
+function selectDate() {
+    const picker = document.getElementById('datePicker');
+    selectedDate = new Date(picker.value);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    closeDatePicker();
+    updateDateDisplay();
+    applyDateFilter();
+}
+
+function selectToday() {
+    selectedDate = new Date();
+    selectedDate.setHours(0, 0, 0, 0);
+
+    closeDatePicker();
+    updateDateDisplay();
+    applyDateFilter();
+}
+
+function updateDateDisplay() {
+    const dateLabel = document.getElementById('dateLabel');
+
+    if (!selectedDate) {
+        dateLabel.textContent = 'Alle dager';
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // Check if it's today, tomorrow, or yesterday
+    if (selectedDate.getTime() === today.getTime()) {
+        dateLabel.textContent = 'I dag';
+    } else if (selectedDate.getTime() === tomorrow.getTime()) {
+        dateLabel.textContent = 'I morgen';
+    } else if (selectedDate.getTime() === yesterday.getTime()) {
+        dateLabel.textContent = 'I går';
+    } else {
+        // Format: "Fredag 1. nov"
+        const options = { weekday: 'long', day: 'numeric', month: 'short' };
+        const formatted = selectedDate.toLocaleDateString('no-NO', options);
+        dateLabel.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    }
+}
+
+function applyDateFilter() {
+    // Start with league-filtered matches
+    let filteredMatches = [...leagueFilteredMatches];
+
+    if (selectedDate) {
+        // Filter to show only matches on selected date
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        filteredMatches = filteredMatches.filter(match => {
+            const matchDate = new Date(match.commence_time || match.date || match.timestamp * 1000);
+            return matchDate >= startOfDay && matchDate <= endOfDay;
+        });
+
+        console.log(`📅 Date filter: ${filteredMatches.length} matches for ${selectedDate.toLocaleDateString('no-NO')}`);
+    } else {
+        console.log(`📅 Date filter: showing all dates (${filteredMatches.length} matches)`);
+    }
+
+    matches = filteredMatches;
+    renderMatches();
+}
+
+// Initialize date display on page load
+function initDateNavigation() {
+    selectedDate = new Date();
+    selectedDate.setHours(0, 0, 0, 0);
+    updateDateDisplay();
+}
+
 // Close auth modal when clicking outside of it (but not on modal content)
 window.onclick = function(event) {
     const modal = document.getElementById('authModal');
     if (event.target === modal) {
         closeAuthModal();
+    }
+
+    const dateModal = document.getElementById('datePickerModal');
+    if (event.target === dateModal) {
+        closeDatePicker();
     }
 };
 

@@ -111,6 +111,33 @@
             <div id="mainContent" style="display: none;">
                 <section class="matches-section">
                     <h2>Legg inn tips</h2>
+
+                    <!-- Date Navigation -->
+                    <div class="date-navigation">
+                        <button class="date-nav-btn" id="prevDayBtn" onclick="changeDay(-1)">
+                            <span>‹</span>
+                        </button>
+                        <div class="date-display" id="currentDateDisplay" onclick="showDatePicker()">
+                            <span id="dateLabel">I dag</span>
+                        </div>
+                        <button class="date-nav-btn" id="nextDayBtn" onclick="changeDay(1)">
+                            <span>›</span>
+                        </button>
+                        <button class="calendar-btn" onclick="showDatePicker()">
+                            <span>📅</span>
+                        </button>
+                    </div>
+
+                    <!-- Date Picker Modal -->
+                    <div id="datePickerModal" class="modal" style="display: none;">
+                        <div class="modal-content modal-small">
+                            <span class="close" onclick="closeDatePicker()">&times;</span>
+                            <h3>Velg dato</h3>
+                            <input type="date" id="datePicker" onchange="selectDate()">
+                            <button onclick="selectToday()" class="btn-secondary">I dag</button>
+                        </div>
+                    </div>
+
                     <div id="loadingMessage" class="loading-message">Laster kamper...</div>
                     <div id="errorMessage" class="error-message" style="display: none;"></div>
                     <div id="matchesList"></div>
