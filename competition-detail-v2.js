@@ -757,9 +757,14 @@ async function loadCompetitionMatches() {
         } else {
             console.log('🔄 Fetching matches from API...');
 
-            // Fetch scores (completed and live matches)
+            // Fetch both scores (completed/live) and upcoming fixtures
             const scores = await footballApi.fetchScores();
+            const upcoming = await footballApi.getUpcomingFixtures();
             console.log(`📊 Total scores available: ${scores.length}`);
+            console.log(`📅 Total upcoming fixtures: ${upcoming.length}`);
+
+            // Combine both arrays
+            const allMatches = [...scores, ...upcoming];
 
             const competitionLeagues = competition.leagues || [];
             const leagueNames = {
@@ -772,7 +777,7 @@ async function loadCompetitionMatches() {
             };
 
             // SIMPLIFIED LOGIC: Just filter by league and optionally by round
-            competitionMatches = scores.filter(match => {
+            competitionMatches = allMatches.filter(match => {
                 // Must be in one of the competition leagues
                 const matchInLeague = competitionLeagues.some(leagueId => {
                     const leagueName = leagueNames[leagueId];
