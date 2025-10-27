@@ -867,9 +867,13 @@ async function submitTip(matchId, homeScore, awayScore) {
         awayTeam: match.awayTeam,
         homeScore: homeScore,
         awayScore: awayScore,
-        odds: match.odds,
         timestamp: new Date().toISOString()
     };
+
+    // Only include odds if they exist
+    if (match.odds) {
+        tip.odds = match.odds;
+    }
 
     // Save tip to Firebase
     const saved = await saveTipToFirestore(tip);
@@ -891,6 +895,7 @@ function getOutcome(homeScore, awayScore) {
 // Calculate points for a tip
 function calculatePoints(tip, match) {
     if (!match.result) return 0;
+    if (!tip.odds) return 0; // Skip if tip has no odds
 
     const tipOutcome = getOutcome(tip.homeScore, tip.awayScore);
     const resultOutcome = getOutcome(match.result.home, match.result.away);
