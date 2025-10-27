@@ -126,6 +126,21 @@
                         <button class="calendar-btn" onclick="showDatePicker()">
                             <span>📅</span>
                         </button>
+                        <button class="league-filter-btn" onclick="showLeagueFilter()">
+                            <span>🏆</span>
+                        </button>
+                    </div>
+
+                    <!-- League Filter -->
+                    <div id="leagueFilterContainer" class="league-filter-container" style="display: none;">
+                        <div class="league-filter-header">
+                            <span>Filtrer ligaer</span>
+                            <div class="league-filter-actions">
+                                <button onclick="selectAllLeaguesFilter()" class="filter-action-btn">Velg alle</button>
+                                <button onclick="deselectAllLeaguesFilter()" class="filter-action-btn">Fjern alle</button>
+                            </div>
+                        </div>
+                        <div id="leagueFilterList" class="league-filter-list"></div>
                     </div>
 
                     <!-- Date Picker Modal -->

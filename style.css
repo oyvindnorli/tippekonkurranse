@@ -295,7 +295,7 @@ header h1 {
     color: #1f2937;
 }
 
-.calendar-btn {
+.calendar-btn, .league-filter-btn {
     background: #3b82f6;
     border: 1px solid #2563eb;
     border-radius: 8px;
@@ -309,14 +309,94 @@ header h1 {
     font-size: 20px;
 }
 
-.calendar-btn:hover {
+.calendar-btn:hover, .league-filter-btn:hover {
     background: #2563eb;
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
 }
 
-.calendar-btn:active {
+.calendar-btn:active, .league-filter-btn:active {
     transform: scale(0.95);
+}
+
+/* League Filter Container */
+.league-filter-container {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 16px 20px;
+}
+
+.league-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.league-filter-header span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.league-filter-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-action-btn {
+    font-size: 12px;
+    padding: 4px 12px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #374151;
+    font-weight: 500;
+}
+
+.filter-action-btn:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.league-filter-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.league-filter-item {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+}
+
+.league-filter-item:hover {
+    background: #f9fafb;
+}
+
+.league-filter-item label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.league-filter-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.league-filter-item span {
+    font-size: 13px;
+    color: #1f2937;
+    font-weight: 500;
 }
 
 .modal-small {

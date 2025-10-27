@@ -9,6 +9,9 @@ let userTips = [];
 // Date navigation
 let selectedDate = null; // null = show all dates, otherwise show only this date
 
+// Active league filter - tracks which leagues are currently visible
+let activeLeagueFilter = new Set(); // Empty = show all from preferences
+
 // Load league preferences from Firestore (user preferences)
 async function loadSelectedLeagues(userId) {
     try {
@@ -327,13 +330,16 @@ function applyLeagueFilter() {
         14: 'CAF Confederation Cup'
     };
 
-    if (selectedLeagues.size === 0) {
+    // Determine which leagues to show based on active filter
+    const leaguesToShow = activeLeagueFilter.size > 0 ? activeLeagueFilter : selectedLeagues;
+
+    if (leaguesToShow.size === 0) {
         leagueFilteredMatches = [];
     } else {
         leagueFilteredMatches = allMatches.filter(match => {
-            // Check if match league name matches any selected league
+            // Check if match league name matches any active league
             const matchLeague = match.league;
-            for (const leagueId of selectedLeagues) {
+            for (const leagueId of leaguesToShow) {
                 const leagueName = leagueNames[leagueId];
                 // Skip if league name not found in mapping
                 if (!leagueName) {
@@ -350,7 +356,7 @@ function applyLeagueFilter() {
         });
     }
 
-    console.log(`🏆 League filter: ${leagueFilteredMatches.length} matches after filtering`);
+    console.log(`🏆 League filter: ${leagueFilteredMatches.length} matches (from ${Array.from(leaguesToShow).length} leagues)`);
 
     // After applying league filter, apply date filter
     applyDateFilter();
@@ -1062,6 +1068,100 @@ function initDateNavigation() {
     selectedDate = new Date();
     selectedDate.setHours(0, 0, 0, 0);
     updateDateDisplay();
+}
+
+// League filter functions
+function showLeagueFilter() {
+    const container = document.getElementById('leagueFilterContainer');
+    const isVisible = container.style.display !== 'none';
+
+    if (isVisible) {
+        container.style.display = 'none';
+    } else {
+        populateLeagueFilter();
+        container.style.display = 'block';
+    }
+}
+
+function populateLeagueFilter() {
+    const listContainer = document.getElementById('leagueFilterList');
+    listContainer.innerHTML = '';
+
+    // Get league names mapping
+    const LEAGUE_NAMES = {
+        1: '🌍 World Cup',
+        2: '⭐ Champions League',
+        3: '🏆 Europa League',
+        39: '⚽ Premier League',
+        40: '⚽ Championship',
+        41: '⚽ League One',
+        42: '⚽ League Two',
+        140: '🇪🇸 La Liga',
+        78: '🇩🇪 Bundesliga',
+        135: '🇮🇹 Serie A',
+        61: '🇫🇷 Ligue 1',
+        94: '🇵🇹 Primeira Liga',
+        88: '🇳🇱 Eredivisie',
+        103: '🇳🇴 Eliteserien'
+    };
+
+    // Create checkboxes for each league in user's preferences
+    selectedLeagues.forEach(leagueId => {
+        const leagueName = LEAGUE_NAMES[leagueId] || `Liga ${leagueId}`;
+        const isActive = activeLeagueFilter.size === 0 || activeLeagueFilter.has(leagueId);
+
+        const checkbox = document.createElement('div');
+        checkbox.className = 'league-filter-item';
+        checkbox.innerHTML = `
+            <label>
+                <input type="checkbox"
+                       value="${leagueId}"
+                       ${isActive ? 'checked' : ''}
+                       onchange="toggleLeagueFilter(${leagueId})">
+                <span>${leagueName}</span>
+            </label>
+        `;
+        listContainer.appendChild(checkbox);
+    });
+}
+
+function toggleLeagueFilter(leagueId) {
+    // Initialize filter if empty (means "show all")
+    if (activeLeagueFilter.size === 0) {
+        activeLeagueFilter = new Set(selectedLeagues);
+    }
+
+    if (activeLeagueFilter.has(leagueId)) {
+        activeLeagueFilter.delete(leagueId);
+    } else {
+        activeLeagueFilter.add(leagueId);
+    }
+
+    // If all leagues are selected again, clear filter (show all)
+    if (activeLeagueFilter.size === selectedLeagues.size) {
+        activeLeagueFilter.clear();
+    }
+
+    console.log(`🏆 Active league filter:`, Array.from(activeLeagueFilter));
+
+    // Re-apply filters
+    applyLeagueFilter();
+}
+
+function selectAllLeaguesFilter() {
+    activeLeagueFilter.clear(); // Empty = show all
+    populateLeagueFilter();
+    applyLeagueFilter();
+}
+
+function deselectAllLeaguesFilter() {
+    activeLeagueFilter = new Set(); // Empty set, but we'll add one to avoid showing nothing
+    if (selectedLeagues.size > 0) {
+        const firstLeague = Array.from(selectedLeagues)[0];
+        activeLeagueFilter.add(firstLeague);
+    }
+    populateLeagueFilter();
+    applyLeagueFilter();
 }
 
 // Close auth modal when clicking outside of it (but not on modal content)
