@@ -4,7 +4,6 @@ class FootballApiService {
         this.useMockData = !isApiKeySet();
         this.cache = this.loadCache();
         this.teamLogosCache = {};
-        this.oddsApiAvailable = true; // Track if The Odds API is working
 
         if (this.useMockData) {
             console.warn('⚠️ API key not set. Using mock data. Get your API key from: https://dashboard.api-football.com/');
@@ -319,82 +318,6 @@ class FootballApiService {
     }
 
     /**
-     * Fetch odds from The Odds API as fallback
-     * @param {string} homeTeam - Home team name
-     * @param {string} awayTeam - Away team name
-     */
-    async fetchOddsFromTheOddsAPI(homeTeam, awayTeam) {
-        try {
-            // Skip if The Odds API is not available
-            if (!this.oddsApiAvailable) {
-                return null;
-            }
-
-            // Determine which sport to use based on league
-            const sport = 'soccer_epl'; // Default to Premier League
-
-            const url = `${API_CONFIG.ODDS_BASE_URL}/sports/${sport}/odds/?apiKey=${API_CONFIG.ODDS_API_KEY}&regions=${API_CONFIG.REGIONS}&markets=${API_CONFIG.MARKETS}`;
-
-            console.log(`🎲 Trying The Odds API for ${homeTeam} vs ${awayTeam}...`);
-
-            const response = await fetch(url);
-
-            if (!response.ok) {
-                if (response.status === 401) {
-                    console.warn('⚠️ The Odds API key is invalid or expired. Disabling The Odds API fallback.');
-                    this.oddsApiAvailable = false; // Disable for future requests
-                } else {
-                    console.warn(`The Odds API returned ${response.status}`);
-                }
-                return null;
-            }
-
-            const data = await response.json();
-
-            // Find the match by team names
-            const match = data.find(event => {
-                const eventHomeTeam = event.home_team.toLowerCase();
-                const eventAwayTeam = event.away_team.toLowerCase();
-                const searchHome = homeTeam.toLowerCase();
-                const searchAway = awayTeam.toLowerCase();
-
-                return (eventHomeTeam.includes(searchHome) || searchHome.includes(eventHomeTeam)) &&
-                       (eventAwayTeam.includes(searchAway) || searchAway.includes(eventAwayTeam));
-            });
-
-            if (!match || !match.bookmakers || match.bookmakers.length === 0) {
-                return null;
-            }
-
-            // Get odds from first bookmaker
-            const bookmaker = match.bookmakers[0];
-            const h2hMarket = bookmaker.markets.find(m => m.key === 'h2h');
-
-            if (!h2hMarket || !h2hMarket.outcomes || h2hMarket.outcomes.length < 3) {
-                return null;
-            }
-
-            const homeOdds = h2hMarket.outcomes.find(o => o.name === match.home_team);
-            const awayOdds = h2hMarket.outcomes.find(o => o.name === match.away_team);
-            const drawOdds = h2hMarket.outcomes.find(o => o.name === 'Draw');
-
-            if (homeOdds && drawOdds && awayOdds) {
-                console.log(`✅ Found odds from The Odds API: H:${homeOdds.price} U:${drawOdds.price} B:${awayOdds.price}`);
-                return {
-                    H: homeOdds.price,
-                    U: drawOdds.price,
-                    B: awayOdds.price
-                };
-            }
-
-            return null;
-        } catch (error) {
-            console.error('Error fetching from The Odds API:', error);
-            return null;
-        }
-    }
-
-    /**
      * Get team logo URL
      */
     getTeamLogo(teamName) {
@@ -583,24 +506,14 @@ class FootballApiService {
                 console.log(`✅ Odds for ${fixture.homeTeam} vs ${fixture.awayTeam}: H:${fixture.odds.H} U:${fixture.odds.U} B:${fixture.odds.B}`);
                 successCount++;
             } else {
-                // Fallback 1: try to fetch individually from API-Football
+                // Fallback: try to fetch individually from API-Football
                 console.log(`[${i+1}/${fixtures.length}] Fetching individual odds for ${fixture.homeTeam} vs ${fixture.awayTeam}...`);
                 try {
                     fixture.odds = await this.fetchOddsForFixture(fixture.id);
 
                     if (fixture.odds.H === 2.0 && fixture.odds.U === 3.0 && fixture.odds.B === 3.5) {
-                        // Fallback 2: try The Odds API
-                        console.log(`🔄 Trying The Odds API for ${fixture.homeTeam} vs ${fixture.awayTeam}...`);
-                        const theOddsApiOdds = await this.fetchOddsFromTheOddsAPI(fixture.homeTeam, fixture.awayTeam);
-
-                        if (theOddsApiOdds) {
-                            fixture.odds = theOddsApiOdds;
-                            console.log(`✅ Got odds from The Odds API: H:${fixture.odds.H} U:${fixture.odds.U} B:${fixture.odds.B}`);
-                            successCount++;
-                        } else {
-                            console.warn(`⚠️ Using default odds for ${fixture.homeTeam} vs ${fixture.awayTeam}`);
-                            defaultCount++;
-                        }
+                        console.warn(`⚠️ Using default odds for ${fixture.homeTeam} vs ${fixture.awayTeam}`);
+                        defaultCount++;
                     } else {
                         console.log(`✅ Odds for ${fixture.homeTeam} vs ${fixture.awayTeam}: H:${fixture.odds.H} U:${fixture.odds.U} B:${fixture.odds.B}`);
                         successCount++;
