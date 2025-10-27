@@ -4,6 +4,7 @@ class FootballApiService {
         this.useMockData = !isApiKeySet();
         this.cache = this.loadCache();
         this.teamLogosCache = {};
+        this.oddsApiAvailable = true; // Track if The Odds API is working
 
         if (this.useMockData) {
             console.warn('⚠️ API key not set. Using mock data. Get your API key from: https://dashboard.api-football.com/');
@@ -324,6 +325,11 @@ class FootballApiService {
      */
     async fetchOddsFromTheOddsAPI(homeTeam, awayTeam) {
         try {
+            // Skip if The Odds API is not available
+            if (!this.oddsApiAvailable) {
+                return null;
+            }
+
             // Determine which sport to use based on league
             const sport = 'soccer_epl'; // Default to Premier League
 
@@ -334,7 +340,12 @@ class FootballApiService {
             const response = await fetch(url);
 
             if (!response.ok) {
-                console.warn(`The Odds API returned ${response.status}`);
+                if (response.status === 401) {
+                    console.warn('⚠️ The Odds API key is invalid or expired. Disabling The Odds API fallback.');
+                    this.oddsApiAvailable = false; // Disable for future requests
+                } else {
+                    console.warn(`The Odds API returned ${response.status}`);
+                }
                 return null;
             }
 
