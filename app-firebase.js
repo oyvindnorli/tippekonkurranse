@@ -399,6 +399,14 @@ async function loadMatches() {
         const cachedMatches = getCachedMatches();
         if (cachedMatches && cachedMatches.length > 0) {
             allMatches = cachedMatches;
+
+            // Ensure cached matches are sorted by date
+            allMatches.sort((a, b) => {
+                const dateA = new Date(a.commence_time || a.date || a.timestamp * 1000);
+                const dateB = new Date(b.commence_time || b.date || b.timestamp * 1000);
+                return dateA - dateB;
+            });
+
             applyLeagueFilter();
 
             // Load user tips in parallel
@@ -440,6 +448,15 @@ async function loadMatches() {
         // Combine all matches
         allMatches = upcomingMatches.concat(uniqueCompletedMatches);
 
+        // Sort all matches by date (chronological order)
+        allMatches.sort((a, b) => {
+            const dateA = new Date(a.commence_time || a.date || a.timestamp * 1000);
+            const dateB = new Date(b.commence_time || b.date || b.timestamp * 1000);
+            return dateA - dateB;
+        });
+
+        console.log('✅ Sorted all matches by date');
+
         // Cache the fresh data
         setCachedMatches(allMatches);
 
@@ -464,6 +481,14 @@ async function loadMatches() {
 
         // Fallback to mock data
         allMatches = await footballApi.getMockFixtures();
+
+        // Sort mock data by date too
+        allMatches.sort((a, b) => {
+            const dateA = new Date(a.commence_time || a.date || a.timestamp * 1000);
+            const dateB = new Date(b.commence_time || b.date || b.timestamp * 1000);
+            return dateA - dateB;
+        });
+
         applyLeagueFilter();
 
         // Load user tips first before rendering
