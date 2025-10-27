@@ -483,17 +483,20 @@ async function fetchMatchResultsForCompetition() {
             // If we have selected rounds, filter by them
             if (competition.selectedRounds) {
                 // Premier League round filtering
-                if (competition.selectedRounds.premierLeague && match.league.includes('Premier League') && match.round) {
-                    const roundMatch = match.round.match(/(\d+)/);
-                    if (roundMatch) {
-                        const roundNumber = parseInt(roundMatch[1]);
-                        includeMatch = competition.selectedRounds.premierLeague.includes(roundNumber);
+                if (competition.selectedRounds.premierLeague && competition.selectedRounds.premierLeague.length > 0 && match.league.includes('Premier League')) {
+                    if (match.round) {
+                        const roundMatch = match.round.match(/(\d+)/);
+                        if (roundMatch) {
+                            const roundNumber = parseInt(roundMatch[1]);
+                            includeMatch = competition.selectedRounds.premierLeague.includes(roundNumber);
+                        }
                     }
                 }
-
                 // Champions League round filtering
-                if (competition.selectedRounds.championsLeague && match.league.includes('Champions League') && match.round) {
-                    includeMatch = competition.selectedRounds.championsLeague.includes(match.round);
+                else if (competition.selectedRounds.championsLeague && competition.selectedRounds.championsLeague.length > 0 && match.league.includes('Champions League')) {
+                    if (match.round) {
+                        includeMatch = competition.selectedRounds.championsLeague.includes(match.round);
+                    }
                 }
             }
             // If competitionType is 'round' but no selectedRounds, assume PL Round 9
@@ -782,19 +785,30 @@ async function loadCompetitionMatches() {
 
                 // If we have selected rounds, filter by them
                 if (competition.selectedRounds) {
+                    let roundMatches = false;
+
                     // Premier League round filtering
-                    if (competition.selectedRounds.premierLeague && match.league.includes('Premier League') && match.round) {
-                        const roundMatch = match.round.match(/(\d+)/);
-                        if (roundMatch) {
-                            const roundNumber = parseInt(roundMatch[1]);
-                            return competition.selectedRounds.premierLeague.includes(roundNumber);
+                    if (competition.selectedRounds.premierLeague && competition.selectedRounds.premierLeague.length > 0 && match.league.includes('Premier League')) {
+                        if (match.round) {
+                            const roundMatch = match.round.match(/(\d+)/);
+                            if (roundMatch) {
+                                const roundNumber = parseInt(roundMatch[1]);
+                                roundMatches = competition.selectedRounds.premierLeague.includes(roundNumber);
+                            }
                         }
+                        return roundMatches; // Return immediately for PL matches
                     }
 
                     // Champions League round filtering
-                    if (competition.selectedRounds.championsLeague && match.league.includes('Champions League') && match.round) {
-                        return competition.selectedRounds.championsLeague.includes(match.round);
+                    if (competition.selectedRounds.championsLeague && competition.selectedRounds.championsLeague.length > 0 && match.league.includes('Champions League')) {
+                        if (match.round) {
+                            roundMatches = competition.selectedRounds.championsLeague.includes(match.round);
+                        }
+                        return roundMatches; // Return immediately for CL matches
                     }
+
+                    // If we have selectedRounds but this match doesn't match any, exclude it
+                    return false;
                 }
 
                 // If competitionType is 'round' but no selectedRounds, assume PL Round 9 for backward compatibility
