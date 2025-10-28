@@ -25,6 +25,10 @@ __pycache__/
 # Vercel
 .vercel
 
+# Environment variables
+.env
+.env.local
+
 # OS filer
 .DS_Store
 Thumbs.db

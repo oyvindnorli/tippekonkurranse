@@ -1,8 +1,8 @@
 // API Configuration
 const API_CONFIG = {
-    // API-Football - Get your API key from: https://dashboard.api-football.com/
-    API_KEY: 'dc3a8f33b796becd652ac9b08a8ff0ce',
-    BASE_URL: 'https://v3.football.api-sports.io',
+    // Using Vercel serverless function as proxy to API-Football
+    // This hides the API key and avoids CORS issues
+    BASE_URL: '/api/football',
 
     // League IDs - you can add multiple leagues
     // Available: 39 (Premier League), 140 (La Liga), 78 (Bundesliga),
@@ -18,7 +18,7 @@ const API_CONFIG = {
     CACHE_DURATION: 15 * 60 * 1000 // 15 minutes in milliseconds
 };
 
-// Check if API key is set
+// Check if API is available (always true now since we use serverless function)
 function isApiKeySet() {
-    return API_CONFIG.API_KEY !== 'YOUR_API_KEY_HERE' && API_CONFIG.API_KEY.length > 0;
+    return true; // Serverless function handles API key
 }

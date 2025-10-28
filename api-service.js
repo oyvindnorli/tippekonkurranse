@@ -75,15 +75,11 @@ class FootballApiService {
 
             // Fetch fixtures for each league
             for (const leagueId of API_CONFIG.LEAGUES) {
-                const url = `${API_CONFIG.BASE_URL}/fixtures?league=${leagueId}&season=${API_CONFIG.SEASON}&from=${from}&to=${to}`;
+                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${from}&to=${to}`;
 
                 console.log(`📡 Fetching league ${leagueId}...`);
                 const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'x-rapidapi-host': 'v3.football.api-sports.io',
-                        'x-rapidapi-key': API_CONFIG.API_KEY
-                    }
+                    method: 'GET'
                 });
 
                 if (!response.ok) {
@@ -134,16 +130,12 @@ class FootballApiService {
 
         try {
             // Try to fetch all odds for the league on this date
-            const url = `${API_CONFIG.BASE_URL}/odds?league=${leagueId}&season=${API_CONFIG.SEASON}&date=${date}`;
+            const url = `${API_CONFIG.BASE_URL}?endpoint=odds&league=${leagueId}&season=${API_CONFIG.SEASON}&date=${date}`;
 
             console.log(`📡 Fetching odds for league ${leagueId} on ${date}...`);
 
             const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'x-rapidapi-host': 'v3.football.api-sports.io',
-                    'x-rapidapi-key': API_CONFIG.API_KEY
-                }
+                method: 'GET'
             });
 
             if (!response.ok) {
@@ -198,14 +190,10 @@ class FootballApiService {
 
         try {
             // Try without specifying bookmaker first (gets best available)
-            let url = `${API_CONFIG.BASE_URL}/odds?fixture=${fixtureId}`;
+            let url = `${API_CONFIG.BASE_URL}?endpoint=odds&fixture=${fixtureId}`;
 
             let response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'x-rapidapi-host': 'v3.football.api-sports.io',
-                    'x-rapidapi-key': API_CONFIG.API_KEY
-                }
+                method: 'GET'
             });
 
             if (response.ok) {
@@ -371,15 +359,11 @@ class FootballApiService {
             // Fetch live and recent matches for each league - WITH EVENTS
             for (const leagueId of API_CONFIG.LEAGUES) {
                 // Use timezone parameter to get events data
-                const url = `${API_CONFIG.BASE_URL}/fixtures?league=${leagueId}&season=${API_CONFIG.SEASON}&from=${fromDate}&to=${toDate}&timezone=Europe/Oslo`;
+                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${fromDate}&to=${toDate}&timezone=Europe/Oslo`;
 
                 console.log(`📡 Fetching scores for league ${leagueId}...`);
                 const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'x-rapidapi-host': 'v3.football.api-sports.io',
-                        'x-rapidapi-key': API_CONFIG.API_KEY
-                    }
+                    method: 'GET'
                 });
 
                 if (!response.ok) {
@@ -755,14 +739,10 @@ class FootballApiService {
 
             // Fetch fixtures for both leagues
             for (const leagueId of API_CONFIG.LEAGUES) {
-                const url = `${API_CONFIG.BASE_URL}/fixtures?league=${leagueId}&season=${API_CONFIG.SEASON}&from=${fromDate}&to=${toDate}`;
+                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${fromDate}&to=${toDate}`;
 
                 const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'x-rapidapi-host': 'v3.football.api-sports.io',
-                        'x-rapidapi-key': API_CONFIG.API_KEY
-                    }
+                    method: 'GET'
                 });
 
                 if (!response.ok) continue;
