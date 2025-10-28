@@ -1,3 +1,8 @@
+// Import utility modules
+import { LEAGUE_NAMES, getLeagueName } from './js/utils/leagueConfig.js';
+import { calculatePoints, getOutcome, formatMatchTime, sortMatchesByDate } from './js/utils/matchUtils.js';
+import { formatDateRange, getDateLabel, groupMatchesByDate, toISODate, getStartOfDay, getEndOfDay } from './js/utils/dateUtils.js';
+
 // Match data - will be loaded from API or mock data
 let matches = [];
 let allMatches = []; // Store all matches for filtering
@@ -566,57 +571,7 @@ function init() {
     });
 }
 
-// Group matches by date
-function groupMatchesByDate(matches) {
-    const groups = {};
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    matches.forEach(match => {
-        let matchDate;
-
-        // Try to use commence_time first, fallback to timestamp
-        if (match.commence_time) {
-            matchDate = new Date(match.commence_time);
-        } else if (match.timestamp) {
-            // timestamp is in seconds, convert to milliseconds
-            matchDate = new Date(match.timestamp * 1000);
-        } else {
-            console.warn('Match missing both commence_time and timestamp:', match);
-            return;
-        }
-
-        // Check if date is valid
-        if (isNaN(matchDate.getTime())) {
-            console.warn('Invalid date for match:', match);
-            return;
-        }
-
-        matchDate.setHours(0, 0, 0, 0);
-
-        const daysDiff = Math.floor((matchDate - today) / (1000 * 60 * 60 * 24));
-
-        let dateLabel;
-        if (daysDiff === 0) {
-            dateLabel = 'I dag';
-        } else if (daysDiff === 1) {
-            dateLabel = 'I morgen';
-        } else {
-            // Format: "Fredag, 17. oktober"
-            const weekday = matchDate.toLocaleDateString('nb-NO', { weekday: 'long' });
-            const day = matchDate.getDate();
-            const month = matchDate.toLocaleDateString('nb-NO', { month: 'long' });
-            dateLabel = `${weekday.charAt(0).toUpperCase() + weekday.slice(1)}, ${day}. ${month}`;
-        }
-
-        if (!groups[dateLabel]) {
-            groups[dateLabel] = [];
-        }
-        groups[dateLabel].push(match);
-    });
-
-    return groups;
-}
+// groupMatchesByDate() is now imported from dateUtils.js
 
 // Render matches list
 function renderMatches() {
@@ -892,34 +847,7 @@ async function submitTip(matchId, homeScore, awayScore) {
 }
 
 // Calculate outcome (H, U, B)
-function getOutcome(homeScore, awayScore) {
-    if (homeScore > awayScore) return 'H';
-    if (homeScore < awayScore) return 'B';
-    return 'U';
-}
-
-// Calculate points for a tip
-function calculatePoints(tip, match) {
-    if (!match.result) return 0;
-    if (!tip.odds) return 0; // Skip if tip has no odds
-
-    const tipOutcome = getOutcome(tip.homeScore, tip.awayScore);
-    const resultOutcome = getOutcome(match.result.home, match.result.away);
-
-    let points = 0;
-
-    // Correct outcome: points equal to odds
-    if (tipOutcome === resultOutcome) {
-        points += tip.odds[resultOutcome];
-    }
-
-    // Exact score: 3 bonus points (in addition to outcome points)
-    if (tip.homeScore === match.result.home && tip.awayScore === match.result.away) {
-        points += 3;
-    }
-
-    return points;
-}
+// getOutcome() and calculatePoints() are now imported from matchUtils.js
 
 // Update total score
 function updateTotalScore() {
@@ -1098,194 +1026,11 @@ function populateLeagueFilter() {
     const listContainer = document.getElementById('leagueFilterList');
     listContainer.innerHTML = '';
 
-    // Get league names mapping (matches preferences.js)
-    const LEAGUE_NAMES = {
-        // International
-        1: '🌍 World Cup',
-        2: '⭐ Champions League',
-        3: '🇪🇺 Europa League',
-        4: '🇪🇺 Euro Championship',
-        9: '🌎 Copa America',
-        11: '🏆 Copa Sudamericana',
-        12: '🏆 CAF Champions League',
-        13: '🏆 Copa Libertadores',
-        14: '🏆 CAF Confederation Cup',
-        15: '🌍 FIFA Club World Cup',
-        17: '🇨🇳 Super League',
-        848: '🇪🇺 Conference League',
-        960: '🇪🇺 UEFA Nations League',
-        531: '🏆 UEFA Super Cup',
-
-        // England
-        39: '⚽ Premier League',
-        40: '⚽ Championship',
-        41: '⚽ League One',
-        42: '⚽ League Two',
-        45: '🏆 FA Cup',
-        46: '🏆 FA Community Shield',
-        48: '🏆 League Cup (EFL Cup)',
-
-        // Spain
-        140: '🇪🇸 La Liga',
-        141: '🇪🇸 La Liga 2',
-        143: '🏆 Copa del Rey',
-        556: '🏆 Super Cup (ESP)',
-
-        // Germany
-        78: '🇩🇪 Bundesliga',
-        79: '🇩🇪 2. Bundesliga',
-        80: '🇩🇪 3. Liga',
-        81: '🏆 DFB Pokal',
-        529: '🏆 Super Cup (GER)',
-
-        // Italy
-        135: '🇮🇹 Serie A',
-        136: '🇮🇹 Serie B',
-        137: '🏆 Coppa Italia',
-        547: '🏆 Super Cup (ITA)',
-
-        // France
-        61: '🇫🇷 Ligue 1',
-        62: '🇫🇷 Ligue 2',
-        65: '🏆 Coupe de France',
-        66: '🇫🇷 National',
-        526: '🏆 Coupe de la Ligue',
-        527: '🏆 Trophée des Champions',
-
-        // Netherlands
-        88: '🇳🇱 Eredivisie',
-        89: '🇳🇱 Eerste Divisie',
-        90: '🏆 KNVB Beker',
-
-        // Portugal
-        94: '🇵🇹 Primeira Liga',
-        95: '🇵🇹 Segunda Liga',
-        96: '🏆 Taça de Portugal',
-        550: '🏆 Super Cup (POR)',
-
-        // Belgium
-        144: '🇧🇪 Jupiler Pro League',
-        145: '🇧🇪 Challenger Pro League',
-
-        // Turkey
-        203: '🇹🇷 Süper Lig',
-        204: '🇹🇷 1. Lig',
-        206: '🏆 Turkish Cup',
-
-        // Greece
-        197: '🇬🇷 Super League',
-        198: '🇬🇷 Super League 2',
-
-        // Russia
-        235: '🇷🇺 Premier League',
-        236: '🇷🇺 FNL',
-
-        // Ukraine
-        333: '🇺🇦 Premier League',
-
-        // Austria
-        218: '🇦🇹 Bundesliga',
-
-        // Switzerland
-        207: '🇨🇭 Super League',
-        208: '🇨🇭 Challenge League',
-
-        // Sweden
-        113: '🇸🇪 Allsvenskan',
-        114: '🇸🇪 Superettan',
-
-        // Norway
-        103: '🇳🇴 Eliteserien',
-        104: '🇳🇴 OBOS-ligaen',
-        105: '🏆 NM Cupen',
-
-        // Denmark
-        119: '🇩🇰 Superliga',
-        120: '🇩🇰 1. Division',
-
-        // Finland
-        244: '🇫🇮 Veikkausliiga',
-
-        // Poland
-        106: '🇵🇱 Ekstraklasa',
-
-        // Czech Republic
-        345: '🇨🇿 Czech Liga',
-
-        // Hungary
-        271: '🇭🇺 NB I',
-
-        // Romania
-        283: '🇷🇴 Liga I',
-
-        // Bulgaria
-        172: '🇧🇬 First League',
-
-        // Serbia
-        289: '🇷🇸 SuperLiga',
-
-        // Croatia
-        210: '🇭🇷 1. HNL',
-
-        // Scotland
-        179: '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Premiership',
-        180: '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Championship',
-
-        // Ireland
-        357: '🇮🇪 Premier Division',
-
-        // USA
-        253: '🇺🇸 MLS',
-        254: '🇺🇸 USL Championship',
-
-        // Mexico
-        262: '🇲🇽 Liga MX',
-        263: '🇲🇽 Liga de Expansión MX',
-
-        // Brazil
-        71: '🇧🇷 Série A',
-        72: '🇧🇷 Série B',
-        73: '🏆 Copa do Brasil',
-
-        // Argentina
-        128: '🇦🇷 Liga Profesional',
-        129: '🏆 Copa Argentina',
-
-        // Chile
-        265: '🇨🇱 Primera División',
-
-        // Colombia
-        239: '🇨🇴 Primera A',
-
-        // Japan
-        98: '🇯🇵 J1 League',
-        99: '🇯🇵 J2 League',
-
-        // South Korea
-        292: '🇰🇷 K League 1',
-
-        // Australia
-        188: '🇦🇺 A-League',
-
-        // Saudi Arabia
-        307: '🇸🇦 Pro League',
-
-        // UAE
-        301: '🇦🇪 Pro League',
-
-        // Qatar
-        305: '🇶🇦 Stars League',
-
-        // Egypt
-        233: '🇪🇬 Premier League',
-
-        // South Africa
-        288: '🇿🇦 Premier Division'
-    };
+    // LEAGUE_NAMES is now imported from leagueConfig.js
 
     // Create checkboxes for each league in user's preferences
     selectedLeagues.forEach(leagueId => {
-        const leagueName = LEAGUE_NAMES[leagueId] || `Liga ${leagueId}`;
+        const leagueName = getLeagueName(leagueId);
         const isActive = activeLeagueFilter.size === 0 || activeLeagueFilter.has(leagueId);
 
         const checkbox = document.createElement('div');
