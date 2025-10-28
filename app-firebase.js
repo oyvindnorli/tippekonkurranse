@@ -31,7 +31,26 @@ async function loadSelectedLeagues(userId) {
         if (prefsDoc.exists && prefsDoc.data().leagues) {
             const leagueArray = prefsDoc.data().leagues;
             console.log('📂 Loaded user league preferences from Firestore:', leagueArray);
-            return new Set(leagueArray);
+
+            // Only allow Premier League (39) and Champions League (2)
+            const validLeagues = [39, 2];
+            const filteredLeagues = leagueArray.filter(id => validLeagues.includes(id));
+
+            // If user had old/invalid leagues, reset to defaults and save
+            if (filteredLeagues.length !== leagueArray.length || filteredLeagues.length === 0) {
+                console.log('🔄 Migrating old league preferences to new format (PL + CL only)');
+                const defaultLeagues = [39, 2];
+
+                // Save corrected preferences back to Firestore
+                await db.collection('userPreferences').doc(userId).set({
+                    leagues: defaultLeagues,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                return new Set(defaultLeagues);
+            }
+
+            return new Set(filteredLeagues.length > 0 ? filteredLeagues : [39, 2]);
         } else {
             console.log('📂 No preferences found, using defaults');
             return new Set([39, 2]); // Default: Premier League and Champions League
@@ -586,6 +605,19 @@ function renderMatches() {
     const groupedMatches = groupMatchesByDate(matches);
 
     console.log('📅 Date groups:', Object.keys(groupedMatches));
+
+    // Show message if no matches
+    if (Object.keys(groupedMatches).length === 0) {
+        const noMatchesDiv = document.createElement('div');
+        noMatchesDiv.className = 'info-message';
+        noMatchesDiv.innerHTML = `
+            <h3>Ingen kamper funnet</h3>
+            <p>Det er ingen kommende kamper for de valgte ligaene og datoen.</p>
+            <p>Prøv å velge en annen dato eller vent til nye kamper er planlagt.</p>
+        `;
+        matchesList.appendChild(noMatchesDiv);
+        return;
+    }
 
     Object.entries(groupedMatches).forEach(([dateLabel, dateMatches]) => {
         const dateGroup = document.createElement('div');
