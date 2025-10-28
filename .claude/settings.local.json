@@ -7,7 +7,10 @@
       "Read(//c/**)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "WebFetch(domain:dashboard.api-football.com)",
+      "WebSearch",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []
