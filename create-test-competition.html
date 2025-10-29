@@ -52,7 +52,22 @@
 <body>
     <div class="container">
         <h1>🏆 Opprett EFL Cup-konkurranse</h1>
-        <p>Dette scriptet oppretter en konkurranse for dagens EFL Cup-kamper med 0-0 tips.</p>
+        <p>Dette scriptet oppretter en konkurranse for dagens EFL Cup-kamper med dine valgte tips.</p>
+
+        <div style="margin: 20px 0;">
+            <label style="display: block; margin-bottom: 10px; font-weight: bold;">Velg resultat for alle kamper:</label>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div>
+                    <label style="margin-right: 5px;">Hjemmelag:</label>
+                    <input type="number" id="homeScore" value="0" min="0" max="9" style="width: 60px; padding: 8px; font-size: 16px; background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; border-radius: 5px;">
+                </div>
+                <span style="font-size: 20px; font-weight: bold;">-</span>
+                <div>
+                    <label style="margin-right: 5px;">Bortelag:</label>
+                    <input type="number" id="awayScore" value="0" min="0" max="9" style="width: 60px; padding: 8px; font-size: 16px; background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; border-radius: 5px;">
+                </div>
+            </div>
+        </div>
 
         <button onclick="createTestCompetition()">Opprett Konkurranse</button>
 
@@ -145,8 +160,12 @@
 
                 log('✅ Deltaker registrert', 'success');
 
-                // Create 0-0 tips for all matches
-                log(`📝 Legger inn 0-0 tips på ${matches.length} kamper...`, 'info');
+                // Get selected scores
+                const homeScore = parseInt(document.getElementById('homeScore').value) || 0;
+                const awayScore = parseInt(document.getElementById('awayScore').value) || 0;
+
+                // Create tips for all matches
+                log(`📝 Legger inn ${homeScore}-${awayScore} tips på ${matches.length} kamper...`, 'info');
 
                 for (const match of matches) {
                     const matchId = match.fixture.id;
@@ -155,8 +174,8 @@
 
                     const tipData = {
                         matchId: matchId,
-                        homeScore: 0,
-                        awayScore: 0,
+                        homeScore: homeScore,
+                        awayScore: awayScore,
                         userId: user.uid,
                         userDisplayName: user.displayName || user.email,
                         homeTeam: homeTeam,
@@ -167,7 +186,7 @@
                     const docId = `${user.uid}_${matchId}`;
                     await db.collection('tips').doc(docId).set(tipData);
 
-                    log(`  ✓ ${homeTeam} vs ${awayTeam}: 0-0`, 'success');
+                    log(`  ✓ ${homeTeam} vs ${awayTeam}: ${homeScore}-${awayScore}`, 'success');
                 }
 
                 log('', 'info');
