@@ -108,6 +108,7 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
     const leagueNames = {
         39: 'Premier League',
         2: 'Champions League',
+        48: 'EFL Cup',
         140: 'La Liga',
         78: 'Bundesliga',
         135: 'Serie A',
@@ -465,6 +466,7 @@ async function fetchMatchResultsForCompetition() {
         const leagueNames = {
             39: 'Premier League',
             2: 'UEFA Champions League',
+            48: 'EFL Cup',
             140: 'La Liga',
             78: 'Bundesliga',
             135: 'Serie A',
@@ -473,14 +475,21 @@ async function fetchMatchResultsForCompetition() {
 
         // SIMPLIFIED LOGIC: Same as loadCompetitionMatches
         scores.forEach(match => {
-            // Must be in one of the competition leagues
-            const isInLeague = leagues.some(leagueId => {
-                const leagueName = leagueNames[leagueId];
-                return match.league && match.league.includes(leagueName);
-            });
+            // If competition has specific matchIds, only process those
+            if (competition.matchIds && competition.matchIds.length > 0) {
+                if (!competition.matchIds.includes(match.id) || !match.result) {
+                    return;
+                }
+            } else {
+                // Must be in one of the competition leagues
+                const isInLeague = leagues.some(leagueId => {
+                    const leagueName = leagueNames[leagueId];
+                    return match.league && match.league.includes(leagueName);
+                });
 
-            if (!isInLeague || !match.result) {
-                return;
+                if (!isInLeague || !match.result) {
+                    return;
+                }
             }
 
             let includeMatch = false;
@@ -775,14 +784,20 @@ async function loadCompetitionMatches() {
             const leagueNames = {
                 39: 'Premier League',
                 2: 'UEFA Champions League',
+                48: 'EFL Cup',
                 140: 'La Liga',
                 78: 'Bundesliga',
                 135: 'Serie A',
                 1: 'World Cup'
             };
 
-            // SIMPLIFIED LOGIC: Just filter by league and optionally by round
+            // SIMPLIFIED LOGIC: Just filter by league and optionally by round or matchIds
             competitionMatches = allMatches.filter(match => {
+                // If competition has specific matchIds (custom competition), only include those
+                if (competition.matchIds && competition.matchIds.length > 0) {
+                    return competition.matchIds.includes(match.id);
+                }
+
                 // Must be in one of the competition leagues
                 const matchInLeague = competitionLeagues.some(leagueId => {
                     const leagueName = leagueNames[leagueId];
