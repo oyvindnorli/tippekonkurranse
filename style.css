@@ -29,7 +29,7 @@ header {
     background:
         linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%),
         url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1920&h=400&fit=crop') center/cover;
-    padding: 12px 0;
+    padding: 8px 0;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     position: sticky;
     top: 0;
@@ -38,27 +38,27 @@ header {
 
 header h1 {
     color: #ffffff;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     letter-spacing: -0.5px;
 }
 
 .user-section {
     text-align: center;
-    margin-bottom: 6px;
-    min-height: 24px; /* Ensure consistent height */
+    margin-bottom: 4px;
+    min-height: 20px; /* Ensure consistent height */
 }
 
 .user-section .current-user {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    font-size: 13px;
+    gap: 10px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.85);
-    min-height: 32px; /* Match user-section height */
+    min-height: 28px; /* Match user-section height */
     /* Remove opacity transition - show immediately */
 }
 
@@ -68,13 +68,13 @@ header h1 {
 }
 
 .btn-small {
-    padding: 7px 16px;
+    padding: 5px 12px;
     background: rgba(34, 211, 238, 0.1);
     color: #22d3ee;
     border: 1.5px solid rgba(34, 211, 238, 0.3);
     border-radius: 6px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     transition: all 0.2s ease;
 }
@@ -87,43 +87,43 @@ header h1 {
 
 .score-display {
     text-align: center;
-    margin-bottom: 10px;
-    min-height: 32px; /* Ensure consistent height even when empty */
+    margin-bottom: 6px;
+    min-height: 26px; /* Ensure consistent height even when empty */
 }
 
 .score-display h2 {
     color: #ffffff;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     display: inline-block;
 }
 
 .score-display span {
     color: #22d3ee;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 800;
 }
 
 .nav-buttons {
     text-align: center;
-    margin-top: 6px;
+    margin-top: 4px;
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
-    min-height: 36px; /* Fixed height to prevent header jump */
+    min-height: 30px; /* Fixed height to prevent header jump */
     /* Remove opacity transition - show immediately when display is set to flex */
 }
 
 .nav-btn {
     display: inline-block;
-    padding: 6px 14px;
+    padding: 5px 12px;
     background: rgba(34, 211, 238, 0.15);
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     border-radius: 6px;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 12px;
     transition: all 0.3s ease;
     border: 1px solid rgba(34, 211, 238, 0.2);
 }
