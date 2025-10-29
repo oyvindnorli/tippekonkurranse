@@ -34,12 +34,17 @@ async function loadSelectedLeagues(userId) {
 
             // Only allow Premier League (39), Champions League (2), and EFL Cup (48)
             const validLeagues = [39, 2, 48];
+            const defaultLeagues = [39, 2, 48];
             const filteredLeagues = leagueArray.filter(id => validLeagues.includes(id));
 
-            // If user had old/invalid leagues, reset to defaults and save
-            if (filteredLeagues.length !== leagueArray.length || filteredLeagues.length === 0) {
-                console.log('🔄 Migrating old league preferences to new format (PL + CL + EFL)');
-                const defaultLeagues = [39, 2, 48];
+            // Check if user is missing any default leagues or has invalid leagues
+            const hasAllDefaultLeagues = defaultLeagues.every(id => leagueArray.includes(id));
+            const needsMigration = filteredLeagues.length !== leagueArray.length ||
+                                   filteredLeagues.length === 0 ||
+                                   !hasAllDefaultLeagues;
+
+            if (needsMigration) {
+                console.log('🔄 Migrating league preferences to include all default leagues (PL + CL + EFL)');
 
                 // Save corrected preferences back to Firestore
                 await db.collection('userPreferences').doc(userId).set({
@@ -50,7 +55,7 @@ async function loadSelectedLeagues(userId) {
                 return new Set(defaultLeagues);
             }
 
-            return new Set(filteredLeagues.length > 0 ? filteredLeagues : [39, 2, 48]);
+            return new Set(filteredLeagues.length > 0 ? filteredLeagues : defaultLeagues);
         } else {
             console.log('📂 No preferences found, using defaults');
             return new Set([39, 2, 48]); // Default: Premier League, Champions League, EFL Cup
