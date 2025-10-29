@@ -106,18 +106,18 @@ header h1 {
 
 .nav-buttons {
     text-align: center;
-    margin-top: 10px;
+    margin-top: 6px;
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
-    min-height: 42px; /* Fixed height to prevent header jump */
+    min-height: 36px; /* Fixed height to prevent header jump */
     /* Remove opacity transition - show immediately when display is set to flex */
 }
 
 .nav-btn {
     display: inline-block;
-    padding: 9px 20px;
+    padding: 6px 14px;
     background: rgba(34, 211, 238, 0.15);
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
@@ -2359,41 +2359,81 @@ header h1 {
 }
 
 @media (max-width: 768px) {
+    header {
+        padding: 8px 0;
+    }
+
+    header h1 {
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+
+    .nav-btn {
+        padding: 5px 12px;
+        font-size: 13px;
+    }
+
     .hero-banner {
-        padding: 60px 30px;
-        border-radius: 16px;
+        padding: 20px 15px;
+        margin: 8px 0 15px;
+        border-radius: 12px;
     }
 
     .hero-icon {
-        font-size: 60px;
+        font-size: 30px;
+        margin-bottom: 4px;
     }
 
     .hero-title {
-        font-size: 32px;
+        font-size: 22px;
+        margin-bottom: 4px;
     }
 
     .hero-subtitle {
-        font-size: 16px;
+        font-size: 13px;
     }
 
     .welcome-content h2 {
-        font-size: 28px;
+        font-size: 20px;
     }
 
     .welcome-content > p {
-        font-size: 16px;
+        font-size: 14px;
     }
 
     .feature-list {
         grid-template-columns: 1fr;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .feature-item {
+        padding: 12px 10px;
+    }
+
+    .feature-icon {
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .feature-item h3 {
+        font-size: 15px;
+        margin-bottom: 4px;
+    }
+
+    .feature-item p {
+        font-size: 12px;
     }
 
     .welcome-actions {
         flex-direction: column;
+        gap: 8px;
     }
 
     .btn-large {
         width: 100%;
+        padding: 12px 24px;
+        font-size: 15px;
     }
 }
 
