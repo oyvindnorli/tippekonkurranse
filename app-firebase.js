@@ -1119,6 +1119,22 @@ function deselectAllLeaguesFilter() {
     applyLeagueFilter();
 }
 
+// Export functions to window object so they're accessible from HTML onclick attributes
+// (needed because this file is loaded as a module)
+window.showAuthModal = showAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.handleSignIn = handleSignIn;
+window.handleSignUp = handleSignUp;
+window.handleResetPassword = handleResetPassword;
+window.changeDay = changeDay;
+window.showDatePicker = showDatePicker;
+window.closeDatePicker = closeDatePicker;
+window.selectToday = selectToday;
+window.showLeagueFilter = showLeagueFilter;
+window.toggleLeagueFilter = toggleLeagueFilter;
+window.selectAllLeaguesFilter = selectAllLeaguesFilter;
+window.deselectAllLeaguesFilter = deselectAllLeaguesFilter;
+
 // Close auth modal when clicking outside of it (but not on modal content)
 window.onclick = function(event) {
     const modal = document.getElementById('authModal');
