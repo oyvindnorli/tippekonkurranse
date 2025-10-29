@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Sjekk EFL Cup Odds</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+        }
+        pre {
+            background: #2d3748;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        button {
+            background: #3182ce;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .match {
+            background: #2d3748;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>EFL Cup Odds Checker</h1>
+    <button onclick="checkMatches()">Sjekk dagens kamper og odds</button>
+    <div id="output"></div>
+
+    <script>
+        async function checkMatches() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Laster...</p>';
+
+            try {
+                const today = '2025-10-29';
+
+                // Fetch today's EFL Cup matches
+                const matchesUrl = `/api/football?endpoint=fixtures&league=48&season=2025&from=${today}&to=${today}`;
+                console.log('Fetching:', matchesUrl);
+
+                const matchesRes = await fetch(matchesUrl);
+                const matchesData = await matchesRes.json();
+
+                console.log('Matches response:', matchesData);
+
+                if (!matchesData.response || matchesData.response.length === 0) {
+                    output.innerHTML = '<p>Ingen kamper funnet for i dag</p>';
+                    return;
+                }
+
+                let html = `<h2>Fant ${matchesData.response.length} kamper:</h2>`;
+
+                for (const match of matchesData.response) {
+                    const fixtureId = match.fixture.id;
+                    const homeTeam = match.teams.home.name;
+                    const awayTeam = match.teams.away.name;
+                    const status = match.fixture.status.short;
+
+                    html += `<div class="match">`;
+                    html += `<h3>${homeTeam} vs ${awayTeam}</h3>`;
+                    html += `<p>Fixture ID: ${fixtureId}</p>`;
+                    html += `<p>Status: ${status}</p>`;
+
+                    // Try to fetch odds
+                    const oddsUrl = `/api/football?endpoint=odds&fixture=${fixtureId}`;
+                    console.log('Fetching odds:', oddsUrl);
+
+                    try {
+                        const oddsRes = await fetch(oddsUrl);
+                        const oddsData = await oddsRes.json();
+
+                        console.log(`Odds for ${fixtureId}:`, oddsData);
+
+                        if (oddsData.response && oddsData.response.length > 0) {
+                            const bookmakers = oddsData.response[0].bookmakers;
+                            if (bookmakers && bookmakers.length > 0) {
+                                const bet = bookmakers[0].bets?.find(b => b.name === 'Match Winner');
+                                if (bet && bet.values) {
+                                    const homeOdd = bet.values.find(v => v.value === 'Home')?.odd;
+                                    const drawOdd = bet.values.find(v => v.value === 'Draw')?.odd;
+                                    const awayOdd = bet.values.find(v => v.value === 'Away')?.odd;
+
+                                    html += `<p style="color: #48bb78;">✅ ODDS FUNNET!</p>`;
+                                    html += `<p>H: ${homeOdd} | U: ${drawOdd} | B: ${awayOdd}</p>`;
+                                    html += `<p>Bookmaker: ${bookmakers[0].name}</p>`;
+                                } else {
+                                    html += `<p style="color: #f56565;">❌ Ingen Match Winner odds</p>`;
+                                }
+                            } else {
+                                html += `<p style="color: #f56565;">❌ Ingen bookmakers</p>`;
+                            }
+                        } else {
+                            html += `<p style="color: #f56565;">❌ Ingen odds tilgjengelig</p>`;
+                        }
+                    } catch (error) {
+                        html += `<p style="color: #f56565;">❌ Feil ved henting av odds: ${error.message}</p>`;
+                    }
+
+                    html += `</div>`;
+
+                    // Small delay
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+
+                output.innerHTML = html;
+
+            } catch (error) {
+                output.innerHTML = `<p style="color: #f56565;">Feil: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
