@@ -51,10 +51,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏆 Opprett EFL Cup Test-konkurranse</h1>
-        <p>Dette scriptet oppretter en test-konkurranse for dagens EFL Cup-kamper med 0-0 tips.</p>
+        <h1>🏆 Opprett EFL Cup-konkurranse</h1>
+        <p>Dette scriptet oppretter en konkurranse for dagens EFL Cup-kamper med 0-0 tips.</p>
 
-        <button onclick="createTestCompetition()">Opprett Test-konkurranse</button>
+        <button onclick="createTestCompetition()">Opprett Konkurranse</button>
 
         <div id="log"></div>
     </div>
@@ -120,8 +120,8 @@
                 log('🏆 Oppretter konkurranse...', 'info');
 
                 const competitionData = {
-                    name: `EFL Cup Test - ${dateStr}`,
-                    description: 'Test-konkurranse for EFL Cup kamper',
+                    name: `EFL Cup - ${dateStr}`,
+                    description: 'EFL Cup kamper',
                     creatorId: user.uid,
                     creatorName: user.displayName || user.email,
                     participants: [user.uid],
@@ -171,7 +171,7 @@
                 }
 
                 log('', 'info');
-                log('🎉 Ferdig! Test-konkuransen er opprettet med alle tips!', 'success');
+                log('🎉 Ferdig! Konkuransen er opprettet med alle tips!', 'success');
                 log(`🔗 Gå til: competition-detail.html?id=${compRef.id}`, 'info');
                 log('', 'info');
 
