@@ -430,7 +430,7 @@ async function calculateParticipantPoints(userId) {
             }
         });
 
-        return totalPoints;
+        return Math.round(totalPoints * 100) / 100; // Round to 2 decimals
 
     } catch (error) {
         console.error('Failed to calculate points:', error);
