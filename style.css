@@ -29,7 +29,7 @@ header {
     background:
         linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%),
         url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1920&h=400&fit=crop') center/cover;
-    padding: 20px 0;
+    padding: 12px 0;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     position: sticky;
     top: 0;
@@ -38,17 +38,17 @@ header {
 
 header h1 {
     color: #ffffff;
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 800;
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     letter-spacing: -0.5px;
 }
 
 .user-section {
     text-align: center;
-    margin-bottom: 10px;
-    min-height: 32px; /* Ensure consistent height */
+    margin-bottom: 6px;
+    min-height: 24px; /* Ensure consistent height */
 }
 
 .user-section .current-user {
@@ -2203,9 +2203,9 @@ header h1 {
     background:
         linear-gradient(135deg, rgba(59, 130, 246, 0.85) 0%, rgba(30, 64, 175, 0.9) 50%, rgba(124, 58, 237, 0.85) 100%),
         url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=1600&h=900&fit=crop') center/cover;
-    border-radius: 24px;
-    padding: 40px 30px;
-    margin: 20px 0 30px;
+    border-radius: 16px;
+    padding: 25px 20px;
+    margin: 10px 0 20px;
     box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
     position: relative;
     overflow: hidden;
@@ -2229,8 +2229,8 @@ header h1 {
 }
 
 .hero-icon {
-    font-size: 50px;
-    margin-bottom: 10px;
+    font-size: 36px;
+    margin-bottom: 6px;
     animation: bounce 2s infinite;
 }
 
@@ -2240,18 +2240,18 @@ header h1 {
 }
 
 .hero-title {
-    font-size: 36px;
+    font-size: 28px;
     font-weight: 900;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     text-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .hero-subtitle {
-    font-size: 16px;
+    font-size: 14px;
     opacity: 0.95;
     max-width: 600px;
     margin: 0 auto;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .welcome-content {
@@ -2277,8 +2277,8 @@ header h1 {
 .feature-list {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 @media (max-width: 900px) {
@@ -2288,9 +2288,9 @@ header h1 {
 }
 
 .feature-item {
-    padding: 20px 15px;
+    padding: 15px 12px;
     background: white;
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -2301,22 +2301,22 @@ header h1 {
 }
 
 .feature-icon {
-    font-size: 48px;
+    font-size: 32px;
     display: block;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .feature-item h3 {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
     color: #0f172a;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
 }
 
 .feature-item p {
-    font-size: 15px;
+    font-size: 13px;
     color: #64748b;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 .welcome-actions {
