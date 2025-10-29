@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opprett Test-konkurranse</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a202c;
+            color: #e2e8f0;
+        }
+        .container {
+            background: #2d3748;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        button {
+            background: #3182ce;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #2c5aa0;
+        }
+        #log {
+            background: #1a202c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .log-line {
+            margin: 5px 0;
+        }
+        .success { color: #48bb78; }
+        .error { color: #f56565; }
+        .info { color: #63b3ed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Opprett EFL Cup Test-konkurranse</h1>
+        <p>Dette scriptet oppretter en test-konkurranse for dagens EFL Cup-kamper med 0-0 tips.</p>
+
+        <button onclick="createTestCompetition()">Opprett Test-konkurranse</button>
+
+        <div id="log"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="api-config.js"></script>
+    <script>
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            line.textContent = message;
+            logDiv.appendChild(line);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        async function createTestCompetition() {
+            try {
+                log('🔄 Starter opprettelse av test-konkurranse...', 'info');
+
+                // Check if user is logged in
+                const user = auth.currentUser;
+                if (!user) {
+                    log('❌ Du må være logget inn først!', 'error');
+                    alert('Du må være logget inn først! Gå til index.html og logg inn, deretter kom tilbake hit.');
+                    return;
+                }
+
+                log(`👤 Logget inn som: ${user.email}`, 'success');
+                log(`📋 Bruker-ID: ${user.uid}`, 'info');
+
+                // Fetch today's EFL Cup matches
+                log('🔍 Henter dagens EFL Cup-kamper...', 'info');
+
+                const today = new Date();
+                const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+
+                const response = await fetch(`/api/football?endpoint=fixtures&league=48&season=2025&from=${dateStr}&to=${dateStr}`);
+                const data = await response.json();
+
+                if (!data.response || data.response.length === 0) {
+                    log('⚠️ Ingen EFL Cup-kamper funnet for i dag', 'error');
+                    log(`📅 Søkte etter kamper ${dateStr}`, 'info');
+                    return;
+                }
+
+                const matches = data.response;
+                log(`✅ Fant ${matches.length} EFL Cup-kamper`, 'success');
+
+                // Create competition
+                log('🏆 Oppretter konkurranse...', 'info');
+
+                const competitionData = {
+                    name: `EFL Cup Test - ${dateStr}`,
+                    description: 'Test-konkurranse for EFL Cup kamper',
+                    creatorId: user.uid,
+                    creatorName: user.displayName || user.email,
+                    participants: [user.uid],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    competitionType: 'custom',
+                    leagues: [48], // EFL Cup
+                    matchIds: matches.map(m => m.fixture.id)
+                };
+
+                const compRef = await db.collection('competitions').add(competitionData);
+                log(`✅ Konkurranse opprettet! ID: ${compRef.id}`, 'success');
+
+                // Create participant entry
+                await db.collection('competitionParticipants').doc(`${compRef.id}_${user.uid}`).set({
+                    competitionId: compRef.id,
+                    userId: user.uid,
+                    userName: user.displayName || user.email,
+                    totalPoints: 0,
+                    joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                log('✅ Deltaker registrert', 'success');
+
+                // Create 0-0 tips for all matches
+                log(`📝 Legger inn 0-0 tips på ${matches.length} kamper...`, 'info');
+
+                for (const match of matches) {
+                    const matchId = match.fixture.id;
+                    const homeTeam = match.teams.home.name;
+                    const awayTeam = match.teams.away.name;
+
+                    const tipData = {
+                        matchId: matchId,
+                        homeScore: 0,
+                        awayScore: 0,
+                        userId: user.uid,
+                        userDisplayName: user.displayName || user.email,
+                        homeTeam: homeTeam,
+                        awayTeam: awayTeam,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    const docId = `${user.uid}_${matchId}`;
+                    await db.collection('tips').doc(docId).set(tipData);
+
+                    log(`  ✓ ${homeTeam} vs ${awayTeam}: 0-0`, 'success');
+                }
+
+                log('', 'info');
+                log('🎉 Ferdig! Test-konkuransen er opprettet med alle tips!', 'success');
+                log(`🔗 Gå til: competition-detail.html?id=${compRef.id}`, 'info');
+                log('', 'info');
+
+                // Create clickable link
+                const link = document.createElement('a');
+                link.href = `competition-detail.html?id=${compRef.id}`;
+                link.textContent = '👉 Klikk her for å se konkuransen';
+                link.style.cssText = 'display: block; margin: 20px 0; padding: 15px; background: #3182ce; color: white; text-decoration: none; border-radius: 5px; text-align: center; font-size: 18px;';
+                document.querySelector('.container').appendChild(link);
+
+            } catch (error) {
+                log(`❌ Feil: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Wait for auth state
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                log(`✓ Klar til å opprette konkurranse (${user.email})`, 'success');
+            } else {
+                log('⚠️ Ikke logget inn - logg inn først på index.html', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
