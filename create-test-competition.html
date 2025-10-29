@@ -131,8 +131,35 @@
                 const matches = data.response;
                 log(`✅ Fant ${matches.length} EFL Cup-kamper`, 'success');
 
-                // Create competition
-                log('🏆 Oppretter konkurranse...', 'info');
+                // Check if competition already exists for today
+                log('🔍 Sjekker om konkurranse allerede eksisterer...', 'info');
+
+                const matchIds = matches.map(m => m.fixture.id);
+                const existingCompetitionsSnapshot = await db.collection('competitions')
+                    .where('competitionType', '==', 'custom')
+                    .where('leagues', 'array-contains', 48)
+                    .get();
+
+                let competitionId = null;
+                let isNewCompetition = true;
+
+                // Check if any existing competition has the same matchIds
+                existingCompetitionsSnapshot.forEach(doc => {
+                    const comp = doc.data();
+                    if (comp.matchIds && comp.matchIds.length === matchIds.length) {
+                        const sameMatches = matchIds.every(id => comp.matchIds.includes(id));
+                        if (sameMatches) {
+                            competitionId = doc.id;
+                            isNewCompetition = false;
+                            log(`✅ Fant eksisterende konkurranse: ${comp.name}`, 'success');
+                        }
+                    }
+                });
+
+                let compRef;
+                if (isNewCompetition) {
+                    // Create new competition
+                    log('🏆 Oppretter ny konkurranse...', 'info');
 
                 const competitionData = {
                     name: `EFL Cup - ${dateStr}`,
@@ -146,12 +173,24 @@
                     matchIds: matches.map(m => m.fixture.id)
                 };
 
-                const compRef = await db.collection('competitions').add(competitionData);
-                log(`✅ Konkurranse opprettet! ID: ${compRef.id}`, 'success');
+                    compRef = await db.collection('competitions').add(competitionData);
+                    competitionId = compRef.id;
+                    log(`✅ Ny konkurranse opprettet! ID: ${competitionId}`, 'success');
+                } else {
+                    // Join existing competition
+                    log('👥 Blir med i eksisterende konkurranse...', 'info');
+                    compRef = db.collection('competitions').doc(competitionId);
+
+                    // Add user to participants array
+                    await compRef.update({
+                        participants: firebase.firestore.FieldValue.arrayUnion(user.uid)
+                    });
+                    log('✅ Lagt til i konkurranse!', 'success');
+                }
 
                 // Create participant entry
-                await db.collection('competitionParticipants').doc(`${compRef.id}_${user.uid}`).set({
-                    competitionId: compRef.id,
+                await db.collection('competitionParticipants').doc(`${competitionId}_${user.uid}`).set({
+                    competitionId: competitionId,
                     userId: user.uid,
                     userName: user.displayName || user.email,
                     totalPoints: 0,
@@ -190,13 +229,13 @@
                 }
 
                 log('', 'info');
-                log('🎉 Ferdig! Konkuransen er opprettet med alle tips!', 'success');
-                log(`🔗 Gå til: competition-detail.html?id=${compRef.id}`, 'info');
+                log('🎉 Ferdig! ' + (isNewCompetition ? 'Konkuransen er opprettet' : 'Du er med i konkuransen') + ' med alle tips!', 'success');
+                log(`🔗 Gå til: competition-detail.html?id=${competitionId}`, 'info');
                 log('', 'info');
 
                 // Create clickable link
                 const link = document.createElement('a');
-                link.href = `competition-detail.html?id=${compRef.id}`;
+                link.href = `competition-detail.html?id=${competitionId}`;
                 link.textContent = '👉 Klikk her for å se konkuransen';
                 link.style.cssText = 'display: block; margin: 20px 0; padding: 15px; background: #3182ce; color: white; text-decoration: none; border-radius: 5px; text-align: center; font-size: 18px;';
                 document.querySelector('.container').appendChild(link);
