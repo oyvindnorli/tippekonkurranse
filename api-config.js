@@ -6,10 +6,11 @@ const API_CONFIG = {
 
     // League IDs - you can add multiple leagues
     // Available: 39 (Premier League), 140 (La Liga), 78 (Bundesliga),
-    //            135 (Serie A), 61 (Ligue 1), 2 (Champions League), 1 (World Cup), etc.
+    //            135 (Serie A), 61 (Ligue 1), 2 (Champions League), 48 (EFL Cup), etc.
     LEAGUES: [
         39,  // Premier League
-        2    // Champions League
+        2,   // Champions League
+        48   // EFL Cup
     ],
     SEASON: new Date().getFullYear(), // Current season
     MAX_MATCHES: 20, // Maximum number of matches to show

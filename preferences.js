@@ -1,14 +1,15 @@
 // Preferences Management
 let preferencesUser = null;
 
-// Available leagues - Only Premier League and Champions League
+// Available leagues - Premier League, Champions League and EFL Cup
 const AVAILABLE_LEAGUES = [
     { id: 2, name: 'Champions League', country: '🌍 UEFA', icon: '⭐' },
-    { id: 39, name: 'Premier League', country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', icon: '⚽' }
+    { id: 39, name: 'Premier League', country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', icon: '⚽' },
+    { id: 48, name: 'EFL Cup', country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', icon: '🏆' }
 ];
 
-// Default leagues (Premier League and Champions League)
-const DEFAULT_LEAGUES = [39, 2];
+// Default leagues (Premier League, Champions League and EFL Cup)
+const DEFAULT_LEAGUES = [39, 2, 48];
 
 // Initialize
 function init() {
