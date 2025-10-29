@@ -162,8 +162,8 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
     const now = new Date();
     let startDate, endDate;
 
-    if (competition.competitionType === 'round') {
-        // For round-based, determine start/end from matches
+    if (competition.competitionType === 'round' || competition.competitionType === 'custom') {
+        // For round-based or custom, determine start/end from matches
         if (competitionMatches.length > 0) {
             const dates = competitionMatches.map(m => new Date(m.commence_time || m.date));
             startDate = new Date(Math.min(...dates));
@@ -172,9 +172,14 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
             startDate = now;
             endDate = now;
         }
-    } else {
+    } else if (competition.startDate && competition.endDate) {
+        // Date-based competition with explicit start/end dates
         startDate = competition.startDate.toDate();
         endDate = competition.endDate.toDate();
+    } else {
+        // Fallback - use current date
+        startDate = now;
+        endDate = now;
     }
     let status = 'upcoming';
     let statusText = '📅 Kommende';
