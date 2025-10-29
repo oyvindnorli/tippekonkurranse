@@ -2360,17 +2360,39 @@ header h1 {
 
 @media (max-width: 768px) {
     header {
-        padding: 8px 0;
+        padding: 4px 0;
     }
 
     header h1 {
-        font-size: 18px;
-        margin-bottom: 6px;
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+
+    .user-section {
+        margin-bottom: 3px;
+        min-height: 20px;
+    }
+
+    .user-section .current-user {
+        font-size: 11px;
+        gap: 8px;
+        min-height: 24px;
+    }
+
+    .btn-small {
+        padding: 4px 10px;
+        font-size: 10px;
+    }
+
+    .nav-buttons {
+        margin-top: 4px;
+        gap: 6px;
+        min-height: 30px;
     }
 
     .nav-btn {
-        padding: 5px 12px;
-        font-size: 13px;
+        padding: 4px 10px;
+        font-size: 12px;
     }
 
     .hero-banner {
