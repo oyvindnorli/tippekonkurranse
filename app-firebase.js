@@ -889,6 +889,9 @@ async function submitTip(matchId, homeScore, awayScore) {
 // Update total score
 function updateTotalScore() {
     let totalScore = 0;
+    let tipsWithPoints = 0;
+    let tipsWithoutPoints = 0;
+    let oldTipsCount = 0;
 
     console.log('💰 Calculating total score...');
     console.log(`Total user tips: ${userTips.length}`);
@@ -899,19 +902,22 @@ function updateTotalScore() {
         if (match) {
             const points = calculatePoints(tip, match);
             if (points > 0) {
+                tipsWithPoints++;
                 console.log(`✅ Points earned for match ${match.homeTeam} vs ${match.awayTeam}: ${points.toFixed(2)}`);
                 console.log(`   Your tip: ${tip.homeScore}-${tip.awayScore}, Result: ${match.result?.home}-${match.result?.away}`);
             } else if (match.result) {
+                tipsWithoutPoints++;
                 console.log(`❌ No points for match ${match.homeTeam} vs ${match.awayTeam}`);
                 console.log(`   Your tip: ${tip.homeScore}-${tip.awayScore}, Result: ${match.result.home}-${match.result.away}`);
             }
             totalScore += points;
         } else {
-            console.log(`⚠️ Match not found for tip matchId: ${tip.matchId}`);
+            // Match not found - likely an old match no longer in API response
+            oldTipsCount++;
         }
     });
 
-    console.log(`💰 Total score: ${totalScore.toFixed(2)}`);
+    console.log(`💰 Total score: ${totalScore.toFixed(2)} (${tipsWithPoints} correct, ${tipsWithoutPoints} incorrect, ${oldTipsCount} old tips)`);
 
     const scoreElement = document.getElementById('totalScore');
     if (scoreElement) {
