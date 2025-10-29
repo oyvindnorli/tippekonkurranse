@@ -473,6 +473,12 @@ class FootballApiService {
         console.log(`📅 Fetching fixtures from ${from} to ${to}`);
         const fixtures = await this.fetchFixtures(from, to);
 
+        // Skip odds fetching if no fixtures
+        if (fixtures.length === 0) {
+            console.log('ℹ️ No upcoming fixtures, skipping odds fetch');
+            return [];
+        }
+
         // Fetch odds - new strategy: fetch all odds by league and date first
         console.log(`💰 Fetching odds for ${fixtures.length} fixtures...`);
         let successCount = 0;
@@ -480,19 +486,28 @@ class FootballApiService {
 
         // Build a map of all odds by league and date
         const allOddsMap = {};
-        const dateSet = new Set();
+        const leagueDateMap = new Map(); // Map<leagueId, Set<dateStr>>
 
-        // Group fixtures by date
+        // Group fixtures by league and date (only fetch for leagues that have fixtures)
         fixtures.forEach(fixture => {
             const fixtureDate = new Date(fixture.commence_time);
             const dateStr = fixtureDate.toISOString().split('T')[0];
-            dateSet.add(dateStr);
+            const leagueId = fixture.league;
+
+            if (!leagueDateMap.has(leagueId)) {
+                leagueDateMap.set(leagueId, new Set());
+            }
+            leagueDateMap.get(leagueId).add(dateStr);
         });
 
-        // Fetch odds for each league and date combination
-        console.log(`📡 Fetching odds in bulk for ${dateSet.size} dates...`);
-        for (const leagueId of API_CONFIG.LEAGUES) {
-            for (const dateStr of dateSet) {
+        // Calculate total API calls needed
+        let totalCalls = 0;
+        leagueDateMap.forEach((dates) => totalCalls += dates.size);
+
+        // Fetch odds for each league and date combination (only for dates with fixtures)
+        console.log(`📡 Fetching odds in bulk for ${totalCalls} league/date combinations...`);
+        for (const [leagueId, dates] of leagueDateMap.entries()) {
+            for (const dateStr of dates) {
                 const leagueOdds = await this.fetchOddsForLeague(leagueId, dateStr);
                 Object.assign(allOddsMap, leagueOdds);
                 await new Promise(resolve => setTimeout(resolve, 300));
