@@ -214,6 +214,7 @@ function createCompetitionCard(competition) {
     const leagueNames = {
         39: 'Premier League',
         2: 'Champions League',
+        48: 'EFL Cup',
         140: 'La Liga',
         78: 'Bundesliga',
         135: 'Serie A',
