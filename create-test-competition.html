@@ -203,10 +203,53 @@
                 const homeScore = parseInt(document.getElementById('homeScore').value) || 0;
                 const awayScore = parseInt(document.getElementById('awayScore').value) || 0;
 
-                // Create tips for all matches
-                log(`📝 Legger inn ${homeScore}-${awayScore} tips på ${matches.length} kamper...`, 'info');
+                // Fetch odds for all matches
+                log(`🎲 Henter odds for ${matches.length} kamper...`, 'info');
+                const matchesWithOdds = [];
 
                 for (const match of matches) {
+                    const matchId = match.fixture.id;
+                    try {
+                        // Fetch odds from API
+                        const oddsResponse = await fetch(`/api/football?endpoint=odds&fixture=${matchId}`);
+                        const oddsData = await oddsResponse.json();
+
+                        let odds = null;
+                        if (oddsData.response && oddsData.response.length > 0) {
+                            const bookmaker = oddsData.response[0].bookmakers?.[0];
+                            const bet = bookmaker?.bets?.find(b => b.name === 'Match Winner');
+                            if (bet && bet.values) {
+                                odds = {
+                                    H: parseFloat(bet.values.find(v => v.value === 'Home')?.odd || 0),
+                                    U: parseFloat(bet.values.find(v => v.value === 'Draw')?.odd || 0),
+                                    B: parseFloat(bet.values.find(v => v.value === 'Away')?.odd || 0)
+                                };
+                            }
+                        }
+
+                        matchesWithOdds.push({
+                            ...match,
+                            odds: odds
+                        });
+
+                        if (odds) {
+                            log(`  ✓ Odds: H:${odds.H} U:${odds.U} B:${odds.B}`, 'info');
+                        } else {
+                            log(`  ⚠️ Ingen odds tilgjengelig for denne kampen`, 'info');
+                        }
+
+                        // Small delay to avoid rate limiting
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    } catch (error) {
+                        log(`  ⚠️ Kunne ikke hente odds: ${error.message}`, 'info');
+                        matchesWithOdds.push(match);
+                    }
+                }
+
+                // Create tips for all matches
+                log(`📝 Legger inn ${homeScore}-${awayScore} tips på ${matchesWithOdds.length} kamper...`, 'info');
+
+                for (const match of matchesWithOdds) {
                     const matchId = match.fixture.id;
                     const homeTeam = match.teams.home.name;
                     const awayTeam = match.teams.away.name;
@@ -222,10 +265,16 @@
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     };
 
+                    // Add odds if available
+                    if (match.odds) {
+                        tipData.odds = match.odds;
+                    }
+
                     const docId = `${user.uid}_${matchId}`;
                     await db.collection('tips').doc(docId).set(tipData);
 
-                    log(`  ✓ ${homeTeam} vs ${awayTeam}: ${homeScore}-${awayScore}`, 'success');
+                    const oddsText = match.odds ? ` (odds: H:${match.odds.H} U:${match.odds.U} B:${match.odds.B})` : '';
+                    log(`  ✓ ${homeTeam} vs ${awayTeam}: ${homeScore}-${awayScore}${oddsText}`, 'success');
                 }
 
                 log('', 'info');
