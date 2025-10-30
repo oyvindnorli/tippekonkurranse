@@ -402,21 +402,35 @@ class FootballApiService {
 
     /**
      * Get upcoming fixtures (main method)
+     * Now uses Firestore as single source of truth for odds consistency
      */
     async getUpcomingFixtures() {
-        // Check if we have valid cached data
-        if (this.cache && this.cache.data) {
-            return this.cache.data;
-        }
-
         const today = new Date();
         const nextWeek = new Date();
         nextWeek.setDate(today.getDate() + 7); // Get fixtures for next week
 
+        // Try Firestore first (fastest and ensures consistent odds)
+        try {
+            const { getUpcomingMatchesFromCache, saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
+            const cachedMatches = await getUpcomingMatchesFromCache(today, nextWeek, API_CONFIG.LEAGUES);
+
+            if (cachedMatches && cachedMatches.length > 0) {
+                console.log(`⚡ Loaded ${cachedMatches.length} matches from Firestore cache`);
+
+                // Return cached matches immediately for fast loading
+                // We'll update results in background if needed
+                this.updateResultsInBackground(cachedMatches);
+                return cachedMatches;
+            }
+        } catch (error) {
+            console.warn('⚠️ Firestore cache failed, falling back to API:', error);
+        }
+
+        // Firestore cache miss - fetch from API
         const from = today.toISOString().split('T')[0];
         const to = nextWeek.toISOString().split('T')[0];
 
-        console.log(`📅 Fetching fixtures from ${from} to ${to}`);
+        console.log(`📅 Fetching fixtures from API ${from} to ${to}`);
         const fixtures = await this.fetchFixtures(from, to);
 
         // Skip odds fetching if no fixtures
@@ -497,10 +511,54 @@ class FootballApiService {
 
         console.log(`💰 Odds: ${successCount} fetched${defaultCount > 0 ? `, ${defaultCount} missing` : ''}`);
 
-        // Save to cache
+        // Save to Firestore for consistent odds across all users
+        try {
+            const { saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
+            await saveMatchesToFirestore(fixtures);
+        } catch (error) {
+            console.warn('⚠️ Failed to save matches to Firestore:', error);
+        }
+
+        // Also save to localStorage for faster initial load
         this.saveCache(fixtures);
 
         return fixtures;
+    }
+
+    /**
+     * Update match results in background (for cached matches)
+     * Only updates completed status and results, never odds
+     */
+    async updateResultsInBackground(cachedMatches) {
+        try {
+            // Get match IDs that need result updates (not completed yet)
+            const incompleteMatches = cachedMatches.filter(m => !m.completed);
+
+            if (incompleteMatches.length === 0) {
+                return; // All matches completed, no update needed
+            }
+
+            console.log(`🔄 Checking results for ${incompleteMatches.length} incomplete matches...`);
+
+            // Fetch latest scores from API
+            const updatedScores = await this.fetchScores();
+
+            // Find matches with new results
+            const matchesWithResults = [];
+            incompleteMatches.forEach(cached => {
+                const updated = updatedScores.find(s => String(s.id) === String(cached.id));
+                if (updated && updated.completed) {
+                    matchesWithResults.push(updated);
+                }
+            });
+
+            if (matchesWithResults.length > 0) {
+                const { updateMatchResults } = await import('./js/utils/matchCache.js');
+                await updateMatchResults(matchesWithResults);
+            }
+        } catch (error) {
+            console.warn('⚠️ Background result update failed:', error);
+        }
     }
 
     /**

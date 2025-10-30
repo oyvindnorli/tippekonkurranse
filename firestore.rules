@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users collection - users can read/write their own document
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // User preferences - users can read/write their own preferences
+    match /userPreferences/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Competitions - anyone can read, only authenticated users can create
+    match /competitions/{competitionId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null &&
+                      resource.data.createdBy == request.auth.uid;
+    }
+
+    // Competition participants - anyone can read, authenticated users can join
+    match /competitionParticipants/{participantId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null &&
+                      resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null &&
+                      resource.data.userId == request.auth.uid;
+    }
+
+    // Tips - users can read/write their own tips
+    match /tips/{tipId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null &&
+                      resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null &&
+                      resource.data.userId == request.auth.uid;
+    }
+
+    // Matches collection - anyone can read, authenticated users can write
+    // Odds are frozen on first write (handled in code logic)
+    match /matches/{matchId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      // Only allow updating result/completed fields, never odds
+      allow update: if request.auth != null &&
+                      (!request.resource.data.diff(resource.data).affectedKeys()
+                        .hasAny(['odds', 'oddsLockedAt', 'homeTeam', 'awayTeam', 'league']));
+    }
+
+    // Cached matches (legacy) - read only
+    match /cachedMatches/{matchId} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
