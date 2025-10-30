@@ -1,0 +1,20 @@
+{
+  "name": "tippekonkurranse",
+  "version": "1.0.0",
+  "description": "Fotball tippekonkurranse app",
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "jsdom": "^23.0.0"
+  },
+  "keywords": ["football", "betting", "competition"],
+  "author": "",
+  "license": "ISC"
+}

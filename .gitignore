@@ -32,3 +32,7 @@ __pycache__/
 # OS filer
 .DS_Store
 Thumbs.db
+
+# Node modules
+node_modules/
+coverage/
