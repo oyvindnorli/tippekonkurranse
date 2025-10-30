@@ -1140,6 +1140,62 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Force refresh data from API (bypass cache)
+async function refreshData() {
+    console.log('🔄 Force refreshing data from API...');
+
+    // Clear localStorage cache
+    localStorage.removeItem('cachedMatches');
+    localStorage.removeItem('cachedMatchesTime');
+
+    try {
+        const loadingMessage = document.getElementById('loadingMessage');
+        loadingMessage.style.display = 'block';
+
+        // Fetch fresh data from API (skip Firestore cache)
+        const [upcomingMatches, completedMatches] = await Promise.all([
+            footballApi.getUpcomingFixtures(true), // skipCache = true
+            footballApi.fetchScores()
+        ]);
+
+        console.log(`✅ Fetched ${upcomingMatches.length} upcoming, ${completedMatches.length} completed`);
+
+        // Deduplicate matches
+        const existingIds = new Set(upcomingMatches.map(m => String(m.id)));
+        const uniqueCompletedMatches = completedMatches.filter(m => {
+            const id = String(m.id);
+            if (existingIds.has(id)) return false;
+            existingIds.add(id);
+            return true;
+        });
+
+        // Combine and sort
+        allMatches = upcomingMatches.concat(uniqueCompletedMatches);
+        allMatches.sort((a, b) => {
+            const dateA = new Date(a.commence_time || a.date || a.timestamp * 1000);
+            const dateB = new Date(b.commence_time || b.date || b.timestamp * 1000);
+            return dateA - dateB;
+        });
+
+        // Cache the fresh data
+        setCachedMatches(allMatches);
+
+        // Apply filter and render
+        applyLeagueFilter();
+        await loadUserTips();
+        renderMatches();
+        updateTotalScore();
+
+        loadingMessage.style.display = 'none';
+        console.log('✅ Data refreshed successfully!');
+    } catch (error) {
+        console.error('❌ Failed to refresh data:', error);
+    }
+}
+
+// Make refreshData available globally
+window.refreshData = refreshData;
+
 // Add button to simulate results for testing (can be removed later)
 window.addEventListener('DOMContentLoaded', () => {
     init();

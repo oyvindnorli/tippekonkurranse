@@ -168,25 +168,31 @@ class FootballApiService {
      * Get upcoming fixtures (main method)
      * Now uses Firestore as single source of truth for odds consistency
      */
-    async getUpcomingFixtures() {
+    async getUpcomingFixtures(skipCache = false) {
         const today = new Date();
         const tomorrow = new Date();
         tomorrow.setDate(today.getDate() + 7); // Get fixtures for next 7 days
 
         // Try Firestore first (fastest and ensures consistent odds)
-        try {
-            const { getUpcomingMatchesFromCache, saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
-            const cachedMatches = await getUpcomingMatchesFromCache(today, tomorrow, API_CONFIG.LEAGUES);
+        if (!skipCache) {
+            try {
+                const { getUpcomingMatchesFromCache, saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
+                const cachedMatches = await getUpcomingMatchesFromCache(today, tomorrow, API_CONFIG.LEAGUES);
 
-            if (cachedMatches && cachedMatches.length > 0) {
-                console.log(`⚡ Loaded ${cachedMatches.length} matches from Firestore cache`);
+                if (cachedMatches && cachedMatches.length > 0) {
+                    console.log(`⚡ Loaded ${cachedMatches.length} matches from Firestore cache for leagues ${API_CONFIG.LEAGUES.join(',')}`);
 
-                // Return cached matches immediately for fast loading
-                // Note: Results will be updated by loadMatches() which calls fetchScores() separately
-                return cachedMatches;
+                    // Return cached matches immediately for fast loading
+                    // Note: Results will be updated by loadMatches() which calls fetchScores() separately
+                    return cachedMatches;
+                } else {
+                    console.log(`⚠️ Firestore cache returned 0 matches for leagues ${API_CONFIG.LEAGUES.join(',')}, fetching from API...`);
+                }
+            } catch (error) {
+                console.warn('⚠️ Firestore cache failed, falling back to API:', error);
             }
-        } catch (error) {
-            console.warn('⚠️ Firestore cache failed, falling back to API:', error);
+        } else {
+            console.log('🔄 Skipping Firestore cache, fetching fresh data from API...');
         }
 
         // Firestore cache miss - fetch from API
