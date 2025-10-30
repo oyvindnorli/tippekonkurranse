@@ -193,6 +193,20 @@ async function loadCompetitions() {
                 const allMatchesCompleted = competitionMatches.length > 0 &&
                     competitionMatches.every(match => match.completed);
 
+                // Debug logging for active competitions
+                if (!allMatchesCompleted && competitionMatches.length > 0) {
+                    console.log(`⚠️ Competition "${c.name}" marked as ACTIVE:`);
+                    console.log(`  - Total matches: ${competitionMatches.length}`);
+                    console.log(`  - Completed: ${competitionMatches.filter(m => m.completed).length}`);
+                    console.log(`  - Has cachedMatches: ${c.cachedMatches ? 'YES' : 'NO'}`);
+                    const incomplete = competitionMatches.filter(m => !m.completed);
+                    if (incomplete.length > 0 && incomplete.length <= 3) {
+                        incomplete.forEach(m => {
+                            console.log(`  - Incomplete: ${m.homeTeam} vs ${m.awayTeam} (status: ${m.statusShort})`);
+                        });
+                    }
+                }
+
                 if (allMatchesCompleted) {
                     // All matches are completed
                     completed.push(c);
