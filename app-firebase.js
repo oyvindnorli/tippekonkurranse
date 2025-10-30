@@ -1195,6 +1195,7 @@ async function refreshData() {
 
 // Make refreshData available globally
 window.refreshData = refreshData;
+window.forceRefreshData = refreshData; // Alias for onclick handler
 
 // Add button to simulate results for testing (can be removed later)
 window.addEventListener('DOMContentLoaded', () => {
