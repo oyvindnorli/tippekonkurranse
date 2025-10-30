@@ -406,13 +406,13 @@ class FootballApiService {
      */
     async getUpcomingFixtures() {
         const today = new Date();
-        const nextWeek = new Date();
-        nextWeek.setDate(today.getDate() + 7); // Get fixtures for next week
+        const tomorrow = new Date();
+        tomorrow.setDate(today.getDate() + 2); // Get fixtures for today + tomorrow (2 days)
 
         // Try Firestore first (fastest and ensures consistent odds)
         try {
             const { getUpcomingMatchesFromCache, saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
-            const cachedMatches = await getUpcomingMatchesFromCache(today, nextWeek, API_CONFIG.LEAGUES);
+            const cachedMatches = await getUpcomingMatchesFromCache(today, tomorrow, API_CONFIG.LEAGUES);
 
             if (cachedMatches && cachedMatches.length > 0) {
                 console.log(`⚡ Loaded ${cachedMatches.length} matches from Firestore cache`);
@@ -428,7 +428,7 @@ class FootballApiService {
 
         // Firestore cache miss - fetch from API
         const from = today.toISOString().split('T')[0];
-        const to = nextWeek.toISOString().split('T')[0];
+        const to = tomorrow.toISOString().split('T')[0];
 
         console.log(`📅 Fetching fixtures from API ${from} to ${to}`);
         const fixtures = await this.fetchFixtures(from, to);

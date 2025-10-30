@@ -55,6 +55,8 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
         const startISO = startDate.toISOString();
         const endISO = endDate.toISOString();
 
+        console.log(`🔍 Firestore query: ${startISO.split('T')[0]} to ${endISO.split('T')[0]} for leagues ${leagueIds.join(',')}`);
+
         // Fetch all matches in date range, then filter by league in JS
         // (Firestore 'in' has limit of 10, and we want flexibility)
         const snapshot = await db.collection('matches')
@@ -62,6 +64,8 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
             .where('commence_time', '<=', endISO)
             .orderBy('commence_time')
             .get();
+
+        console.log(`📊 Firestore returned ${snapshot.size} total documents`);
 
         const matches = [];
         const leagueSet = new Set(leagueIds);
@@ -74,10 +78,10 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
             }
         });
 
-        console.log(`📦 Firestore cache: Found ${matches.length} matches`);
+        console.log(`📦 Firestore cache: Found ${matches.length} matches (after league filter)`);
         return matches;
     } catch (error) {
-        console.error('Error fetching upcoming matches from Firestore:', error);
+        console.error('❌ Error fetching upcoming matches from Firestore:', error);
         return [];
     }
 }
