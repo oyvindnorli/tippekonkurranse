@@ -4,6 +4,16 @@
  */
 
 /**
+ * Formater en dato på norsk
+ * @param {Date} date - Dato
+ * @returns {string} Formatert dato (f.eks. "5. nov 2025")
+ */
+export function formatDate(date) {
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    return date.toLocaleDateString('no-NO', options);
+}
+
+/**
  * Formater et dato-intervall på norsk
  * @param {Date} startDate - Startdato
  * @param {Date} endDate - Sluttdato
