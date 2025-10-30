@@ -16,8 +16,8 @@ const API_CONFIG = {
     SEASON: new Date().getFullYear(), // Current season
     MAX_MATCHES: 30, // Maximum number of matches to show
 
-    // Cache settings (15 minutes - you have Pro plan with 7500 requests/day)
-    CACHE_DURATION: 15 * 60 * 1000 // 15 minutes in milliseconds
+    // Cache settings (30 minutes - you have Pro plan with 7500 requests/day)
+    CACHE_DURATION: 30 * 60 * 1000 // 30 minutes in milliseconds
 };
 
 // Check if API is available (always true now since we use serverless function)

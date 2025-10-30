@@ -452,11 +452,31 @@ class FootballApiService {
 
         // Fetch odds for each league and date combination (only for dates with fixtures)
         console.log(`📡 Fetching odds in bulk for ${totalCalls} league/date combinations...`);
+        let oddsCallCount = 0;
+        let foundAnyOdds = false;
+
         for (const [leagueId, dates] of leagueDateMap.entries()) {
             for (const dateStr of dates) {
+                oddsCallCount++;
                 const leagueOdds = await this.fetchOddsForLeague(leagueId, dateStr);
                 Object.assign(allOddsMap, leagueOdds);
-                await new Promise(resolve => setTimeout(resolve, 300));
+
+                if (Object.keys(leagueOdds).length > 0) {
+                    foundAnyOdds = true;
+                }
+
+                // Early exit: if we've made 2+ calls and found no odds, API likely has none
+                if (oddsCallCount >= 2 && !foundAnyOdds) {
+                    console.log('⚡ No odds found after 2 calls, skipping rest');
+                    break;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 100)); // Reduced delay
+            }
+
+            // Break outer loop too if we're skipping
+            if (oddsCallCount >= 2 && !foundAnyOdds) {
+                break;
             }
         }
 
