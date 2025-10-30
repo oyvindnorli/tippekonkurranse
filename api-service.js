@@ -69,7 +69,6 @@ class FootballApiService {
         }
 
         try {
-            console.log('🌐 Fetching fixtures from API-Football...');
             let allFixtures = [];
             const fixtureIds = new Set(); // Track unique fixture IDs
 
@@ -77,13 +76,11 @@ class FootballApiService {
             for (const leagueId of API_CONFIG.LEAGUES) {
                 const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${from}&to=${to}`;
 
-                console.log(`📡 Fetching league ${leagueId}...`);
                 const response = await fetch(url, {
                     method: 'GET'
                 });
 
                 if (!response.ok) {
-                    console.warn(`Failed to fetch league ${leagueId}: ${response.status}`);
                     continue;
                 }
 
@@ -91,26 +88,16 @@ class FootballApiService {
 
                 if (data.response && data.response.length > 0) {
                     // Deduplicate fixtures by ID
-                    let addedCount = 0;
                     data.response.forEach(fixture => {
                         if (!fixtureIds.has(fixture.fixture.id)) {
                             fixtureIds.add(fixture.fixture.id);
                             allFixtures.push(fixture);
-                            addedCount++;
-                        } else {
-                            console.log(`🔄 Skipping duplicate fixture: ${fixture.teams.home.name} vs ${fixture.teams.away.name} (ID: ${fixture.fixture.id})`);
                         }
                     });
-                    console.log(`✅ Added ${addedCount} unique fixtures from league ${leagueId} (${data.response.length} total in response)`);
-                }
-
-                // Log API rate limit info
-                if (data.parameters && data.parameters.requests) {
-                    console.log(`📊 API requests used: ${data.parameters.requests.current}/${data.parameters.requests.limit_day}`);
                 }
             }
 
-            console.log(`📅 Total unique fixtures fetched: ${allFixtures.length}`);
+            console.log(`📅 Fetched ${allFixtures.length} fixtures`);
             return this.transformFixturesData(allFixtures);
         } catch (error) {
             console.error('Error fetching fixtures:', error);
@@ -132,49 +119,33 @@ class FootballApiService {
             // Try to fetch all odds for the league on this date
             const url = `${API_CONFIG.BASE_URL}?endpoint=odds&league=${leagueId}&season=${API_CONFIG.SEASON}&date=${date}`;
 
-            console.log(`📡 Fetching odds for league ${leagueId} on ${date}...`);
-
             const response = await fetch(url, {
                 method: 'GET'
             });
 
             if (!response.ok) {
-                console.error(`❌ Failed to fetch league odds: ${response.status} ${response.statusText}`);
                 if (response.status === 429) {
-                    console.error('⚠️ API RATE LIMIT EXCEEDED! You have used up your daily quota.');
+                    console.error('⚠️ API RATE LIMIT EXCEEDED!');
                 }
                 return {};
             }
 
             const data = await response.json();
 
-            // Log API usage
-            if (data.requests) {
-                console.log(`📊 API Usage: ${data.requests.current}/${data.requests.limit_day} requests used today`);
-            }
-
             const oddsMap = {};
 
             if (data.response && data.response.length > 0) {
-                console.log(`✅ Found odds for ${data.response.length} fixtures in league ${leagueId} on ${date}`);
-
                 data.response.forEach(oddsData => {
                     const fixtureId = oddsData.fixture.id;
                     const odds = this.transformOddsData(oddsData);
                     if (odds) {
                         oddsMap[fixtureId] = odds;
-                        console.log(`  💰 Fixture ${fixtureId}: H:${odds.H} U:${odds.U} B:${odds.B}`);
-                    } else {
-                        console.warn(`  ⚠️ No odds available for fixture ${fixtureId}`);
                     }
                 });
-            } else {
-                console.warn(`⚠️ No odds data returned for league ${leagueId} on ${date}`);
             }
 
             return oddsMap;
         } catch (error) {
-            console.error(`Error fetching league odds:`, error);
             return {};
         }
     }
@@ -201,16 +172,13 @@ class FootballApiService {
                 if (data.response && data.response.length > 0) {
                     const odds = this.transformOddsData(data.response[0]);
                     if (odds.H !== 2.0 || odds.U !== 3.0 || odds.B !== 3.5) {
-                        console.log(`✅ Found odds for fixture ${fixtureId}`);
                         return odds;
                     }
                 }
             }
 
-            console.warn(`⚠️ No odds found for fixture ${fixtureId}`);
             return null; // No odds available
         } catch (error) {
-            console.error(`❌ Error fetching odds for fixture ${fixtureId}:`, error);
             return null; // No odds available
         }
     }
@@ -219,29 +187,17 @@ class FootballApiService {
      * Transform API-Football fixtures data to our format
      */
     transformFixturesData(apiFixtures) {
-        // Log all fixtures before filtering
-        console.log(`📋 Total fixtures received from API: ${apiFixtures.length}`);
-
         // Filter out matches that have already finished or are in progress
         const now = new Date();
-
-        // Log what we're filtering out
-        apiFixtures.forEach(fixture => {
-            const matchDate = new Date(fixture.fixture.date);
-            const status = fixture.fixture.status.short;
-            const homeTeam = fixture.teams.home.name;
-            const awayTeam = fixture.teams.away.name;
-
-            if (matchDate <= now) {
-                console.log(`⏰ Filtering out (already started/past): ${homeTeam} vs ${awayTeam} - Date: ${matchDate.toLocaleString('no-NO')} - Status: ${status}`);
-            } else if (status !== 'NS') {
-                console.log(`⚠️ Filtering out (status not NS): ${homeTeam} vs ${awayTeam} - Status: ${status}`);
-            }
-        });
+        let filteredCount = 0;
 
         const upcomingFixtures = apiFixtures.filter(fixture => {
             const matchDate = new Date(fixture.fixture.date);
-            return matchDate > now && fixture.fixture.status.short === 'NS'; // NS = Not Started
+            if (matchDate <= now || fixture.fixture.status.short !== 'NS') {
+                filteredCount++;
+                return false;
+            }
+            return true;
         });
 
         // Sort by date
@@ -249,7 +205,9 @@ class FootballApiService {
             return new Date(a.fixture.date) - new Date(b.fixture.date);
         });
 
-        console.log(`📅 Upcoming fixtures after filtering: ${upcomingFixtures.length}`);
+        if (filteredCount > 0) {
+            console.log(`📅 Filtered ${filteredCount} matches, ${upcomingFixtures.length} upcoming`);
+        }
 
         return upcomingFixtures.slice(0, API_CONFIG.MAX_MATCHES).map(fixture => {
             const matchDate = new Date(fixture.fixture.date);
@@ -354,20 +312,16 @@ class FootballApiService {
             const fromDate = weekAgo.toISOString().split('T')[0];
             const toDate = today.toISOString().split('T')[0];
 
-            console.log(`📅 Fetching matches from ${fromDate} to ${toDate}`);
-
             // Fetch live and recent matches for each league - WITH EVENTS
             for (const leagueId of API_CONFIG.LEAGUES) {
                 // Use timezone parameter to get events data
                 const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${fromDate}&to=${toDate}&timezone=Europe/Oslo`;
 
-                console.log(`📡 Fetching scores for league ${leagueId}...`);
                 const response = await fetch(url, {
                     method: 'GET'
                 });
 
                 if (!response.ok) {
-                    console.warn(`Failed to fetch scores for league ${leagueId}: ${response.status}`);
                     continue;
                 }
 
@@ -375,24 +329,16 @@ class FootballApiService {
 
                 if (data.response && data.response.length > 0) {
                     // Deduplicate matches by ID
-                    let addedCount = 0;
                     data.response.forEach(match => {
                         if (!fixtureIds.has(match.fixture.id)) {
                             fixtureIds.add(match.fixture.id);
                             allMatches.push(match);
-                            addedCount++;
-
-                            // Log if match has events
-                            if (match.events && match.events.length > 0) {
-                                console.log(`📋 Match ${match.teams.home.name} vs ${match.teams.away.name} has ${match.events.length} events`);
-                            }
                         }
                     });
-                    console.log(`✅ Added ${addedCount} unique matches from league ${leagueId} (${data.response.length} total in response)`);
                 }
             }
 
-            console.log(`📊 Total unique matches in last 7 days: ${allMatches.length}`);
+            console.log(`📊 Fetched ${allMatches.length} completed matches`);
             return this.transformScoresData(allMatches);
         } catch (error) {
             console.error('Error fetching scores:', error);
@@ -523,35 +469,27 @@ class FootballApiService {
             // First try to use odds from bulk fetch
             if (allOddsMap[fixture.id]) {
                 fixture.odds = allOddsMap[fixture.id];
-                console.log(`✅ Odds for ${fixture.homeTeam} vs ${fixture.awayTeam}: H:${fixture.odds.H} U:${fixture.odds.U} B:${fixture.odds.B}`);
                 successCount++;
             } else {
                 // Fallback: try to fetch individually from API-Football
-                console.log(`[${i+1}/${fixtures.length}] Fetching individual odds for ${fixture.homeTeam} vs ${fixture.awayTeam}...`);
                 try {
                     fixture.odds = await this.fetchOddsForFixture(fixture.id);
 
                     if (!fixture.odds) {
-                        console.warn(`⚠️ No odds available for ${fixture.homeTeam} vs ${fixture.awayTeam}`);
                         defaultCount++;
                     } else {
-                        console.log(`✅ Odds for ${fixture.homeTeam} vs ${fixture.awayTeam}: H:${fixture.odds.H} U:${fixture.odds.U} B:${fixture.odds.B}`);
                         successCount++;
                     }
 
                     await new Promise(resolve => setTimeout(resolve, 500));
                 } catch (error) {
-                    console.error(`❌ Failed to fetch odds for ${fixture.homeTeam} vs ${fixture.awayTeam}:`, error);
                     fixture.odds = null;
                     defaultCount++;
                 }
             }
         }
 
-        console.log(`📊 Odds fetch summary: ${successCount} with odds, ${defaultCount} without odds`);
-        if (defaultCount > 0) {
-            console.warn(`⚠️ ${defaultCount} matches are missing odds from the API. This is normal for some leagues/bookmakers.`);
-        }
+        console.log(`💰 Odds: ${successCount} fetched${defaultCount > 0 ? `, ${defaultCount} missing` : ''}`);
 
         // Save to cache
         this.saveCache(fixtures);

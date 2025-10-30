@@ -30,7 +30,6 @@ async function loadSelectedLeagues(userId) {
 
         if (prefsDoc.exists && prefsDoc.data().leagues) {
             const leagueArray = prefsDoc.data().leagues;
-            console.log('📂 Loaded user league preferences from Firestore:', leagueArray);
 
             // Only allow Premier League (39), Champions League (2), and EFL Cup (48)
             const validLeagues = [39, 2, 48];
@@ -96,9 +95,7 @@ let selectedLeagues = new Set([39, 2, 48]); // Default: Premier League, Champion
 
 // Load user tips from Firebase
 async function loadUserTips() {
-    console.log('📥 Loading user tips from Firebase...');
     userTips = await getCurrentUserTips();
-    console.log('✅ Loaded tips:', userTips.length, userTips);
 }
 
 // UI Functions for Auth Modal
@@ -385,8 +382,6 @@ function applyLeagueFilter() {
         });
     }
 
-    console.log(`🏆 League filter: ${leagueFilteredMatches.length} matches (from ${Array.from(leaguesToShow).length} leagues)`);
-
     // After applying league filter, apply date filter
     applyDateFilter();
 }
@@ -401,12 +396,10 @@ function getCachedMatches() {
             const age = Date.now() - parseInt(cacheTime);
             // Cache valid for 5 minutes
             if (age < 5 * 60 * 1000) {
-                console.log('✅ Using cached matches (age:', Math.round(age / 1000), 'seconds)');
                 return JSON.parse(cached);
             }
         }
     } catch (error) {
-        console.warn('⚠️ Could not load cached matches:', error);
     }
     return null;
 }
@@ -415,9 +408,7 @@ function setCachedMatches(matches) {
     try {
         localStorage.setItem('cachedMatches', JSON.stringify(matches));
         localStorage.setItem('cachedMatchesTime', Date.now().toString());
-        console.log('💾 Cached', matches.length, 'matches');
     } catch (error) {
-        console.warn('⚠️ Could not cache matches:', error);
     }
 }
 
@@ -452,20 +443,15 @@ async function loadMatches() {
 
             await tipsPromise;
             updateTotalScore();
-
-            console.log('⚡ Rendered cached matches, fetching fresh data in background...');
         }
 
         // Fetch fresh data from API (in parallel)
         const [upcomingMatches, completedMatches] = await Promise.all([
             footballApi.getUpcomingFixtures(),
             footballApi.fetchScores().catch(error => {
-                console.warn('⚠️ Could not load completed matches:', error);
                 return [];
             })
         ]);
-
-        console.log('📊 Loaded matches:', upcomingMatches.length, 'upcoming,', completedMatches.length, 'completed');
 
         // Deduplicate matches
         const existingIds = new Set(upcomingMatches.map(m => String(m.id)));
@@ -478,8 +464,6 @@ async function loadMatches() {
             return true;
         });
 
-        console.log(`✅ Adding ${uniqueCompletedMatches.length} unique completed matches`);
-
         // Combine all matches
         allMatches = upcomingMatches.concat(uniqueCompletedMatches);
 
@@ -490,7 +474,7 @@ async function loadMatches() {
             return dateA - dateB;
         });
 
-        console.log('✅ Sorted all matches by date');
+        console.log(`📊 ${upcomingMatches.length} upcoming, ${completedMatches.length} completed`);
 
         // Cache the fresh data
         setCachedMatches(allMatches);
@@ -559,18 +543,14 @@ function init() {
 
         if (user) {
             // User is signed in, load preferences first
-            console.log('👤 User logged in, loading preferences...');
             selectedLeagues = await loadSelectedLeagues(user.uid);
-            console.log('✅ User preferences loaded, selected leagues:', Array.from(selectedLeagues));
 
             // Update API_CONFIG.LEAGUES to use user's preferred leagues
             API_CONFIG.LEAGUES = Array.from(selectedLeagues);
-            console.log('🔧 Updated API_CONFIG.LEAGUES:', API_CONFIG.LEAGUES);
 
             // Clear API cache to fetch fresh data with new leagues
             if (footballApi && footballApi.clearCache) {
                 footballApi.clearCache();
-                console.log('🗑️ Cleared API cache to fetch fresh data');
             }
 
             // Show main content
@@ -602,14 +582,7 @@ function renderMatches() {
     const matchesList = document.getElementById('matchesList');
     matchesList.innerHTML = '';
 
-    console.log('🎯 Rendering matches:', matches.length);
-    if (matches.length > 0) {
-        console.log('First match commence_time:', matches[0].commence_time);
-    }
-
     const groupedMatches = groupMatchesByDate(matches);
-
-    console.log('📅 Date groups:', Object.keys(groupedMatches));
 
     // Show message if no matches
     if (Object.keys(groupedMatches).length === 0) {
@@ -648,11 +621,6 @@ function renderMatches() {
             const upcomingMatches = timeMatches.filter(match => {
                 const matchDate = match.commence_time ? new Date(match.commence_time) : (match.timestamp ? new Date(match.timestamp * 1000) : null);
                 const hasStarted = matchDate && matchDate < new Date();
-
-                if (hasStarted) {
-                    console.log(`⏰ Skipping match that has started: ${match.homeTeam} vs ${match.awayTeam}`);
-                }
-
                 return !hasStarted;
             });
 
@@ -681,8 +649,6 @@ function renderMatches() {
                 const existingTip = userTips.find(tip => String(tip.matchId) === String(match.id));
 
                 if (!existingTip && userTips.length > 0) {
-                    console.log(`🔍 No tip found for match ${match.id}`);
-                    console.log('Available tip matchIds:', userTips.map(t => t.matchId));
                 }
 
                 const homeScore = existingTip ? existingTip.homeScore : '?';
@@ -690,7 +656,6 @@ function renderMatches() {
                 const hasTip = existingTip !== undefined;
 
                 if (existingTip) {
-                    console.log(`✅ Found tip for match ${match.id}: ${homeScore}-${awayScore}`);
                 }
 
                 const matchCard = document.createElement('div');
@@ -702,10 +667,8 @@ function renderMatches() {
 
                 // Log missing logos
                 if (!homeLogo) {
-                    console.log(`⚠️ Missing logo for: ${match.homeTeam}`);
                 }
                 if (!awayLogo) {
-                    console.log(`⚠️ Missing logo for: ${match.awayTeam}`);
                 }
 
                 matchCard.innerHTML = `
@@ -893,22 +856,14 @@ function updateTotalScore() {
     let tipsWithoutPoints = 0;
     let oldTipsCount = 0;
 
-    console.log('💰 Calculating total score...');
-    console.log(`Total user tips: ${userTips.length}`);
-    console.log(`Total matches available: ${matches.length}`);
-
     userTips.forEach(tip => {
         const match = matches.find(m => String(m.id) === String(tip.matchId));
         if (match) {
             const points = calculatePoints(tip, match);
             if (points > 0) {
                 tipsWithPoints++;
-                console.log(`✅ Points earned for match ${match.homeTeam} vs ${match.awayTeam}: ${points.toFixed(2)}`);
-                console.log(`   Your tip: ${tip.homeScore}-${tip.awayScore}, Result: ${match.result?.home}-${match.result?.away}`);
             } else if (match.result) {
                 tipsWithoutPoints++;
-                console.log(`❌ No points for match ${match.homeTeam} vs ${match.awayTeam}`);
-                console.log(`   Your tip: ${tip.homeScore}-${tip.awayScore}, Result: ${match.result.home}-${match.result.away}`);
             }
             totalScore += points;
         } else {
@@ -917,7 +872,9 @@ function updateTotalScore() {
         }
     });
 
-    console.log(`💰 Total score: ${totalScore.toFixed(2)} (${tipsWithPoints} correct, ${tipsWithoutPoints} incorrect, ${oldTipsCount} old tips)`);
+    if (tipsWithPoints > 0 || tipsWithoutPoints > 0) {
+        console.log(`💰 ${totalScore.toFixed(2)} poeng (${tipsWithPoints} riktige${oldTipsCount > 0 ? `, ${oldTipsCount} gamle` : ''})`);
+    }
 
     const scoreElement = document.getElementById('totalScore');
     if (scoreElement) {
@@ -1036,9 +993,6 @@ function applyDateFilter() {
             return matchDate >= startOfDay && matchDate <= endOfDay;
         });
 
-        console.log(`📅 Date filter: ${filteredMatches.length} matches for ${selectedDate.toLocaleDateString('no-NO')}`);
-    } else {
-        console.log(`📅 Date filter: showing all dates (${filteredMatches.length} matches)`);
     }
 
     matches = filteredMatches;
@@ -1108,7 +1062,6 @@ function toggleLeagueFilter(leagueId) {
         activeLeagueFilter.clear();
     }
 
-    console.log(`🏆 Active league filter:`, Array.from(activeLeagueFilter));
 
     // Re-apply filters
     applyLeagueFilter();
@@ -1174,13 +1127,5 @@ window.addEventListener('DOMContentLoaded', () => {
     init();
 
     // Add debug button in console
-    console.log('🔥 APP VERSION: 2025-10-13-19:40 - SHOW ? FOR EMPTY TIPS!');
-    console.log('Total userTips loaded:', userTips.length);
-    if (userTips.length > 0) {
-        console.log('Sample tip:', userTips[0]);
-    }
-    console.log('Tilgjengelige funksjoner:');
-    console.log('- simulateResult(matchId): Simuler resultat for en kamp');
-    console.log('- refreshData(): Hent nye data fra API (tømmer cache)');
-    console.log('- Eksempel: simulateResult(1)');
+    console.log('🔥 Tippekonkurranse loaded | simulateResult(matchId) | refreshData()');
 });
