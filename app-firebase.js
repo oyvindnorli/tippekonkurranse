@@ -524,22 +524,25 @@ async function loadMatches() {
 
 // Initialize the app
 function init() {
-    // Show auth buttons by default (will be hidden by onUserLoggedIn if user is logged in)
-    const authSection = document.getElementById('authSection');
-    if (authSection) {
-        authSection.style.display = 'block';
-    }
-
     // Initialize Firebase first
     initializeFirebase();
 
     // Initialize date navigation
     initDateNavigation();
 
+    // Hide everything until we know auth state (prevent flash of wrong content)
+    const welcomeSection = document.getElementById('welcomeSection');
+    const mainContent = document.getElementById('mainContent');
+    const authSection = document.getElementById('authSection');
+    const authLoading = document.getElementById('authLoading');
+
+    if (welcomeSection) welcomeSection.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'none';
+
     // Wait for auth state before loading matches
     firebase.auth().onAuthStateChanged(async (user) => {
-        const welcomeSection = document.getElementById('welcomeSection');
-        const mainContent = document.getElementById('mainContent');
+        // Hide loading spinner
+        if (authLoading) authLoading.style.display = 'none';
 
         if (user) {
             // User is signed in, load preferences first
@@ -553,7 +556,7 @@ function init() {
                 footballApi.clearCache();
             }
 
-            // Show main content
+            // Show main content, hide welcome
             if (welcomeSection) {
                 welcomeSection.style.display = 'none';
             }
@@ -570,6 +573,9 @@ function init() {
             }
             if (mainContent) {
                 mainContent.style.display = 'none';
+            }
+            if (authSection) {
+                authSection.style.display = 'block';
             }
         }
     });
