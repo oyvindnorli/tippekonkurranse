@@ -364,14 +364,17 @@ function applyLeagueFilter() {
     } else {
         leagueFilteredMatches = allMatches.filter(match => {
             // Check if match league ID matches any active league
-            const matchLeagueId = match.league_id || match.leagueId;
+            // Support multiple field names: league (new), league_id, leagueId (old)
+            const matchLeagueId = (typeof match.league === 'number' ? match.league : null)
+                                || match.league_id
+                                || match.leagueId;
 
             // If we have league ID, match directly
             if (matchLeagueId) {
                 return leaguesToShow.has(matchLeagueId);
             }
 
-            // Fallback: match by league name (for older data format)
+            // Fallback: match by league name (for older data format with string league)
             const matchLeague = typeof match.league === 'string' ? match.league : (match.league?.name || '');
             if (!matchLeague) return false;
 
