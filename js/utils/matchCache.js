@@ -6,6 +6,53 @@
  */
 
 /**
+ * Clean up old format matches from Firestore (league as string)
+ * @returns {Promise<number>} Number of matches deleted
+ */
+export async function cleanupOldFormatMatches() {
+    try {
+        const db = firebase.firestore();
+
+        // Get all matches
+        const snapshot = await db.collection('matches').get();
+
+        console.log(`🧹 Checking ${snapshot.size} matches for cleanup...`);
+
+        let deletedCount = 0;
+        const batch = db.batch();
+        let batchCount = 0;
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+
+            // Delete if league is a string (old format)
+            if (typeof data.league === 'string') {
+                batch.delete(doc.ref);
+                batchCount++;
+                deletedCount++;
+
+                // Firestore batch limit is 500
+                if (batchCount >= 500) {
+                    console.warn('⚠️ Batch limit reached. Some old matches may remain.');
+                }
+            }
+        });
+
+        if (batchCount > 0) {
+            await batch.commit();
+            console.log(`✅ Deleted ${deletedCount} old format matches from Firestore`);
+        } else {
+            console.log('✅ No old format matches found');
+        }
+
+        return deletedCount;
+    } catch (error) {
+        console.error('❌ Error cleaning up old matches:', error);
+        return 0;
+    }
+}
+
+/**
  * Get matches from Firestore cache or fetch from API
  * @param {Array} matchIds - Array of match IDs to fetch
  * @returns {Promise<Array>} Array of matches with odds frozen
@@ -133,8 +180,28 @@ export async function saveMatchesToFirestore(matches) {
                 const needsRewrite = existing && typeof existing.league === 'string';
 
                 if (needsRewrite) {
-                    console.log(`⚠️ Skipping match ${match.id} - old format detected (league: "${existing.league}"). Will be cleaned up later.`);
-                    continue; // Skip old format matches - don't try to rewrite them
+                    console.log(`🔄 Overwriting match ${match.id} - old format detected (league: "${existing.league}")`);
+                    // Overwrite old format match completely
+                    batch.set(docRef, {
+                        id: match.id,
+                        homeTeam: match.homeTeam,
+                        awayTeam: match.awayTeam,
+                        homeLogo: match.homeLogo || null,
+                        awayLogo: match.awayLogo || null,
+                        commence_time: match.commence_time,
+                        league: match.league, // Now correct format (number)
+                        leagueName: match.leagueName || null,
+                        round: match.round || null,
+                        odds: match.odds || null,
+                        result: match.result || null,
+                        completed: match.completed || false,
+                        statusShort: match.statusShort || 'NS',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    batchCount++;
+                    savedCount++;
+                    continue;
                 }
 
                 if (existing) {

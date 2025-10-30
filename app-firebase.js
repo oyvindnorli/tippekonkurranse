@@ -1152,6 +1152,10 @@ async function refreshData() {
         const loadingMessage = document.getElementById('loadingMessage');
         loadingMessage.style.display = 'block';
 
+        // Clean up old format matches from Firestore first
+        const { cleanupOldFormatMatches } = await import('./js/utils/matchCache.js');
+        await cleanupOldFormatMatches();
+
         // Fetch fresh data from API (skip Firestore cache)
         const [upcomingMatches, completedMatches] = await Promise.all([
             footballApi.getUpcomingFixtures(true), // skipCache = true
