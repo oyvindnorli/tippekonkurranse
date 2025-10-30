@@ -553,15 +553,20 @@ function init() {
 
         if (user) {
             // User is signed in, load preferences first
+            const previousLeagues = API_CONFIG.LEAGUES ? [...API_CONFIG.LEAGUES] : [];
             selectedLeagues = await loadSelectedLeagues(user.uid);
 
             // Update API_CONFIG.LEAGUES to use user's preferred leagues
-            API_CONFIG.LEAGUES = Array.from(selectedLeagues);
+            const newLeagues = Array.from(selectedLeagues);
 
-            // Clear API cache to fetch fresh data with new leagues
-            if (footballApi && footballApi.clearCache) {
+            // Only clear cache if leagues actually changed
+            const leaguesChanged = JSON.stringify(previousLeagues.sort()) !== JSON.stringify(newLeagues.sort());
+            if (leaguesChanged && footballApi && footballApi.clearCache) {
+                console.log('🔄 Leagues changed, clearing cache');
                 footballApi.clearCache();
             }
+
+            API_CONFIG.LEAGUES = newLeagues;
 
             // Show main content, hide welcome
             if (welcomeSection) {

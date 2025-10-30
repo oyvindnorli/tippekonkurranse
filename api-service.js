@@ -182,8 +182,7 @@ class FootballApiService {
                 console.log(`⚡ Loaded ${cachedMatches.length} matches from Firestore cache`);
 
                 // Return cached matches immediately for fast loading
-                // We'll update results in background if needed
-                this.updateResultsInBackground(cachedMatches);
+                // Note: Results will be updated by loadMatches() which calls fetchScores() separately
                 return cachedMatches;
             }
         } catch (error) {

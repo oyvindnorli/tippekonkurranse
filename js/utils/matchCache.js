@@ -73,12 +73,6 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
         snapshot.forEach(doc => {
             const data = doc.data();
 
-            // Debug first document to see what league type we have
-            if (matches.length === 0 && snapshot.size > 0) {
-                console.log(`🔍 First doc league type: ${typeof data.league}, value: ${data.league}`);
-                console.log(`🔍 Looking for leagues: ${JSON.stringify(Array.from(leagueSet))}`);
-            }
-
             // Filter by league IDs - handle both string and number
             const docLeague = typeof data.league === 'string' ? parseInt(data.league) : data.league;
             if (leagueSet.has(docLeague)) {
@@ -86,7 +80,7 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
             }
         });
 
-        console.log(`📦 Firestore cache: Found ${matches.length} matches (after league filter)`);
+        console.log(`📦 Firestore cache: ${matches.length}/${snapshot.size} matches matched leagues ${leagueIds.join(',')}`);
         return matches;
     } catch (error) {
         console.error('❌ Error fetching upcoming matches from Firestore:', error);
