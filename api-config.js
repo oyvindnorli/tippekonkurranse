@@ -10,7 +10,8 @@ const API_CONFIG = {
     LEAGUES: [
         39,  // Premier League
         2,   // Champions League
-        48   // EFL Cup
+        48,  // EFL Cup
+        135  // Serie A
     ],
     SEASON: new Date().getFullYear(), // Current season
     MAX_MATCHES: 20, // Maximum number of matches to show

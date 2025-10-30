@@ -1,13 +1,14 @@
 /**
  * League Configuration
- * Premier League, Champions League og EFL Cup
+ * Premier League, Champions League, EFL Cup og Serie A
  */
 
 // Liga-navn med emojis (matches preferences.js AVAILABLE_LEAGUES)
 export const LEAGUE_NAMES = {
     2: '⭐ Champions League',
     39: '⚽ Premier League',
-    48: '🏆 EFL Cup'
+    48: '🏆 EFL Cup',
+    135: '🇮🇹 Serie A'
 };
 
 /**
