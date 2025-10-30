@@ -128,8 +128,13 @@ async function loadCompetitions() {
                 competitionMatches = scores.filter(match => {
                     if (!match.round) return false;
 
+                    // Get league as string (handle both ID and name)
+                    const matchLeague = typeof match.league === 'string'
+                        ? match.league
+                        : (LEAGUE_NAMES_SIMPLE[match.league] || '');
+
                     // Check PL rounds
-                    if (c.selectedRounds?.premierLeague && match.league?.includes('Premier League')) {
+                    if (c.selectedRounds?.premierLeague && matchLeague.includes('Premier League')) {
                         const roundMatch = match.round.match(/(\d+)/);
                         if (roundMatch) {
                             const roundNumber = parseInt(roundMatch[1]);
@@ -138,7 +143,7 @@ async function loadCompetitions() {
                     }
 
                     // Check CL rounds
-                    if (c.selectedRounds?.championsLeague && match.league?.includes('Champions League')) {
+                    if (c.selectedRounds?.championsLeague && matchLeague.includes('Champions League')) {
                         return c.selectedRounds.championsLeague.includes(match.round);
                     }
 

@@ -409,7 +409,7 @@ class FootballApiService {
     async getUpcomingFixtures() {
         const today = new Date();
         const tomorrow = new Date();
-        tomorrow.setDate(today.getDate() + 2); // Get fixtures for today + tomorrow (2 days)
+        tomorrow.setDate(today.getDate() + 7); // Get fixtures for next 7 days
 
         // Try Firestore first (fastest and ensures consistent odds)
         try {
