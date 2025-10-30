@@ -139,10 +139,11 @@ export async function saveMatchesToFirestore(matches) {
                 const needsRewrite = existing && typeof existing.league === 'string';
 
                 if (needsRewrite) {
-                    console.log(`🔄 Rewriting match ${match.id} - old format detected (league: "${existing.league}")`);
+                    console.log(`⚠️ Skipping match ${match.id} - old format detected (league: "${existing.league}"). Will be cleaned up later.`);
+                    continue; // Skip old format matches - don't try to rewrite them
                 }
 
-                if (existing && !needsRewrite) {
+                if (existing) {
                     // Only update result and completed status, NEVER update odds
                     if (match.result || match.completed) {
                         batch.update(docRef, {
@@ -154,7 +155,6 @@ export async function saveMatchesToFirestore(matches) {
                     }
                 } else {
                     // New match - save everything including frozen odds
-                    // Use set with merge:false to completely overwrite old format
                     batch.set(docRef, {
                         id: match.id,
                         homeTeam: match.homeTeam,
