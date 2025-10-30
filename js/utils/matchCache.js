@@ -89,60 +89,91 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
  */
 export async function saveMatchesToFirestore(matches) {
     const db = firebase.firestore();
-    const batch = db.batch();
-    let count = 0;
+    let totalSaved = 0;
 
-    for (const match of matches) {
-        try {
-            const docRef = db.collection('matches').doc(String(match.id));
+    // First, check which matches already exist
+    const matchIds = matches.map(m => String(m.id));
+    const existingMatches = new Map();
 
-            // Check if match already exists with odds
-            const existing = await docRef.get();
+    try {
+        // Fetch existing matches in batches of 10 (Firestore 'in' limit)
+        for (let i = 0; i < matchIds.length; i += 10) {
+            const batch = matchIds.slice(i, i + 10);
+            const snapshot = await db.collection('matches')
+                .where(firebase.firestore.FieldPath.documentId(), 'in', batch)
+                .get();
 
-            if (existing.exists) {
-                const existingData = existing.data();
+            snapshot.forEach(doc => {
+                existingMatches.set(doc.id, doc.data());
+            });
+        }
+    } catch (error) {
+        console.warn('⚠️ Error checking existing matches:', error);
+    }
 
-                // Only update result and completed status, NEVER update odds
-                if (match.result || match.completed) {
-                    batch.update(docRef, {
+    // Now save in batches of 500 (Firestore batch limit)
+    const BATCH_SIZE = 500;
+    for (let i = 0; i < matches.length; i += BATCH_SIZE) {
+        const batch = db.batch();
+        const batchMatches = matches.slice(i, i + BATCH_SIZE);
+        let batchCount = 0;
+
+        for (const match of batchMatches) {
+            try {
+                const docRef = db.collection('matches').doc(String(match.id));
+                const existing = existingMatches.get(String(match.id));
+
+                if (existing) {
+                    // Only update result and completed status, NEVER update odds
+                    if (match.result || match.completed) {
+                        batch.update(docRef, {
+                            result: match.result || null,
+                            completed: match.completed || false,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        batchCount++;
+                    }
+                } else {
+                    // New match - save everything including frozen odds
+                    batch.set(docRef, {
+                        id: match.id,
+                        homeTeam: match.homeTeam,
+                        awayTeam: match.awayTeam,
+                        homeLogo: match.homeLogo || null,
+                        awayLogo: match.awayLogo || null,
+                        commence_time: match.commence_time,
+                        league: match.league,
+                        leagueLogo: match.leagueLogo || null,
+                        round: match.round || null,
+                        odds: match.odds || null,
                         result: match.result || null,
                         completed: match.completed || false,
-                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                        oddsLockedAt: match.odds ? firebase.firestore.FieldValue.serverTimestamp() : null
                     });
-                    count++;
+                    batchCount++;
                 }
-            } else {
-                // New match - save everything including frozen odds
-                batch.set(docRef, {
-                    id: match.id,
-                    homeTeam: match.homeTeam,
-                    awayTeam: match.awayTeam,
-                    homeLogo: match.homeLogo || null,
-                    awayLogo: match.awayLogo || null,
-                    commence_time: match.commence_time,
-                    league: match.league,
-                    leagueLogo: match.leagueLogo || null,
-                    round: match.round || null,
-                    odds: match.odds || null,
-                    result: match.result || null,
-                    completed: match.completed || false,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-                    oddsLockedAt: match.odds ? firebase.firestore.FieldValue.serverTimestamp() : null
-                });
-                count++;
+            } catch (error) {
+                console.error(`Error preparing match ${match.id}:`, error);
             }
-        } catch (error) {
-            console.error(`Error saving match ${match.id} to Firestore:`, error);
+        }
+
+        if (batchCount > 0) {
+            try {
+                await batch.commit();
+                totalSaved += batchCount;
+            } catch (error) {
+                console.error('Error committing batch:', error);
+            }
         }
     }
 
-    if (count > 0) {
-        await batch.commit();
-        console.log(`💾 Saved ${count} matches to Firestore`);
+    if (totalSaved > 0) {
+        console.log(`💾 Saved ${totalSaved} matches to Firestore`);
     }
 
-    return count;
+    return totalSaved;
 }
 
 /**

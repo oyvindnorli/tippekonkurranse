@@ -514,9 +514,12 @@ class FootballApiService {
         // Save to Firestore for consistent odds across all users
         try {
             const { saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
-            await saveMatchesToFirestore(fixtures);
+            const saved = await saveMatchesToFirestore(fixtures);
+            if (saved === 0) {
+                console.log('ℹ️ No new matches to save (all already in Firestore)');
+            }
         } catch (error) {
-            console.warn('⚠️ Failed to save matches to Firestore:', error);
+            console.error('⚠️ Failed to save matches to Firestore:', error);
         }
 
         // Also save to localStorage for faster initial load
