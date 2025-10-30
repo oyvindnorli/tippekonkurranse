@@ -90,13 +90,29 @@ async function loadCompetitions() {
         const completed = [];
 
         competitions.forEach(c => {
-            const leagueNames = { 39: 'Premier League', 2: 'UEFA Champions League', 140: 'La Liga', 78: 'Bundesliga', 135: 'Serie A', 1: 'World Cup' };
+            const leagueNames = { 39: 'Premier League', 2: 'UEFA Champions League', 48: 'EFL Cup', 140: 'La Liga', 78: 'Bundesliga', 135: 'Serie A', 1: 'World Cup' };
             const leagues = c.leagues || [];
 
             let competitionMatches = [];
             let start, end;
 
-            if (c.competitionType === 'round' && c.selectedRounds) {
+            // Check if competition has specific matchIds (custom competition)
+            if (c.matchIds && c.matchIds.length > 0) {
+                // Custom competition with specific matches
+                competitionMatches = scores.filter(match => c.matchIds.includes(match.id));
+
+                // Determine start/end from matches
+                if (competitionMatches.length > 0) {
+                    const dates = competitionMatches.map(m => new Date(m.commence_time || m.date));
+                    start = new Date(Math.min(...dates));
+                    end = new Date(Math.max(...dates));
+                } else {
+                    // No matches found yet - assume ongoing
+                    start = now;
+                    end = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+                }
+
+            } else if (c.competitionType === 'round' && c.selectedRounds) {
                 // Round-based competition - filter by rounds
                 competitionMatches = scores.filter(match => {
                     if (!match.round) return false;
@@ -159,16 +175,20 @@ async function loadCompetitions() {
                 }
             }
 
-            // Categorize competition
+            // Categorize competition based on match completion status
             if (start > now) {
+                // Competition hasn't started yet
                 upcoming.push(c);
             } else {
+                // Competition has started - check if all matches are completed
                 const allMatchesCompleted = competitionMatches.length > 0 &&
                     competitionMatches.every(match => match.completed);
 
-                if (allMatchesCompleted || end < now) {
+                if (allMatchesCompleted) {
+                    // All matches are completed
                     completed.push(c);
                 } else {
+                    // Some matches are still pending
                     active.push(c);
                 }
             }

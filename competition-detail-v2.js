@@ -184,28 +184,22 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
     let statusText = '📅 Kommende';
     let statusClass = 'status-upcoming';
 
-    if (now >= startDate && now <= endDate) {
-        // Check if all matches are completed even if we're within the date range
-        if (allMatchesCompleted === true) {
-            status = 'completed';
-            statusText = '✅ Fullført';
-            statusClass = 'status-completed';
-        } else {
-            status = 'active';
-            statusText = '🔴 Aktiv';
-            statusClass = 'status-active';
-        }
-    } else if (now > endDate) {
-        // Only mark as completed if date has passed OR all matches are completed
-        if (allMatchesCompleted === true || allMatchesCompleted === null) {
-            status = 'completed';
-            statusText = '✅ Fullført';
-            statusClass = 'status-completed';
-        } else {
-            status = 'active';
-            statusText = '🔴 Aktiv';
-            statusClass = 'status-active';
-        }
+    // Determine status based on start date and match completion
+    if (now < startDate) {
+        // Competition hasn't started yet
+        status = 'upcoming';
+        statusText = '⏰ Kommende';
+        statusClass = 'status-upcoming';
+    } else if (allMatchesCompleted === true) {
+        // All matches are completed - competition is finished
+        status = 'completed';
+        statusText = '✅ Fullført';
+        statusClass = 'status-completed';
+    } else {
+        // Competition has started but not all matches are completed
+        status = 'active';
+        statusText = '🔴 Aktiv';
+        statusClass = 'status-active';
     }
 
     const statusBadge = document.getElementById('competitionStatus');
