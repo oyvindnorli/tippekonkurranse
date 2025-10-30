@@ -1,3 +1,12 @@
+// Import utility modules
+import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js';
+import { calculatePoints } from './js/utils/matchUtils.js';
+import { formatDate as formatDateUtil } from './js/utils/dateUtils.js';
+
+// Import services
+import * as competitionService from './js/services/competitionService.js';
+import * as leaderboardService from './js/services/leaderboardService.js';
+
 // Competition detail page
 let competitionId = null;
 let competition = null;
@@ -42,15 +51,8 @@ async function loadCompetition() {
         errorMessage.style.display = 'none';
         detailsSection.style.display = 'none';
 
-        // Get competition data
-        const db = firebase.firestore();
-        const competitionDoc = await db.collection('competitions').doc(competitionId).get();
-
-        if (!competitionDoc.exists) {
-            throw new Error('Konkurranse finnes ikke');
-        }
-
-        competition = { id: competitionDoc.id, ...competitionDoc.data() };
+        // Get competition data using service
+        competition = await competitionService.loadCompetition(competitionId);
 
         // Load user tips
         await loadUserTips();
@@ -81,15 +83,7 @@ async function loadUserTips() {
         const user = firebase.auth().currentUser;
         if (!user) return;
 
-        const db = firebase.firestore();
-        const tipsSnapshot = await db.collection('tips')
-            .where('userId', '==', user.uid)
-            .get();
-
-        userTips = [];
-        tipsSnapshot.forEach(doc => {
-            userTips.push({ id: doc.id, ...doc.data() });
-        });
+        userTips = await competitionService.loadUserTips(user.uid);
 
     } catch (error) {
         console.error('Failed to load user tips:', error);
@@ -101,17 +95,6 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
     document.getElementById('competitionName').textContent = competition.name;
     document.getElementById('competitionDescription').textContent = competition.description || 'Ingen beskrivelse';
     document.getElementById('creatorName').textContent = competition.creatorName;
-
-    // Get league names
-    const leagueNames = {
-        39: 'Premier League',
-        2: 'Champions League',
-        48: 'EFL Cup',
-        140: 'La Liga',
-        78: 'Bundesliga',
-        135: 'Serie A',
-        1: 'World Cup'
-    };
 
     const leagues = competition.leagues || [];
     let leaguesText = '';
@@ -151,7 +134,7 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
             document.getElementById('competitionPeriod').textContent = 'Ingen datoer satt';
         }
 
-        leaguesText = leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ') || 'Alle ligaer';
+        leaguesText = leagues.map(id => LEAGUE_NAMES_SIMPLE[id] || `Liga ${id}`).join(', ') || 'Alle ligaer';
     }
 
     document.getElementById('matchCount').textContent = leaguesText;
@@ -240,10 +223,9 @@ function renderCompetitionDetails(allMatchesCompleted = false) {
     }
 }
 
-// Format date
+// Format date (using imported formatDateUtil)
 function formatDate(date) {
-    const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    return date.toLocaleDateString('no-NO', options);
+    return formatDateUtil(date);
 }
 
 // Join competition
@@ -255,27 +237,9 @@ async function joinCompetition() {
     }
 
     try {
-        const db = firebase.firestore();
-
-        // Add user to participants array
-        await db.collection('competitions').doc(competitionId).update({
-            participants: firebase.firestore.FieldValue.arrayUnion(user.uid)
-        });
-
-        // Create participant entry
-        await db.collection('competitionParticipants').doc(`${competitionId}_${user.uid}`).set({
-            competitionId: competitionId,
-            userId: user.uid,
-            userName: user.displayName || user.email,
-            totalPoints: 0,
-            joinedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
+        await competitionService.joinCompetition(competitionId, user);
         alert('Du er nå med i konkurransen!');
-
-        // Reload competition
         loadCompetition();
-
     } catch (error) {
         console.error('Failed to join competition:', error);
         alert('Kunne ikke bli med i konkurransen. Prøv igjen.');
@@ -320,28 +284,9 @@ async function deleteCompetition() {
     }
 
     try {
-        const db = firebase.firestore();
-
-        // Delete all competition participants
-        const participantsSnapshot = await db.collection('competitionParticipants')
-            .where('competitionId', '==', competitionId)
-            .get();
-
-        const deletePromises = [];
-        participantsSnapshot.forEach(doc => {
-            deletePromises.push(doc.ref.delete());
-        });
-
-        // Delete the competition itself
-        deletePromises.push(db.collection('competitions').doc(competitionId).delete());
-
-        await Promise.all(deletePromises);
-
+        await competitionService.deleteCompetition(competitionId);
         alert('Konkurransen er slettet');
-
-        // Redirect to competitions page
         window.location.href = 'competitions.html';
-
     } catch (error) {
         console.error('Failed to delete competition:', error);
         alert('Kunne ikke slette konkurransen. Prøv igjen.');
@@ -351,214 +296,27 @@ async function deleteCompetition() {
 // Load leaderboard
 async function loadLeaderboard() {
     try {
-        const db = firebase.firestore();
-
-        // Get all participants for this competition
-        const participantsSnapshot = await db.collection('competitionParticipants')
-            .where('competitionId', '==', competitionId)
-            .get();
-
-        const participants = [];
-        for (const doc of participantsSnapshot.docs) {
-            const participant = doc.data();
-
-            // Calculate points for this participant
-            const points = await calculateParticipantPoints(participant.userId);
-
-            // Fetch actual displayName from users collection
-            let userName = participant.userName;
-            try {
-                const userDoc = await db.collection('users').doc(participant.userId).get();
-                if (userDoc.exists && userDoc.data().displayName) {
-                    userName = userDoc.data().displayName;
-                }
-            } catch (error) {
-                console.warn('Could not fetch user displayName:', error);
-            }
-
-            participants.push({
-                userId: participant.userId,
-                userName: userName,
-                totalPoints: points
-            });
-        }
-
-        // Sort by points (descending)
-        participants.sort((a, b) => b.totalPoints - a.totalPoints);
-
+        const participants = await leaderboardService.loadLeaderboard(competitionId, competition, footballApi);
         renderLeaderboard(participants);
-
     } catch (error) {
         console.error('Failed to load leaderboard:', error);
     }
 }
 
-// Calculate points for a participant
+// Calculate points for a participant (wrapper for service)
 async function calculateParticipantPoints(userId) {
-    try {
-        const db = firebase.firestore();
-
-        // Get user's tips
-        const tipsSnapshot = await db.collection('tips')
-            .where('userId', '==', userId)
-            .get();
-
-        const tips = [];
-        tipsSnapshot.forEach(doc => {
-            tips.push({ id: doc.id, ...doc.data() });
-        });
-
-        // Fetch match results for competition period and leagues
-        const matchResults = await fetchMatchResultsForCompetition();
-
-        // Calculate points
-        let totalPoints = 0;
-
-        Object.keys(matchResults).forEach(matchId => {
-            const tip = tips.find(t => String(t.matchId) === String(matchId));
-            const result = matchResults[matchId];
-
-            // Count points for both completed and live matches (if they have a score)
-            if (tip && result && result.result && result.result.home !== null && result.result.away !== null) {
-                const points = calculateMatchPoints(tip, result);
-                totalPoints += points;
-            }
-        });
-
-        return Math.round(totalPoints * 100) / 100; // Round to 2 decimals
-
-    } catch (error) {
-        console.error('Failed to calculate points:', error);
-        return 0;
-    }
+    return await leaderboardService.calculateParticipantPoints(userId, competition, footballApi);
 }
 
-// Fetch match results for competition
-async function fetchMatchResultsForCompetition() {
-    try {
-        const results = {};
-
-        // Use cached matches if available, otherwise fetch from API
-        let scores;
-        if (competition.cachedMatches && competition.cachedMatches.length > 0) {
-            scores = competition.cachedMatches;
-        } else {
-            scores = await footballApi.fetchScores();
-        }
-
-        const leagues = competition.leagues || [];
-        const leagueNames = {
-            39: 'Premier League',
-            2: 'UEFA Champions League',
-            48: 'EFL Cup',
-            140: 'La Liga',
-            78: 'Bundesliga',
-            135: 'Serie A',
-            1: 'World Cup'
-        };
-
-        // SIMPLIFIED LOGIC: Same as loadCompetitionMatches
-        scores.forEach(match => {
-            // If competition has specific matchIds, only process those
-            if (competition.matchIds && competition.matchIds.length > 0) {
-                if (!competition.matchIds.includes(match.id) || !match.result) {
-                    return;
-                }
-            } else {
-                // Must be in one of the competition leagues
-                const isInLeague = leagues.some(leagueId => {
-                    const leagueName = leagueNames[leagueId];
-                    return match.league && match.league.includes(leagueName);
-                });
-
-                if (!isInLeague || !match.result) {
-                    return;
-                }
-            }
-
-            let includeMatch = false;
-
-            // If we have selected rounds, filter by them
-            if (competition.selectedRounds) {
-                // Premier League round filtering
-                if (competition.selectedRounds.premierLeague && competition.selectedRounds.premierLeague.length > 0 && match.league.includes('Premier League')) {
-                    if (match.round) {
-                        const roundMatch = match.round.match(/(\d+)/);
-                        if (roundMatch) {
-                            const roundNumber = parseInt(roundMatch[1]);
-                            includeMatch = competition.selectedRounds.premierLeague.includes(roundNumber);
-                        }
-                    }
-                }
-                // Champions League round filtering
-                else if (competition.selectedRounds.championsLeague && competition.selectedRounds.championsLeague.length > 0 && match.league.includes('Champions League')) {
-                    if (match.round) {
-                        includeMatch = competition.selectedRounds.championsLeague.includes(match.round);
-                    }
-                }
-            }
-            // If competitionType is 'round' but no selectedRounds, assume PL Round 9
-            else if (competition.competitionType === 'round' && match.league.includes('Premier League') && match.round) {
-                const roundMatch = match.round.match(/(\d+)/);
-                if (roundMatch) {
-                    const roundNumber = parseInt(roundMatch[1]);
-                    includeMatch = roundNumber === 9;
-                }
-            }
-            // For date-based, check date range
-            else if (competition.startDate && competition.endDate) {
-                const matchDate = new Date(match.commence_time || match.date);
-                const startDate = new Date(competition.startDate.toDate());
-                startDate.setHours(0, 0, 0, 0);
-                const endDate = new Date(competition.endDate.toDate());
-                endDate.setHours(23, 59, 59, 999);
-                includeMatch = matchDate >= startDate && matchDate <= endDate;
-            }
-            // Default: include all league matches with results
-            else {
-                includeMatch = true;
-            }
-
-            if (includeMatch) {
-                results[match.id] = match;
-            }
-        });
-
-
-        return results;
-
-    } catch (error) {
-        console.error('Failed to fetch match results:', error);
-        return {};
-    }
-}
-
-// Calculate points for a single match
+// Calculate points for a single match (wrapper for imported function)
 function calculateMatchPoints(tip, result) {
-    let points = 0;
-
-    const tipOutcome = getOutcome(tip.homeScore, tip.awayScore);
-    const resultOutcome = getOutcome(result.result.home, result.result.away);
-
-    // Points for correct outcome
-    if (tipOutcome === resultOutcome && tip.odds) {
-        points += tip.odds[resultOutcome];
-    }
-
-    // Bonus points for exact score
-    if (tip.homeScore === result.result.home && tip.awayScore === result.result.away) {
-        points += 3;
-    }
-
-    return points;
+    // Use the imported calculatePoints function from matchUtils
+    // Note: calculatePoints expects { odds, homeScore, awayScore } as tip
+    // and result object with { result: { home, away } }
+    return calculatePoints(tip, result);
 }
 
-// Get outcome (H, U, B)
-function getOutcome(homeScore, awayScore) {
-    if (homeScore > awayScore) return 'H';
-    if (homeScore < awayScore) return 'B';
-    return 'U';
-}
+// getOutcome is now imported from matchUtils
 
 // Render leaderboard
 function renderLeaderboard(participants) {
@@ -747,15 +505,6 @@ async function loadCompetitionMatches() {
             const allMatches = [...scores, ...upcoming];
 
             const competitionLeagues = competition.leagues || [];
-            const leagueNames = {
-                39: 'Premier League',
-                2: 'UEFA Champions League',
-                48: 'EFL Cup',
-                140: 'La Liga',
-                78: 'Bundesliga',
-                135: 'Serie A',
-                1: 'World Cup'
-            };
 
             // SIMPLIFIED LOGIC: Just filter by league and optionally by round or matchIds
             competitionMatches = allMatches.filter(match => {
@@ -766,7 +515,7 @@ async function loadCompetitionMatches() {
 
                 // Must be in one of the competition leagues
                 const matchInLeague = competitionLeagues.some(leagueId => {
-                    const leagueName = leagueNames[leagueId];
+                    const leagueName = LEAGUE_NAMES_SIMPLE[leagueId];
                     return match.league && match.league.includes(leagueName);
                 });
 
@@ -840,11 +589,9 @@ async function loadCompetitionMatches() {
         // If all matches are completed and we haven't cached yet, save to Firestore
         if (allCompleted && !competition.cachedMatches) {
             try {
-                await db.collection('competitions').doc(competitionId).update({
-                    cachedMatches: competitionMatches,
-                    cachedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                await competitionService.cacheCompetitionMatches(competitionId, competitionMatches);
             } catch (error) {
+                console.warn('Failed to cache matches:', error);
             }
         }
 

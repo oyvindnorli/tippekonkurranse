@@ -1,3 +1,6 @@
+// Import league configuration
+import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js';
+
 // Competitions functionality
 let selectedLeagues = new Set([39, 2]); // Default: Premier League and Champions League
 let availableRounds = null; // Store fetched rounds
@@ -90,7 +93,6 @@ async function loadCompetitions() {
         const completed = [];
 
         competitions.forEach(c => {
-            const leagueNames = { 39: 'Premier League', 2: 'UEFA Champions League', 48: 'EFL Cup', 140: 'La Liga', 78: 'Bundesliga', 135: 'Serie A', 1: 'World Cup' };
             const leagues = c.leagues || [];
 
             let competitionMatches = [];
@@ -167,7 +169,7 @@ async function loadCompetitions() {
                         if (matchDate < start || matchDate > end) return false;
 
                         return leagues.some(leagueId => {
-                            const leagueName = leagueNames[leagueId];
+                            const leagueName = LEAGUE_NAMES_SIMPLE[leagueId];
                             return match.league && match.league.includes(leagueName);
                         });
                     });
@@ -177,7 +179,7 @@ async function loadCompetitions() {
                     end = now;
                     competitionMatches = scores.filter(match => {
                         return leagues.some(leagueId => {
-                            const leagueName = leagueNames[leagueId];
+                            const leagueName = LEAGUE_NAMES_SIMPLE[leagueId];
                             return match.league && match.league.includes(leagueName);
                         });
                     });
@@ -253,17 +255,6 @@ function createCompetitionCard(competition) {
     const user = firebase.auth().currentUser;
     const isCreator = user && competition.creatorId === user.uid;
 
-    // Get league names
-    const leagueNames = {
-        39: 'Premier League',
-        2: 'Champions League',
-        48: 'EFL Cup',
-        140: 'La Liga',
-        78: 'Bundesliga',
-        135: 'Serie A',
-        1: 'World Cup'
-    };
-
     const leagues = competition.leagues || competition.matchIds || [];
     let leaguesList = '';
     let periodText = '';
@@ -300,7 +291,7 @@ function createCompetitionCard(competition) {
         }
 
         leaguesList = Array.isArray(leagues) && typeof leagues[0] === 'number'
-            ? leagues.map(id => leagueNames[id] || `Liga ${id}`).join(', ')
+            ? leagues.map(id => LEAGUE_NAMES_SIMPLE[id] || `Liga ${id}`).join(', ')
             : 'Alle ligaer';
     }
 
@@ -382,23 +373,6 @@ async function loadNextRounds() {
         console.error('Failed to load next rounds:', error);
         document.getElementById('plNextRound').textContent = 'Feil ved lasting';
         document.getElementById('clNextRound').textContent = 'Feil ved lasting';
-    }
-}
-
-// OLD FUNCTIONS - REMOVE BELOW
-function toggleRoundLeague_OLD(league) {
-    const checkbox = document.getElementById(league === 'pl' ? 'includePL' : 'includeCL');
-    const container = document.getElementById(league === 'pl' ? 'plRoundsContainer' : 'clRoundsContainer');
-
-    if (checkbox.checked) {
-        container.style.display = 'block';
-    } else {
-        container.style.display = 'none';
-        // Uncheck all rounds in this league
-        container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            cb.checked = false;
-        });
-        updateSelectedRounds(league);
     }
 }
 
