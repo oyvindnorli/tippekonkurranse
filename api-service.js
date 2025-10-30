@@ -237,7 +237,8 @@ class FootballApiService {
                 commence_time: fixture.fixture.date,
                 timestamp: fixture.fixture.timestamp,
                 status: fixture.fixture.status.short,
-                league: fixture.league.name,
+                league: fixture.league.id, // Use ID not name for filtering
+                leagueName: fixture.league.name, // Keep name for display
                 leagueLogo: fixture.league.logo,
                 round: fixture.league.round, // e.g. "Regular Season - 10"
                 venue: fixture.fixture.venue.name,
@@ -391,7 +392,8 @@ class FootballApiService {
                 statusShort: match.fixture.status.short,
                 completed: isCompleted,
                 result: result,
-                league: match.league.name,
+                league: match.league.id, // Use ID not name for filtering
+                leagueName: match.league.name, // Keep name for display
                 leagueLogo: match.league.logo,
                 round: match.league.round, // e.g. "Regular Season - 10"
                 elapsed: match.fixture.status.elapsed,
