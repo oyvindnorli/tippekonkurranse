@@ -12,7 +12,7 @@ const API_CONFIG = {
         135  // Serie A
     ],
     SEASON: new Date().getFullYear(), // Current season
-    MAX_MATCHES: 30, // Maximum number of matches to show
+    MAX_MATCHES: 100, // Maximum number of matches to show (increased to show all in 7-day period)
 
     // Cache settings (30 minutes - you have Pro plan with 7500 requests/day)
     CACHE_DURATION: 30 * 60 * 1000 // 30 minutes in milliseconds
