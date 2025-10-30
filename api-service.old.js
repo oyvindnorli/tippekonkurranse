@@ -1,0 +1,861 @@
+// API-Football Service
+class FootballApiService {
+    constructor() {
+        this.useMockData = !isApiKeySet();
+        this.cache = this.loadCache();
+        this.teamLogosCache = {};
+
+        if (this.useMockData) {
+            console.warn('⚠️ API key not set. Using mock data. Get your API key from: https://dashboard.api-football.com/');
+        } else {
+            console.log('✅ API-Football initialized with key');
+        }
+    }
+
+    /**
+     * Load cache from localStorage
+     */
+    loadCache() {
+        try {
+            const cached = localStorage.getItem('apiFootballCache');
+            if (cached) {
+                const data = JSON.parse(cached);
+                // Check if cache is still valid
+                if (data.timestamp && (Date.now() - data.timestamp) < API_CONFIG.CACHE_DURATION) {
+                    const hoursRemaining = Math.round((API_CONFIG.CACHE_DURATION - (Date.now() - data.timestamp)) / 1000 / 60 / 60);
+                    console.log(`✅ Using cached data (expires in ${hoursRemaining} hours)`);
+                    return data;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading cache:', error);
+        }
+        return null;
+    }
+
+    /**
+     * Save cache to localStorage
+     */
+    saveCache(data) {
+        try {
+            const cacheData = {
+                timestamp: Date.now(),
+                data: data
+            };
+            localStorage.setItem('apiFootballCache', JSON.stringify(cacheData));
+            console.log('💾 Data cached for 24 hours');
+        } catch (error) {
+            console.error('Error saving cache:', error);
+        }
+    }
+
+    /**
+     * Clear cache (useful for manual refresh)
+     */
+    clearCache() {
+        localStorage.removeItem('apiFootballCache');
+        this.cache = null;
+        console.log('🗑️ Cache cleared');
+    }
+
+    /**
+     * Fetch fixtures from API-Football
+     * @param {string} from - Date in format YYYY-MM-DD
+     * @param {string} to - Date in format YYYY-MM-DD
+     */
+    async fetchFixtures(from, to) {
+        if (this.useMockData) {
+            return this.getMockFixtures();
+        }
+
+        try {
+            let allFixtures = [];
+            const fixtureIds = new Set(); // Track unique fixture IDs
+
+            // Fetch fixtures for each league
+            for (const leagueId of API_CONFIG.LEAGUES) {
+                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${from}&to=${to}`;
+
+                const response = await fetch(url, {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    continue;
+                }
+
+                const data = await response.json();
+
+                if (data.response && data.response.length > 0) {
+                    // Deduplicate fixtures by ID
+                    data.response.forEach(fixture => {
+                        if (!fixtureIds.has(fixture.fixture.id)) {
+                            fixtureIds.add(fixture.fixture.id);
+                            allFixtures.push(fixture);
+                        }
+                    });
+                }
+            }
+
+            console.log(`📅 Fetched ${allFixtures.length} fixtures`);
+            return this.transformFixturesData(allFixtures);
+        } catch (error) {
+            console.error('Error fetching fixtures:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Fetch all odds for a league and date range
+     * @param {number} leagueId - The league ID
+     * @param {string} date - Date in format YYYY-MM-DD
+     */
+    async fetchOddsForLeague(leagueId, date) {
+        if (this.useMockData) {
+            return {};
+        }
+
+        try {
+            // Try to fetch all odds for the league on this date
+            const url = `${API_CONFIG.BASE_URL}?endpoint=odds&league=${leagueId}&season=${API_CONFIG.SEASON}&date=${date}`;
+
+            const response = await fetch(url, {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                if (response.status === 429) {
+                    console.error('⚠️ API RATE LIMIT EXCEEDED!');
+                }
+                return {};
+            }
+
+            const data = await response.json();
+
+            const oddsMap = {};
+
+            if (data.response && data.response.length > 0) {
+                data.response.forEach(oddsData => {
+                    const fixtureId = oddsData.fixture.id;
+                    const odds = this.transformOddsData(oddsData);
+                    if (odds) {
+                        oddsMap[fixtureId] = odds;
+                    }
+                });
+            }
+
+            return oddsMap;
+        } catch (error) {
+            return {};
+        }
+    }
+
+    /**
+     * Fetch odds for fixtures from API-Football
+     * @param {number} fixtureId - The fixture ID
+     */
+    async fetchOddsForFixture(fixtureId) {
+        if (this.useMockData) {
+            return { H: 2.5, U: 3.2, B: 2.8 };
+        }
+
+        try {
+            // Try without specifying bookmaker first (gets best available)
+            let url = `${API_CONFIG.BASE_URL}?endpoint=odds&fixture=${fixtureId}`;
+
+            let response = await fetch(url, {
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.response && data.response.length > 0) {
+                    const odds = this.transformOddsData(data.response[0]);
+                    if (odds.H !== 2.0 || odds.U !== 3.0 || odds.B !== 3.5) {
+                        return odds;
+                    }
+                }
+            }
+
+            return null; // No odds available
+        } catch (error) {
+            return null; // No odds available
+        }
+    }
+
+    /**
+     * Transform API-Football fixtures data to our format
+     */
+    transformFixturesData(apiFixtures) {
+        // Filter out matches that have already finished or are in progress
+        const now = new Date();
+        let filteredCount = 0;
+
+        const upcomingFixtures = apiFixtures.filter(fixture => {
+            const matchDate = new Date(fixture.fixture.date);
+            if (matchDate <= now || fixture.fixture.status.short !== 'NS') {
+                filteredCount++;
+                return false;
+            }
+            return true;
+        });
+
+        // Sort by date
+        upcomingFixtures.sort((a, b) => {
+            return new Date(a.fixture.date) - new Date(b.fixture.date);
+        });
+
+        if (filteredCount > 0) {
+            console.log(`📅 Filtered ${filteredCount} matches, ${upcomingFixtures.length} upcoming`);
+        }
+
+        return upcomingFixtures.slice(0, API_CONFIG.MAX_MATCHES).map(fixture => {
+            const matchDate = new Date(fixture.fixture.date);
+            const time = matchDate.toLocaleString('no-NO', {
+                weekday: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit'
+            });
+
+            // Store team logos
+            if (fixture.teams.home.logo) {
+                this.teamLogosCache[fixture.teams.home.name] = fixture.teams.home.logo;
+            }
+            if (fixture.teams.away.logo) {
+                this.teamLogosCache[fixture.teams.away.name] = fixture.teams.away.logo;
+            }
+
+            return {
+                id: fixture.fixture.id,
+                homeTeam: fixture.teams.home.name,
+                awayTeam: fixture.teams.away.name,
+                homeLogo: fixture.teams.home.logo,
+                awayLogo: fixture.teams.away.logo,
+                time: time,
+                commence_time: fixture.fixture.date,
+                timestamp: fixture.fixture.timestamp,
+                status: fixture.fixture.status.short,
+                league: fixture.league.id, // Use ID not name for filtering
+                leagueName: fixture.league.name, // Keep name for display
+                leagueLogo: fixture.league.logo,
+                round: fixture.league.round, // e.g. "Regular Season - 10"
+                venue: fixture.fixture.venue.name,
+                city: fixture.fixture.venue.city,
+                result: null, // No result yet for upcoming matches
+                odds: null // Odds will be fetched separately
+            };
+        });
+    }
+
+    /**
+     * Transform API-Football odds data to our format
+     */
+    transformOddsData(apiOdds) {
+        try {
+            if (!apiOdds.bookmakers || apiOdds.bookmakers.length === 0) {
+                return null; // No odds available
+            }
+
+            const bookmaker = apiOdds.bookmakers[0];
+            const matchWinnerBet = bookmaker.bets.find(bet => bet.name === 'Match Winner');
+
+            if (!matchWinnerBet || !matchWinnerBet.values) {
+                return null; // No odds available
+            }
+
+            const homeOdds = matchWinnerBet.values.find(v => v.value === 'Home');
+            const drawOdds = matchWinnerBet.values.find(v => v.value === 'Draw');
+            const awayOdds = matchWinnerBet.values.find(v => v.value === 'Away');
+
+            // Only return odds if all three values are present
+            if (!homeOdds || !drawOdds || !awayOdds) {
+                return null;
+            }
+
+            return {
+                H: parseFloat(homeOdds.odd),
+                U: parseFloat(drawOdds.odd),
+                B: parseFloat(awayOdds.odd)
+            };
+        } catch (error) {
+            console.error('Error transforming odds data:', error);
+            return null; // No odds available
+        }
+    }
+
+    /**
+     * Get team logo URL
+     */
+    getTeamLogo(teamName) {
+        return this.teamLogosCache[teamName] || null;
+    }
+
+    /**
+     * Fetch live and recent scores from API-Football
+     */
+    async fetchScores() {
+        if (this.useMockData) {
+            return this.getMockScores();
+        }
+
+        try {
+            console.log('🔴 Fetching live scores from API-Football...');
+            let allMatches = [];
+            const fixtureIds = new Set(); // Track unique fixture IDs
+
+            // Get date range - last 7 days to today
+            const today = new Date();
+            const weekAgo = new Date();
+            weekAgo.setDate(today.getDate() - 7);
+
+            const fromDate = weekAgo.toISOString().split('T')[0];
+            const toDate = today.toISOString().split('T')[0];
+
+            // Fetch live and recent matches for each league - WITH EVENTS
+            for (const leagueId of API_CONFIG.LEAGUES) {
+                // Use timezone parameter to get events data
+                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${fromDate}&to=${toDate}&timezone=Europe/Oslo`;
+
+                const response = await fetch(url, {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    continue;
+                }
+
+                const data = await response.json();
+
+                if (data.response && data.response.length > 0) {
+                    // Deduplicate matches by ID
+                    data.response.forEach(match => {
+                        if (!fixtureIds.has(match.fixture.id)) {
+                            fixtureIds.add(match.fixture.id);
+                            allMatches.push(match);
+                        }
+                    });
+                }
+            }
+
+            console.log(`📊 Fetched ${allMatches.length} completed matches`);
+            return this.transformScoresData(allMatches);
+        } catch (error) {
+            console.error('Error fetching scores:', error);
+            console.log('💡 Falling back to mock data...');
+            return this.getMockScores();
+        }
+    }
+
+    /**
+     * Transform scores data to our format
+     */
+    transformScoresData(apiMatches) {
+        return apiMatches.map(match => {
+            const matchDate = new Date(match.fixture.date);
+            const time = matchDate.toLocaleTimeString('no-NO', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // Store team logos
+            if (match.teams.home.logo) {
+                this.teamLogosCache[match.teams.home.name] = match.teams.home.logo;
+            }
+            if (match.teams.away.logo) {
+                this.teamLogosCache[match.teams.away.name] = match.teams.away.logo;
+            }
+
+            let result = null;
+            if (match.goals.home !== null && match.goals.away !== null) {
+                result = {
+                    home: match.goals.home,
+                    away: match.goals.away
+                };
+            }
+
+            const isCompleted = match.fixture.status.short === 'FT' ||
+                               match.fixture.status.short === 'AET' ||
+                               match.fixture.status.short === 'PEN';
+
+            return {
+                id: match.fixture.id,
+                homeTeam: match.teams.home.name,
+                awayTeam: match.teams.away.name,
+                homeLogo: match.teams.home.logo,
+                awayLogo: match.teams.away.logo,
+                time: time,
+                commence_time: match.fixture.date,
+                timestamp: match.fixture.timestamp,
+                status: match.fixture.status.long,
+                statusShort: match.fixture.status.short,
+                completed: isCompleted,
+                result: result,
+                league: match.league.id, // Use ID not name for filtering
+                leagueName: match.league.name, // Keep name for display
+                leagueLogo: match.league.logo,
+                round: match.league.round, // e.g. "Regular Season - 10"
+                elapsed: match.fixture.status.elapsed,
+                last_update: new Date().toISOString()
+            };
+        });
+    }
+
+    /**
+     * Get upcoming fixtures (main method)
+     * Now uses Firestore as single source of truth for odds consistency
+     */
+    async getUpcomingFixtures() {
+        const today = new Date();
+        const tomorrow = new Date();
+        tomorrow.setDate(today.getDate() + 7); // Get fixtures for next 7 days
+
+        // Try Firestore first (fastest and ensures consistent odds)
+        try {
+            const { getUpcomingMatchesFromCache, saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
+            const cachedMatches = await getUpcomingMatchesFromCache(today, tomorrow, API_CONFIG.LEAGUES);
+
+            if (cachedMatches && cachedMatches.length > 0) {
+                console.log(`⚡ Loaded ${cachedMatches.length} matches from Firestore cache`);
+
+                // Return cached matches immediately for fast loading
+                // We'll update results in background if needed
+                this.updateResultsInBackground(cachedMatches);
+                return cachedMatches;
+            }
+        } catch (error) {
+            console.warn('⚠️ Firestore cache failed, falling back to API:', error);
+        }
+
+        // Firestore cache miss - fetch from API
+        const from = today.toISOString().split('T')[0];
+        const to = tomorrow.toISOString().split('T')[0];
+
+        console.log(`📅 Fetching fixtures from API ${from} to ${to}`);
+        const fixtures = await this.fetchFixtures(from, to);
+
+        // Skip odds fetching if no fixtures
+        if (fixtures.length === 0) {
+            console.log('ℹ️ No upcoming fixtures, skipping odds fetch');
+            return [];
+        }
+
+        // Fetch odds - new strategy: fetch all odds by league and date first
+        console.log(`💰 Fetching odds for ${fixtures.length} fixtures...`);
+        let successCount = 0;
+        let defaultCount = 0;
+
+        // Build a map of all odds by league and date
+        const allOddsMap = {};
+        const leagueDateMap = new Map(); // Map<leagueId, Set<dateStr>>
+
+        // Group fixtures by league and date (only fetch for leagues that have fixtures)
+        fixtures.forEach(fixture => {
+            const fixtureDate = new Date(fixture.commence_time);
+            const dateStr = fixtureDate.toISOString().split('T')[0];
+            const leagueId = fixture.league;
+
+            if (!leagueDateMap.has(leagueId)) {
+                leagueDateMap.set(leagueId, new Set());
+            }
+            leagueDateMap.get(leagueId).add(dateStr);
+        });
+
+        // Calculate total API calls needed
+        let totalCalls = 0;
+        leagueDateMap.forEach((dates) => totalCalls += dates.size);
+
+        // Fetch odds for each league and date combination (only for dates with fixtures)
+        console.log(`📡 Fetching odds in bulk for ${totalCalls} league/date combinations...`);
+        let oddsCallCount = 0;
+        let foundAnyOdds = false;
+
+        for (const [leagueId, dates] of leagueDateMap.entries()) {
+            for (const dateStr of dates) {
+                oddsCallCount++;
+                const leagueOdds = await this.fetchOddsForLeague(leagueId, dateStr);
+                Object.assign(allOddsMap, leagueOdds);
+
+                if (Object.keys(leagueOdds).length > 0) {
+                    foundAnyOdds = true;
+                }
+
+                // Early exit: if we've made 2+ calls and found no odds, API likely has none
+                if (oddsCallCount >= 2 && !foundAnyOdds) {
+                    console.log('⚡ No odds found after 2 calls, skipping rest');
+                    break;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 100)); // Reduced delay
+            }
+
+            // Break outer loop too if we're skipping
+            if (oddsCallCount >= 2 && !foundAnyOdds) {
+                break;
+            }
+        }
+
+        console.log(`📊 Bulk fetch complete. Found odds for ${Object.keys(allOddsMap).length} fixtures`);
+
+        // Assign odds to fixtures (no individual fallback - too slow)
+        for (let i = 0; i < fixtures.length; i++) {
+            const fixture = fixtures[i];
+
+            if (allOddsMap[fixture.id]) {
+                fixture.odds = allOddsMap[fixture.id];
+                successCount++;
+            } else {
+                fixture.odds = null;
+                defaultCount++;
+            }
+        }
+
+        console.log(`💰 Odds: ${successCount} fetched${defaultCount > 0 ? `, ${defaultCount} missing` : ''}`);
+
+        // Save to Firestore for consistent odds across all users
+        try {
+            const { saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
+            const saved = await saveMatchesToFirestore(fixtures);
+            if (saved === 0) {
+                console.log('ℹ️ No new matches to save (all already in Firestore)');
+            }
+        } catch (error) {
+            console.error('⚠️ Failed to save matches to Firestore:', error);
+        }
+
+        // Also save to localStorage for faster initial load
+        this.saveCache(fixtures);
+
+        return fixtures;
+    }
+
+    /**
+     * Update match results in background (for cached matches)
+     * Only updates completed status and results, never odds
+     */
+    async updateResultsInBackground(cachedMatches) {
+        try {
+            // Get match IDs that need result updates (not completed yet)
+            const incompleteMatches = cachedMatches.filter(m => !m.completed);
+
+            if (incompleteMatches.length === 0) {
+                return; // All matches completed, no update needed
+            }
+
+            console.log(`🔄 Checking results for ${incompleteMatches.length} incomplete matches...`);
+
+            // Fetch latest scores from API
+            const updatedScores = await this.fetchScores();
+
+            // Find matches with new results
+            const matchesWithResults = [];
+            incompleteMatches.forEach(cached => {
+                const updated = updatedScores.find(s => String(s.id) === String(cached.id));
+                if (updated && updated.completed) {
+                    matchesWithResults.push(updated);
+                }
+            });
+
+            if (matchesWithResults.length > 0) {
+                const { updateMatchResults } = await import('./js/utils/matchCache.js');
+                await updateMatchResults(matchesWithResults);
+            }
+        } catch (error) {
+            console.warn('⚠️ Background result update failed:', error);
+        }
+    }
+
+    /**
+     * Mock data when API key is not set
+     */
+    getMockFixtures() {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const todayMatch1 = new Date(today);
+        todayMatch1.setHours(15, 0, 0, 0);
+
+        const todayMatch2 = new Date(today);
+        todayMatch2.setHours(17, 30, 0, 0);
+
+        const tomorrowMatch1 = new Date(tomorrow);
+        tomorrowMatch1.setHours(14, 0, 0, 0);
+
+        const tomorrowMatch2 = new Date(tomorrow);
+        tomorrowMatch2.setHours(16, 30, 0, 0);
+
+        const tomorrowMatch3 = new Date(tomorrow);
+        tomorrowMatch3.setHours(19, 0, 0, 0);
+
+        return Promise.resolve([
+            {
+                id: 1,
+                homeTeam: "Manchester United",
+                awayTeam: "Liverpool",
+                time: "lør. 15:00 18.10",
+                commence_time: todayMatch1.toISOString(),
+                timestamp: Math.floor(todayMatch1.getTime() / 1000),
+                odds: { H: 2.5, U: 3.2, B: 2.8 },
+                league: "Premier League",
+                venue: "Old Trafford",
+                city: "Manchester"
+            },
+            {
+                id: 2,
+                homeTeam: "Arsenal",
+                awayTeam: "Chelsea",
+                time: "lør. 17:30 18.10",
+                commence_time: todayMatch2.toISOString(),
+                timestamp: Math.floor(todayMatch2.getTime() / 1000),
+                odds: { H: 2.1, U: 3.5, B: 3.4 },
+                league: "Premier League",
+                venue: "Emirates Stadium",
+                city: "London"
+            },
+            {
+                id: 3,
+                homeTeam: "Manchester City",
+                awayTeam: "Tottenham",
+                time: "søn. 14:00 19.10",
+                commence_time: tomorrowMatch1.toISOString(),
+                timestamp: Math.floor(tomorrowMatch1.getTime() / 1000),
+                odds: { H: 1.6, U: 4.2, B: 5.5 },
+                league: "Premier League",
+                venue: "Etihad Stadium",
+                city: "Manchester"
+            },
+            {
+                id: 4,
+                homeTeam: "Newcastle",
+                awayTeam: "Brighton",
+                time: "søn. 16:30 19.10",
+                commence_time: tomorrowMatch2.toISOString(),
+                timestamp: Math.floor(tomorrowMatch2.getTime() / 1000),
+                odds: { H: 2.3, U: 3.3, B: 3.1 },
+                league: "Premier League",
+                venue: "St James' Park",
+                city: "Newcastle"
+            },
+            {
+                id: 5,
+                homeTeam: "Aston Villa",
+                awayTeam: "West Ham",
+                time: "søn. 19:00 19.10",
+                commence_time: tomorrowMatch3.toISOString(),
+                timestamp: Math.floor(tomorrowMatch3.getTime() / 1000),
+                odds: { H: 2.0, U: 3.4, B: 3.8 },
+                league: "Premier League",
+                venue: "Villa Park",
+                city: "Birmingham"
+            }
+        ]);
+    }
+
+    /**
+     * Mock scores when API is not available
+     */
+    getMockScores() {
+        console.log('🎭 Using mock scores');
+
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const match1 = new Date(today);
+        match1.setHours(15, 0, 0, 0);
+
+        const match2 = new Date(today);
+        match2.setHours(17, 30, 0, 0);
+
+        return Promise.resolve([
+            {
+                id: 1,
+                homeTeam: "Manchester United",
+                awayTeam: "Liverpool",
+                time: "15:00",
+                commence_time: match1.toISOString(),
+                timestamp: Math.floor(match1.getTime() / 1000),
+                completed: true,
+                result: { home: 2, away: 1 },
+                status: "Match Finished",
+                statusShort: "FT",
+                league: "Premier League",
+                last_update: now.toISOString()
+            },
+            {
+                id: 2,
+                homeTeam: "Arsenal",
+                awayTeam: "Chelsea",
+                time: "17:30",
+                commence_time: match2.toISOString(),
+                timestamp: Math.floor(match2.getTime() / 1000),
+                completed: false,
+                result: { home: 1, away: 1 },
+                status: "Second Half",
+                statusShort: "2H",
+                elapsed: 67,
+                league: "Premier League",
+                last_update: now.toISOString()
+            }
+        ]);
+    }
+
+    /**
+     * Format date range for round display
+     */
+    formatDateRange(startDate, endDate) {
+        const options = { day: 'numeric', month: 'short' };
+        const start = startDate.toLocaleDateString('no-NO', options);
+        const end = endDate.toLocaleDateString('no-NO', options);
+
+        // Same day
+        if (startDate.toDateString() === endDate.toDateString()) {
+            return start;
+        }
+
+        // Same month
+        if (startDate.getMonth() === endDate.getMonth()) {
+            const dayOptions = { day: 'numeric' };
+            const startDay = startDate.toLocaleDateString('no-NO', dayOptions);
+            return `${startDay}-${end}`;
+        }
+
+        // Different months
+        return `${start} - ${end}`;
+    }
+
+    /**
+     * Fetch available rounds for Premier League and Champions League
+     * Returns upcoming and recent rounds for competition creation
+     */
+    async fetchAvailableRounds() {
+        if (this.useMockData) {
+            return {
+                premierLeague: [
+                    { value: 10, label: 'Runde 10', status: 'upcoming' },
+                    { value: 11, label: 'Runde 11', status: 'upcoming' },
+                    { value: 12, label: 'Runde 12', status: 'upcoming' }
+                ],
+                championsLeague: [
+                    { value: 'League Stage - Matchday 3', label: 'Matchday 3', status: 'upcoming' },
+                    { value: 'League Stage - Matchday 4', label: 'Matchday 4', status: 'upcoming' }
+                ]
+            };
+        }
+
+        try {
+            console.log('🔍 Fetching available rounds...');
+
+            // Get fixtures for next 60 days to find upcoming rounds
+            const today = new Date();
+            const twoMonthsLater = new Date();
+            twoMonthsLater.setDate(today.getDate() + 60);
+
+            const fromDate = today.toISOString().split('T')[0];
+            const toDate = twoMonthsLater.toISOString().split('T')[0];
+
+            const plRoundsMap = new Map(); // Map<roundNumber, { fixtures: [...] }>
+            const clRoundsMap = new Map(); // Map<roundString, { fixtures: [...] }>
+
+            // Fetch fixtures for both leagues
+            for (const leagueId of API_CONFIG.LEAGUES) {
+                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${fromDate}&to=${toDate}`;
+
+                const response = await fetch(url, {
+                    method: 'GET'
+                });
+
+                if (!response.ok) continue;
+
+                const data = await response.json();
+
+                if (data.response && data.response.length > 0) {
+                    data.response.forEach(fixture => {
+                        const round = fixture.league.round;
+                        if (!round) return;
+
+                        if (leagueId === 39) {
+                            // Premier League - extract round number
+                            const match = round.match(/(\d+)/);
+                            if (match) {
+                                const roundNum = parseInt(match[1]);
+                                if (!plRoundsMap.has(roundNum)) {
+                                    plRoundsMap.set(roundNum, { fixtures: [] });
+                                }
+                                plRoundsMap.get(roundNum).fixtures.push(fixture);
+                            }
+                        } else if (leagueId === 2) {
+                            // Champions League - store full round string
+                            if (!clRoundsMap.has(round)) {
+                                clRoundsMap.set(round, { fixtures: [] });
+                            }
+                            clRoundsMap.get(round).fixtures.push(fixture);
+                        }
+                    });
+                }
+            }
+
+            // Convert to sorted arrays with date ranges
+            const plRoundsArray = Array.from(plRoundsMap.entries())
+                .sort((a, b) => a[0] - b[0])
+                .slice(0, 10) // Limit to next 10 rounds
+                .map(([num, data]) => {
+                    // Find earliest and latest fixture dates
+                    const dates = data.fixtures.map(f => new Date(f.fixture.date));
+                    const startDate = new Date(Math.min(...dates));
+                    const endDate = new Date(Math.max(...dates));
+
+                    return {
+                        value: num,
+                        label: `Runde ${num}`,
+                        status: 'upcoming',
+                        startDate: startDate,
+                        endDate: endDate,
+                        dateRange: this.formatDateRange(startDate, endDate)
+                    };
+                });
+
+            const clRoundsArray = Array.from(clRoundsMap.entries())
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .slice(0, 10)
+                .map(([round, data]) => {
+                    // Find earliest and latest fixture dates
+                    const dates = data.fixtures.map(f => new Date(f.fixture.date));
+                    const startDate = new Date(Math.min(...dates));
+                    const endDate = new Date(Math.max(...dates));
+
+                    // Extract matchday number from "League Stage - Matchday 4"
+                    const match = round.match(/Matchday (\d+)/);
+                    const label = match ? `Runde ${match[1]}` : round;
+
+                    return {
+                        value: round,
+                        label: label,
+                        status: 'upcoming',
+                        startDate: startDate,
+                        endDate: endDate,
+                        dateRange: this.formatDateRange(startDate, endDate)
+                    };
+                });
+
+            console.log('✅ Found rounds:', { pl: plRoundsArray.length, cl: clRoundsArray.length });
+
+            return {
+                premierLeague: plRoundsArray,
+                championsLeague: clRoundsArray
+            };
+
+        } catch (error) {
+            console.error('Failed to fetch available rounds:', error);
+            return {
+                premierLeague: [],
+                championsLeague: []
+            };
+        }
+    }
+}
+
+// Create a global instance
+const footballApi = new FootballApiService();

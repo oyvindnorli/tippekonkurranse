@@ -1,8 +1,18 @@
-// API-Football Service
+/**
+ * API-Football Service (Refactored)
+ * Main service class that orchestrates API calls, caching, and data transformation
+ */
+
+// Import modules
+import * as cacheService from './js/services/api/cacheService.js';
+import * as apiClient from './js/services/api/apiClient.js';
+import * as transformers from './js/services/api/transformers.js';
+import * as mockData from './js/services/api/mockData.js';
+
 class FootballApiService {
     constructor() {
         this.useMockData = !isApiKeySet();
-        this.cache = this.loadCache();
+        this.cache = cacheService.loadCache();
         this.teamLogosCache = {};
 
         if (this.useMockData) {
@@ -16,46 +26,22 @@ class FootballApiService {
      * Load cache from localStorage
      */
     loadCache() {
-        try {
-            const cached = localStorage.getItem('apiFootballCache');
-            if (cached) {
-                const data = JSON.parse(cached);
-                // Check if cache is still valid
-                if (data.timestamp && (Date.now() - data.timestamp) < API_CONFIG.CACHE_DURATION) {
-                    const hoursRemaining = Math.round((API_CONFIG.CACHE_DURATION - (Date.now() - data.timestamp)) / 1000 / 60 / 60);
-                    console.log(`✅ Using cached data (expires in ${hoursRemaining} hours)`);
-                    return data;
-                }
-            }
-        } catch (error) {
-            console.error('Error loading cache:', error);
-        }
-        return null;
+        return cacheService.loadCache();
     }
 
     /**
      * Save cache to localStorage
      */
     saveCache(data) {
-        try {
-            const cacheData = {
-                timestamp: Date.now(),
-                data: data
-            };
-            localStorage.setItem('apiFootballCache', JSON.stringify(cacheData));
-            console.log('💾 Data cached for 24 hours');
-        } catch (error) {
-            console.error('Error saving cache:', error);
-        }
+        cacheService.saveCache(data);
     }
 
     /**
      * Clear cache (useful for manual refresh)
      */
     clearCache() {
-        localStorage.removeItem('apiFootballCache');
+        cacheService.clearCache();
         this.cache = null;
-        console.log('🗑️ Cache cleared');
     }
 
     /**
@@ -65,40 +51,23 @@ class FootballApiService {
      */
     async fetchFixtures(from, to) {
         if (this.useMockData) {
-            return this.getMockFixtures();
+            return mockData.getMockFixtures();
         }
 
         try {
-            let allFixtures = [];
-            const fixtureIds = new Set(); // Track unique fixture IDs
+            const rawFixtures = await apiClient.fetchFixtures(
+                API_CONFIG.BASE_URL,
+                API_CONFIG.LEAGUES,
+                API_CONFIG.SEASON,
+                from,
+                to
+            );
 
-            // Fetch fixtures for each league
-            for (const leagueId of API_CONFIG.LEAGUES) {
-                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${from}&to=${to}`;
-
-                const response = await fetch(url, {
-                    method: 'GET'
-                });
-
-                if (!response.ok) {
-                    continue;
-                }
-
-                const data = await response.json();
-
-                if (data.response && data.response.length > 0) {
-                    // Deduplicate fixtures by ID
-                    data.response.forEach(fixture => {
-                        if (!fixtureIds.has(fixture.fixture.id)) {
-                            fixtureIds.add(fixture.fixture.id);
-                            allFixtures.push(fixture);
-                        }
-                    });
-                }
-            }
-
-            console.log(`📅 Fetched ${allFixtures.length} fixtures`);
-            return this.transformFixturesData(allFixtures);
+            return transformers.transformFixturesData(
+                rawFixtures,
+                API_CONFIG.MAX_MATCHES,
+                this.teamLogosCache
+            );
         } catch (error) {
             console.error('Error fetching fixtures:', error);
             throw error;
@@ -116,33 +85,20 @@ class FootballApiService {
         }
 
         try {
-            // Try to fetch all odds for the league on this date
-            const url = `${API_CONFIG.BASE_URL}?endpoint=odds&league=${leagueId}&season=${API_CONFIG.SEASON}&date=${date}`;
-
-            const response = await fetch(url, {
-                method: 'GET'
-            });
-
-            if (!response.ok) {
-                if (response.status === 429) {
-                    console.error('⚠️ API RATE LIMIT EXCEEDED!');
-                }
-                return {};
-            }
-
-            const data = await response.json();
+            const rawOdds = await apiClient.fetchOddsForLeague(
+                API_CONFIG.BASE_URL,
+                leagueId,
+                API_CONFIG.SEASON,
+                date
+            );
 
             const oddsMap = {};
-
-            if (data.response && data.response.length > 0) {
-                data.response.forEach(oddsData => {
-                    const fixtureId = oddsData.fixture.id;
-                    const odds = this.transformOddsData(oddsData);
-                    if (odds) {
-                        oddsMap[fixtureId] = odds;
-                    }
-                });
-            }
+            Object.keys(rawOdds).forEach(fixtureId => {
+                const odds = transformers.transformOddsData(rawOdds[fixtureId]);
+                if (odds) {
+                    oddsMap[fixtureId] = odds;
+                }
+            });
 
             return oddsMap;
         } catch (error) {
@@ -160,127 +116,20 @@ class FootballApiService {
         }
 
         try {
-            // Try without specifying bookmaker first (gets best available)
-            let url = `${API_CONFIG.BASE_URL}?endpoint=odds&fixture=${fixtureId}`;
+            const rawOdds = await apiClient.fetchOddsForFixture(
+                API_CONFIG.BASE_URL,
+                fixtureId
+            );
 
-            let response = await fetch(url, {
-                method: 'GET'
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.response && data.response.length > 0) {
-                    const odds = this.transformOddsData(data.response[0]);
-                    if (odds.H !== 2.0 || odds.U !== 3.0 || odds.B !== 3.5) {
-                        return odds;
-                    }
+            if (rawOdds) {
+                const odds = transformers.transformOddsData(rawOdds);
+                if (odds.H !== 2.0 || odds.U !== 3.0 || odds.B !== 3.5) {
+                    return odds;
                 }
             }
 
             return null; // No odds available
         } catch (error) {
-            return null; // No odds available
-        }
-    }
-
-    /**
-     * Transform API-Football fixtures data to our format
-     */
-    transformFixturesData(apiFixtures) {
-        // Filter out matches that have already finished or are in progress
-        const now = new Date();
-        let filteredCount = 0;
-
-        const upcomingFixtures = apiFixtures.filter(fixture => {
-            const matchDate = new Date(fixture.fixture.date);
-            if (matchDate <= now || fixture.fixture.status.short !== 'NS') {
-                filteredCount++;
-                return false;
-            }
-            return true;
-        });
-
-        // Sort by date
-        upcomingFixtures.sort((a, b) => {
-            return new Date(a.fixture.date) - new Date(b.fixture.date);
-        });
-
-        if (filteredCount > 0) {
-            console.log(`📅 Filtered ${filteredCount} matches, ${upcomingFixtures.length} upcoming`);
-        }
-
-        return upcomingFixtures.slice(0, API_CONFIG.MAX_MATCHES).map(fixture => {
-            const matchDate = new Date(fixture.fixture.date);
-            const time = matchDate.toLocaleString('no-NO', {
-                weekday: 'short',
-                hour: '2-digit',
-                minute: '2-digit',
-                day: '2-digit',
-                month: '2-digit'
-            });
-
-            // Store team logos
-            if (fixture.teams.home.logo) {
-                this.teamLogosCache[fixture.teams.home.name] = fixture.teams.home.logo;
-            }
-            if (fixture.teams.away.logo) {
-                this.teamLogosCache[fixture.teams.away.name] = fixture.teams.away.logo;
-            }
-
-            return {
-                id: fixture.fixture.id,
-                homeTeam: fixture.teams.home.name,
-                awayTeam: fixture.teams.away.name,
-                homeLogo: fixture.teams.home.logo,
-                awayLogo: fixture.teams.away.logo,
-                time: time,
-                commence_time: fixture.fixture.date,
-                timestamp: fixture.fixture.timestamp,
-                status: fixture.fixture.status.short,
-                league: fixture.league.id, // Use ID not name for filtering
-                leagueName: fixture.league.name, // Keep name for display
-                leagueLogo: fixture.league.logo,
-                round: fixture.league.round, // e.g. "Regular Season - 10"
-                venue: fixture.fixture.venue.name,
-                city: fixture.fixture.venue.city,
-                result: null, // No result yet for upcoming matches
-                odds: null // Odds will be fetched separately
-            };
-        });
-    }
-
-    /**
-     * Transform API-Football odds data to our format
-     */
-    transformOddsData(apiOdds) {
-        try {
-            if (!apiOdds.bookmakers || apiOdds.bookmakers.length === 0) {
-                return null; // No odds available
-            }
-
-            const bookmaker = apiOdds.bookmakers[0];
-            const matchWinnerBet = bookmaker.bets.find(bet => bet.name === 'Match Winner');
-
-            if (!matchWinnerBet || !matchWinnerBet.values) {
-                return null; // No odds available
-            }
-
-            const homeOdds = matchWinnerBet.values.find(v => v.value === 'Home');
-            const drawOdds = matchWinnerBet.values.find(v => v.value === 'Draw');
-            const awayOdds = matchWinnerBet.values.find(v => v.value === 'Away');
-
-            // Only return odds if all three values are present
-            if (!homeOdds || !drawOdds || !awayOdds) {
-                return null;
-            }
-
-            return {
-                H: parseFloat(homeOdds.odd),
-                U: parseFloat(drawOdds.odd),
-                B: parseFloat(awayOdds.odd)
-            };
-        } catch (error) {
-            console.error('Error transforming odds data:', error);
             return null; // No odds available
         }
     }
@@ -297,109 +146,22 @@ class FootballApiService {
      */
     async fetchScores() {
         if (this.useMockData) {
-            return this.getMockScores();
+            return mockData.getMockScores();
         }
 
         try {
-            console.log('🔴 Fetching live scores from API-Football...');
-            let allMatches = [];
-            const fixtureIds = new Set(); // Track unique fixture IDs
+            const rawMatches = await apiClient.fetchScores(
+                API_CONFIG.BASE_URL,
+                API_CONFIG.LEAGUES,
+                API_CONFIG.SEASON
+            );
 
-            // Get date range - last 7 days to today
-            const today = new Date();
-            const weekAgo = new Date();
-            weekAgo.setDate(today.getDate() - 7);
-
-            const fromDate = weekAgo.toISOString().split('T')[0];
-            const toDate = today.toISOString().split('T')[0];
-
-            // Fetch live and recent matches for each league - WITH EVENTS
-            for (const leagueId of API_CONFIG.LEAGUES) {
-                // Use timezone parameter to get events data
-                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${fromDate}&to=${toDate}&timezone=Europe/Oslo`;
-
-                const response = await fetch(url, {
-                    method: 'GET'
-                });
-
-                if (!response.ok) {
-                    continue;
-                }
-
-                const data = await response.json();
-
-                if (data.response && data.response.length > 0) {
-                    // Deduplicate matches by ID
-                    data.response.forEach(match => {
-                        if (!fixtureIds.has(match.fixture.id)) {
-                            fixtureIds.add(match.fixture.id);
-                            allMatches.push(match);
-                        }
-                    });
-                }
-            }
-
-            console.log(`📊 Fetched ${allMatches.length} completed matches`);
-            return this.transformScoresData(allMatches);
+            return transformers.transformScoresData(rawMatches, this.teamLogosCache);
         } catch (error) {
             console.error('Error fetching scores:', error);
             console.log('💡 Falling back to mock data...');
-            return this.getMockScores();
+            return mockData.getMockScores();
         }
-    }
-
-    /**
-     * Transform scores data to our format
-     */
-    transformScoresData(apiMatches) {
-        return apiMatches.map(match => {
-            const matchDate = new Date(match.fixture.date);
-            const time = matchDate.toLocaleTimeString('no-NO', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            // Store team logos
-            if (match.teams.home.logo) {
-                this.teamLogosCache[match.teams.home.name] = match.teams.home.logo;
-            }
-            if (match.teams.away.logo) {
-                this.teamLogosCache[match.teams.away.name] = match.teams.away.logo;
-            }
-
-            let result = null;
-            if (match.goals.home !== null && match.goals.away !== null) {
-                result = {
-                    home: match.goals.home,
-                    away: match.goals.away
-                };
-            }
-
-            const isCompleted = match.fixture.status.short === 'FT' ||
-                               match.fixture.status.short === 'AET' ||
-                               match.fixture.status.short === 'PEN';
-
-            return {
-                id: match.fixture.id,
-                homeTeam: match.teams.home.name,
-                awayTeam: match.teams.away.name,
-                homeLogo: match.teams.home.logo,
-                awayLogo: match.teams.away.logo,
-                time: time,
-                commence_time: match.fixture.date,
-                timestamp: match.fixture.timestamp,
-                status: match.fixture.status.long,
-                statusShort: match.fixture.status.short,
-                completed: isCompleted,
-                result: result,
-                league: match.league.id, // Use ID not name for filtering
-                leagueName: match.league.name, // Keep name for display
-                leagueLogo: match.league.logo,
-                round: match.league.round, // e.g. "Regular Season - 10"
-                elapsed: match.fixture.status.elapsed,
-                last_update: new Date().toISOString()
-            };
-        });
     }
 
     /**
@@ -570,136 +332,14 @@ class FootballApiService {
      * Mock data when API key is not set
      */
     getMockFixtures() {
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-
-        const todayMatch1 = new Date(today);
-        todayMatch1.setHours(15, 0, 0, 0);
-
-        const todayMatch2 = new Date(today);
-        todayMatch2.setHours(17, 30, 0, 0);
-
-        const tomorrowMatch1 = new Date(tomorrow);
-        tomorrowMatch1.setHours(14, 0, 0, 0);
-
-        const tomorrowMatch2 = new Date(tomorrow);
-        tomorrowMatch2.setHours(16, 30, 0, 0);
-
-        const tomorrowMatch3 = new Date(tomorrow);
-        tomorrowMatch3.setHours(19, 0, 0, 0);
-
-        return Promise.resolve([
-            {
-                id: 1,
-                homeTeam: "Manchester United",
-                awayTeam: "Liverpool",
-                time: "lør. 15:00 18.10",
-                commence_time: todayMatch1.toISOString(),
-                timestamp: Math.floor(todayMatch1.getTime() / 1000),
-                odds: { H: 2.5, U: 3.2, B: 2.8 },
-                league: "Premier League",
-                venue: "Old Trafford",
-                city: "Manchester"
-            },
-            {
-                id: 2,
-                homeTeam: "Arsenal",
-                awayTeam: "Chelsea",
-                time: "lør. 17:30 18.10",
-                commence_time: todayMatch2.toISOString(),
-                timestamp: Math.floor(todayMatch2.getTime() / 1000),
-                odds: { H: 2.1, U: 3.5, B: 3.4 },
-                league: "Premier League",
-                venue: "Emirates Stadium",
-                city: "London"
-            },
-            {
-                id: 3,
-                homeTeam: "Manchester City",
-                awayTeam: "Tottenham",
-                time: "søn. 14:00 19.10",
-                commence_time: tomorrowMatch1.toISOString(),
-                timestamp: Math.floor(tomorrowMatch1.getTime() / 1000),
-                odds: { H: 1.6, U: 4.2, B: 5.5 },
-                league: "Premier League",
-                venue: "Etihad Stadium",
-                city: "Manchester"
-            },
-            {
-                id: 4,
-                homeTeam: "Newcastle",
-                awayTeam: "Brighton",
-                time: "søn. 16:30 19.10",
-                commence_time: tomorrowMatch2.toISOString(),
-                timestamp: Math.floor(tomorrowMatch2.getTime() / 1000),
-                odds: { H: 2.3, U: 3.3, B: 3.1 },
-                league: "Premier League",
-                venue: "St James' Park",
-                city: "Newcastle"
-            },
-            {
-                id: 5,
-                homeTeam: "Aston Villa",
-                awayTeam: "West Ham",
-                time: "søn. 19:00 19.10",
-                commence_time: tomorrowMatch3.toISOString(),
-                timestamp: Math.floor(tomorrowMatch3.getTime() / 1000),
-                odds: { H: 2.0, U: 3.4, B: 3.8 },
-                league: "Premier League",
-                venue: "Villa Park",
-                city: "Birmingham"
-            }
-        ]);
+        return mockData.getMockFixtures();
     }
 
     /**
      * Mock scores when API is not available
      */
     getMockScores() {
-        console.log('🎭 Using mock scores');
-
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-        const match1 = new Date(today);
-        match1.setHours(15, 0, 0, 0);
-
-        const match2 = new Date(today);
-        match2.setHours(17, 30, 0, 0);
-
-        return Promise.resolve([
-            {
-                id: 1,
-                homeTeam: "Manchester United",
-                awayTeam: "Liverpool",
-                time: "15:00",
-                commence_time: match1.toISOString(),
-                timestamp: Math.floor(match1.getTime() / 1000),
-                completed: true,
-                result: { home: 2, away: 1 },
-                status: "Match Finished",
-                statusShort: "FT",
-                league: "Premier League",
-                last_update: now.toISOString()
-            },
-            {
-                id: 2,
-                homeTeam: "Arsenal",
-                awayTeam: "Chelsea",
-                time: "17:30",
-                commence_time: match2.toISOString(),
-                timestamp: Math.floor(match2.getTime() / 1000),
-                completed: false,
-                result: { home: 1, away: 1 },
-                status: "Second Half",
-                statusShort: "2H",
-                elapsed: 67,
-                league: "Premier League",
-                last_update: now.toISOString()
-            }
-        ]);
+        return mockData.getMockScores();
     }
 
     /**
@@ -859,3 +499,11 @@ class FootballApiService {
 
 // Create a global instance
 const footballApi = new FootballApiService();
+
+// Export for use in other modules
+export { footballApi };
+
+// Also expose globally for non-module scripts
+if (typeof window !== 'undefined') {
+    window.footballApi = footballApi;
+}
