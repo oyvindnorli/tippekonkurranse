@@ -51,7 +51,6 @@ async function loadCompetition() {
         }
 
         competition = { id: competitionDoc.id, ...competitionDoc.data() };
-        console.log('📥 Loaded competition:', competition);
 
         // Load user tips
         await loadUserTips();
@@ -92,7 +91,6 @@ async function loadUserTips() {
             userTips.push({ id: doc.id, ...doc.data() });
         });
 
-        console.log('📥 Loaded user tips:', userTips.length);
     } catch (error) {
         console.error('Failed to load user tips:', error);
     }
@@ -279,7 +277,6 @@ async function joinCompetition() {
             joinedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        console.log('✅ Joined competition');
         alert('Du er nå med i konkurransen!');
 
         // Reload competition
@@ -346,7 +343,6 @@ async function deleteCompetition() {
 
         await Promise.all(deletePromises);
 
-        console.log('✅ Competition deleted');
         alert('Konkurransen er slettet');
 
         // Redirect to competitions page
@@ -396,7 +392,6 @@ async function loadLeaderboard() {
         // Sort by points (descending)
         participants.sort((a, b) => b.totalPoints - a.totalPoints);
 
-        console.log('📊 Leaderboard:', participants);
         renderLeaderboard(participants);
 
     } catch (error) {
@@ -447,20 +442,15 @@ async function calculateParticipantPoints(userId) {
 // Fetch match results for competition
 async function fetchMatchResultsForCompetition() {
     try {
-        console.log('🔧 fetchMatchResultsForCompetition - SIMPLIFIED VERSION');
         const results = {};
 
         // Use cached matches if available, otherwise fetch from API
         let scores;
         if (competition.cachedMatches && competition.cachedMatches.length > 0) {
-            console.log('💾 Using cached matches for leaderboard calculation');
             scores = competition.cachedMatches;
         } else {
-            console.log('🔄 Fetching scores from API for leaderboard calculation');
             scores = await footballApi.fetchScores();
         }
-
-        console.log(`📊 Total scores available: ${scores.length}`);
 
         const leagues = competition.leagues || [];
         const leagueNames = {
@@ -540,11 +530,6 @@ async function fetchMatchResultsForCompetition() {
             }
         });
 
-        console.log(`📈 Total matches for leaderboard calculation: ${Object.keys(results).length}`);
-        Object.keys(results).forEach(id => {
-            const m = results[id];
-            console.log(`  - ${m.homeTeam} ${m.result.home}-${m.result.away} ${m.awayTeam}`);
-        });
 
         return results;
 
@@ -752,30 +737,17 @@ async function loadCompetitionMatches() {
     matchesList.innerHTML = '<div class="loading-message">Laster kamper...</div>';
 
     try {
-        console.log('=== COMPETITION DEBUG INFO ===');
-        console.log('Competition Type:', competition.competitionType);
-        console.log('Competition Leagues:', competition.leagues);
-        console.log('Selected Rounds:', competition.selectedRounds);
-        console.log('Start Date:', competition.startDate);
-        console.log('End Date:', competition.endDate);
-        console.log('Cached Matches:', competition.cachedMatches?.length || 0);
-        console.log('=============================');
 
         const db = firebase.firestore();
         competitionMatches = []; // Reset global variable
 
         // Check if competition has cached matches
         if (competition.cachedMatches && competition.cachedMatches.length > 0) {
-            console.log('💾 Using cached matches from Firestore:', competition.cachedMatches.length);
             competitionMatches = competition.cachedMatches;
         } else {
-            console.log('🔄 Fetching matches from API...');
-
             // Fetch both scores (completed/live) and upcoming fixtures
             const scores = await footballApi.fetchScores();
             const upcoming = await footballApi.getUpcomingFixtures();
-            console.log(`📊 Total scores available: ${scores.length}`);
-            console.log(`📅 Total upcoming fixtures: ${upcoming.length}`);
 
             // Combine both arrays
             const allMatches = [...scores, ...upcoming];
@@ -841,7 +813,6 @@ async function loadCompetitionMatches() {
                     const roundMatch = match.round.match(/(\d+)/);
                     if (roundMatch) {
                         const roundNumber = parseInt(roundMatch[1]);
-                        console.log(`🔍 OLD COMPETITION - Checking PL Round ${roundNumber} (looking for round 9)`);
                         return roundNumber === 9;
                     }
                 }
@@ -860,10 +831,6 @@ async function loadCompetitionMatches() {
                 return true;
             });
 
-            console.log('📥 Competition matches filtered:', competitionMatches.length);
-            competitionMatches.forEach(m => {
-                console.log(`  - ${m.homeTeam} vs ${m.awayTeam} (${m.round || 'no round'})`);
-            });
         }
 
         if (competitionMatches.length === 0) {
@@ -875,19 +842,15 @@ async function loadCompetitionMatches() {
 
         // Check if all matches are completed
         const allCompleted = competitionMatches.every(match => match.completed);
-        console.log(`🏁 All matches completed: ${allCompleted} (${competitionMatches.length} matches)`);
 
         // If all matches are completed and we haven't cached yet, save to Firestore
         if (allCompleted && !competition.cachedMatches) {
-            console.log('💾 Saving matches to Firestore cache...');
             try {
                 await db.collection('competitions').doc(competitionId).update({
                     cachedMatches: competitionMatches,
                     cachedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                console.log('✅ Matches cached successfully');
             } catch (error) {
-                console.warn('⚠️ Could not cache matches:', error);
             }
         }
 
@@ -905,7 +868,6 @@ function renderCompetitionMatches(matches) {
     const matchesList = document.getElementById('competitionMatchesList');
     matchesList.innerHTML = '';
 
-    console.log(`📋 Rendering ${matches.length} competition matches`);
 
     if (matches.length === 0) {
         matchesList.innerHTML = '<div class="no-matches">Ingen kamper funnet for denne konkurransen</div>';
