@@ -411,7 +411,7 @@ class FootballApiService {
 
         const today = new Date();
         const nextWeek = new Date();
-        nextWeek.setDate(today.getDate() + 14); // Get fixtures for next 2 weeks
+        nextWeek.setDate(today.getDate() + 7); // Get fixtures for next week
 
         const from = today.toISOString().split('T')[0];
         const to = nextWeek.toISOString().split('T')[0];
@@ -462,30 +462,16 @@ class FootballApiService {
 
         console.log(`📊 Bulk fetch complete. Found odds for ${Object.keys(allOddsMap).length} fixtures`);
 
-        // Now assign odds to fixtures
+        // Assign odds to fixtures (no individual fallback - too slow)
         for (let i = 0; i < fixtures.length; i++) {
             const fixture = fixtures[i];
 
-            // First try to use odds from bulk fetch
             if (allOddsMap[fixture.id]) {
                 fixture.odds = allOddsMap[fixture.id];
                 successCount++;
             } else {
-                // Fallback: try to fetch individually from API-Football
-                try {
-                    fixture.odds = await this.fetchOddsForFixture(fixture.id);
-
-                    if (!fixture.odds) {
-                        defaultCount++;
-                    } else {
-                        successCount++;
-                    }
-
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                } catch (error) {
-                    fixture.odds = null;
-                    defaultCount++;
-                }
+                fixture.odds = null;
+                defaultCount++;
             }
         }
 
