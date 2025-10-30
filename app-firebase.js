@@ -363,18 +363,25 @@ function applyLeagueFilter() {
         leagueFilteredMatches = [];
     } else {
         leagueFilteredMatches = allMatches.filter(match => {
-            // Check if match league name matches any active league
-            const matchLeague = match.league;
+            // Check if match league ID matches any active league
+            const matchLeagueId = match.league_id || match.leagueId;
+
+            // If we have league ID, match directly
+            if (matchLeagueId) {
+                return leaguesToShow.has(matchLeagueId);
+            }
+
+            // Fallback: match by league name (for older data format)
+            const matchLeague = typeof match.league === 'string' ? match.league : (match.league?.name || '');
+            if (!matchLeague) return false;
+
             for (const leagueId of leaguesToShow) {
                 const leagueName = leagueNames[leagueId];
-                // Skip if league name not found in mapping
-                if (!leagueName) {
-                    console.warn(`⚠️ League ID ${leagueId} not found in leagueNames mapping`);
-                    continue;
-                }
-                if (matchLeague && (matchLeague.includes(leagueName) ||
+                if (!leagueName) continue;
+
+                if (matchLeague.includes(leagueName) ||
                     leagueName.includes(matchLeague) ||
-                    matchLeague.toLowerCase().includes(leagueName.toLowerCase()))) {
+                    matchLeague.toLowerCase().includes(leagueName.toLowerCase())) {
                     return true;
                 }
             }

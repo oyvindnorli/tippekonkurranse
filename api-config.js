@@ -4,14 +4,10 @@ const API_CONFIG = {
     // This hides the API key and avoids CORS issues
     BASE_URL: '/api/football',
 
-    // League IDs - you can add multiple leagues
-    // Available: 39 (Premier League), 140 (La Liga), 78 (Bundesliga),
-    //            135 (Serie A), 61 (Ligue 1), 2 (Champions League), 48 (EFL Cup), etc.
+    // League IDs - Only Premier League and Champions League
     LEAGUES: [
         39,  // Premier League
-        2,   // Champions League
-        48,  // EFL Cup
-        135  // Serie A
+        2    // Champions League
     ],
     SEASON: new Date().getFullYear(), // Current season
     MAX_MATCHES: 30, // Maximum number of matches to show
