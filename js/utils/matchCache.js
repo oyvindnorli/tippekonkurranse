@@ -72,8 +72,16 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
 
         snapshot.forEach(doc => {
             const data = doc.data();
-            // Filter by league IDs
-            if (leagueSet.has(data.league)) {
+
+            // Debug first document to see what league type we have
+            if (matches.length === 0 && snapshot.size > 0) {
+                console.log(`🔍 First doc league type: ${typeof data.league}, value: ${data.league}`);
+                console.log(`🔍 Looking for leagues: ${JSON.stringify(Array.from(leagueSet))}`);
+            }
+
+            // Filter by league IDs - handle both string and number
+            const docLeague = typeof data.league === 'string' ? parseInt(data.league) : data.league;
+            if (leagueSet.has(docLeague)) {
                 matches.push(data);
             }
         });
