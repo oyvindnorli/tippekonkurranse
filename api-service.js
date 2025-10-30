@@ -412,6 +412,8 @@ class FootballApiService {
         tomorrow.setDate(today.getDate() + 2); // Get fixtures for today + tomorrow (2 days)
 
         // Try Firestore first (fastest and ensures consistent odds)
+        // TEMPORARILY DISABLED: Using localStorage cache instead
+        /*
         try {
             const { getUpcomingMatchesFromCache, saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
             const cachedMatches = await getUpcomingMatchesFromCache(today, tomorrow, API_CONFIG.LEAGUES);
@@ -427,8 +429,9 @@ class FootballApiService {
         } catch (error) {
             console.warn('⚠️ Firestore cache failed, falling back to API:', error);
         }
+        */
 
-        // Firestore cache miss - fetch from API
+        // Fetch from API (Firestore cache disabled)
         const from = today.toISOString().split('T')[0];
         const to = tomorrow.toISOString().split('T')[0];
 
@@ -514,6 +517,9 @@ class FootballApiService {
         console.log(`💰 Odds: ${successCount} fetched${defaultCount > 0 ? `, ${defaultCount} missing` : ''}`);
 
         // Save to Firestore for consistent odds across all users
+        // TEMPORARILY DISABLED: Firestore rules not deployed yet
+        // TODO: Deploy firestore.rules to Firebase Console to enable
+        /*
         try {
             const { saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
             const saved = await saveMatchesToFirestore(fixtures);
@@ -523,6 +529,7 @@ class FootballApiService {
         } catch (error) {
             console.error('⚠️ Failed to save matches to Firestore:', error);
         }
+        */
 
         // Also save to localStorage for faster initial load
         this.saveCache(fixtures);
@@ -558,8 +565,10 @@ class FootballApiService {
             });
 
             if (matchesWithResults.length > 0) {
-                const { updateMatchResults } = await import('./js/utils/matchCache.js');
-                await updateMatchResults(matchesWithResults);
+                // TEMPORARILY DISABLED: Firestore rules not deployed yet
+                // const { updateMatchResults } = await import('./js/utils/matchCache.js');
+                // await updateMatchResults(matchesWithResults);
+                console.log(`ℹ️ ${matchesWithResults.length} matches have results (Firestore update disabled)`);
             }
         } catch (error) {
             console.warn('⚠️ Background result update failed:', error);
