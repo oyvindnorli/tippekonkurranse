@@ -731,7 +731,9 @@ function renderMatches() {
                             <div class="score-controls-inline">
                                 <button class="score-btn-inline minus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Reduser hjemmelag">−</button>
                                 <span class="score-display-inline" id="home-score-${match.id}">${homeScore}</span>
+                                <button class="score-btn-inline plus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Øk hjemmelag">+</button>
                                 <span class="score-separator">-</span>
+                                <button class="score-btn-inline minus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Reduser bortelag">−</button>
                                 <span class="score-display-inline" id="away-score-${match.id}">${awayScore}</span>
                                 <button class="score-btn-inline plus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Øk bortelag">+</button>
                             </div>
