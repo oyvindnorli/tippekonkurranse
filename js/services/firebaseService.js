@@ -192,6 +192,10 @@ export function listenToDocument(collectionName, docId, callback) {
             }
         },
         (error) => {
+            // Ignore benign errors from page navigation/refresh
+            if (error.code === 'cancelled' || error.code === 'unavailable') {
+                return;
+            }
             console.error(`Error listening to ${collectionName}/${docId}:`, error);
         }
     );
@@ -218,6 +222,10 @@ export function listenToQuery(collectionName, field, operator, value, callback) 
                 callback(docs);
             },
             (error) => {
+                // Ignore benign errors from page navigation/refresh
+                if (error.code === 'cancelled' || error.code === 'unavailable') {
+                    return;
+                }
                 console.error(`Error listening to ${collectionName} query:`, error);
             }
         );
