@@ -671,14 +671,16 @@ function renderMatches() {
             const timeHeader = document.createElement('div');
             timeHeader.className = 'time-header';
             // Clean time format - extract only HH:MM if it contains more
-            const cleanTime = time.includes(',') ? time.split(',').pop().trim() : time;
+            const cleanTime = time && time !== 'undefined' ?
+                (time.includes(',') ? time.split(',').pop().trim() : time) :
+                '';
 
             // Get league info from first match in this time group
             const firstMatch = upcomingMatches[0];
             const leagueLogo = firstMatch.leagueLogo ? `<img src="${firstMatch.leagueLogo}" alt="${firstMatch.leagueName || 'Liga'}" class="league-logo-small" onerror="this.style.display='none'">` : '';
             const leagueName = firstMatch.leagueName ? `<span class="league-name">${firstMatch.leagueName}</span>` : '';
 
-            timeHeader.innerHTML = `<strong>${cleanTime}</strong> ${leagueLogo} ${leagueName}`;
+            timeHeader.innerHTML = cleanTime ? `<strong>${cleanTime}</strong> ${leagueLogo} ${leagueName}` : `${leagueLogo} ${leagueName}`;
             dateGroup.appendChild(timeHeader);
 
             // Render all upcoming matches for this time
@@ -727,17 +729,11 @@ function renderMatches() {
                         <!-- Score controls -->
                         <div class="score-section">
                             <div class="score-controls-inline">
-                                <button class="score-btn-inline minus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''}>−</button>
+                                <button class="score-btn-inline minus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Reduser hjemmelag">−</button>
                                 <span class="score-display-inline" id="home-score-${match.id}">${homeScore}</span>
                                 <span class="score-separator">-</span>
                                 <span class="score-display-inline" id="away-score-${match.id}">${awayScore}</span>
-                                <button class="score-btn-inline plus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''}>+</button>
-                            </div>
-                            <div class="score-fine-tune">
-                                <button class="score-btn-small minus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Hjemme -">H−</button>
-                                <button class="score-btn-small plus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Hjemme +">H+</button>
-                                <button class="score-btn-small minus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Borte -">B−</button>
-                                <button class="score-btn-small plus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Borte +">B+</button>
+                                <button class="score-btn-inline plus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Øk bortelag">+</button>
                             </div>
                         </div>
 
@@ -776,11 +772,11 @@ function renderMatches() {
                         });
                     });
 
-                    // Add event listeners for +/- buttons (both inline and small)
-                    const buttons = matchCard.querySelectorAll('.score-btn-inline, .score-btn-small');
+                    // Add event listeners for +/- buttons
+                    const buttons = matchCard.querySelectorAll('.score-btn-inline');
                     buttons.forEach(btn => {
                         btn.addEventListener('click', (e) => {
-                            const matchId = e.target.dataset.matchId; // Keep as string, don't parse
+                            const matchId = e.target.dataset.matchId;
                             const type = e.target.dataset.type;
                             const isPlus = e.target.classList.contains('plus-btn');
 
