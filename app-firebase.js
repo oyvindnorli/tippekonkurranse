@@ -17,6 +17,31 @@ let selectedDate = null; // null = show all dates, otherwise show only this date
 // Active league filter - tracks which leagues are currently visible
 let activeLeagueFilter = new Set(); // Empty = show all from preferences
 
+// Save league filter to localStorage
+function saveLeagueFilterToCache() {
+    try {
+        const filterArray = Array.from(activeLeagueFilter);
+        localStorage.setItem('activeLeagueFilter', JSON.stringify(filterArray));
+    } catch (error) {
+        console.warn('Failed to save league filter to cache:', error);
+    }
+}
+
+// Load league filter from localStorage
+function loadLeagueFilterFromCache() {
+    try {
+        const cached = localStorage.getItem('activeLeagueFilter');
+        if (cached) {
+            const filterArray = JSON.parse(cached);
+            activeLeagueFilter = new Set(filterArray);
+            console.log(`📦 Loaded league filter from cache: ${filterArray.length} leagues`);
+        }
+    } catch (error) {
+        console.warn('Failed to load league filter from cache:', error);
+        activeLeagueFilter = new Set();
+    }
+}
+
 // Load league preferences from Firestore (user preferences)
 async function loadSelectedLeagues(userId) {
     try {
@@ -588,6 +613,9 @@ function init() {
 
             API_CONFIG.LEAGUES = newLeagues;
 
+            // Load saved league filter from localStorage
+            loadLeagueFilterFromCache();
+
             // Show main content, hide welcome
             if (welcomeSection) {
                 welcomeSection.style.display = 'none';
@@ -1148,6 +1176,8 @@ function toggleLeagueFilter(leagueId) {
         activeLeagueFilter.clear();
     }
 
+    // Save filter to cache
+    saveLeagueFilterToCache();
 
     // Re-apply filters
     applyLeagueFilter();
@@ -1155,6 +1185,7 @@ function toggleLeagueFilter(leagueId) {
 
 function selectAllLeaguesFilter() {
     activeLeagueFilter.clear(); // Empty = show all
+    saveLeagueFilterToCache();
     populateLeagueFilter();
     applyLeagueFilter();
 }
@@ -1165,6 +1196,7 @@ function deselectAllLeaguesFilter() {
         const firstLeague = Array.from(selectedLeagues)[0];
         activeLeagueFilter.add(firstLeague);
     }
+    saveLeagueFilterToCache();
     populateLeagueFilter();
     applyLeagueFilter();
 }
