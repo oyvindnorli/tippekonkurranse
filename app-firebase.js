@@ -797,30 +797,47 @@ function renderMatches() {
                             { element: awayScoreElement, type: 'away' }
                         ].forEach(({ element, type }) => {
                             let touchStartY = 0;
+                            let touchStartX = 0;
+                            let isSwiping = false;
 
                             element.addEventListener('touchstart', (e) => {
                                 touchStartY = e.touches[0].clientY;
-                            });
+                                touchStartX = e.touches[0].clientX;
+                                isSwiping = false;
+                            }, { passive: true });
 
                             element.addEventListener('touchmove', (e) => {
-                                e.preventDefault(); // Prevent scrolling while swiping
-                            });
+                                const touchCurrentY = e.touches[0].clientY;
+                                const touchCurrentX = e.touches[0].clientX;
+                                const deltaY = Math.abs(touchStartY - touchCurrentY);
+                                const deltaX = Math.abs(touchStartX - touchCurrentX);
+
+                                // Only prevent default if vertical swipe is dominant
+                                if (deltaY > deltaX && deltaY > 10) {
+                                    isSwiping = true;
+                                    e.preventDefault();
+                                }
+                            }, { passive: false });
 
                             element.addEventListener('touchend', (e) => {
-                                const touchEndY = e.changedTouches[0].clientY;
-                                const deltaY = touchStartY - touchEndY;
+                                if (isSwiping) {
+                                    const touchEndY = e.changedTouches[0].clientY;
+                                    const deltaY = touchStartY - touchEndY;
 
-                                // Swipe threshold - 30px minimum
-                                if (Math.abs(deltaY) > 30) {
-                                    if (deltaY > 0) {
-                                        // Swipe up - increase
-                                        updateScore(match.id, type, true);
-                                    } else {
-                                        // Swipe down - decrease
-                                        updateScore(match.id, type, false);
+                                    // Swipe threshold - 20px minimum
+                                    if (Math.abs(deltaY) > 20) {
+                                        e.preventDefault();
+                                        if (deltaY > 0) {
+                                            // Swipe up - increase
+                                            updateScore(match.id, type, true);
+                                        } else {
+                                            // Swipe down - decrease
+                                            updateScore(match.id, type, false);
+                                        }
                                     }
                                 }
-                            });
+                                isSwiping = false;
+                            }, { passive: false });
                         });
                     }
                 }

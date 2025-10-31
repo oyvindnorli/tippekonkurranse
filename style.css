@@ -620,7 +620,7 @@ header h1 {
     text-align: center;
     cursor: grab;
     user-select: none;
-    touch-action: none;
+    touch-action: pan-y; /* Allow vertical scrolling but capture swipes */
     padding: 4px 8px;
     border-radius: 4px;
     transition: background 0.2s ease;
