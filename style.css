@@ -237,86 +237,38 @@ header h1 {
     border-bottom: 1px solid #e5e7eb;
 }
 
-/* Date Navigation */
-.date-navigation {
+/* Filter Buttons */
+.filter-buttons {
     display: flex;
-    align-items: center;
     justify-content: center;
-    gap: 12px;
     padding: 16px 20px;
     background: #ffffff;
     border-bottom: 1px solid #e5e7eb;
 }
 
-.date-nav-btn {
-    background: #f3f4f6;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 24px;
-    color: #374151;
-}
-
-.date-nav-btn:hover {
-    background: #e5e7eb;
-    border-color: #9ca3af;
-}
-
-.date-nav-btn:active {
-    transform: scale(0.95);
-}
-
-.date-display {
-    flex: 1;
-    max-width: 220px;
-    text-align: center;
-    padding: 10px 16px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.date-display:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-}
-
-.date-display span {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1f2937;
-}
-
-.calendar-btn, .league-filter-btn {
+.league-filter-btn {
     background: #3b82f6;
-    border: 1px solid #2563eb;
+    color: white;
+    border: none;
     border-radius: 8px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.calendar-btn:hover, .league-filter-btn:hover {
+.league-filter-btn:hover {
     background: #2563eb;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.calendar-btn:active, .league-filter-btn:active {
-    transform: scale(0.95);
+.league-filter-btn:active {
+    transform: scale(0.98);
 }
 
 /* League Filter Container */

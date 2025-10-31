@@ -1114,10 +1114,8 @@ function applyDateFilter() {
 
 // Initialize date display on page load
 function initDateNavigation() {
-    // Start with today's date
-    selectedDate = new Date();
-    selectedDate.setHours(0, 0, 0, 0);
-    updateDateDisplay();
+    // Show all dates by default (no date filter)
+    selectedDate = null;
 }
 
 // League filter functions
