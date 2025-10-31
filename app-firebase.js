@@ -1022,8 +1022,9 @@ function applyDateFilter() {
 
 // Initialize date display on page load
 function initDateNavigation() {
-    // Start with no date filter (show all upcoming matches)
-    selectedDate = null;
+    // Start with today's date
+    selectedDate = new Date();
+    selectedDate.setHours(0, 0, 0, 0);
     updateDateDisplay();
 }
 
