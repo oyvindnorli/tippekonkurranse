@@ -618,17 +618,7 @@ header h1 {
     color: #1e293b;
     min-width: 20px;
     text-align: center;
-    cursor: grab;
     user-select: none;
-    touch-action: pan-y; /* Allow vertical scrolling but capture swipes */
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: background 0.2s ease;
-}
-
-.score-display-inline:active {
-    cursor: grabbing;
-    background: #f1f5f9;
 }
 
 .score-separator {
@@ -2438,25 +2428,15 @@ header h1 {
     }
 
     .score-btn-inline {
-        width: 28px;
-        height: 28px;
-        font-size: 18px;
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+        border-radius: 50%;
     }
 
     .score-display-inline {
         font-size: 20px;
         min-width: 24px;
-        padding: 8px 12px;
-        background: #f8fafc;
-        border: 2px dashed #cbd5e1;
-    }
-
-    /* Hint: Swipe up/down on scores to change them on mobile */
-    .score-display-inline::after {
-        content: '⇅';
-        font-size: 10px;
-        color: #94a3b8;
-        margin-left: 4px;
     }
 
     .score-fine-tune {
