@@ -1205,10 +1205,20 @@ async function refreshData() {
 window.refreshData = refreshData;
 window.forceRefreshData = refreshData; // Alias for onclick handler
 
+// Make cleanup function available globally
+window.cleanupFirestore = async function() {
+    console.log('🧹 Starting complete Firestore cleanup...');
+    const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js');
+    const deleted = await cleanupAllOutdatedMatches();
+    console.log(`✅ Cleanup complete! Deleted ${deleted} outdated matches.`);
+    console.log('🔄 Refreshing data...');
+    await refreshData();
+};
+
 // Add button to simulate results for testing (can be removed later)
 window.addEventListener('DOMContentLoaded', () => {
     init();
 
-    // Add debug button in console
-    console.log('🔥 Tippekonkurranse loaded | simulateResult(matchId) | refreshData()');
+    // Add debug functions in console
+    console.log('🔥 Tippekonkurranse loaded | simulateResult(matchId) | refreshData() | cleanupFirestore()');
 });

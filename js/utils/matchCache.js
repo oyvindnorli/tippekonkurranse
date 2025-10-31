@@ -53,6 +53,73 @@ export async function cleanupOldFormatMatches() {
 }
 
 /**
+ * Clean up ALL outdated matches from Firestore
+ * Deletes: old format (league: string) + matches older than today
+ * @returns {Promise<number>} Number of matches deleted
+ */
+export async function cleanupAllOutdatedMatches() {
+    try {
+        const db = firebase.firestore();
+
+        // Get all matches
+        const snapshot = await db.collection('matches').get();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        console.log(`🧹 Checking ${snapshot.size} matches for complete cleanup...`);
+
+        let deletedCount = 0;
+        const batch = db.batch();
+        let batchCount = 0;
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            let shouldDelete = false;
+
+            // Delete if league is a string (old format)
+            if (typeof data.league === 'string') {
+                console.log(`  ❌ Deleting old format: ${data.homeTeam} vs ${data.awayTeam} (league: "${data.league}")`);
+                shouldDelete = true;
+            }
+
+            // Delete if match date is before today (outdated)
+            if (data.commence_time) {
+                const matchDate = new Date(data.commence_time);
+                matchDate.setHours(0, 0, 0, 0);
+                if (matchDate < today) {
+                    console.log(`  ❌ Deleting outdated: ${data.homeTeam} vs ${data.awayTeam} (${matchDate.toISOString().split('T')[0]})`);
+                    shouldDelete = true;
+                }
+            }
+
+            if (shouldDelete) {
+                batch.delete(doc.ref);
+                batchCount++;
+                deletedCount++;
+
+                // Firestore batch limit is 500
+                if (batchCount >= 500) {
+                    console.warn('⚠️ Batch limit reached (500). Some matches may remain.');
+                }
+            }
+        });
+
+        if (batchCount > 0) {
+            await batch.commit();
+            console.log(`✅ Deleted ${deletedCount} outdated matches from Firestore`);
+            console.log(`✅ Remaining: ${snapshot.size - deletedCount} valid matches`);
+        } else {
+            console.log('✅ No outdated matches found - Firestore is clean!');
+        }
+
+        return deletedCount;
+    } catch (error) {
+        console.error('❌ Error cleaning up outdated matches:', error);
+        return 0;
+    }
+}
+
+/**
  * Get matches from Firestore cache or fetch from API
  * @param {Array} matchIds - Array of match IDs to fetch
  * @returns {Promise<Array>} Array of matches with odds frozen
