@@ -2437,6 +2437,29 @@ header h1 {
     .score-display-inline {
         font-size: 20px;
         min-width: 24px;
+        padding: 8px 16px;
+        background: linear-gradient(90deg, #f1f5f9 0%, #ffffff 50%, #f1f5f9 100%);
+        border-radius: 6px;
+        position: relative;
+    }
+
+    /* Visual hint: swipeable horizontally */
+    .score-display-inline::before {
+        content: '←';
+        position: absolute;
+        left: 2px;
+        font-size: 10px;
+        color: #94a3b8;
+        opacity: 0.6;
+    }
+
+    .score-display-inline::after {
+        content: '→';
+        position: absolute;
+        right: 2px;
+        font-size: 10px;
+        color: #94a3b8;
+        opacity: 0.6;
     }
 
     .score-fine-tune {

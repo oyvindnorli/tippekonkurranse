@@ -787,6 +787,43 @@ function renderMatches() {
                         });
                     });
 
+                    // Add horizontal swipe functionality for score displays (mobile friendly)
+                    const homeScoreElement = document.getElementById(`home-score-${match.id}`);
+                    const awayScoreElement = document.getElementById(`away-score-${match.id}`);
+
+                    if (homeScoreElement && awayScoreElement) {
+                        [
+                            { element: homeScoreElement, type: 'home' },
+                            { element: awayScoreElement, type: 'away' }
+                        ].forEach(({ element, type }) => {
+                            let touchStartX = 0;
+                            let touchStartY = 0;
+
+                            element.addEventListener('touchstart', (e) => {
+                                touchStartX = e.touches[0].clientX;
+                                touchStartY = e.touches[0].clientY;
+                            }, { passive: true });
+
+                            element.addEventListener('touchend', (e) => {
+                                const touchEndX = e.changedTouches[0].clientX;
+                                const touchEndY = e.changedTouches[0].clientY;
+                                const deltaX = touchEndX - touchStartX;
+                                const deltaY = Math.abs(touchEndY - touchStartY);
+
+                                // Only trigger if horizontal swipe is dominant (not vertical scroll)
+                                if (Math.abs(deltaX) > 50 && deltaY < 30) {
+                                    if (deltaX > 0) {
+                                        // Swipe right - increase
+                                        updateScore(match.id, type, true);
+                                    } else {
+                                        // Swipe left - decrease
+                                        updateScore(match.id, type, false);
+                                    }
+                                }
+                            }, { passive: true });
+                        });
+                    }
+
                 }
             });
         });
