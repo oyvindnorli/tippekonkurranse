@@ -176,7 +176,7 @@ class FootballApiService {
         // Try Firestore first (fastest and ensures consistent odds)
         if (!skipCache) {
             try {
-                const { getUpcomingMatchesFromCache, saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
+                const { getUpcomingMatchesFromCache, saveMatchesToFirestore, cleanupOldFormatMatches } = await import('./js/utils/matchCache.js');
                 const cachedMatches = await getUpcomingMatchesFromCache(today, tomorrow, API_CONFIG.LEAGUES);
 
                 if (cachedMatches && cachedMatches.length > 0) {
@@ -187,6 +187,9 @@ class FootballApiService {
                     return cachedMatches;
                 } else {
                     console.log(`⚠️ Firestore cache returned 0 matches for leagues ${API_CONFIG.LEAGUES.join(',')}, fetching from API...`);
+
+                    // If cache is empty/invalid, clean up old format matches in background
+                    cleanupOldFormatMatches().catch(err => console.warn('Cleanup failed:', err));
                 }
             } catch (error) {
                 console.warn('⚠️ Firestore cache failed, falling back to API:', error);

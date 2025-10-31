@@ -117,17 +117,36 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
         const matches = [];
         const leagueSet = new Set(leagueIds);
 
+        let oldFormatCount = 0;
+
         snapshot.forEach(doc => {
             const data = doc.data();
 
-            // Filter by league IDs - handle both string and number
-            const docLeague = typeof data.league === 'string' ? parseInt(data.league) : data.league;
-            if (leagueSet.has(docLeague)) {
+            // Skip old format matches (league as string) - they will be cleaned up
+            if (typeof data.league === 'string') {
+                oldFormatCount++;
+                return;
+            }
+
+            // Filter by league IDs (only accept numbers now)
+            const docLeague = data.league;
+            if (typeof docLeague === 'number' && leagueSet.has(docLeague)) {
                 matches.push(data);
             }
         });
 
+        if (oldFormatCount > 0) {
+            console.log(`⚠️ Found ${oldFormatCount} old format matches - will fetch fresh data from API`);
+        }
+
         console.log(`📦 Firestore cache: ${matches.length}/${snapshot.size} matches matched leagues ${leagueIds.join(',')}`);
+
+        // If we have old format matches and few/no valid matches, return empty to trigger API fetch
+        if (oldFormatCount > 0 && matches.length < 10) {
+            console.log(`🔄 Too many old format matches (${oldFormatCount}), forcing API refresh...`);
+            return [];
+        }
+
         return matches;
     } catch (error) {
         console.error('❌ Error fetching upcoming matches from Firestore:', error);
