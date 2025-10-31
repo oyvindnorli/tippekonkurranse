@@ -744,15 +744,15 @@ function renderMatches() {
                             <div class="odds-section">
                                 <button class="odd-btn-inline home-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Hjemmeseier 1-0">
                                     <span class="odd-label-inline">H</span>
-                                    <span class="odd-value-inline">${match.odds.H.toFixed(2)}</span>
+                                    <span class="odd-value-inline">${match.odds.H.toFixed(1)}</span>
                                 </button>
                                 <button class="odd-btn-inline draw-btn" data-match-id="${match.id}" data-type="draw" ${match.result ? 'disabled' : ''} title="Uavgjort 0-0">
                                     <span class="odd-label-inline">U</span>
-                                    <span class="odd-value-inline">${match.odds.U.toFixed(2)}</span>
+                                    <span class="odd-value-inline">${match.odds.U.toFixed(1)}</span>
                                 </button>
                                 <button class="odd-btn-inline away-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Borteseier 0-1">
                                     <span class="odd-label-inline">B</span>
-                                    <span class="odd-value-inline">${match.odds.B.toFixed(2)}</span>
+                                    <span class="odd-value-inline">${match.odds.B.toFixed(1)}</span>
                                 </button>
                             </div>
                         ` : '<div class="odds-section"><span class="no-odds">Ingen odds</span></div>'}
