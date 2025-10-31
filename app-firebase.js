@@ -1226,10 +1226,20 @@ window.cleanupFirestore = async function() {
     await refreshData();
 };
 
+// Make convert function available globally
+window.convertOldMatches = async function() {
+    console.log('🔄 Starting conversion of old format matches...');
+    const { convertOldFormatMatches } = await import('./js/utils/matchCache.js');
+    const converted = await convertOldFormatMatches();
+    console.log(`✅ Conversion complete! Converted ${converted} matches.`);
+    console.log('🔄 Refreshing data...');
+    await refreshData();
+};
+
 // Add button to simulate results for testing (can be removed later)
 window.addEventListener('DOMContentLoaded', () => {
     init();
 
     // Add debug functions in console
-    console.log('🔥 Tippekonkurranse loaded | simulateResult(matchId) | refreshData() | cleanupFirestore()');
+    console.log('🔥 Tippekonkurranse loaded | simulateResult(matchId) | refreshData() | cleanupFirestore() | convertOldMatches()');
 });
