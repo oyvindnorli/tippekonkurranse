@@ -345,8 +345,14 @@ async function loadCompetitionMatches() {
 
                 // Must be in one of the competition leagues
                 const matchInLeague = competitionLeagues.some(leagueId => {
-                    const leagueName = LEAGUE_NAMES_SIMPLE[leagueId];
-                    return match.league && match.league.includes(leagueName);
+                    // Support both new format (league as number) and old format (league as string)
+                    if (typeof match.league === 'number') {
+                        return match.league === leagueId;
+                    } else if (typeof match.league === 'string') {
+                        const leagueName = LEAGUE_NAMES_SIMPLE[leagueId];
+                        return match.league.includes(leagueName);
+                    }
+                    return false;
                 });
 
                 if (!matchInLeague) {
@@ -357,8 +363,10 @@ async function loadCompetitionMatches() {
                 if (competition.selectedRounds) {
                     let roundMatches = false;
 
-                    // Premier League round filtering
-                    if (competition.selectedRounds.premierLeague && competition.selectedRounds.premierLeague.length > 0 && match.league.includes('Premier League')) {
+                    // Premier League round filtering (league ID 39)
+                    const isPremierLeague = (typeof match.league === 'number' && match.league === 39) ||
+                                           (typeof match.league === 'string' && match.league.includes('Premier League'));
+                    if (competition.selectedRounds.premierLeague && competition.selectedRounds.premierLeague.length > 0 && isPremierLeague) {
                         if (match.round) {
                             const roundMatch = match.round.match(/(\d+)/);
                             if (roundMatch) {
@@ -369,8 +377,10 @@ async function loadCompetitionMatches() {
                         return roundMatches; // Return immediately for PL matches
                     }
 
-                    // Champions League round filtering
-                    if (competition.selectedRounds.championsLeague && competition.selectedRounds.championsLeague.length > 0 && match.league.includes('Champions League')) {
+                    // Champions League round filtering (league ID 2)
+                    const isChampionsLeague = (typeof match.league === 'number' && match.league === 2) ||
+                                             (typeof match.league === 'string' && match.league.includes('Champions League'));
+                    if (competition.selectedRounds.championsLeague && competition.selectedRounds.championsLeague.length > 0 && isChampionsLeague) {
                         if (match.round) {
                             roundMatches = competition.selectedRounds.championsLeague.includes(match.round);
                         }
@@ -382,7 +392,9 @@ async function loadCompetitionMatches() {
                 }
 
                 // If competitionType is 'round' but no selectedRounds, assume PL Round 9 for backward compatibility
-                if (competition.competitionType === 'round' && !competition.selectedRounds && match.league.includes('Premier League') && match.round) {
+                const isPremierLeagueBackCompat = (typeof match.league === 'number' && match.league === 39) ||
+                                                  (typeof match.league === 'string' && match.league.includes('Premier League'));
+                if (competition.competitionType === 'round' && !competition.selectedRounds && isPremierLeagueBackCompat && match.round) {
                     const roundMatch = match.round.match(/(\d+)/);
                     if (roundMatch) {
                         const roundNumber = parseInt(roundMatch[1]);
