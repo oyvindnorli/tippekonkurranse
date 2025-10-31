@@ -456,6 +456,12 @@ function createCompetitionMatchCard(match) {
     return competitionRenderer.createCompetitionMatchCard(match, userTips, calculateMatchPoints, footballApi);
 }
 
+// Export functions to window for onclick handlers
+window.joinCompetition = joinCompetition;
+window.shareCompetition = shareCompetition;
+window.viewUserTips = viewUserTips;
+window.closeUserTipsModal = closeUserTipsModal;
+
 // Close modal when clicking outside
 window.addEventListener('click', function(event) {
     const modal = document.getElementById('userTipsModal');
