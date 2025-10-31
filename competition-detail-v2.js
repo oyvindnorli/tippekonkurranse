@@ -459,7 +459,6 @@ function createCompetitionMatchCard(match) {
 // Export functions to window for onclick handlers
 window.joinCompetition = joinCompetition;
 window.shareCompetition = shareCompetition;
-window.viewUserTips = viewUserTips;
 window.closeUserTipsModal = closeUserTipsModal;
 
 // Close modal when clicking outside
