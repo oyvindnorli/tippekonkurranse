@@ -536,7 +536,7 @@ header h1 {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex: 2;
+    flex: 3;
     min-width: 0;
 }
 
@@ -672,10 +672,10 @@ header h1 {
     background: #ffffff;
     border: 1.5px solid #e2e8f0;
     border-radius: 6px;
-    padding: 6px 8px;
+    padding: 6px 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-width: 46px;
+    min-width: 42px;
 }
 
 .odd-btn-inline:hover:not(:disabled) {
