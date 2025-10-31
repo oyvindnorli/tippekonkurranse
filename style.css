@@ -500,26 +500,227 @@ header h1 {
     font-weight: 500;
 }
 
-/* Match cards - Clean vertical layout */
+/* Match cards - Compact inline layout */
 .match-card {
     background: #ffffff;
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 8px;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 6px;
     border: 1.5px solid #e5e7eb;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .match-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border-color: #cbd5e1;
+    transform: translateY(-1px);
 }
 
 .match-card.has-tip {
     background: linear-gradient(135deg, #f0fdf4 0%, #f0fdfa 100%);
     border: 2px solid #10b981;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+}
+
+/* Inline layout - everything on one line */
+.match-info-inline {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+/* Teams section */
+.teams-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.team-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.team-logo-inline {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.team-name-inline {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vs-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+/* Score section */
+.score-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}
+
+.score-controls-inline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.score-btn-inline {
+    background: #e2e8f0;
+    border: none;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    color: #475569;
+    transition: all 0.15s ease;
+}
+
+.score-btn-inline:hover:not(:disabled) {
+    background: #cbd5e1;
+    transform: scale(1.1);
+}
+
+.score-btn-inline:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.score-display-inline {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    min-width: 20px;
+    text-align: center;
+}
+
+.score-separator {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    margin: 0 2px;
+}
+
+/* Fine-tune score buttons */
+.score-fine-tune {
+    display: flex;
+    gap: 3px;
+}
+
+.score-btn-small {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.score-btn-small:hover:not(:disabled) {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.score-btn-small:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Odds section */
+.odds-section {
+    display: flex;
+    gap: 6px;
+}
+
+.odd-btn-inline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 50px;
+}
+
+.odd-btn-inline:hover:not(:disabled) {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+}
+
+.odd-btn-inline:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.odd-btn-inline.home-btn:hover:not(:disabled) {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+
+.odd-btn-inline.draw-btn:hover:not(:disabled) {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.odd-btn-inline.away-btn:hover:not(:disabled) {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.odd-label-inline {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.odd-value-inline {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.no-odds {
+    font-size: 12px;
+    color: #94a3b8;
+    font-style: italic;
 }
 
 .match-info {
@@ -2189,6 +2390,79 @@ header h1 {
         flex-basis: 100%;
         order: -1;
         font-size: 14px;
+    }
+
+    /* Inline design mobile adjustments */
+    .match-info-inline {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .teams-section {
+        flex-direction: column;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .team-inline {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .team-name-inline {
+        font-size: 13px;
+    }
+
+    .vs-text {
+        align-self: center;
+        margin: 2px 0;
+    }
+
+    .score-section {
+        width: 100%;
+    }
+
+    .score-controls-inline {
+        justify-content: center;
+    }
+
+    .score-btn-inline {
+        width: 28px;
+        height: 28px;
+        font-size: 18px;
+    }
+
+    .score-display-inline {
+        font-size: 20px;
+        min-width: 24px;
+    }
+
+    .score-fine-tune {
+        gap: 4px;
+    }
+
+    .score-btn-small {
+        padding: 3px 8px;
+        font-size: 11px;
+    }
+
+    .odds-section {
+        width: 100%;
+        justify-content: space-around;
+    }
+
+    .odd-btn-inline {
+        flex: 1;
+        min-width: 70px;
+        padding: 8px 12px;
+    }
+
+    .odd-label-inline {
+        font-size: 12px;
+    }
+
+    .odd-value-inline {
+        font-size: 15px;
     }
 }
 
