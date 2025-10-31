@@ -269,16 +269,15 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
 
         if (oldFormatCount > 0) {
             console.log(`⚠️ Found ${oldFormatCount} old format matches - will fetch fresh data from API`);
-        }
+            console.log(`📦 Firestore cache: ${matches.length}/${snapshot.size} matches matched leagues ${leagueIds.join(',')}`);
+            console.log(`🔄 Forcing API refresh due to old format matches...`);
 
-        console.log(`📦 Firestore cache: ${matches.length}/${snapshot.size} matches matched leagues ${leagueIds.join(',')}`);
-
-        // If we have old format matches and few/no valid matches, return empty to trigger API fetch
-        if (oldFormatCount > 0 && matches.length < 10) {
-            console.log(`🔄 Too many old format matches (${oldFormatCount}), forcing API refresh...`);
+            // Always fetch fresh data if old format matches exist
+            // This ensures we get all matches with correct format
             return [];
         }
 
+        console.log(`📦 Firestore cache: ${matches.length}/${snapshot.size} matches matched leagues ${leagueIds.join(',')}`);
         return matches;
     } catch (error) {
         console.error('❌ Error fetching upcoming matches from Firestore:', error);
