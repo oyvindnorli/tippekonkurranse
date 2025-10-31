@@ -675,8 +675,8 @@ function renderMatches() {
 
             // Get league info from first match in this time group
             const firstMatch = upcomingMatches[0];
-            const leagueLogo = firstMatch.leagueLogo ? `<img src="${firstMatch.leagueLogo}" alt="${firstMatch.league}" class="league-logo-small" onerror="this.style.display='none'">` : '';
-            const leagueName = firstMatch.league ? `<span class="league-name">${firstMatch.league}</span>` : '';
+            const leagueLogo = firstMatch.leagueLogo ? `<img src="${firstMatch.leagueLogo}" alt="${firstMatch.leagueName || 'Liga'}" class="league-logo-small" onerror="this.style.display='none'">` : '';
+            const leagueName = firstMatch.leagueName ? `<span class="league-name">${firstMatch.leagueName}</span>` : '';
 
             timeHeader.innerHTML = `<strong>${cleanTime}</strong> ${leagueLogo} ${leagueName}`;
             dateGroup.appendChild(timeHeader);
