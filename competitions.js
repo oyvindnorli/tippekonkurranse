@@ -436,6 +436,12 @@ function viewCompetition(competitionId) {
     window.location.href = `competition-detail.html?id=${competitionId}`;
 }
 
+// Export functions to window object for onclick handlers
+window.viewCompetition = viewCompetition;
+window.showCreateCompetitionModal = showCreateCompetitionModal;
+window.closeCreateCompetitionModal = closeCreateCompetitionModal;
+window.signOut = signOut;
+
 // Close modal on outside click
 window.onclick = function(event) {
     const modal = document.getElementById('createCompetitionModal');
