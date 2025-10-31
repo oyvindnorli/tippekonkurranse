@@ -786,6 +786,50 @@ function renderMatches() {
                             updateScore(matchId, type, isPlus);
                         });
                     });
+
+                    // Add swipe functionality for score displays
+                    const homeScoreElement = document.getElementById(`home-score-${match.id}`);
+                    const awayScoreElement = document.getElementById(`away-score-${match.id}`);
+
+                    [
+                        { element: homeScoreElement, type: 'home' },
+                        { element: awayScoreElement, type: 'away' }
+                    ].forEach(({ element, type }) => {
+                        let touchStartY = 0;
+                        let currentScore = element.textContent === '?' ? 0 : parseInt(element.textContent);
+
+                        element.addEventListener('touchstart', (e) => {
+                            touchStartY = e.touches[0].clientY;
+                            element.style.cursor = 'grabbing';
+                        });
+
+                        element.addEventListener('touchmove', (e) => {
+                            e.preventDefault(); // Prevent scrolling while swiping
+                        });
+
+                        element.addEventListener('touchend', (e) => {
+                            const touchEndY = e.changedTouches[0].clientY;
+                            const deltaY = touchStartY - touchEndY;
+
+                            // Swipe threshold - 30px minimum
+                            if (Math.abs(deltaY) > 30) {
+                                if (deltaY > 0) {
+                                    // Swipe up - increase
+                                    updateScore(match.id, type, true);
+                                } else {
+                                    // Swipe down - decrease
+                                    updateScore(match.id, type, false);
+                                }
+                            }
+
+                            element.style.cursor = 'grab';
+                        });
+
+                        // Visual feedback: make it clear it's swipeable
+                        element.style.cursor = 'grab';
+                        element.style.userSelect = 'none';
+                        element.style.touchAction = 'none';
+                    });
                 }
             });
         });
