@@ -425,6 +425,11 @@ export async function deleteAllMatches() {
 
         console.log(`🗑️ Deleting all ${snapshot.size} matches from Firestore...`);
 
+        if (snapshot.empty) {
+            console.log('ℹ️ No matches to delete');
+            return 0;
+        }
+
         let deletedCount = 0;
         const BATCH_SIZE = 500;
 
@@ -433,19 +438,27 @@ export async function deleteAllMatches() {
             const batch = db.batch();
             const batchDocs = snapshot.docs.slice(i, i + BATCH_SIZE);
 
+            console.log(`  ⏳ Preparing to delete ${batchDocs.length} matches (batch ${Math.floor(i/BATCH_SIZE) + 1})...`);
+
             batchDocs.forEach(doc => {
                 batch.delete(doc.ref);
             });
 
-            await batch.commit();
-            deletedCount += batchDocs.length;
-            console.log(`  🗑️ Deleted ${deletedCount}/${snapshot.size} matches...`);
+            try {
+                await batch.commit();
+                deletedCount += batchDocs.length;
+                console.log(`  ✅ Deleted ${deletedCount}/${snapshot.size} matches`);
+            } catch (batchError) {
+                console.error(`  ❌ Error deleting batch:`, batchError);
+                throw batchError;
+            }
         }
 
         console.log(`✅ All matches deleted from Firestore! Total: ${deletedCount}`);
         return deletedCount;
     } catch (error) {
         console.error('❌ Error deleting all matches:', error);
+        console.error('Error details:', error.message, error.code);
         return 0;
     }
 }
