@@ -416,6 +416,42 @@ export async function updateMatchResults(matches) {
 }
 
 /**
+ * Delete ALL matches from Firestore (fresh start)
+ * @returns {Promise<number>} Number of matches deleted
+ */
+export async function deleteAllMatches() {
+    try {
+        const db = firebase.firestore();
+        const snapshot = await db.collection('matches').get();
+
+        console.log(`🗑️ Deleting all ${snapshot.size} matches from Firestore...`);
+
+        let deletedCount = 0;
+        const BATCH_SIZE = 500;
+
+        // Delete in batches (Firestore limit is 500 per batch)
+        for (let i = 0; i < snapshot.docs.length; i += BATCH_SIZE) {
+            const batch = db.batch();
+            const batchDocs = snapshot.docs.slice(i, i + BATCH_SIZE);
+
+            batchDocs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+
+            await batch.commit();
+            deletedCount += batchDocs.length;
+            console.log(`  🗑️ Deleted ${deletedCount}/${snapshot.size} matches...`);
+        }
+
+        console.log(`✅ All matches deleted from Firestore! Total: ${deletedCount}`);
+        return deletedCount;
+    } catch (error) {
+        console.error('❌ Error deleting all matches:', error);
+        return 0;
+    }
+}
+
+/**
  * Clean up old matches (older than 30 days)
  * Should be called periodically by admin
  */

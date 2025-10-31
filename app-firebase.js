@@ -1253,10 +1253,32 @@ window.convertOldMatches = async function() {
     await refreshData();
 };
 
+// Make delete all matches function available globally
+window.deleteAllMatchesFromFirestore = async function() {
+    const confirmDelete = confirm('⚠️ Er du sikker på at du vil slette ALLE kamper fra Firestore?\n\nDette kan ikke angres, men kampene vil bli hentet på nytt fra API ved neste refresh.');
+
+    if (!confirmDelete) {
+        console.log('❌ Sletting avbrutt av bruker');
+        return;
+    }
+
+    console.log('🗑️ Sletter alle kamper fra Firestore...');
+    const { deleteAllMatches } = await import('./js/utils/matchCache.js');
+    const deleted = await deleteAllMatches();
+    console.log(`✅ Sletting fullført! Slettet ${deleted} kamper.`);
+    console.log('🔄 Refresher data fra API...');
+
+    // Clear localStorage cache too
+    localStorage.removeItem('footballMatches');
+    localStorage.removeItem('footballMatchesTimestamp');
+
+    await refreshData();
+};
+
 // Add button to simulate results for testing (can be removed later)
 window.addEventListener('DOMContentLoaded', () => {
     init();
 
     // Add debug functions in console
-    console.log('🔥 Tippekonkurranse loaded | simulateResult(matchId) | refreshData() | cleanupFirestore() | convertOldMatches()');
+    console.log('🔥 Tippekonkurranse loaded | simulateResult(matchId) | refreshData() | cleanupFirestore() | convertOldMatches() | deleteAllMatchesFromFirestore()');
 });
