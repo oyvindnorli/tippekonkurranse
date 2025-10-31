@@ -345,6 +345,7 @@ export async function saveMatchesToFirestore(matches) {
                         homeLogo: match.homeLogo || null,
                         awayLogo: match.awayLogo || null,
                         commence_time: match.commence_time,
+                        time: match.time || null, // Keep time for display
                         league: match.league, // This is now ID (number)
                         leagueName: match.leagueName || null, // For display
                         leagueLogo: match.leagueLogo || null,
