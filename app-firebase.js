@@ -424,6 +424,9 @@ function setCachedMatches(matches) {
 
 // Load matches from API
 async function loadMatches() {
+    const startTime = performance.now();
+    console.log('⏱️ Starting to load matches...');
+
     const loadingMessage = document.getElementById('loadingMessage');
     const errorMessage = document.getElementById('errorMessage');
 
@@ -434,6 +437,9 @@ async function loadMatches() {
         // Try to load from cache first for instant display
         const cachedMatches = getCachedMatches();
         if (cachedMatches && cachedMatches.length > 0) {
+            const cacheTime = performance.now();
+            console.log(`📦 Loaded ${cachedMatches.length} matches from cache in ${((cacheTime - startTime) / 1000).toFixed(2)}s`);
+
             allMatches = cachedMatches;
 
             // Ensure cached matches are sorted by date
@@ -456,12 +462,15 @@ async function loadMatches() {
         }
 
         // Fetch fresh data from API (in parallel)
+        const apiStartTime = performance.now();
         const [upcomingMatches, completedMatches] = await Promise.all([
             footballApi.getUpcomingFixtures(),
             footballApi.fetchScores().catch(error => {
                 return [];
             })
         ]);
+        const apiEndTime = performance.now();
+        console.log(`🌐 API fetch completed in ${((apiEndTime - apiStartTime) / 1000).toFixed(2)}s`);
 
         // Deduplicate matches
         const existingIds = new Set(upcomingMatches.map(m => String(m.id)));
@@ -502,6 +511,10 @@ async function loadMatches() {
         // Re-render with fresh data
         renderMatches();
         updateTotalScore();
+
+        const endTime = performance.now();
+        const duration = ((endTime - startTime) / 1000).toFixed(2);
+        console.log(`✅ Matches loaded successfully in ${duration}s`);
     } catch (error) {
         console.error('Failed to load matches:', error);
         loadingMessage.style.display = 'none';
@@ -527,6 +540,10 @@ async function loadMatches() {
 
         renderMatches();
         updateTotalScore();
+
+        const endTime = performance.now();
+        const duration = ((endTime - startTime) / 1000).toFixed(2);
+        console.log(`⚠️ Matches loaded with fallback in ${duration}s`);
     }
 }
 
