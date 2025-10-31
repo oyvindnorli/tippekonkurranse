@@ -747,7 +747,7 @@ function renderMatches() {
 
                 // Add event listeners for odds buttons
                 if (!match.result) {
-                    const oddsButtons = matchCard.querySelectorAll('.odd-btn');
+                    const oddsButtons = matchCard.querySelectorAll('.odd-btn-inline');
                     oddsButtons.forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             e.preventDefault();
