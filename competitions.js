@@ -189,20 +189,15 @@ async function loadCompetitions() {
             console.log(`  - Fresh matches found: ${competitionMatches.length}`);
             console.log(`  - Has cachedMatches: ${c.cachedMatches ? 'YES (' + c.cachedMatches.length + ')' : 'NO'}`);
 
-            // If no fresh matches found but we have cached ones, there's likely a problem
-            // Don't use cached matches to determine status - they may be stale
+            // If no fresh matches found, use cached matches
             if (competitionMatches.length === 0 && c.cachedMatches && c.cachedMatches.length > 0) {
-                console.warn(`⚠️ No fresh data for "${c.name}" but cachedMatches exist - may need database cleanup`);
-                console.warn(`   Competition will appear as ACTIVE until fresh data is available`);
-                // Don't use cachedMatches - better to show as active than incorrectly as completed
-                // Set start/end from competition dates if available
-                if (c.startDate && c.endDate) {
-                    start = new Date(c.startDate.toDate());
-                    end = new Date(c.endDate.toDate());
-                } else {
-                    start = now;
-                    end = now;
-                }
+                console.log(`ℹ️ Using cachedMatches for "${c.name}" (no fresh data - matches likely old)`);
+                competitionMatches = c.cachedMatches;
+
+                // Determine start/end from cached matches
+                const dates = competitionMatches.map(m => new Date(m.commence_time || m.date));
+                start = new Date(Math.min(...dates));
+                end = new Date(Math.max(...dates));
             }
 
             if (competitionMatches.length > 0) {
