@@ -343,13 +343,22 @@ async function loadCompetitionMatches() {
             const scores = await footballApi.fetchScores();
             const upcoming = await footballApi.getUpcomingFixtures();
 
-            // Combine both arrays
+            // Combine both arrays and deduplicate by match ID
             const allMatches = [...scores, ...upcoming];
+            const uniqueMatches = [];
+            const seenIds = new Set();
+
+            allMatches.forEach(match => {
+                if (!seenIds.has(match.id)) {
+                    seenIds.add(match.id);
+                    uniqueMatches.push(match);
+                }
+            });
 
             const competitionLeagues = competition.leagues || [];
 
             // SIMPLIFIED LOGIC: Just filter by league and optionally by round or matchIds
-            competitionMatches = allMatches.filter(match => {
+            competitionMatches = uniqueMatches.filter(match => {
                 // If competition has specific matchIds (custom competition), only include those
                 if (competition.matchIds && competition.matchIds.length > 0) {
                     return competition.matchIds.includes(match.id);
