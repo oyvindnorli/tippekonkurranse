@@ -626,6 +626,9 @@ function init() {
 
             // Load matches with user's preferred leagues
             loadMatches();
+
+            // Clean up old matches from Firestore in background (don't await)
+            cleanupOldMatchesInBackground();
         } else {
             // User is not signed in, show welcome section
             if (welcomeSection) {
@@ -1306,6 +1309,26 @@ async function refreshData() {
 // Make refreshData available globally
 window.refreshData = refreshData;
 window.forceRefreshData = refreshData; // Alias for onclick handler
+
+// Clean up old matches in background (automatic cleanup)
+async function cleanupOldMatchesInBackground() {
+    try {
+        // Wait a bit before starting cleanup (let the page load first)
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        console.log('🧹 Starting automatic cleanup of old matches...');
+        const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js');
+        const deleted = await cleanupAllOutdatedMatches();
+
+        if (deleted > 0) {
+            console.log(`✅ Automatic cleanup complete! Deleted ${deleted} outdated matches.`);
+            // Refresh data to show updated list
+            await refreshData();
+        }
+    } catch (error) {
+        console.warn('⚠️ Background cleanup failed:', error);
+    }
+}
 
 // Make cleanup function available globally
 window.cleanupFirestore = async function() {
