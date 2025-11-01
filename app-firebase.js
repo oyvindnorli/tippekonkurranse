@@ -2,6 +2,7 @@
 import { LEAGUE_NAMES, getLeagueName } from './js/utils/leagueConfig.js';
 import { calculatePoints, getOutcome, formatMatchTime, sortMatchesByDate, filterUpcomingMatches } from './js/utils/matchUtils.js';
 import { formatDateRange, getDateLabel, groupMatchesByDate, toISODate, getStartOfDay, getEndOfDay } from './js/utils/dateUtils.js';
+import { STORAGE_KEYS, TIMEOUTS } from './js/constants/appConstants.js';
 
 // Match data - will be loaded from API or mock data
 let matches = [];
@@ -21,7 +22,7 @@ let activeLeagueFilter = new Set(); // Empty = show all from preferences
 function saveLeagueFilterToCache() {
     try {
         const filterArray = Array.from(activeLeagueFilter);
-        localStorage.setItem('activeLeagueFilter', JSON.stringify(filterArray));
+        localStorage.setItem(STORAGE_KEYS.ACTIVE_LEAGUE_FILTER, JSON.stringify(filterArray));
     } catch (error) {
         console.warn('Failed to save league filter to cache:', error);
     }
@@ -30,7 +31,7 @@ function saveLeagueFilterToCache() {
 // Load league filter from localStorage
 function loadLeagueFilterFromCache() {
     try {
-        const cached = localStorage.getItem('activeLeagueFilter');
+        const cached = localStorage.getItem(STORAGE_KEYS.ACTIVE_LEAGUE_FILTER);
         if (cached) {
             const filterArray = JSON.parse(cached);
             activeLeagueFilter = new Set(filterArray);
@@ -424,13 +425,13 @@ function applyLeagueFilter() {
 // Cache matches in localStorage for faster loading
 function getCachedMatches() {
     try {
-        const cached = localStorage.getItem('cachedMatches');
-        const cacheTime = localStorage.getItem('cachedMatchesTime');
+        const cached = localStorage.getItem(STORAGE_KEYS.CACHED_MATCHES);
+        const cacheTime = localStorage.getItem(STORAGE_KEYS.CACHED_MATCHES_TIME);
 
         if (cached && cacheTime) {
             const age = Date.now() - parseInt(cacheTime);
-            // Cache valid for 5 minutes
-            if (age < 5 * 60 * 1000) {
+            // Cache valid for configured duration
+            if (age < import.meta.env?.VITE_CACHE_DURATION || 5 * 60 * 1000) {
                 return JSON.parse(cached);
             }
         }
@@ -441,8 +442,8 @@ function getCachedMatches() {
 
 function setCachedMatches(matches) {
     try {
-        localStorage.setItem('cachedMatches', JSON.stringify(matches));
-        localStorage.setItem('cachedMatchesTime', Date.now().toString());
+        localStorage.setItem(STORAGE_KEYS.CACHED_MATCHES, JSON.stringify(matches));
+        localStorage.setItem(STORAGE_KEYS.CACHED_MATCHES_TIME, Date.now().toString());
     } catch (error) {
     }
 }
@@ -1251,8 +1252,8 @@ async function refreshData() {
     console.log('🔄 Force refreshing data from API...');
 
     // Clear localStorage cache
-    localStorage.removeItem('cachedMatches');
-    localStorage.removeItem('cachedMatchesTime');
+    localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES);
+    localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES_TIME);
 
     try {
         const loadingMessage = document.getElementById('loadingMessage');
@@ -1311,13 +1312,13 @@ window.forceRefreshData = refreshData; // Alias for onclick handler
 async function cleanupOldMatchesInBackground() {
     try {
         // Wait a bit before starting cleanup (let the page load first)
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, TIMEOUTS.CACHE_CLEANUP_DELAY));
 
         console.log('🧹 Starting automatic cleanup of old matches...');
 
         // Clear localStorage cache first
-        localStorage.removeItem('cachedMatches');
-        localStorage.removeItem('cachedMatchesTime');
+        localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES);
+        localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES_TIME);
 
         const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js');
         const deleted = await cleanupAllOutdatedMatches();
@@ -1339,10 +1340,10 @@ window.cleanupFirestore = async function() {
     console.log('🧹 Starting complete Firestore cleanup...');
 
     // Clear all caches first
-    localStorage.removeItem('cachedMatches');
-    localStorage.removeItem('cachedMatchesTime');
-    localStorage.removeItem('footballMatches');
-    localStorage.removeItem('footballMatchesTimestamp');
+    localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES);
+    localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES_TIME);
+    localStorage.removeItem(STORAGE_KEYS.FOOTBALL_MATCHES);
+    localStorage.removeItem(STORAGE_KEYS.FOOTBALL_MATCHES_TIMESTAMP);
     console.log('🗑️ Cleared localStorage cache');
 
     const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js');

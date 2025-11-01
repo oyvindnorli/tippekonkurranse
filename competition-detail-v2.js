@@ -2,6 +2,7 @@
 import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js';
 import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js';
 import { formatDate } from './js/utils/dateUtils.js';
+import { LEAGUE_IDS } from './js/constants/appConstants.js';
 
 // Import services
 import * as competitionService from './js/services/competitionService.js';
@@ -15,7 +16,6 @@ let competitionId = null;
 let competition = null;
 let userTips = [];
 let competitionMatches = []; // Store competition matches globally
-let isLoading = false; // Prevent multiple simultaneous loads
 let hasLoaded = false; // Track if we've already loaded the competition
 
 // Initialize page
@@ -36,7 +36,7 @@ function init() {
 
     // Wait for auth state to be ready
     firebase.auth().onAuthStateChanged((user) => {
-        if (user && !isLoading && !hasLoaded) {
+        if (user && !hasLoaded) {
             loadCompetition();
         } else if (!user) {
             // Redirect to home page if not logged in
@@ -47,12 +47,14 @@ function init() {
 
 // Load competition details
 async function loadCompetition() {
-    // Prevent multiple simultaneous loads
-    if (isLoading) {
-        console.log('⚠️ Already loading competition, skipping duplicate call');
+    // Check if already loaded
+    if (hasLoaded) {
+        console.log('⚠️ Competition already loaded, skipping duplicate call');
         return;
     }
-    isLoading = true;
+
+    // Mark as loaded immediately to prevent race conditions
+    hasLoaded = true;
 
     const loadingMessage = document.getElementById('loadingMessage');
     const errorMessage = document.getElementById('errorMessage');
@@ -80,15 +82,14 @@ async function loadCompetition() {
 
         loadingMessage.style.display = 'none';
         detailsSection.style.display = 'block';
-        hasLoaded = true; // Mark as loaded to prevent duplicate loads
 
     } catch (error) {
         console.error('Failed to load competition:', error);
         loadingMessage.style.display = 'none';
         errorMessage.textContent = error.message || 'Kunne ikke laste konkurranse';
         errorMessage.style.display = 'block';
-    } finally {
-        isLoading = false;
+        // Reset hasLoaded on error so user can retry
+        hasLoaded = false;
     }
 }
 
@@ -376,8 +377,8 @@ async function loadCompetitionMatches() {
                 if (competition.selectedRounds) {
                     let roundMatches = false;
 
-                    // Premier League round filtering (league ID 39)
-                    const isPremierLeague = (typeof match.league === 'number' && match.league === 39) ||
+                    // Premier League round filtering
+                    const isPremierLeague = (typeof match.league === 'number' && match.league === LEAGUE_IDS.PREMIER_LEAGUE) ||
                                            (typeof match.league === 'string' && match.league.includes('Premier League'));
                     if (competition.selectedRounds.premierLeague && competition.selectedRounds.premierLeague.length > 0 && isPremierLeague) {
                         if (match.round) {
@@ -390,8 +391,8 @@ async function loadCompetitionMatches() {
                         return roundMatches; // Return immediately for PL matches
                     }
 
-                    // Champions League round filtering (league ID 2)
-                    const isChampionsLeague = (typeof match.league === 'number' && match.league === 2) ||
+                    // Champions League round filtering
+                    const isChampionsLeague = (typeof match.league === 'number' && match.league === LEAGUE_IDS.CHAMPIONS_LEAGUE) ||
                                              (typeof match.league === 'string' && match.league.includes('Champions League'));
                     if (competition.selectedRounds.championsLeague && competition.selectedRounds.championsLeague.length > 0 && isChampionsLeague) {
                         if (match.round) {
@@ -405,7 +406,7 @@ async function loadCompetitionMatches() {
                 }
 
                 // If competitionType is 'round' but no selectedRounds, assume PL Round 9 for backward compatibility
-                const isPremierLeagueBackCompat = (typeof match.league === 'number' && match.league === 39) ||
+                const isPremierLeagueBackCompat = (typeof match.league === 'number' && match.league === LEAGUE_IDS.PREMIER_LEAGUE) ||
                                                   (typeof match.league === 'string' && match.league.includes('Premier League'));
                 if (competition.competitionType === 'round' && !competition.selectedRounds && isPremierLeagueBackCompat && match.round) {
                     const roundMatch = match.round.match(/(\d+)/);

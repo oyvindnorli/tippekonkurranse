@@ -3,6 +3,8 @@
  * Funksjoner for beregning av poeng, formatering og match-logikk
  */
 
+import { POINTS, OUTCOME } from '../constants/appConstants.js';
+
 /**
  * Bestem utfall av en kamp (H/U/B)
  * @param {number} homeScore - Hjemmelagets score
@@ -10,9 +12,9 @@
  * @returns {string} 'H' (hjemme), 'U' (uavgjort), eller 'B' (borte)
  */
 export function getOutcome(homeScore, awayScore) {
-    if (homeScore > awayScore) return 'H';
-    if (homeScore < awayScore) return 'B';
-    return 'U';
+    if (homeScore > awayScore) return OUTCOME.HOME;
+    if (homeScore < awayScore) return OUTCOME.AWAY;
+    return OUTCOME.DRAW;
 }
 
 /**
@@ -39,9 +41,9 @@ export function calculatePoints(tip, match) {
         points += tip.odds[resultOutcome];
     }
 
-    // Exact score: 3 bonus points (in addition to outcome points)
+    // Exact score: bonus points (in addition to outcome points)
     if (tip.homeScore === match.result.home && tip.awayScore === match.result.away) {
-        points += 3;
+        points += POINTS.EXACT_SCORE_BONUS;
     }
 
     return points;
