@@ -16,6 +16,7 @@ let competition = null;
 let userTips = [];
 let competitionMatches = []; // Store competition matches globally
 let isLoading = false; // Prevent multiple simultaneous loads
+let hasLoaded = false; // Track if we've already loaded the competition
 
 // Initialize page
 function init() {
@@ -35,7 +36,7 @@ function init() {
 
     // Wait for auth state to be ready
     firebase.auth().onAuthStateChanged((user) => {
-        if (user && !isLoading) {
+        if (user && !isLoading && !hasLoaded) {
             loadCompetition();
         } else if (!user) {
             // Redirect to home page if not logged in
@@ -79,6 +80,7 @@ async function loadCompetition() {
 
         loadingMessage.style.display = 'none';
         detailsSection.style.display = 'block';
+        hasLoaded = true; // Mark as loaded to prevent duplicate loads
 
     } catch (error) {
         console.error('Failed to load competition:', error);

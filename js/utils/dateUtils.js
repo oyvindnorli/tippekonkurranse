@@ -174,9 +174,14 @@ export function groupMatchesByDate(matches) {
             return;
         }
 
-        // Skip matches that have already started (unless they're completed with results)
-        if (matchDate < now && !match.result) {
-            return;
+        // Skip matches from previous days (only show today and future)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const matchDay = new Date(matchDate);
+        matchDay.setHours(0, 0, 0, 0);
+
+        if (matchDay < today) {
+            return; // Skip matches from previous days
         }
 
         matchDate.setHours(0, 0, 0, 0);

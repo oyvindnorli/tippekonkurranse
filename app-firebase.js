@@ -651,12 +651,15 @@ function renderMatches() {
     const matchesList = document.getElementById('matchesList');
     matchesList.innerHTML = '';
 
-    // Filter out old matches that have already started (unless completed with results)
-    const now = new Date();
+    // Filter out matches from previous days - only show today and future matches
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of today
+
     const upcomingMatches = matches.filter(match => {
         const matchDate = new Date(match.commence_time || match.timestamp * 1000);
-        // Keep if match hasn't started yet OR if it's completed with a result
-        return matchDate >= now || match.result || match.completed;
+        matchDate.setHours(0, 0, 0, 0); // Compare dates without time
+        // Only keep matches from today or future dates
+        return matchDate >= today;
     });
 
     const groupedMatches = groupMatchesByDate(upcomingMatches);
