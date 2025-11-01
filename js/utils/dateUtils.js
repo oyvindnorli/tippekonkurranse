@@ -150,6 +150,7 @@ export function daysBetween(startDate, endDate) {
  */
 export function groupMatchesByDate(matches) {
     const groups = {};
+    const now = new Date();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -170,6 +171,11 @@ export function groupMatchesByDate(matches) {
         // Check if date is valid
         if (isNaN(matchDate.getTime())) {
             console.warn('Invalid date for match:', match);
+            return;
+        }
+
+        // Skip matches that have already started (unless they're completed with results)
+        if (matchDate < now && !match.result) {
             return;
         }
 
