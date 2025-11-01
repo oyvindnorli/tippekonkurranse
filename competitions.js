@@ -100,17 +100,8 @@ async function loadCompetitions() {
             let competitionMatches = [];
             let start, end;
 
-            // Check if competition has cached matches (from Firestore)
-            if (c.cachedMatches && c.cachedMatches.length > 0) {
-                // Use cached matches - these are already complete
-                competitionMatches = c.cachedMatches;
-
-                // Determine start/end from cached matches
-                const dates = competitionMatches.map(m => new Date(m.commence_time || m.date));
-                start = new Date(Math.min(...dates));
-                end = new Date(Math.max(...dates));
-
-            } else if (c.matchIds && c.matchIds.length > 0) {
+            // Try to get fresh match data from API first
+            if (c.matchIds && c.matchIds.length > 0) {
                 // Custom competition with specific matches
                 competitionMatches = scores.filter(match => c.matchIds.includes(match.id));
 
@@ -191,6 +182,17 @@ async function loadCompetitions() {
                         });
                     });
                 }
+            }
+
+            // Fallback to cached matches if no fresh data found
+            if (competitionMatches.length === 0 && c.cachedMatches && c.cachedMatches.length > 0) {
+                console.log(`ℹ️ Using cached matches for "${c.name}" (no fresh data available)`);
+                competitionMatches = c.cachedMatches;
+
+                // Determine start/end from cached matches
+                const dates = competitionMatches.map(m => new Date(m.commence_time || m.date));
+                start = new Date(Math.min(...dates));
+                end = new Date(Math.max(...dates));
             }
 
             // Categorize competition based on match completion status
