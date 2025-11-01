@@ -648,7 +648,15 @@ function renderMatches() {
     const matchesList = document.getElementById('matchesList');
     matchesList.innerHTML = '';
 
-    const groupedMatches = groupMatchesByDate(matches);
+    // Filter out old matches that have already started (unless completed with results)
+    const now = new Date();
+    const upcomingMatches = matches.filter(match => {
+        const matchDate = new Date(match.commence_time || match.timestamp * 1000);
+        // Keep if match hasn't started yet OR if it's completed with a result
+        return matchDate >= now || match.result || match.completed;
+    });
+
+    const groupedMatches = groupMatchesByDate(upcomingMatches);
 
     // Show message if no matches
     if (Object.keys(groupedMatches).length === 0) {
