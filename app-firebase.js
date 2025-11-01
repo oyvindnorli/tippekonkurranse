@@ -870,7 +870,10 @@ function renderMatches() {
             });
         });
 
-        matchesList.appendChild(dateGroup);
+        // Only append the date group if it has matches (more than just the date header)
+        if (dateGroup.children.length > 1) {
+            matchesList.appendChild(dateGroup);
+        }
     });
 }
 

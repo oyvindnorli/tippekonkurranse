@@ -2353,23 +2353,28 @@ header h1 {
     }
 
     .teams-section {
-        flex-direction: column;
-        gap: 6px;
+        /* Keep teams on one line on mobile */
+        flex-direction: row;
+        gap: 8px;
         width: 100%;
+        justify-content: space-between;
     }
 
     .team-inline {
-        width: 100%;
-        justify-content: flex-start;
+        flex: 1;
+        min-width: 0;
     }
 
     .team-name-inline {
-        font-size: 13px;
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .vs-text {
-        align-self: center;
-        margin: 2px 0;
+        flex-shrink: 0;
+        font-size: 11px;
     }
 
     .score-section {
