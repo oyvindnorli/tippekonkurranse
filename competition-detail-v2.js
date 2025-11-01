@@ -441,15 +441,22 @@ async function loadCompetitionMatches() {
 
         }
 
+        // Check if all matches are completed BEFORE rendering
+        let allCompleted;
         if (competitionMatches.length === 0) {
-            matchesList.innerHTML = '<div class="no-matches">Ingen kamper funnet i denne perioden for valgte ligaer</div>';
-            return null; // No matches found - status indeterminate
+            // If no matches found but we have cachedMatches, competition is done
+            // (matches were filtered out because they're old)
+            if (competition.cachedMatches && competition.cachedMatches.length > 0) {
+                allCompleted = true;
+                matchesList.innerHTML = '<div class="info-message">✅ Alle kamper er fullført</div>';
+            } else {
+                allCompleted = false;
+                matchesList.innerHTML = '<div class="no-matches">Ingen kamper funnet i denne perioden for valgte ligaer</div>';
+            }
+        } else {
+            allCompleted = competitionMatches.every(match => match.completed);
+            renderCompetitionMatches(competitionMatches);
         }
-
-        renderCompetitionMatches(competitionMatches);
-
-        // Check if all matches are completed
-        const allCompleted = competitionMatches.every(match => match.completed);
 
         // If all matches are completed and we haven't cached yet, save to Firestore
         if (allCompleted && !competition.cachedMatches) {
