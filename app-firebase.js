@@ -1340,11 +1340,21 @@ async function cleanupOldMatchesInBackground() {
 // Make cleanup function available globally
 window.cleanupFirestore = async function() {
     console.log('🧹 Starting complete Firestore cleanup...');
+
+    // Clear all caches first
+    localStorage.removeItem('cachedMatches');
+    localStorage.removeItem('cachedMatchesTime');
+    localStorage.removeItem('footballMatches');
+    localStorage.removeItem('footballMatchesTimestamp');
+    console.log('🗑️ Cleared localStorage cache');
+
     const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js');
     const deleted = await cleanupAllOutdatedMatches();
     console.log(`✅ Cleanup complete! Deleted ${deleted} outdated matches.`);
     console.log('🔄 Refreshing data...');
-    await refreshData();
+
+    // Force page reload to ensure clean state
+    window.location.reload();
 };
 
 // Make convert function available globally
