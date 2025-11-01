@@ -184,15 +184,29 @@ async function loadCompetitions() {
                 }
             }
 
-            // Fallback to cached matches if no fresh data found
-            if (competitionMatches.length === 0 && c.cachedMatches && c.cachedMatches.length > 0) {
-                console.log(`ℹ️ Using cached matches for "${c.name}" (no fresh data available)`);
-                competitionMatches = c.cachedMatches;
+            // Log match data for debugging
+            console.log(`📊 Competition "${c.name}":`);
+            console.log(`  - Fresh matches found: ${competitionMatches.length}`);
+            console.log(`  - Has cachedMatches: ${c.cachedMatches ? 'YES (' + c.cachedMatches.length + ')' : 'NO'}`);
 
-                // Determine start/end from cached matches
-                const dates = competitionMatches.map(m => new Date(m.commence_time || m.date));
-                start = new Date(Math.min(...dates));
-                end = new Date(Math.max(...dates));
+            // If no fresh matches found but we have cached ones, there's likely a problem
+            // Don't use cached matches to determine status - they may be stale
+            if (competitionMatches.length === 0 && c.cachedMatches && c.cachedMatches.length > 0) {
+                console.warn(`⚠️ No fresh data for "${c.name}" but cachedMatches exist - may need database cleanup`);
+                console.warn(`   Competition will appear as ACTIVE until fresh data is available`);
+                // Don't use cachedMatches - better to show as active than incorrectly as completed
+                // Set start/end from competition dates if available
+                if (c.startDate && c.endDate) {
+                    start = new Date(c.startDate.toDate());
+                    end = new Date(c.endDate.toDate());
+                } else {
+                    start = now;
+                    end = now;
+                }
+            }
+
+            if (competitionMatches.length > 0) {
+                console.log(`  - Completed: ${competitionMatches.filter(m => m.completed).length}/${competitionMatches.length}`);
             }
 
             // Categorize competition based on match completion status
