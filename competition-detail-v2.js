@@ -15,6 +15,7 @@ let competitionId = null;
 let competition = null;
 let userTips = [];
 let competitionMatches = []; // Store competition matches globally
+let isLoading = false; // Prevent multiple simultaneous loads
 
 // Initialize page
 function init() {
@@ -34,9 +35,9 @@ function init() {
 
     // Wait for auth state to be ready
     firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
+        if (user && !isLoading) {
             loadCompetition();
-        } else {
+        } else if (!user) {
             // Redirect to home page if not logged in
             window.location.href = 'index.html';
         }
@@ -45,6 +46,13 @@ function init() {
 
 // Load competition details
 async function loadCompetition() {
+    // Prevent multiple simultaneous loads
+    if (isLoading) {
+        console.log('⚠️ Already loading competition, skipping duplicate call');
+        return;
+    }
+    isLoading = true;
+
     const loadingMessage = document.getElementById('loadingMessage');
     const errorMessage = document.getElementById('errorMessage');
     const detailsSection = document.getElementById('competitionDetails');
@@ -77,6 +85,8 @@ async function loadCompetition() {
         loadingMessage.style.display = 'none';
         errorMessage.textContent = error.message || 'Kunne ikke laste konkurranse';
         errorMessage.style.display = 'block';
+    } finally {
+        isLoading = false;
     }
 }
 

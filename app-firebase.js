@@ -1314,9 +1314,14 @@ window.forceRefreshData = refreshData; // Alias for onclick handler
 async function cleanupOldMatchesInBackground() {
     try {
         // Wait a bit before starting cleanup (let the page load first)
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
         console.log('🧹 Starting automatic cleanup of old matches...');
+
+        // Clear localStorage cache first
+        localStorage.removeItem('cachedMatches');
+        localStorage.removeItem('cachedMatchesTime');
+
         const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js');
         const deleted = await cleanupAllOutdatedMatches();
 
@@ -1324,6 +1329,8 @@ async function cleanupOldMatchesInBackground() {
             console.log(`✅ Automatic cleanup complete! Deleted ${deleted} outdated matches.`);
             // Refresh data to show updated list
             await refreshData();
+        } else {
+            console.log('✅ No old matches to clean up');
         }
     } catch (error) {
         console.warn('⚠️ Background cleanup failed:', error);
