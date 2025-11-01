@@ -2,7 +2,8 @@
 import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js';
 import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js';
 import { formatDate } from './js/utils/dateUtils.js';
-import { LEAGUE_IDS } from './js/constants/appConstants.js';
+import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js';
+import { ErrorHandler } from './js/utils/errorHandler.js';
 
 // Import services
 import * as competitionService from './js/services/competitionService.js';
@@ -84,10 +85,14 @@ async function loadCompetition() {
         detailsSection.style.display = 'block';
 
     } catch (error) {
-        console.error('Failed to load competition:', error);
+        ErrorHandler.handle(error, {
+            context: 'loadCompetition',
+            showUser: true,
+            userMessage: ERROR_MESSAGES.LOAD_COMPETITION_FAILED,
+            logToConsole: true
+        });
+
         loadingMessage.style.display = 'none';
-        errorMessage.textContent = error.message || 'Kunne ikke laste konkurranse';
-        errorMessage.style.display = 'block';
         // Reset hasLoaded on error so user can retry
         hasLoaded = false;
     }
@@ -102,7 +107,11 @@ async function loadUserTips() {
         userTips = await competitionService.loadUserTips(user.uid);
 
     } catch (error) {
-        console.error('Failed to load user tips:', error);
+        ErrorHandler.handle(error, {
+            context: 'loadUserTips',
+            showUser: false, // Don't show to user - not critical
+            logToConsole: true
+        });
     }
 }
 

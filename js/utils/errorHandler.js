@@ -3,6 +3,8 @@
  * Centralized error handling with consistent logging and user feedback
  */
 
+import { ERROR_MESSAGES, TIMEOUTS } from '../constants/appConstants.js';
+
 /**
  * Error types
  */
@@ -66,7 +68,7 @@ export class ErrorHandler {
         // Show to user if requested
         if (showUser) {
             const message = userMessage || this.getUserFriendlyMessage(appError);
-            alert(message);
+            this.displayErrorToUser(message);
         }
 
         return appError;
@@ -194,6 +196,31 @@ export class ErrorHandler {
     static success(message, context = '') {
         console.log(`✅ ${context ? `[${context}]` : ''} ${message}`);
     }
+
+    /**
+     * Display error message to user in DOM
+     * @param {string} message - Message to display
+     */
+    static displayErrorToUser(message) {
+        // Try to find error message element
+        const errorElement = document.getElementById('errorMessage') ||
+                            document.querySelector('.error-message');
+
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                if (errorElement.textContent === message) {
+                    errorElement.style.display = 'none';
+                }
+            }, 10000);
+        } else {
+            // Fallback to alert if no error element found
+            alert(message);
+        }
+    }
 }
 
 /**
@@ -208,7 +235,69 @@ export function withErrorHandling(fn, options = {}) {
         try {
             return await fn(...args);
         } catch (error) {
-            return ErrorHandler.handle(error, options);
+            ErrorHandler.handle(error, options);
+            throw error; // Re-throw for caller to handle if needed
         }
     };
+}
+
+/**
+ * Sjekk om bruker er online
+ * @returns {boolean}
+ */
+export function isOnline() {
+    return navigator.onLine;
+}
+
+/**
+ * Vent på at bruker er online
+ * @param {number} timeout - Max tid å vente (ms)
+ * @returns {Promise<boolean>} True hvis online, false hvis timeout
+ */
+export function waitForOnline(timeout = 30000) {
+    return new Promise((resolve) => {
+        if (navigator.onLine) {
+            resolve(true);
+            return;
+        }
+
+        const timeoutId = setTimeout(() => {
+            window.removeEventListener('online', onlineHandler);
+            resolve(false);
+        }, timeout);
+
+        const onlineHandler = () => {
+            clearTimeout(timeoutId);
+            window.removeEventListener('online', onlineHandler);
+            resolve(true);
+        };
+
+        window.addEventListener('online', onlineHandler);
+    });
+}
+
+/**
+ * Retry en operasjon ved feil
+ * @param {Function} fn - Funksjon å prøve på nytt
+ * @param {number} maxRetries - Max antall forsøk
+ * @param {number} delay - Delay mellom forsøk (ms)
+ * @returns {Promise} Resultat fra funksjonen
+ */
+export async function retryOperation(fn, maxRetries = 3, delay = TIMEOUTS.API_RETRY_DELAY || 1000) {
+    let lastError;
+
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await fn();
+        } catch (error) {
+            lastError = error;
+            ErrorHandler.warn(`Attempt ${i + 1}/${maxRetries} failed: ${error.message}`, 'retryOperation');
+
+            if (i < maxRetries - 1) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+
+    throw lastError;
 }

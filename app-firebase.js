@@ -2,7 +2,8 @@
 import { LEAGUE_NAMES, getLeagueName } from './js/utils/leagueConfig.js';
 import { calculatePoints, getOutcome, formatMatchTime, sortMatchesByDate, filterUpcomingMatches } from './js/utils/matchUtils.js';
 import { formatDateRange, getDateLabel, groupMatchesByDate, toISODate, getStartOfDay, getEndOfDay } from './js/utils/dateUtils.js';
-import { STORAGE_KEYS, TIMEOUTS } from './js/constants/appConstants.js';
+import { STORAGE_KEYS, TIMEOUTS, ERROR_MESSAGES } from './js/constants/appConstants.js';
+import { ErrorHandler, retryOperation } from './js/utils/errorHandler.js';
 
 // Match data - will be loaded from API or mock data
 let matches = [];
@@ -542,10 +543,14 @@ async function loadMatches() {
         const duration = ((endTime - startTime) / 1000).toFixed(2);
         console.log(`✅ Matches loaded successfully in ${duration}s`);
     } catch (error) {
-        console.error('Failed to load matches:', error);
+        ErrorHandler.handle(error, {
+            context: 'loadMatches',
+            showUser: true,
+            userMessage: ERROR_MESSAGES.LOAD_MATCHES_FAILED + ' Bruker mock-data.',
+            logToConsole: true
+        });
+
         loadingMessage.style.display = 'none';
-        errorMessage.textContent = 'Kunne ikke laste kamper. Bruker mock-data.';
-        errorMessage.style.display = 'block';
 
         // Fallback to mock data
         allMatches = await footballApi.getMockFixtures();
@@ -1298,9 +1303,14 @@ async function refreshData() {
         updateTotalScore();
 
         loadingMessage.style.display = 'none';
-        console.log('✅ Data refreshed successfully!');
+        ErrorHandler.success('Data refreshed successfully!', 'refreshData');
     } catch (error) {
-        console.error('❌ Failed to refresh data:', error);
+        ErrorHandler.handle(error, {
+            context: 'refreshData',
+            showUser: true,
+            userMessage: 'Kunne ikke oppdatere data. Prøv igjen senere.',
+            logToConsole: true
+        });
     }
 }
 
