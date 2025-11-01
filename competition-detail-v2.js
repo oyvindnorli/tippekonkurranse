@@ -1,6 +1,6 @@
 // Import utility modules
 import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js';
-import { calculatePoints } from './js/utils/matchUtils.js';
+import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js';
 import { formatDate } from './js/utils/dateUtils.js';
 
 // Import services
@@ -343,17 +343,9 @@ async function loadCompetitionMatches() {
             const scores = await footballApi.fetchScores();
             const upcoming = await footballApi.getUpcomingFixtures();
 
-            // Combine both arrays and deduplicate by match ID
+            // Combine both arrays and deduplicate using utility function
             const allMatches = [...scores, ...upcoming];
-            const uniqueMatches = [];
-            const seenIds = new Set();
-
-            allMatches.forEach(match => {
-                if (!seenIds.has(match.id)) {
-                    seenIds.add(match.id);
-                    uniqueMatches.push(match);
-                }
-            });
+            const uniqueMatches = deduplicateMatches(allMatches);
 
             const competitionLeagues = competition.leagues || [];
 

@@ -159,3 +159,39 @@ export function sortMatchesByDate(matches) {
         return dateA - dateB;
     });
 }
+
+/**
+ * Dedupliser kamper basert på match ID
+ * @param {Array} matches - Array av kamper (kan inneholde duplikater)
+ * @returns {Array} Array uten duplikater
+ */
+export function deduplicateMatches(matches) {
+    const uniqueMatches = [];
+    const seenIds = new Set();
+
+    matches.forEach(match => {
+        if (!seenIds.has(match.id)) {
+            seenIds.add(match.id);
+            uniqueMatches.push(match);
+        }
+    });
+
+    return uniqueMatches;
+}
+
+/**
+ * Filtrer ut gamle kamper - behold kun kamper fra i dag og fremover
+ * @param {Array} matches - Array av kamper
+ * @returns {Array} Filtrert array med kun kommende kamper
+ */
+export function filterUpcomingMatches(matches) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of today
+
+    return matches.filter(match => {
+        const matchDate = new Date(match.commence_time || match.date || match.timestamp * 1000);
+        matchDate.setHours(0, 0, 0, 0); // Compare dates without time
+        // Only keep matches from today or future dates
+        return matchDate >= today;
+    });
+}

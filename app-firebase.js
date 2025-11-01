@@ -1,6 +1,6 @@
 // Import utility modules
 import { LEAGUE_NAMES, getLeagueName } from './js/utils/leagueConfig.js';
-import { calculatePoints, getOutcome, formatMatchTime, sortMatchesByDate } from './js/utils/matchUtils.js';
+import { calculatePoints, getOutcome, formatMatchTime, sortMatchesByDate, filterUpcomingMatches } from './js/utils/matchUtils.js';
 import { formatDateRange, getDateLabel, groupMatchesByDate, toISODate, getStartOfDay, getEndOfDay } from './js/utils/dateUtils.js';
 
 // Match data - will be loaded from API or mock data
@@ -651,17 +651,8 @@ function renderMatches() {
     const matchesList = document.getElementById('matchesList');
     matchesList.innerHTML = '';
 
-    // Filter out matches from previous days - only show today and future matches
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of today
-
-    const upcomingMatches = matches.filter(match => {
-        const matchDate = new Date(match.commence_time || match.timestamp * 1000);
-        matchDate.setHours(0, 0, 0, 0); // Compare dates without time
-        // Only keep matches from today or future dates
-        return matchDate >= today;
-    });
-
+    // Filter out matches from previous days using utility function
+    const upcomingMatches = filterUpcomingMatches(matches);
     const groupedMatches = groupMatchesByDate(upcomingMatches);
 
     // Show message if no matches
