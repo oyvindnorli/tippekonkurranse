@@ -10,6 +10,9 @@ let availableRounds = null; // Store fetched rounds
 let selectedPLRounds = new Set(); // Selected Premier League rounds
 let selectedCLRounds = new Set(); // Selected Champions League rounds
 
+// Performance tracking
+const pageLoadStart = performance.now();
+
 // Load user's league preferences from Firestore
 async function loadUserLeaguePreferences(userId) {
     try {
@@ -246,6 +249,11 @@ async function loadCompetitions() {
         renderCompetitions(active, 'activeCompetitionsList');
         renderCompetitions(upcoming, 'upcomingCompetitionsList');
         renderCompetitions(completed, 'completedCompetitionsList');
+
+        // Log total page load time
+        const pageLoadEnd = performance.now();
+        const totalTime = ((pageLoadEnd - pageLoadStart) / 1000).toFixed(2);
+        console.log(`⏱️ Total page load time: ${totalTime}s`);
 
     } catch (error) {
         console.error('Failed to load competitions:', error);

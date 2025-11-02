@@ -19,6 +19,9 @@ let userTips = [];
 let competitionMatches = []; // Store competition matches globally
 let hasLoaded = false; // Track if we've already loaded the competition
 
+// Performance tracking
+const pageLoadStart = performance.now();
+
 // Initialize page
 function init() {
     // Get competition ID from URL
@@ -83,6 +86,11 @@ async function loadCompetition() {
 
         loadingMessage.style.display = 'none';
         detailsSection.style.display = 'block';
+
+        // Log total page load time
+        const pageLoadEnd = performance.now();
+        const totalTime = ((pageLoadEnd - pageLoadStart) / 1000).toFixed(2);
+        console.log(`⏱️ Total page load time: ${totalTime}s`);
 
     } catch (error) {
         ErrorHandler.handle(error, {
