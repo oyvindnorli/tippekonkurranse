@@ -83,35 +83,16 @@ async function loadCompetitions() {
         });
 
         console.log('📥 Loaded competitions:', competitions.length);
-        console.log('🔧 COMPETITIONS.JS VERSION: 2025-11-02-v2');
 
         loadingMessage.style.display = 'none';
 
         // Fetch match results to check if competitions are actually finished
         const scores = await footballApi.fetchScores();
-        console.log(`✅ Fetched ${scores.length} scores`);
         const upcomingFixtures = await footballApi.getUpcomingFixtures();
-        console.log(`✅ Fetched ${upcomingFixtures.length} upcoming fixtures`);
 
         // Combine scores and upcoming, then deduplicate
         const allMatches = [...scores, ...upcomingFixtures];
         const uniqueMatches = deduplicateMatches(allMatches);
-
-        // Debug: Check PL Round 10 matches
-        const plRound10Matches = uniqueMatches.filter(m => {
-            const isNumberLeague = typeof m.league === 'number' && m.league === 39;
-            const isStringLeague = typeof m.league === 'string' && m.league.includes('Premier League');
-            const isPL = isNumberLeague || isStringLeague;
-            if (!isPL || !m.round) return false;
-            const roundMatch = m.round.match(/(\d+)/);
-            if (!roundMatch) return false;
-            const roundNumber = parseInt(roundMatch[1]);
-            return roundNumber === 10;
-        });
-        console.log(`🔍 Total PL Round 10 matches in uniqueMatches: ${plRound10Matches.length}`);
-        plRound10Matches.forEach(m => {
-            console.log(`  - ${m.homeTeam} vs ${m.awayTeam} | Round: "${m.round}" | Completed: ${m.completed} | League type: ${typeof m.league}`);
-        });
 
         // Categorize competitions
         const now = new Date();
@@ -143,19 +124,6 @@ async function loadCompetitions() {
 
             } else if (c.competitionType === 'round' && c.selectedRounds) {
                 // Round-based competition - filter by rounds (includes both completed and upcoming)
-
-                // Debug: log all matches for this competition to see what we're working with
-                if (c.name.includes('Premier League Runde')) {
-                    const plMatches = uniqueMatches.filter(m => {
-                        const league = typeof m.league === 'string' ? m.league : LEAGUE_NAMES_SIMPLE[m.league];
-                        return league && league.includes('Premier League');
-                    });
-                    console.log(`🔍 Debug "${c.name}": Found ${plMatches.length} PL matches in uniqueMatches`);
-                    plMatches.forEach(m => {
-                        console.log(`  - ${m.homeTeam} vs ${m.awayTeam} | Round: "${m.round}" | Completed: ${m.completed} | League: ${typeof m.league === 'string' ? m.league : m.league}`);
-                    });
-                }
-
                 competitionMatches = uniqueMatches.filter(match => {
                     if (!match.round) return false;
 
