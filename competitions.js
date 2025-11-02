@@ -90,14 +90,20 @@ async function loadCompetitions() {
         loadingMessage.style.display = 'none';
 
         // Fetch match results to check if competitions are actually finished
+        const t1 = performance.now();
         const scores = await footballApi.fetchScores();
+        console.log(`⏱️ Fetch scores: ${((performance.now() - t1) / 1000).toFixed(2)}s`);
+
+        const t2 = performance.now();
         const upcomingFixtures = await footballApi.getUpcomingFixtures();
+        console.log(`⏱️ Fetch upcoming: ${((performance.now() - t2) / 1000).toFixed(2)}s`);
 
         // Combine scores and upcoming, then deduplicate
         const allMatches = [...scores, ...upcomingFixtures];
         const uniqueMatches = deduplicateMatches(allMatches);
 
         // Categorize competitions
+        const t3 = performance.now();
         const now = new Date();
         const active = [];
         const upcoming = [];
@@ -245,10 +251,13 @@ async function loadCompetitions() {
                 }
             }
         });
+        console.log(`⏱️ Categorize competitions: ${((performance.now() - t3) / 1000).toFixed(2)}s`);
 
+        const t4 = performance.now();
         renderCompetitions(active, 'activeCompetitionsList');
         renderCompetitions(upcoming, 'upcomingCompetitionsList');
         renderCompetitions(completed, 'completedCompetitionsList');
+        console.log(`⏱️ Render competitions: ${((performance.now() - t4) / 1000).toFixed(2)}s`);
 
         // Log total page load time
         const pageLoadEnd = performance.now();

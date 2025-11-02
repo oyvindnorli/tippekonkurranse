@@ -70,19 +70,29 @@ async function loadCompetition() {
         detailsSection.style.display = 'none';
 
         // Get competition data using service
+        const t1 = performance.now();
         competition = await competitionService.loadCompetition(competitionId);
+        console.log(`⏱️ Load competition: ${((performance.now() - t1) / 1000).toFixed(2)}s`);
 
         // Load user tips
+        const t2 = performance.now();
         await loadUserTips();
+        console.log(`⏱️ Load user tips: ${((performance.now() - t2) / 1000).toFixed(2)}s`);
 
         // Load and render matches first (needed to determine if competition is finished)
+        const t3 = performance.now();
         const allMatchesCompleted = await loadCompetitionMatches();
+        console.log(`⏱️ Load matches: ${((performance.now() - t3) / 1000).toFixed(2)}s`);
 
         // Render competition details (with match completion status)
+        const t4 = performance.now();
         renderCompetitionDetails(allMatchesCompleted);
+        console.log(`⏱️ Render details: ${((performance.now() - t4) / 1000).toFixed(2)}s`);
 
         // Load and render leaderboard
+        const t5 = performance.now();
         await loadLeaderboard();
+        console.log(`⏱️ Load leaderboard: ${((performance.now() - t5) / 1000).toFixed(2)}s`);
 
         loadingMessage.style.display = 'none';
         detailsSection.style.display = 'block';
