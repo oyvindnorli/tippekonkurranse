@@ -619,8 +619,8 @@ function init() {
             loadMatches();
 
             // Clean up old matches from Firestore in background (don't await)
-            // TEMPORARILY DISABLED: permissions error blocking other operations
-            // cleanupOldMatchesInBackground();
+            // Has proper error handling for permission issues
+            cleanupOldMatchesInBackground();
         } else {
             // User is not signed in, show welcome section
             if (welcomeSection) {

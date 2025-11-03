@@ -179,7 +179,12 @@ export async function cleanupAllOutdatedMatches() {
 
         return deletedCount;
     } catch (error) {
-        console.error('❌ Error cleaning up outdated matches:', error);
+        // Silent fail - user likely doesn't have delete permissions
+        if (error.code === 'permission-denied' || error.message?.includes('permission')) {
+            console.log('ℹ️ Cleanup skipped (insufficient permissions - this is normal for regular users)');
+        } else {
+            console.warn('⚠️ Could not clean up outdated matches:', error.message || error);
+        }
         return 0;
     }
 }
