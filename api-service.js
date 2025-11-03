@@ -396,7 +396,6 @@ class FootballApiService {
         try {
             console.log('🔍 Fetching available rounds...');
 
-            // Get fixtures for next 60 days to find upcoming rounds
             const today = new Date();
             const twoMonthsLater = new Date();
             twoMonthsLater.setDate(today.getDate() + 60);
@@ -407,46 +406,59 @@ class FootballApiService {
             const plRoundsMap = new Map(); // Map<roundNumber, { fixtures: [...] }>
             const clRoundsMap = new Map(); // Map<roundString, { fixtures: [...] }>
 
-            // Fetch fixtures for both leagues
-            for (const leagueId of API_CONFIG.LEAGUES) {
-                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&from=${fromDate}&to=${toDate}`;
+            // Fetch BOTH completed scores and upcoming fixtures to get ALL matches in each round
+            const [completedScores, upcomingFixtures] = await Promise.all([
+                this.fetchScores(),
+                this.getUpcomingFixtures()
+            ]);
 
-                const response = await fetch(url, {
-                    method: 'GET'
-                });
+            const allMatches = [...completedScores, ...upcomingFixtures];
 
-                if (!response.ok) continue;
+            // Group all matches by round
+            allMatches.forEach(match => {
+                const round = match.round;
+                if (!round) return;
 
-                const data = await response.json();
+                const leagueId = typeof match.league === 'number' ? match.league : null;
 
-                if (data.response && data.response.length > 0) {
-                    data.response.forEach(fixture => {
-                        const round = fixture.league.round;
-                        if (!round) return;
-
-                        if (leagueId === 39) {
-                            // Premier League - extract round number
-                            const match = round.match(/(\d+)/);
-                            if (match) {
-                                const roundNum = parseInt(match[1]);
-                                if (!plRoundsMap.has(roundNum)) {
-                                    plRoundsMap.set(roundNum, { fixtures: [] });
-                                }
-                                plRoundsMap.get(roundNum).fixtures.push(fixture);
-                            }
-                        } else if (leagueId === 2) {
-                            // Champions League - store full round string
-                            if (!clRoundsMap.has(round)) {
-                                clRoundsMap.set(round, { fixtures: [] });
-                            }
-                            clRoundsMap.get(round).fixtures.push(fixture);
+                if (leagueId === 39 || (typeof match.league === 'string' && match.league.includes('Premier League'))) {
+                    // Premier League - extract round number
+                    const roundMatch = round.match(/(\d+)/);
+                    if (roundMatch) {
+                        const roundNum = parseInt(roundMatch[1]);
+                        if (!plRoundsMap.has(roundNum)) {
+                            plRoundsMap.set(roundNum, { fixtures: [] });
                         }
+                        // Store with fixture.date format for consistency
+                        plRoundsMap.get(roundNum).fixtures.push({
+                            fixture: { date: match.commence_time || match.date }
+                        });
+                    }
+                } else if (leagueId === 2 || (typeof match.league === 'string' && match.league.includes('Champions League'))) {
+                    // Champions League - store full round string
+                    if (!clRoundsMap.has(round)) {
+                        clRoundsMap.set(round, { fixtures: [] });
+                    }
+                    clRoundsMap.get(round).fixtures.push({
+                        fixture: { date: match.commence_time || match.date }
                     });
                 }
-            }
+            });
 
             // Convert to sorted arrays with date ranges
             const now = new Date();
+
+            // Debug: Log all PL rounds found
+            console.log('🔍 All Premier League rounds found:');
+            Array.from(plRoundsMap.entries())
+                .sort((a, b) => a[0] - b[0])
+                .slice(0, 5)
+                .forEach(([num, data]) => {
+                    const allFuture = data.fixtures.every(f => new Date(f.fixture.date) > now);
+                    const futureCount = data.fixtures.filter(f => new Date(f.fixture.date) > now).length;
+                    console.log(`   Runde ${num}: ${data.fixtures.length} kamper (${futureCount} fremtidige) - ${allFuture ? '✅ INKLUDERES' : '❌ EKSKLUDERES'}`);
+                });
+
             const plRoundsArray = Array.from(plRoundsMap.entries())
                 .sort((a, b) => a[0] - b[0])
                 .filter(([num, data]) => {
@@ -497,12 +509,20 @@ class FootballApiService {
                     };
                 });
 
+            // Debug logging
             console.log('✅ Found available rounds (not started):', { pl: plRoundsArray.length, cl: clRoundsArray.length });
+
+            // Show first available round for each league
             if (plRoundsArray.length > 0) {
                 console.log(`   Premier League: ${plRoundsArray[0].label} (${plRoundsArray[0].dateRange})`);
+            } else {
+                console.log(`   Premier League: No upcoming rounds found (all have started)`);
             }
+
             if (clRoundsArray.length > 0) {
                 console.log(`   Champions League: ${clRoundsArray[0].label} (${clRoundsArray[0].dateRange})`);
+            } else {
+                console.log(`   Champions League: No upcoming rounds found (all have started)`);
             }
 
             return {
