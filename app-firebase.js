@@ -670,10 +670,14 @@ function renderMatches() {
         // Group matches by time within this date
         const matchesByTime = {};
         dateMatches.forEach(match => {
-            if (!matchesByTime[match.time]) {
-                matchesByTime[match.time] = [];
+            // Calculate time from commence_time or timestamp
+            const matchDate = match.commence_time ? new Date(match.commence_time) : (match.timestamp ? new Date(match.timestamp * 1000) : null);
+            const time = matchDate ? matchDate.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' }) : 'Ukjent tid';
+
+            if (!matchesByTime[time]) {
+                matchesByTime[time] = [];
             }
-            matchesByTime[match.time].push(match);
+            matchesByTime[time].push(match);
         });
 
         // Render each time group
