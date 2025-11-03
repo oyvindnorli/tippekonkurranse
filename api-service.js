@@ -165,26 +165,120 @@ class FootballApiService {
     }
 
     /**
+     * Filter matches to only show the next round for each league
+     * @param {Array} matches - All matches
+     * @returns {Array} - Matches filtered to next round only
+     */
+    filterToNextRound(matches) {
+        const matchesByLeague = {};
+        const now = new Date();
+
+        // Group matches by league
+        matches.forEach(match => {
+            const leagueId = match.league || match.league_id || match.leagueId;
+            if (!leagueId) return;
+
+            if (!matchesByLeague[leagueId]) {
+                matchesByLeague[leagueId] = [];
+            }
+            matchesByLeague[leagueId].push(match);
+        });
+
+        const nextRoundMatches = [];
+
+        // For each league, find the next round
+        Object.entries(matchesByLeague).forEach(([leagueId, leagueMatches]) => {
+            // Sort by date
+            leagueMatches.sort((a, b) => {
+                const dateA = new Date(a.commence_time || a.timestamp * 1000);
+                const dateB = new Date(b.commence_time || b.timestamp * 1000);
+                return dateA - dateB;
+            });
+
+            // Find the earliest upcoming round (not started yet)
+            const upcomingMatches = leagueMatches.filter(m => {
+                const matchDate = new Date(m.commence_time || m.timestamp * 1000);
+                return matchDate > now;
+            });
+
+            if (upcomingMatches.length === 0) return;
+
+            // Group by round
+            const roundsMap = new Map();
+            upcomingMatches.forEach(match => {
+                const round = match.round || 'Regular Season';
+                if (!roundsMap.has(round)) {
+                    roundsMap.set(round, []);
+                }
+                roundsMap.get(round).push(match);
+            });
+
+            // Get the first round (earliest)
+            const firstRoundKey = Array.from(roundsMap.keys())[0];
+            const firstRoundMatches = roundsMap.get(firstRoundKey) || [];
+
+            nextRoundMatches.push(...firstRoundMatches);
+        });
+
+        return nextRoundMatches;
+    }
+
+    /**
+     * Fetch next round fixtures for each league using next= parameter
+     * @returns {Array} - Upcoming fixtures
+     */
+    async fetchNextRoundFixtures() {
+        const allFixtures = [];
+
+        for (const leagueId of API_CONFIG.LEAGUES) {
+            try {
+                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&next=20`;
+                const response = await fetch(url, { method: 'GET' });
+
+                if (!response.ok) {
+                    console.warn(`Failed to fetch fixtures for league ${leagueId}`);
+                    continue;
+                }
+
+                const data = await response.json();
+                if (data.response && Array.isArray(data.response)) {
+                    const transformed = transformers.transformFixtures(data.response, leagueId);
+                    allFixtures.push(...transformed);
+                }
+            } catch (error) {
+                console.warn(`Error fetching fixtures for league ${leagueId}:`, error);
+            }
+        }
+
+        // Filter to next round only
+        return this.filterToNextRound(allFixtures);
+    }
+
+    /**
      * Get upcoming fixtures (main method)
      * Now uses Firestore as single source of truth for odds consistency
      */
     async getUpcomingFixtures(skipCache = false) {
         const today = new Date();
-        const tomorrow = new Date();
-        tomorrow.setDate(today.getDate() + 7); // Get fixtures for next 7 days
+        const futureDate = new Date();
+        futureDate.setDate(today.getDate() + 60); // Fetch up to 60 days ahead to catch next round
 
         // Try Firestore first (fastest and ensures consistent odds)
         if (!skipCache) {
             try {
                 const { getUpcomingMatchesFromCache, saveMatchesToFirestore, convertOldFormatMatches } = await import('./js/utils/matchCache.js');
-                const cachedMatches = await getUpcomingMatchesFromCache(today, tomorrow, API_CONFIG.LEAGUES);
+                const cachedMatches = await getUpcomingMatchesFromCache(today, futureDate, API_CONFIG.LEAGUES);
 
                 if (cachedMatches && cachedMatches.length > 0) {
                     console.log(`⚡ Loaded ${cachedMatches.length} matches from Firestore cache for leagues ${API_CONFIG.LEAGUES.join(',')}`);
 
+                    // Filter to only show next round for each league
+                    const nextRoundMatches = this.filterToNextRound(cachedMatches);
+                    console.log(`📋 Filtered to ${nextRoundMatches.length} matches (next round only)`);
+
                     // Return cached matches immediately for fast loading
                     // Note: Results will be updated by loadMatches() which calls fetchScores() separately
-                    return cachedMatches;
+                    return nextRoundMatches;
                 } else {
                     console.log(`⚠️ Firestore cache returned 0 matches for leagues ${API_CONFIG.LEAGUES.join(',')}, fetching from API...`);
 
@@ -198,12 +292,9 @@ class FootballApiService {
             console.log('🔄 Skipping Firestore cache, fetching fresh data from API...');
         }
 
-        // Firestore cache miss - fetch from API
-        const from = today.toISOString().split('T')[0];
-        const to = tomorrow.toISOString().split('T')[0];
-
-        console.log(`📅 Fetching fixtures from API ${from} to ${to}`);
-        const fixtures = await this.fetchFixtures(from, to);
+        // Firestore cache miss - fetch from API using next=X parameter for each league
+        console.log(`📅 Fetching next round fixtures from API for leagues ${API_CONFIG.LEAGUES.join(',')}`);
+        const fixtures = await this.fetchNextRoundFixtures();
 
         // Skip odds fetching if no fixtures
         if (fixtures.length === 0) {
