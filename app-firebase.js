@@ -1325,7 +1325,7 @@ async function cleanupOldMatchesInBackground() {
         localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES);
         localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES_TIME);
 
-        const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js');
+        const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js?v=20251103e');
         const deleted = await cleanupAllOutdatedMatches();
 
         if (deleted > 0) {
@@ -1351,7 +1351,7 @@ window.cleanupFirestore = async function() {
     localStorage.removeItem(STORAGE_KEYS.FOOTBALL_MATCHES_TIMESTAMP);
     console.log('🗑️ Cleared localStorage cache');
 
-    const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js');
+    const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js?v=20251103e');
     const deleted = await cleanupAllOutdatedMatches();
     console.log(`✅ Cleanup complete! Deleted ${deleted} outdated matches.`);
     console.log('🔄 Refreshing data...');
