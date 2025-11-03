@@ -16,31 +16,23 @@ let userTips = [];
 // Date navigation
 let selectedDate = null; // null = show all dates, otherwise show only this date
 
-// Active league filter - tracks which leagues are currently visible
-let activeLeagueFilter = new Set(); // Empty = show all from preferences
+// All available leagues that can be enabled
+const AVAILABLE_LEAGUES = [39, 2, 48, 135]; // PL, CL, EFL Cup, Serie A
 
-// Save league filter to localStorage
-function saveLeagueFilterToCache() {
+// Save league preferences to Firestore
+async function saveLeaguePreferences() {
     try {
-        const filterArray = Array.from(activeLeagueFilter);
-        localStorage.setItem(STORAGE_KEYS.ACTIVE_LEAGUE_FILTER, JSON.stringify(filterArray));
-    } catch (error) {
-        console.warn('Failed to save league filter to cache:', error);
-    }
-}
+        const user = firebase.auth().currentUser;
+        if (!user) return;
 
-// Load league filter from localStorage
-function loadLeagueFilterFromCache() {
-    try {
-        const cached = localStorage.getItem(STORAGE_KEYS.ACTIVE_LEAGUE_FILTER);
-        if (cached) {
-            const filterArray = JSON.parse(cached);
-            activeLeagueFilter = new Set(filterArray);
-            console.log(`📦 Loaded league filter from cache: ${filterArray.length} leagues`);
-        }
+        const db = firebase.firestore();
+        await db.collection('userPreferences').doc(user.uid).set({
+            leagues: Array.from(selectedLeagues)
+        }, { merge: true });
+
+        console.log('✅ League preferences saved:', Array.from(selectedLeagues));
     } catch (error) {
-        console.warn('Failed to load league filter from cache:', error);
-        activeLeagueFilter = new Set();
+        console.warn('Failed to save league preferences:', error);
     }
 }
 
@@ -383,14 +375,13 @@ function applyLeagueFilter() {
         14: 'CAF Confederation Cup'
     };
 
-    // Determine which leagues to show based on active filter
-    const leaguesToShow = activeLeagueFilter.size > 0 ? activeLeagueFilter : selectedLeagues;
-
-    if (leaguesToShow.size === 0) {
+    // Show matches for selected leagues only
+    // If no leagues selected (empty set), show nothing
+    if (selectedLeagues.size === 0) {
         leagueFilteredMatches = [];
     } else {
         leagueFilteredMatches = allMatches.filter(match => {
-            // Check if match league ID matches any active league
+            // Check if match league ID matches any selected league
             // Support multiple field names: league (new), league_id, leagueId (old)
             const matchLeagueId = (typeof match.league === 'number' ? match.league : null)
                                 || match.league_id
@@ -398,14 +389,14 @@ function applyLeagueFilter() {
 
             // If we have league ID, match directly
             if (matchLeagueId) {
-                return leaguesToShow.has(matchLeagueId);
+                return selectedLeagues.has(matchLeagueId);
             }
 
             // Fallback: match by league name (for older data format with string league)
             const matchLeague = typeof match.league === 'string' ? match.league : (match.league?.name || '');
             if (!matchLeague) return false;
 
-            for (const leagueId of leaguesToShow) {
+            for (const leagueId of selectedLeagues) {
                 const leagueName = leagueNames[leagueId];
                 if (!leagueName) continue;
 
@@ -618,9 +609,6 @@ function init() {
             }
 
             API_CONFIG.LEAGUES = newLeagues;
-
-            // Load saved league filter from localStorage
-            loadLeagueFilterFromCache();
 
             // Show main content, hide welcome
             if (welcomeSection) {
@@ -1149,12 +1137,11 @@ function populateLeagueFilter() {
     const listContainer = document.getElementById('leagueFilterList');
     listContainer.innerHTML = '';
 
-    // LEAGUE_NAMES is now imported from leagueConfig.js
-
-    // Create checkboxes for each league in user's preferences
-    selectedLeagues.forEach(leagueId => {
+    // Show all available leagues (not just selected ones)
+    // This allows users to enable/disable leagues they want to see
+    AVAILABLE_LEAGUES.forEach(leagueId => {
         const leagueName = getLeagueName(leagueId);
-        const isActive = activeLeagueFilter.size === 0 || activeLeagueFilter.has(leagueId);
+        const isSelected = selectedLeagues.has(leagueId);
 
         const checkbox = document.createElement('div');
         checkbox.className = 'league-filter-item';
@@ -1162,53 +1149,57 @@ function populateLeagueFilter() {
             <label>
                 <input type="checkbox"
                        value="${leagueId}"
-                       ${isActive ? 'checked' : ''}
+                       ${isSelected ? 'checked' : ''}
                        onchange="toggleLeagueFilter(${leagueId})">
                 <span>${leagueName}</span>
             </label>
         `;
         listContainer.appendChild(checkbox);
     });
+
+    // Update header to show count
+    updateLeagueFilterHeader();
+}
+
+function updateLeagueFilterHeader() {
+    const headerElement = document.querySelector('.filter-modal h3');
+    if (headerElement) {
+        const selectedCount = selectedLeagues.size;
+        const totalCount = AVAILABLE_LEAGUES.length;
+        headerElement.textContent = `Filtrer ligaer (${selectedCount} av ${totalCount} valgt)`;
+    }
 }
 
 function toggleLeagueFilter(leagueId) {
-    // Initialize filter if empty (means "show all")
-    if (activeLeagueFilter.size === 0) {
-        activeLeagueFilter = new Set(selectedLeagues);
-    }
-
-    if (activeLeagueFilter.has(leagueId)) {
-        activeLeagueFilter.delete(leagueId);
+    // Toggle league in selectedLeagues
+    if (selectedLeagues.has(leagueId)) {
+        selectedLeagues.delete(leagueId);
     } else {
-        activeLeagueFilter.add(leagueId);
+        selectedLeagues.add(leagueId);
     }
 
-    // If all leagues are selected again, clear filter (show all)
-    if (activeLeagueFilter.size === selectedLeagues.size) {
-        activeLeagueFilter.clear();
-    }
+    // Save to Firestore
+    saveLeaguePreferences();
 
-    // Save filter to cache
-    saveLeagueFilterToCache();
+    // Update UI
+    populateLeagueFilter();
 
     // Re-apply filters
     applyLeagueFilter();
 }
 
 function selectAllLeaguesFilter() {
-    activeLeagueFilter.clear(); // Empty = show all
-    saveLeagueFilterToCache();
+    // Select all available leagues
+    selectedLeagues = new Set(AVAILABLE_LEAGUES);
+    saveLeaguePreferences();
     populateLeagueFilter();
     applyLeagueFilter();
 }
 
 function deselectAllLeaguesFilter() {
-    activeLeagueFilter = new Set(); // Empty set, but we'll add one to avoid showing nothing
-    if (selectedLeagues.size > 0) {
-        const firstLeague = Array.from(selectedLeagues)[0];
-        activeLeagueFilter.add(firstLeague);
-    }
-    saveLeagueFilterToCache();
+    // Empty set = show nothing
+    selectedLeagues = new Set();
+    saveLeaguePreferences();
     populateLeagueFilter();
     applyLeagueFilter();
 }
