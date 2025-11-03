@@ -474,6 +474,7 @@ function viewCompetition(competitionId) {
 window.viewCompetition = viewCompetition;
 window.showCreateCompetitionModal = showCreateCompetitionModal;
 window.closeCreateCompetitionModal = closeCreateCompetitionModal;
+window.updateCompetitionName = updateCompetitionName;
 window.signOut = signOut;
 
 // Close modal on outside click
