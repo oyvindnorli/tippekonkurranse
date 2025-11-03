@@ -446,8 +446,13 @@ class FootballApiService {
             }
 
             // Convert to sorted arrays with date ranges
+            const now = new Date();
             const plRoundsArray = Array.from(plRoundsMap.entries())
                 .sort((a, b) => a[0] - b[0])
+                .filter(([num, data]) => {
+                    // Only include rounds where ALL fixtures are in the future (not started yet)
+                    return data.fixtures.every(f => new Date(f.fixture.date) > now);
+                })
                 .slice(0, 10) // Limit to next 10 rounds
                 .map(([num, data]) => {
                     // Find earliest and latest fixture dates
@@ -467,6 +472,10 @@ class FootballApiService {
 
             const clRoundsArray = Array.from(clRoundsMap.entries())
                 .sort((a, b) => a[0].localeCompare(b[0]))
+                .filter(([round, data]) => {
+                    // Only include rounds where ALL fixtures are in the future (not started yet)
+                    return data.fixtures.every(f => new Date(f.fixture.date) > now);
+                })
                 .slice(0, 10)
                 .map(([round, data]) => {
                     // Find earliest and latest fixture dates
@@ -488,7 +497,13 @@ class FootballApiService {
                     };
                 });
 
-            console.log('✅ Found rounds:', { pl: plRoundsArray.length, cl: clRoundsArray.length });
+            console.log('✅ Found available rounds (not started):', { pl: plRoundsArray.length, cl: clRoundsArray.length });
+            if (plRoundsArray.length > 0) {
+                console.log(`   Premier League: ${plRoundsArray[0].label} (${plRoundsArray[0].dateRange})`);
+            }
+            if (clRoundsArray.length > 0) {
+                console.log(`   Champions League: ${clRoundsArray[0].label} (${clRoundsArray[0].dateRange})`);
+            }
 
             return {
                 premierLeague: plRoundsArray,
