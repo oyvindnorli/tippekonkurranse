@@ -242,7 +242,7 @@ class FootballApiService {
 
                 const data = await response.json();
                 if (data.response && Array.isArray(data.response)) {
-                    const transformed = transformers.transformFixtures(data.response, leagueId);
+                    const transformed = transformers.transformFixturesData(data.response, 20, this.teamLogosCache);
                     allFixtures.push(...transformed);
                 }
             } catch (error) {
