@@ -47,8 +47,9 @@ async function loadSelectedLeagues(userId) {
         const db = firebase.firestore();
         const prefsDoc = await db.collection('userPreferences').doc(userId).get();
 
-        if (prefsDoc.exists && prefsDoc.data().leagues) {
+        if (prefsDoc.exists && prefsDoc.data().leagues !== undefined) {
             const leagueArray = prefsDoc.data().leagues;
+            console.log('📂 Loaded leagues from Firestore:', leagueArray);
 
             // Only allow Premier League (39), Champions League (2), EFL Cup (48), and Serie A (135)
             const validLeagues = [39, 2, 48, 135];
@@ -68,6 +69,7 @@ async function loadSelectedLeagues(userId) {
             }
 
             // Empty array is valid (user wants to see nothing)
+            console.log('✅ Returning leagues:', filteredLeagues);
             return new Set(filteredLeagues);
         } else {
             console.log('📂 No preferences found, using defaults');
@@ -1129,6 +1131,7 @@ function showLeagueFilter() {
 }
 
 function populateLeagueFilter() {
+    console.log('🔄 Populating league filter, selectedLeagues:', Array.from(selectedLeagues));
     const listContainer = document.getElementById('leagueFilterList');
     listContainer.innerHTML = '';
 
@@ -1137,6 +1140,7 @@ function populateLeagueFilter() {
     AVAILABLE_LEAGUES.forEach(leagueId => {
         const leagueName = getLeagueName(leagueId);
         const isSelected = selectedLeagues.has(leagueId);
+        console.log(`  League ${leagueName} (${leagueId}): ${isSelected ? 'CHECKED' : 'unchecked'}`);
 
         const checkbox = document.createElement('div');
         checkbox.className = 'league-filter-item';
@@ -1183,18 +1187,22 @@ function toggleLeagueFilter(leagueId) {
     applyLeagueFilter();
 }
 
-function selectAllLeaguesFilter() {
+async function selectAllLeaguesFilter() {
+    console.log('🔵 Velg alle ligaer');
     // Select all available leagues
     selectedLeagues = new Set(AVAILABLE_LEAGUES);
-    saveLeaguePreferences();
+    console.log('Selected leagues:', Array.from(selectedLeagues));
+    await saveLeaguePreferences();
     populateLeagueFilter();
     applyLeagueFilter();
 }
 
-function deselectAllLeaguesFilter() {
+async function deselectAllLeaguesFilter() {
+    console.log('🔴 Fjern alle ligaer');
     // Empty set = show nothing
     selectedLeagues = new Set();
-    saveLeaguePreferences();
+    console.log('Selected leagues after clear:', Array.from(selectedLeagues));
+    await saveLeaguePreferences();
     populateLeagueFilter();
     applyLeagueFilter();
 }
