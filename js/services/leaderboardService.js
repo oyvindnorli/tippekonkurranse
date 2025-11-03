@@ -21,35 +21,88 @@ export async function loadLeaderboard(competitionId, competition, footballApi) {
         .where('competitionId', '==', competitionId)
         .get();
 
-    const participants = [];
-    for (const doc of participantsSnapshot.docs) {
+    // Fetch match results ONCE for all participants (instead of per participant)
+    const matchResults = await fetchMatchResultsForCompetition(competition, footballApi);
+
+    // Process all participants in parallel
+    const participantPromises = participantsSnapshot.docs.map(async (doc) => {
         const participant = doc.data();
 
-        // Calculate points for this participant
-        const points = await calculateParticipantPoints(participant.userId, competition, footballApi);
+        // Run points calculation and username fetch in parallel
+        const [points, userName] = await Promise.all([
+            calculateParticipantPointsOptimized(participant.userId, matchResults),
+            fetchUserDisplayName(db, participant.userId, participant.userName)
+        ]);
 
-        // Fetch actual displayName from users collection
-        let userName = participant.userName;
-        try {
-            const userDoc = await db.collection('users').doc(participant.userId).get();
-            if (userDoc.exists && userDoc.data().displayName) {
-                userName = userDoc.data().displayName;
-            }
-        } catch (error) {
-            console.warn('Could not fetch user displayName:', error);
-        }
-
-        participants.push({
+        return {
             userId: participant.userId,
             userName: userName,
             totalPoints: points
-        });
-    }
+        };
+    });
+
+    // Wait for all participants to be processed
+    const participants = await Promise.all(participantPromises);
 
     // Sort by points (descending)
     participants.sort((a, b) => b.totalPoints - a.totalPoints);
 
     return participants;
+}
+
+/**
+ * Fetch user display name from Firestore
+ * @param {Object} db - Firestore instance
+ * @param {string} userId - User ID
+ * @param {string} fallbackName - Fallback name if displayName not found
+ * @returns {Promise<string>} Display name
+ */
+async function fetchUserDisplayName(db, userId, fallbackName) {
+    try {
+        const userDoc = await db.collection('users').doc(userId).get();
+        if (userDoc.exists && userDoc.data().displayName) {
+            return userDoc.data().displayName;
+        }
+    } catch (error) {
+        console.warn('Could not fetch user displayName:', error);
+    }
+    return fallbackName;
+}
+
+/**
+ * Calculate points for a participant (optimized - uses pre-fetched match results)
+ * @param {string} userId
+ * @param {Object} matchResults - Pre-fetched match results
+ * @returns {Promise<number>} Total points
+ */
+async function calculateParticipantPointsOptimized(userId, matchResults) {
+    const db = firebase.firestore();
+
+    // Get user's tips
+    const tipsSnapshot = await db.collection('tips')
+        .where('userId', '==', userId)
+        .get();
+
+    const tips = [];
+    tipsSnapshot.forEach(doc => {
+        tips.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Calculate points
+    let totalPoints = 0;
+
+    Object.keys(matchResults).forEach(matchId => {
+        const tip = tips.find(t => String(t.matchId) === String(matchId));
+        const result = matchResults[matchId];
+
+        // Count points for both completed and live matches (if they have a score)
+        if (tip && result && result.result && result.result.home !== null && result.result.away !== null) {
+            const points = calculatePoints(tip, result);
+            totalPoints += points;
+        }
+    });
+
+    return Math.round(totalPoints * 10) / 10; // Round to 1 decimal
 }
 
 /**
@@ -89,7 +142,7 @@ export async function calculateParticipantPoints(userId, competition, footballAp
         }
     });
 
-    return Math.round(totalPoints * 100) / 100; // Round to 2 decimals
+    return Math.round(totalPoints * 10) / 10; // Round to 1 decimal
 }
 
 /**

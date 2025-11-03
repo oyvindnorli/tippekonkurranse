@@ -191,7 +191,7 @@ export function renderLeaderboard(participants, competitionMatches) {
             <div class="leaderboard-name" style="${nameStyle}" ${nameOnClick}>
                 ${participant.userName}
             </div>
-            <div class="leaderboard-score">${participant.totalPoints.toFixed(2)}</div>
+            <div class="leaderboard-score">${participant.totalPoints.toFixed(1)}</div>
         `;
 
         leaderboardList.appendChild(row);
@@ -315,7 +315,7 @@ export function createCompetitionMatchCard(match, userTips, calculateMatchPoints
             <div class="match-tip-display">
                 <span class="tip-label">Ditt tips:</span>
                 <span class="tip-score">${userTip.homeScore} - ${userTip.awayScore}</span>
-                ${match.result ? `<span class="tip-points">${points.toFixed(2)} poeng${match.completed ? '' : ' (live)'}</span>` : ''}
+                ${match.result ? `<span class="tip-points">${points.toFixed(1)} poeng${match.completed ? '' : ' (live)'}</span>` : ''}
             </div>
         `;
     } else {

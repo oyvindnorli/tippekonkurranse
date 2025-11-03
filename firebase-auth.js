@@ -370,7 +370,7 @@ async function loadFirebaseLeaderboard() {
         playerRow.innerHTML = `
             <div class="leaderboard-position">${medal || position}</div>
             <div class="leaderboard-name">${player.name}</div>
-            <div class="leaderboard-score">${player.score.toFixed(2)} poeng</div>
+            <div class="leaderboard-score">${player.score.toFixed(1)} poeng</div>
         `;
         leaderboardDiv.appendChild(playerRow);
     });

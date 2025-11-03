@@ -308,7 +308,7 @@ async function showUserTips(userId, userName) {
                     <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #f8fafc;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <strong>${match.homeTeam} vs ${match.awayTeam}</strong>
-                            <span style="${pointsColor}">${points.toFixed(2)} poeng</span>
+                            <span style="${pointsColor}">${points.toFixed(1)} poeng</span>
                         </div>
                         <div style="display: flex; gap: 20px; font-size: 14px;">
                             <div>Tips: <strong>${tip.homeScore} - ${tip.awayScore}</strong></div>

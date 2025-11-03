@@ -10,7 +10,14 @@
       "Bash(git push)",
       "WebFetch(domain:dashboard.api-football.com)",
       "WebSearch",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(git pull:*)",
+      "Bash(powershell -Command \"(Get-Content ''C:\\Prosjekter\\tippekonkurranse\\competition-detail-v2.js'' | Measure-Object -Line).Lines\")",
+      "Bash(powershell -Command \"(Get-Content ''C:\\Prosjekter\\tippekonkurranse\\api-service.js'' | Measure-Object -Line).Lines\")",
+      "Bash(powershell:*)",
+      "Bash(npm install)",
+      "Bash(npm test)",
+      "Bash(dir \"C:\\Prosjekter\\tippekonkurranse\\screenshots\" /O-D /B)"
     ],
     "deny": [],
     "ask": []

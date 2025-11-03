@@ -66,7 +66,7 @@ export function updateTotalScoreDisplay(tips, matches) {
     if (stats.tipsWithPoints > 0 || stats.tipsWithoutPoints > 0) {
         const oldText = stats.oldTipsCount > 0 ? `, ${stats.oldTipsCount} gamle` : '';
         ErrorHandler.info(
-            `💰 ${stats.totalScore.toFixed(2)} poeng (${stats.tipsWithPoints} riktige${oldText})`,
+            `💰 ${stats.totalScore.toFixed(1)} poeng (${stats.tipsWithPoints} riktige${oldText})`,
             'scoreService'
         );
     }
@@ -74,7 +74,7 @@ export function updateTotalScoreDisplay(tips, matches) {
     // Update DOM element
     const scoreElement = document.getElementById('totalScore');
     if (scoreElement) {
-        scoreElement.textContent = stats.totalScore.toFixed(2);
+        scoreElement.textContent = stats.totalScore.toFixed(1);
     }
 
     return stats;

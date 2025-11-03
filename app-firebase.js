@@ -1000,12 +1000,12 @@ function updateTotalScore() {
     });
 
     if (tipsWithPoints > 0 || tipsWithoutPoints > 0) {
-        console.log(`💰 ${totalScore.toFixed(2)} poeng (${tipsWithPoints} riktige${oldTipsCount > 0 ? `, ${oldTipsCount} gamle` : ''})`);
+        console.log(`💰 ${totalScore.toFixed(1)} poeng (${tipsWithPoints} riktige${oldTipsCount > 0 ? `, ${oldTipsCount} gamle` : ''})`);
     }
 
     const scoreElement = document.getElementById('totalScore');
     if (scoreElement) {
-        scoreElement.textContent = totalScore.toFixed(2);
+        scoreElement.textContent = totalScore.toFixed(1);
     }
 }
 

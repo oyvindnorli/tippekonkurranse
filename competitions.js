@@ -90,13 +90,13 @@ async function loadCompetitions() {
         loadingMessage.style.display = 'none';
 
         // Fetch match results to check if competitions are actually finished
+        // Run both API calls in parallel for faster loading
         const t1 = performance.now();
-        const scores = await footballApi.fetchScores();
-        console.log(`⏱️ Fetch scores: ${((performance.now() - t1) / 1000).toFixed(2)}s`);
-
-        const t2 = performance.now();
-        const upcomingFixtures = await footballApi.getUpcomingFixtures();
-        console.log(`⏱️ Fetch upcoming: ${((performance.now() - t2) / 1000).toFixed(2)}s`);
+        const [scores, upcomingFixtures] = await Promise.all([
+            footballApi.fetchScores(),
+            footballApi.getUpcomingFixtures()
+        ]);
+        console.log(`⏱️ Fetch scores + upcoming (parallel): ${((performance.now() - t1) / 1000).toFixed(2)}s`);
 
         // Combine scores and upcoming, then deduplicate
         const allMatches = [...scores, ...upcomingFixtures];
