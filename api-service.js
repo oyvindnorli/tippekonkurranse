@@ -397,53 +397,73 @@ class FootballApiService {
             console.log('🔍 Fetching available rounds...');
 
             const today = new Date();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(today.getDate() - 7);
             const twoMonthsLater = new Date();
             twoMonthsLater.setDate(today.getDate() + 60);
 
-            const fromDate = today.toISOString().split('T')[0];
-            const toDate = twoMonthsLater.toISOString().split('T')[0];
+            const plRoundsMap = new Map(); // Map<roundNumber, { fixtures: [...], hasStarted: boolean }>
+            const clRoundsMap = new Map(); // Map<roundString, { fixtures: [...], hasStarted: boolean }>
 
-            const plRoundsMap = new Map(); // Map<roundNumber, { fixtures: [...] }>
-            const clRoundsMap = new Map(); // Map<roundString, { fixtures: [...] }>
+            // Fetch fixtures for both past (to find started matches) and future (to find upcoming rounds)
+            // We need a wide range to capture all matches in each round
+            for (const leagueId of [39, 2]) { // Only PL and CL for round-based competitions
+                // Fetch recent completed matches (last 7 days)
+                const recentUrl = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&last=20`;
 
-            // Fetch BOTH completed scores and upcoming fixtures to get ALL matches in each round
-            const [completedScores, upcomingFixtures] = await Promise.all([
-                this.fetchScores(),
-                this.getUpcomingFixtures()
-            ]);
+                // Fetch upcoming matches (next 60 days)
+                const upcomingUrl = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&next=50`;
 
-            const allMatches = [...completedScores, ...upcomingFixtures];
+                const [recentResponse, upcomingResponse] = await Promise.all([
+                    fetch(recentUrl, { method: 'GET' }),
+                    fetch(upcomingUrl, { method: 'GET' })
+                ]);
 
-            // Group all matches by round
-            allMatches.forEach(match => {
-                const round = match.round;
-                if (!round) return;
+                const allFixtures = [];
 
-                const leagueId = typeof match.league === 'number' ? match.league : null;
-
-                if (leagueId === 39 || (typeof match.league === 'string' && match.league.includes('Premier League'))) {
-                    // Premier League - extract round number
-                    const roundMatch = round.match(/(\d+)/);
-                    if (roundMatch) {
-                        const roundNum = parseInt(roundMatch[1]);
-                        if (!plRoundsMap.has(roundNum)) {
-                            plRoundsMap.set(roundNum, { fixtures: [] });
-                        }
-                        // Store with fixture.date format for consistency
-                        plRoundsMap.get(roundNum).fixtures.push({
-                            fixture: { date: match.commence_time || match.date }
-                        });
-                    }
-                } else if (leagueId === 2 || (typeof match.league === 'string' && match.league.includes('Champions League'))) {
-                    // Champions League - store full round string
-                    if (!clRoundsMap.has(round)) {
-                        clRoundsMap.set(round, { fixtures: [] });
-                    }
-                    clRoundsMap.get(round).fixtures.push({
-                        fixture: { date: match.commence_time || match.date }
-                    });
+                if (recentResponse.ok) {
+                    const recentData = await recentResponse.json();
+                    if (recentData.response) allFixtures.push(...recentData.response);
                 }
-            });
+
+                if (upcomingResponse.ok) {
+                    const upcomingData = await upcomingResponse.json();
+                    if (upcomingData.response) allFixtures.push(...upcomingData.response);
+                }
+
+                // Group by round
+                allFixtures.forEach(fixture => {
+                    const round = fixture.league.round;
+                    if (!round) return;
+
+                    const fixtureDate = new Date(fixture.fixture.date);
+                    const hasStarted = fixtureDate <= today;
+
+                    if (leagueId === 39) {
+                        // Premier League
+                        const roundMatch = round.match(/(\d+)/);
+                        if (roundMatch) {
+                            const roundNum = parseInt(roundMatch[1]);
+                            if (!plRoundsMap.has(roundNum)) {
+                                plRoundsMap.set(roundNum, { fixtures: [], hasStarted: false });
+                            }
+                            plRoundsMap.get(roundNum).fixtures.push(fixture);
+                            if (hasStarted) {
+                                plRoundsMap.get(roundNum).hasStarted = true;
+                            }
+                        }
+                    } else if (leagueId === 2) {
+                        // Champions League
+                        if (!clRoundsMap.has(round)) {
+                            clRoundsMap.set(round, { fixtures: [], hasStarted: false });
+                        }
+                        clRoundsMap.get(round).fixtures.push(fixture);
+                        if (hasStarted) {
+                            clRoundsMap.get(round).hasStarted = true;
+                        }
+                    }
+                });
+            }
 
             // Convert to sorted arrays with date ranges
             const now = new Date();
@@ -454,16 +474,15 @@ class FootballApiService {
                 .sort((a, b) => a[0] - b[0])
                 .slice(0, 5)
                 .forEach(([num, data]) => {
-                    const allFuture = data.fixtures.every(f => new Date(f.fixture.date) > now);
                     const futureCount = data.fixtures.filter(f => new Date(f.fixture.date) > now).length;
-                    console.log(`   Runde ${num}: ${data.fixtures.length} kamper (${futureCount} fremtidige) - ${allFuture ? '✅ INKLUDERES' : '❌ EKSKLUDERES'}`);
+                    console.log(`   Runde ${num}: ${data.fixtures.length} kamper (${futureCount} fremtidige) - ${!data.hasStarted ? '✅ INKLUDERES' : '❌ EKSKLUDERES (har startet)'}`);
                 });
 
             const plRoundsArray = Array.from(plRoundsMap.entries())
                 .sort((a, b) => a[0] - b[0])
                 .filter(([num, data]) => {
-                    // Only include rounds where ALL fixtures are in the future (not started yet)
-                    return data.fixtures.every(f => new Date(f.fixture.date) > now);
+                    // Only include rounds that haven't started yet
+                    return !data.hasStarted;
                 })
                 .slice(0, 10) // Limit to next 10 rounds
                 .map(([num, data]) => {
@@ -485,8 +504,8 @@ class FootballApiService {
             const clRoundsArray = Array.from(clRoundsMap.entries())
                 .sort((a, b) => a[0].localeCompare(b[0]))
                 .filter(([round, data]) => {
-                    // Only include rounds where ALL fixtures are in the future (not started yet)
-                    return data.fixtures.every(f => new Date(f.fixture.date) > now);
+                    // Only include rounds that haven't started yet
+                    return !data.hasStarted;
                 })
                 .slice(0, 10)
                 .map(([round, data]) => {
