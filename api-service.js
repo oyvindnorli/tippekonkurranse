@@ -201,7 +201,12 @@ class FootballApiService {
                 return matchDate > now;
             });
 
-            if (upcomingMatches.length === 0) return;
+            if (upcomingMatches.length === 0) {
+                console.log(`ℹ️ Liga ${leagueId}: Ingen kommende kamper funnet`);
+                return;
+            }
+
+            console.log(`ℹ️ Liga ${leagueId}: ${upcomingMatches.length} kommende kamper`);
 
             // Group by round
             const roundsMap = new Map();
@@ -213,11 +218,25 @@ class FootballApiService {
                 roundsMap.get(round).push(match);
             });
 
-            // Get the first round (earliest)
-            const firstRoundKey = Array.from(roundsMap.keys())[0];
-            const firstRoundMatches = roundsMap.get(firstRoundKey) || [];
+            // Find the earliest round by date (not just first key)
+            let earliestRound = null;
+            let earliestDate = null;
 
-            nextRoundMatches.push(...firstRoundMatches);
+            roundsMap.forEach((matches, roundKey) => {
+                const firstMatchDate = new Date(matches[0].commence_time || matches[0].timestamp * 1000);
+                if (!earliestDate || firstMatchDate < earliestDate) {
+                    earliestDate = firstMatchDate;
+                    earliestRound = roundKey;
+                }
+            });
+
+            if (earliestRound) {
+                const firstRoundMatches = roundsMap.get(earliestRound) || [];
+                console.log(`   ✅ Neste runde for liga ${leagueId}: "${earliestRound}" (${firstRoundMatches.length} kamper)`);
+                nextRoundMatches.push(...firstRoundMatches);
+            } else {
+                console.log(`   ⚠️ Ingen runde funnet for liga ${leagueId}`);
+            }
         });
 
         return nextRoundMatches;
