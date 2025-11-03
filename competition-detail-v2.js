@@ -380,13 +380,17 @@ async function loadCompetitionMatches() {
                 for (const leagueId of leagueIds) {
                     try {
                         // Fetch recent (last 20) and upcoming (next 50) fixtures
+                        const baseUrl = '/api/football'; // Use serverless function
+                        const season = new Date().getFullYear();
+
                         const [recentResponse, upcomingResponse] = await Promise.all([
-                            fetch(`https://dashboard.api-football.com/api-proxy?endpoint=fixtures&league=${leagueId}&season=2024&last=20`, { method: 'GET' }),
-                            fetch(`https://dashboard.api-football.com/api-proxy?endpoint=fixtures&league=${leagueId}&season=2024&next=50`, { method: 'GET' })
+                            fetch(`${baseUrl}?endpoint=fixtures&league=${leagueId}&season=${season}&last=20`, { method: 'GET' }),
+                            fetch(`${baseUrl}?endpoint=fixtures&league=${leagueId}&season=${season}&next=50`, { method: 'GET' })
                         ]);
 
                         if (recentResponse.ok) {
                             const recentData = await recentResponse.json();
+                            console.log(`   Recent fixtures for league ${leagueId}:`, recentData.response?.length || 0);
                             if (recentData.response) {
                                 // Convert API format to our format
                                 recentData.response.forEach(f => {
@@ -407,10 +411,13 @@ async function loadCompetitionMatches() {
                                     });
                                 });
                             }
+                        } else {
+                            console.warn(`   Recent fixtures request failed for league ${leagueId}: ${recentResponse.status}`);
                         }
 
                         if (upcomingResponse.ok) {
                             const upcomingData = await upcomingResponse.json();
+                            console.log(`   Upcoming fixtures for league ${leagueId}:`, upcomingData.response?.length || 0);
                             if (upcomingData.response) {
                                 upcomingData.response.forEach(f => {
                                     allFixtures.push({
@@ -430,9 +437,11 @@ async function loadCompetitionMatches() {
                                     });
                                 });
                             }
+                        } else {
+                            console.warn(`   Upcoming fixtures request failed for league ${leagueId}: ${upcomingResponse.status}`);
                         }
                     } catch (err) {
-                        console.warn(`Failed to fetch fixtures for league ${leagueId}:`, err);
+                        console.error(`   Error fetching fixtures for league ${leagueId}:`, err);
                     }
                 }
 
