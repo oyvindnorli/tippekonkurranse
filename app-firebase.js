@@ -52,28 +52,23 @@ async function loadSelectedLeagues(userId) {
 
             // Only allow Premier League (39), Champions League (2), EFL Cup (48), and Serie A (135)
             const validLeagues = [39, 2, 48, 135];
-            const defaultLeagues = [39, 2, 48, 135];
             const filteredLeagues = leagueArray.filter(id => validLeagues.includes(id));
 
-            // Check if user is missing any default leagues or has invalid leagues
-            const hasAllDefaultLeagues = defaultLeagues.every(id => leagueArray.includes(id));
-            const needsMigration = filteredLeagues.length !== leagueArray.length ||
-                                   filteredLeagues.length === 0 ||
-                                   !hasAllDefaultLeagues;
+            // Check if user has invalid leagues (needs cleanup)
+            const needsMigration = filteredLeagues.length !== leagueArray.length;
 
             if (needsMigration) {
-                console.log('🔄 Migrating league preferences to include all default leagues (PL + CL + EFL + Serie A)');
+                console.log('🔄 Cleaning up invalid league preferences');
 
-                // Save corrected preferences back to Firestore
+                // Save corrected preferences back to Firestore (keep only valid leagues)
                 await db.collection('userPreferences').doc(userId).set({
-                    leagues: defaultLeagues,
+                    leagues: filteredLeagues,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
-
-                return new Set(defaultLeagues);
             }
 
-            return new Set(filteredLeagues.length > 0 ? filteredLeagues : defaultLeagues);
+            // Empty array is valid (user wants to see nothing)
+            return new Set(filteredLeagues);
         } else {
             console.log('📂 No preferences found, using defaults');
             return new Set([39, 2, 48, 135]); // Default: Premier League, Champions League, EFL Cup, Serie A
