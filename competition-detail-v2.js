@@ -367,13 +367,85 @@ async function loadCompetitionMatches() {
         if (competition.cachedMatches && competition.cachedMatches.length > 0) {
             competitionMatches = competition.cachedMatches;
         } else {
-            // Fetch both scores (completed/live) and upcoming fixtures
-            const scores = await footballApi.fetchScores();
-            const upcoming = await footballApi.getUpcomingFixtures();
+            let uniqueMatches;
 
-            // Combine both arrays and deduplicate using utility function
-            const allMatches = [...scores, ...upcoming];
-            const uniqueMatches = deduplicateMatches(allMatches);
+            // For round-based competitions, fetch a wider range to include future rounds
+            if (competition.competitionType === 'round' && competition.selectedRounds) {
+                console.log('🔍 Fetching matches for round-based competition...');
+
+                // Fetch both recent and future matches using API directly
+                const leagueIds = competition.leagues || [];
+                const allFixtures = [];
+
+                for (const leagueId of leagueIds) {
+                    try {
+                        // Fetch recent (last 20) and upcoming (next 50) fixtures
+                        const [recentResponse, upcomingResponse] = await Promise.all([
+                            fetch(`https://dashboard.api-football.com/api-proxy?endpoint=fixtures&league=${leagueId}&season=2024&last=20`, { method: 'GET' }),
+                            fetch(`https://dashboard.api-football.com/api-proxy?endpoint=fixtures&league=${leagueId}&season=2024&next=50`, { method: 'GET' })
+                        ]);
+
+                        if (recentResponse.ok) {
+                            const recentData = await recentResponse.json();
+                            if (recentData.response) {
+                                // Convert API format to our format
+                                recentData.response.forEach(f => {
+                                    allFixtures.push({
+                                        id: f.fixture.id,
+                                        league: leagueId,
+                                        round: f.league.round,
+                                        homeTeam: f.teams.home.name,
+                                        awayTeam: f.teams.away.name,
+                                        commence_time: f.fixture.date,
+                                        date: f.fixture.date,
+                                        completed: f.fixture.status.short === 'FT',
+                                        result: f.fixture.status.short === 'FT' ? {
+                                            home: f.goals.home,
+                                            away: f.goals.away
+                                        } : null,
+                                        statusShort: f.fixture.status.short
+                                    });
+                                });
+                            }
+                        }
+
+                        if (upcomingResponse.ok) {
+                            const upcomingData = await upcomingResponse.json();
+                            if (upcomingData.response) {
+                                upcomingData.response.forEach(f => {
+                                    allFixtures.push({
+                                        id: f.fixture.id,
+                                        league: leagueId,
+                                        round: f.league.round,
+                                        homeTeam: f.teams.home.name,
+                                        awayTeam: f.teams.away.name,
+                                        commence_time: f.fixture.date,
+                                        date: f.fixture.date,
+                                        completed: f.fixture.status.short === 'FT',
+                                        result: f.fixture.status.short === 'FT' ? {
+                                            home: f.goals.home,
+                                            away: f.goals.away
+                                        } : null,
+                                        statusShort: f.fixture.status.short
+                                    });
+                                });
+                            }
+                        }
+                    } catch (err) {
+                        console.warn(`Failed to fetch fixtures for league ${leagueId}:`, err);
+                    }
+                }
+
+                uniqueMatches = deduplicateMatches(allFixtures);
+                console.log(`✅ Fetched ${uniqueMatches.length} total matches for round-based competition`);
+            } else {
+                // For date-based competitions, use normal fetch (7 days is enough)
+                const scores = await footballApi.fetchScores();
+                const upcoming = await footballApi.getUpcomingFixtures();
+
+                const allMatches = [...scores, ...upcoming];
+                uniqueMatches = deduplicateMatches(allMatches);
+            }
 
             const competitionLeagues = competition.leagues || [];
 
