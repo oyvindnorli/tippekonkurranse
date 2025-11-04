@@ -1062,6 +1062,9 @@ function selectToday() {
 function updateDateDisplay() {
     const dateLabel = document.getElementById('dateLabel');
 
+    // Guard: Element may not exist yet during initialization
+    if (!dateLabel) return;
+
     if (!selectedDate) {
         dateLabel.textContent = 'Alle dager';
         return;
@@ -1118,7 +1121,7 @@ function applyDateFilter() {
 function initDateNavigation() {
     // Show all dates by default (no date filter)
     selectedDate = null;
-    updateDateDisplay(); // Update UI to show "Alle dager"
+    // Note: updateDateDisplay() not called here since date navigation UI was removed
 }
 
 // League filter functions
