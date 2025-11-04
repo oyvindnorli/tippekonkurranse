@@ -1118,6 +1118,7 @@ function applyDateFilter() {
 function initDateNavigation() {
     // Show all dates by default (no date filter)
     selectedDate = null;
+    updateDateDisplay(); // Update UI to show "Alle dager"
 }
 
 // League filter functions
