@@ -29,7 +29,7 @@ header {
     background:
         linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.75) 100%),
         url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1920&h=400&fit=crop') center/cover;
-    padding: 8px 0;
+    padding: 4px 0 2px 0;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     position: sticky;
     top: 0;
@@ -41,14 +41,14 @@ header h1 {
     font-size: 18px;
     font-weight: 800;
     text-align: center;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
     letter-spacing: -0.5px;
 }
 
 .user-section {
     text-align: center;
     margin-bottom: 0px;
-    min-height: 20px; /* Ensure consistent height */
+    min-height: 18px; /* Ensure consistent height */
 }
 
 .user-section .current-user {
@@ -107,17 +107,18 @@ header h1 {
 .nav-buttons {
     text-align: center;
     margin-top: 0px;
+    margin-bottom: 2px;
     display: flex;
     justify-content: center;
     gap: 6px;
     flex-wrap: wrap;
-    min-height: 30px; /* Fixed height to prevent header jump */
+    min-height: 26px; /* Fixed height to prevent header jump */
     /* Remove opacity transition - show immediately when display is set to flex */
 }
 
 .nav-btn {
     display: inline-block;
-    padding: 5px 12px;
+    padding: 4px 10px;
     background: rgba(34, 211, 238, 0.15);
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
