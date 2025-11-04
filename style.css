@@ -592,6 +592,12 @@ header h1 {
     min-width: 18px;
     text-align: center;
     user-select: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    touch-action: pan-y; /* Allow vertical scroll but enable horizontal swipe */
+    -webkit-tap-highlight-color: rgba(34, 211, 238, 0.1);
+    transition: background-color 0.15s ease, transform 0.15s ease;
+    border-radius: 4px;
 }
 
 .score-separator {

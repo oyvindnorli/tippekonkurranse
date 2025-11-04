@@ -825,10 +825,22 @@ function renderMatches() {
                         ].forEach(({ element, type }) => {
                             let touchStartX = 0;
                             let touchStartY = 0;
+                            let touchStartTime = 0;
 
                             element.addEventListener('touchstart', (e) => {
                                 touchStartX = e.touches[0].clientX;
                                 touchStartY = e.touches[0].clientY;
+                                touchStartTime = Date.now();
+                                element.style.backgroundColor = 'rgba(34, 211, 238, 0.1)';
+                            }, { passive: true });
+
+                            element.addEventListener('touchmove', (e) => {
+                                // Visual feedback during swipe
+                                const touchCurrentX = e.touches[0].clientX;
+                                const deltaX = touchCurrentX - touchStartX;
+                                if (Math.abs(deltaX) > 10) {
+                                    element.style.transform = `translateX(${deltaX * 0.3}px)`;
+                                }
                             }, { passive: true });
 
                             element.addEventListener('touchend', (e) => {
@@ -836,9 +848,14 @@ function renderMatches() {
                                 const touchEndY = e.changedTouches[0].clientY;
                                 const deltaX = touchEndX - touchStartX;
                                 const deltaY = Math.abs(touchEndY - touchStartY);
+                                const swipeTime = Date.now() - touchStartTime;
 
-                                // Only trigger if horizontal swipe is dominant (not vertical scroll)
-                                if (Math.abs(deltaX) > 50 && deltaY < 30) {
+                                // Reset visual feedback
+                                element.style.backgroundColor = '';
+                                element.style.transform = '';
+
+                                // Lower threshold (30px instead of 50px) and allow faster swipes
+                                if (Math.abs(deltaX) > 30 && deltaY < 40 && swipeTime < 500) {
                                     if (deltaX > 0) {
                                         // Swipe right - increase
                                         updateScore(match.id, type, true);
@@ -847,6 +864,12 @@ function renderMatches() {
                                         updateScore(match.id, type, false);
                                     }
                                 }
+                            }, { passive: true });
+
+                            element.addEventListener('touchcancel', (e) => {
+                                // Reset visual feedback on cancel
+                                element.style.backgroundColor = '';
+                                element.style.transform = '';
                             }, { passive: true });
                         });
                     }
