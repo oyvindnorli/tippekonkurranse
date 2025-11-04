@@ -24,44 +24,49 @@ main {
     padding: 0 15px;
 }
 
-/* Header - Modern gradient */
+/* Header - Ultra Compact Modern Design */
 header {
-    background:
-        linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 41, 59, 0.75) 100%),
-        url('https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1920&h=400&fit=crop') center/cover;
-    padding: 4px 0 2px 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    padding: 8px 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     position: sticky;
     top: 0;
     z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
+/* Left side - Title + User info on same line */
 header h1 {
     color: #ffffff;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 800;
-    text-align: center;
-    margin-bottom: 3px;
-    letter-spacing: -0.5px;
+    margin: 0;
+    letter-spacing: -0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .user-section {
-    text-align: center;
-    margin-bottom: 0px;
-    min-height: 0px; /* No minimum height */
-    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    flex: 1;
+    min-width: 0;
 }
 
 .user-section .current-user {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.85);
-    min-height: 0px; /* No minimum height */
-    line-height: 1.2;
-    /* Remove opacity transition - show immediately */
+    gap: 8px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
 }
 
 .user-section .current-user strong {
@@ -70,85 +75,99 @@ header h1 {
 }
 
 .btn-small {
-    padding: 5px 12px;
+    padding: 3px 8px;
     background: rgba(34, 211, 238, 0.1);
     color: #22d3ee;
-    border: 1.5px solid rgba(34, 211, 238, 0.3);
-    border-radius: 6px;
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .btn-small:hover {
     background: rgba(34, 211, 238, 0.2);
     border-color: #22d3ee;
-    transform: translateY(-1px);
 }
 
 .score-display {
-    text-align: center;
-    margin-bottom: 0px;
-    min-height: 0px; /* No minimum height */
-    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
 }
 
 .score-display h2 {
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 600;
-    display: inline-block;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 11px;
+    font-weight: 500;
+    margin: 0;
 }
 
 .score-display span {
     color: #22d3ee;
-    font-size: 16px;
-    font-weight: 800;
+    font-size: 14px;
+    font-weight: 700;
 }
 
+/* Right side - Navigation */
 .nav-buttons {
-    text-align: center;
-    margin-top: 2px;
-    margin-bottom: 2px;
     display: flex;
-    justify-content: center;
+    align-items: center;
     gap: 6px;
-    flex-wrap: wrap;
-    min-height: 0px; /* No minimum height */
-    /* Remove opacity transition - show immediately when display is set to flex */
+    margin: 0;
 }
 
 .nav-btn {
-    display: inline-block;
-    padding: 4px 10px;
-    background: rgba(34, 211, 238, 0.15);
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    background: rgba(34, 211, 238, 0.1);
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     border-radius: 6px;
     font-weight: 600;
-    font-size: 12px;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(34, 211, 238, 0.2);
+    font-size: 11px;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(34, 211, 238, 0.15);
+    white-space: nowrap;
 }
 
 .nav-btn:hover {
-    background: rgba(34, 211, 238, 0.25);
+    background: rgba(34, 211, 238, 0.2);
     color: rgba(255, 255, 255, 0.9);
-    border-color: rgba(34, 211, 238, 0.4);
+    border-color: rgba(34, 211, 238, 0.3);
 }
 
 .nav-btn.active {
     background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
     color: #ffffff;
     font-weight: 700;
-    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.4);
+    box-shadow: 0 2px 6px rgba(34, 211, 238, 0.3);
     border-color: transparent;
 }
 
 .nav-btn.active:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(34, 211, 238, 0.5);
+    box-shadow: 0 3px 8px rgba(34, 211, 238, 0.4);
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+    header {
+        padding: 6px 10px;
+        gap: 8px;
+    }
+
+    header h1 {
+        font-size: 14px;
+    }
+
+    .nav-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
 }
 
 /* Main content - removed, now defined at top */
