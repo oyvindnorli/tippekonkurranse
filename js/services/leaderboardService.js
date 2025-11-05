@@ -14,40 +14,48 @@ import { calculatePoints } from '../utils/matchUtils.js';
  * @returns {Promise<Array>} Array of participants with points
  */
 export async function loadLeaderboard(competitionId, competition, footballApi) {
+    console.log('🔍 [leaderboardService] Loading leaderboard for competition:', competitionId);
     const db = firebase.firestore();
 
-    // Get all participants for this competition
-    const participantsSnapshot = await db.collection('competitionParticipants')
-        .where('competitionId', '==', competitionId)
-        .get();
+    try {
+        // Get all participants for this competition
+        const participantsSnapshot = await db.collection('competitionParticipants')
+            .where('competitionId', '==', competitionId)
+            .get();
 
-    // Fetch match results ONCE for all participants (instead of per participant)
-    const matchResults = await fetchMatchResultsForCompetition(competition, footballApi);
+        console.log('✅ [leaderboardService] Loaded', participantsSnapshot.size, 'participants');
 
-    // Process all participants in parallel
-    const participantPromises = participantsSnapshot.docs.map(async (doc) => {
-        const participant = doc.data();
+        // Fetch match results ONCE for all participants (instead of per participant)
+        const matchResults = await fetchMatchResultsForCompetition(competition, footballApi);
 
-        // Run points calculation and username fetch in parallel
-        const [points, userName] = await Promise.all([
-            calculateParticipantPointsOptimized(participant.userId, matchResults),
-            fetchUserDisplayName(db, participant.userId, participant.userName)
-        ]);
+        // Process all participants in parallel
+        const participantPromises = participantsSnapshot.docs.map(async (doc) => {
+            const participant = doc.data();
 
-        return {
-            userId: participant.userId,
-            userName: userName,
-            totalPoints: points
-        };
-    });
+            // Run points calculation and username fetch in parallel
+            const [points, userName] = await Promise.all([
+                calculateParticipantPointsOptimized(participant.userId, matchResults),
+                fetchUserDisplayName(db, participant.userId, participant.userName)
+            ]);
 
-    // Wait for all participants to be processed
-    const participants = await Promise.all(participantPromises);
+            return {
+                userId: participant.userId,
+                userName: userName,
+                totalPoints: points
+            };
+        });
 
-    // Sort by points (descending)
-    participants.sort((a, b) => b.totalPoints - a.totalPoints);
+        // Wait for all participants to be processed
+        const participants = await Promise.all(participantPromises);
 
-    return participants;
+        // Sort by points (descending)
+        participants.sort((a, b) => b.totalPoints - a.totalPoints);
+
+        return participants;
+    } catch (error) {
+        console.error('❌ [leaderboardService] Error loading leaderboard:', error);
+        throw error;
+    }
 }
 
 /**
@@ -64,7 +72,7 @@ async function fetchUserDisplayName(db, userId, fallbackName) {
             return userDoc.data().displayName;
         }
     } catch (error) {
-        console.warn('Could not fetch user displayName:', error);
+        console.error('❌ [leaderboardService] Error fetching displayName for user', userId, ':', error);
     }
     return fallbackName;
 }
@@ -78,31 +86,36 @@ async function fetchUserDisplayName(db, userId, fallbackName) {
 async function calculateParticipantPointsOptimized(userId, matchResults) {
     const db = firebase.firestore();
 
-    // Get user's tips
-    const tipsSnapshot = await db.collection('tips')
-        .where('userId', '==', userId)
-        .get();
+    try {
+        // Get user's tips
+        const tipsSnapshot = await db.collection('tips')
+            .where('userId', '==', userId)
+            .get();
 
-    const tips = [];
-    tipsSnapshot.forEach(doc => {
-        tips.push({ id: doc.id, ...doc.data() });
-    });
+        const tips = [];
+        tipsSnapshot.forEach(doc => {
+            tips.push({ id: doc.id, ...doc.data() });
+        });
 
-    // Calculate points
-    let totalPoints = 0;
+        // Calculate points
+        let totalPoints = 0;
 
-    Object.keys(matchResults).forEach(matchId => {
-        const tip = tips.find(t => String(t.matchId) === String(matchId));
-        const result = matchResults[matchId];
+        Object.keys(matchResults).forEach(matchId => {
+            const tip = tips.find(t => String(t.matchId) === String(matchId));
+            const result = matchResults[matchId];
 
-        // Count points for both completed and live matches (if they have a score)
-        if (tip && result && result.result && result.result.home !== null && result.result.away !== null) {
-            const points = calculatePoints(tip, result);
-            totalPoints += points;
-        }
-    });
+            // Count points for both completed and live matches (if they have a score)
+            if (tip && result && result.result && result.result.home !== null && result.result.away !== null) {
+                const points = calculatePoints(tip, result);
+                totalPoints += points;
+            }
+        });
 
-    return Math.round(totalPoints * 10) / 10; // Round to 1 decimal
+        return Math.round(totalPoints * 10) / 10; // Round to 1 decimal
+    } catch (error) {
+        console.error('❌ [leaderboardService] Error calculating points for user', userId, ':', error);
+        throw error;
+    }
 }
 
 /**

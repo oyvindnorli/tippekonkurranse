@@ -9,14 +9,22 @@
  * @returns {Promise<Object>} Competition object
  */
 export async function loadCompetition(competitionId) {
+    console.log('🔍 [competitionService] Loading competition:', competitionId);
     const db = firebase.firestore();
-    const competitionDoc = await db.collection('competitions').doc(competitionId).get();
 
-    if (!competitionDoc.exists) {
-        throw new Error('Konkurranse finnes ikke');
+    try {
+        const competitionDoc = await db.collection('competitions').doc(competitionId).get();
+        console.log('✅ [competitionService] Competition doc fetched, exists:', competitionDoc.exists);
+
+        if (!competitionDoc.exists) {
+            throw new Error('Konkurranse finnes ikke');
+        }
+
+        return { id: competitionDoc.id, ...competitionDoc.data() };
+    } catch (error) {
+        console.error('❌ [competitionService] Error loading competition:', error);
+        throw error;
     }
-
-    return { id: competitionDoc.id, ...competitionDoc.data() };
 }
 
 /**
@@ -25,17 +33,25 @@ export async function loadCompetition(competitionId) {
  * @returns {Promise<Array>} Array of tips
  */
 export async function loadUserTips(userId) {
+    console.log('🔍 [competitionService] Loading tips for user:', userId);
     const db = firebase.firestore();
-    const tipsSnapshot = await db.collection('tips')
-        .where('userId', '==', userId)
-        .get();
 
-    const tips = [];
-    tipsSnapshot.forEach(doc => {
-        tips.push({ id: doc.id, ...doc.data() });
-    });
+    try {
+        const tipsSnapshot = await db.collection('tips')
+            .where('userId', '==', userId)
+            .get();
 
-    return tips;
+        const tips = [];
+        tipsSnapshot.forEach(doc => {
+            tips.push({ id: doc.id, ...doc.data() });
+        });
+
+        console.log('✅ [competitionService] Loaded', tips.length, 'tips');
+        return tips;
+    } catch (error) {
+        console.error('❌ [competitionService] Error loading tips:', error);
+        throw error;
+    }
 }
 
 /**
