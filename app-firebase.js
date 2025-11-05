@@ -375,22 +375,6 @@ function applyLeagueFilter() {
     if (selectedLeagues.size === 0) {
         leagueFilteredMatches = [];
     } else {
-        console.log('🔍 Filtering matches. Selected leagues:', Array.from(selectedLeagues));
-        console.log('📊 Total matches before filter:', allMatches.length);
-
-        // Sample first 3 matches to see their structure
-        if (allMatches.length > 0) {
-            console.log('📝 Sample match data (first 3):');
-            allMatches.slice(0, 3).forEach((m, i) => {
-                console.log(`  ${i+1}. ${m.homeTeam} vs ${m.awayTeam}:`, {
-                    league: m.league,
-                    league_id: m.league_id,
-                    leagueId: m.leagueId,
-                    leagueName: m.leagueName
-                });
-            });
-        }
-
         leagueFilteredMatches = allMatches.filter(match => {
             // Check if match league ID matches any selected league
             // Support multiple field names: league (new), league_id, leagueId (old)
@@ -400,19 +384,12 @@ function applyLeagueFilter() {
 
             // If we have league ID, match directly
             if (matchLeagueId) {
-                const matches = selectedLeagues.has(matchLeagueId);
-                if (matches) {
-                    console.log(`✅ Match ${match.homeTeam} vs ${match.awayTeam} - League ID: ${matchLeagueId}`);
-                }
-                return matches;
+                return selectedLeagues.has(matchLeagueId);
             }
 
             // Fallback: match by league name (for older data format with string league)
             const matchLeague = typeof match.league === 'string' ? match.league : (match.league?.name || '');
-            if (!matchLeague) {
-                console.log(`⚠️ No league info for: ${match.homeTeam} vs ${match.awayTeam}`);
-                return false;
-            }
+            if (!matchLeague) return false;
 
             for (const leagueId of selectedLeagues) {
                 const leagueName = leagueNames[leagueId];
@@ -421,15 +398,11 @@ function applyLeagueFilter() {
                 if (matchLeague.includes(leagueName) ||
                     leagueName.includes(matchLeague) ||
                     matchLeague.toLowerCase().includes(leagueName.toLowerCase())) {
-                    console.log(`✅ Match ${match.homeTeam} vs ${match.awayTeam} - League: ${matchLeague} (matched by name)`);
                     return true;
                 }
             }
-            console.log(`❌ No match for: ${match.homeTeam} vs ${match.awayTeam} - League: ${matchLeague}`);
             return false;
         });
-
-        console.log('📊 Matches after filter:', leagueFilteredMatches.length);
     }
 
     // After applying league filter, apply date filter
@@ -1232,6 +1205,10 @@ function toggleLeagueFilter(leagueId) {
         selectedLeagues.add(leagueId);
     }
 
+    // Update API_CONFIG.LEAGUES to match selectedLeagues
+    API_CONFIG.LEAGUES = Array.from(selectedLeagues);
+    console.log('🔄 Updated API_CONFIG.LEAGUES:', API_CONFIG.LEAGUES);
+
     // Save to Firestore
     saveLeaguePreferences();
 
@@ -1245,6 +1222,11 @@ function toggleLeagueFilter(leagueId) {
 async function selectAllLeaguesFilter() {
     // Select all available leagues
     selectedLeagues = new Set(AVAILABLE_LEAGUES);
+
+    // Update API_CONFIG.LEAGUES to match selectedLeagues
+    API_CONFIG.LEAGUES = Array.from(selectedLeagues);
+    console.log('🔄 Updated API_CONFIG.LEAGUES (select all):', API_CONFIG.LEAGUES);
+
     await saveLeaguePreferences();
     populateLeagueFilter();
     applyLeagueFilter();
@@ -1253,6 +1235,11 @@ async function selectAllLeaguesFilter() {
 async function deselectAllLeaguesFilter() {
     // Empty set = show nothing
     selectedLeagues = new Set();
+
+    // Update API_CONFIG.LEAGUES to match selectedLeagues
+    API_CONFIG.LEAGUES = [];
+    console.log('🔄 Updated API_CONFIG.LEAGUES (deselect all):', API_CONFIG.LEAGUES);
+
     await saveLeaguePreferences();
     populateLeagueFilter();
     applyLeagueFilter();
