@@ -1,16 +1,16 @@
 // Import utility modules
-import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251106b';
-import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251106b';
-import { formatDate } from './js/utils/dateUtils.js?v=20251106b';
-import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251106b';
-import { ErrorHandler } from './js/utils/errorHandler.js?v=20251106b';
+import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251106c';
+import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251106c';
+import { formatDate } from './js/utils/dateUtils.js?v=20251106c';
+import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251106c';
+import { ErrorHandler } from './js/utils/errorHandler.js?v=20251106c';
 
 // Import services
-import * as competitionService from './js/services/competitionService.js?v=20251106b';
-import * as leaderboardService from './js/services/leaderboardService.js?v=20251106b';
+import * as competitionService from './js/services/competitionService.js?v=20251106c';
+import * as leaderboardService from './js/services/leaderboardService.js?v=20251106c';
 
 // Import renderers
-import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251106b';
+import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251106c';
 
 // Competition detail page
 let competitionId = null;
@@ -670,6 +670,22 @@ async function renderMatchesWithAllTips() {
         return;
     }
 
+    // Group matches by date
+    const matchesByDate = {};
+    startedMatches.forEach(match => {
+        const matchDate = new Date(match.commence_time || match.date);
+        const dateKey = matchDate.toLocaleDateString('no-NO', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+
+        if (!matchesByDate[dateKey]) {
+            matchesByDate[dateKey] = [];
+        }
+        matchesByDate[dateKey].push(match);
+    });
+
     // Build table HTML
     let html = '<div class="tips-table-wrapper"><table class="tips-comparison-table">';
 
@@ -680,61 +696,66 @@ async function renderMatchesWithAllTips() {
     });
     html += '</tr></thead><tbody>';
 
-    // One row per match
-    startedMatches.forEach(match => {
-        const matchDate = new Date(match.commence_time || match.date);
-        const matchTime = matchDate.toLocaleString('no-NO', {
-            day: '2-digit',
-            month: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+    // Iterate through dates
+    Object.keys(matchesByDate).sort().forEach(dateKey => {
+        const matches = matchesByDate[dateKey];
 
-        const resultText = match.result
-            ? `<div class="match-result">${match.result.home} - ${match.result.away}</div>`
-            : '<div class="match-live">Pågår</div>';
-
+        // Date header row
         html += `
-            <tr>
-                <td class="match-column">
-                    <div class="match-info">
-                        <div class="match-teams">${match.homeTeam} - ${match.awayTeam}</div>
-                        <div class="match-time">${matchTime}</div>
-                        ${resultText}
-                    </div>
+            <tr class="date-header-row">
+                <td colspan="${participantTips.length + 1}" class="date-header">
+                    📅 ${dateKey}
                 </td>
+            </tr>
         `;
 
-        // One cell per participant with their tip
-        participantTips.forEach(({ tips }) => {
-            const tip = tips[match.id];
+        // One row per match on this date
+        matches.forEach(match => {
+            const resultText = match.result
+                ? `<div class="match-result">${match.result.home} - ${match.result.away}</div>`
+                : '<div class="match-live">Pågår</div>';
 
-            if (tip) {
-                const points = match.result ? calculateMatchPoints(tip, match) : 0;
-                const hasPoints = points > 0;
-
-                // Check if exact result (both scores match)
-                const isExactResult = match.result &&
-                    tip.homeScore === match.result.home &&
-                    tip.awayScore === match.result.away;
-
-                const pointsDisplay = match.result ? `<span class="tip-points ${hasPoints ? 'has-points' : ''}">${points.toFixed(1)}p</span>` : '';
-
-                // Apply different CSS class for exact result
-                const cellClass = isExactResult ? 'exact-result' : (hasPoints ? 'correct-tip' : '');
-
-                html += `
-                    <td class="tip-cell ${cellClass}">
-                        <div class="tip-score">${tip.homeScore} - ${tip.awayScore}</div>
-                        ${pointsDisplay}
+            html += `
+                <tr>
+                    <td class="match-column">
+                        <div class="match-info">
+                            <div class="match-teams">${match.homeTeam} - ${match.awayTeam}</div>
+                            ${resultText}
+                        </div>
                     </td>
-                `;
-            } else {
-                html += `<td class="tip-cell no-tip">-</td>`;
-            }
-        });
+            `;
 
-        html += '</tr>';
+            // One cell per participant with their tip
+            participantTips.forEach(({ tips }) => {
+                const tip = tips[match.id];
+
+                if (tip) {
+                    const points = match.result ? calculateMatchPoints(tip, match) : 0;
+                    const hasPoints = points > 0;
+
+                    // Check if exact result (both scores match)
+                    const isExactResult = match.result &&
+                        tip.homeScore === match.result.home &&
+                        tip.awayScore === match.result.away;
+
+                    const pointsDisplay = match.result ? `<span class="tip-points ${hasPoints ? 'has-points' : ''}">${points.toFixed(1)}p</span>` : '';
+
+                    // Apply different CSS class for exact result
+                    const cellClass = isExactResult ? 'exact-result' : (hasPoints ? 'correct-tip' : '');
+
+                    html += `
+                        <td class="tip-cell ${cellClass}">
+                            <div class="tip-score">${tip.homeScore} - ${tip.awayScore}</div>
+                            ${pointsDisplay}
+                        </td>
+                    `;
+                } else {
+                    html += `<td class="tip-cell no-tip">-</td>`;
+                }
+            });
+
+            html += '</tr>';
+        });
     });
 
     html += '</tbody></table></div>';

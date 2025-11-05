@@ -3000,6 +3000,27 @@ header h1 {
     background: #f9fafb;
 }
 
+.tips-comparison-table tbody tr.date-header-row {
+    background: #f1f5f9;
+    border-top: 2px solid #cbd5e1;
+    border-bottom: 2px solid #cbd5e1;
+}
+
+.tips-comparison-table tbody tr.date-header-row:hover {
+    background: #f1f5f9;
+}
+
+.date-header {
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #475569;
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+}
+
 .tips-comparison-table td {
     padding: 12px 16px;
     font-size: 13px;
