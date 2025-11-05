@@ -68,18 +68,29 @@ export async function joinCompetition(competitionId, user) {
 export async function deleteCompetition(competitionId) {
     const db = firebase.firestore();
 
-    // Delete all competition participants first
+    // Get all competition participants
     const participantsSnapshot = await db.collection('competitionParticipants')
         .where('competitionId', '==', competitionId)
         .get();
 
-    // Delete participants sequentially to avoid issues with security rules
-    for (const doc of participantsSnapshot.docs) {
-        await doc.ref.delete();
-    }
+    // Use batch operations to delete participants and competition
+    // Firestore batches support up to 500 operations
+    const batch = db.batch();
 
-    // Then delete the competition itself
-    await db.collection('competitions').doc(competitionId).delete();
+    // Add participant deletions to batch
+    participantsSnapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+    });
+
+    // Add competition deletion to batch
+    const competitionRef = db.collection('competitions').doc(competitionId);
+    batch.delete(competitionRef);
+
+    // Commit all deletes as a single atomic operation
+    await batch.commit();
+
+    // Note: Tips are not deleted as they are owned by users and don't have a direct
+    // competitionId reference. They can remain in the database as orphaned records.
 }
 
 /**

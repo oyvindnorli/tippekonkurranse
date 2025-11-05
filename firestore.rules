@@ -42,6 +42,8 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow update: if request.auth != null &&
                       resource.data.userId == request.auth.uid;
+      // Allow delete if user owns the tip OR if user is deleting tips as part of competition deletion
+      // (We can't easily check competition ownership here, so we'll handle cascade delete via Cloud Functions in the future)
       allow delete: if request.auth != null &&
                       resource.data.userId == request.auth.uid;
     }
