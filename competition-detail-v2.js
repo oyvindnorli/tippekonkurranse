@@ -151,7 +151,12 @@ async function joinCompetition() {
     try {
         await competitionService.joinCompetition(competitionId, user);
         alert('Du er nå med i konkurransen!');
-        loadCompetition();
+
+        // Reset hasLoaded flag to allow reload
+        hasLoaded = false;
+
+        // Reload competition to show updated leaderboard
+        await loadCompetition();
     } catch (error) {
         console.error('Failed to join competition:', error);
         alert('Kunne ikke bli med i konkurransen. Prøv igjen.');
@@ -589,6 +594,7 @@ function createCompetitionMatchCard(match) {
 window.joinCompetition = joinCompetition;
 window.shareCompetition = shareCompetition;
 window.deleteCompetition = deleteCompetition;
+window.showUserTips = showUserTips;
 window.closeUserTipsModal = closeUserTipsModal;
 
 // Close modal when clicking outside
