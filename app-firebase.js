@@ -375,6 +375,9 @@ function applyLeagueFilter() {
     if (selectedLeagues.size === 0) {
         leagueFilteredMatches = [];
     } else {
+        console.log('🔍 Filtering matches. Selected leagues:', Array.from(selectedLeagues));
+        console.log('📊 Total matches before filter:', allMatches.length);
+
         leagueFilteredMatches = allMatches.filter(match => {
             // Check if match league ID matches any selected league
             // Support multiple field names: league (new), league_id, leagueId (old)
@@ -384,12 +387,19 @@ function applyLeagueFilter() {
 
             // If we have league ID, match directly
             if (matchLeagueId) {
-                return selectedLeagues.has(matchLeagueId);
+                const matches = selectedLeagues.has(matchLeagueId);
+                if (matches) {
+                    console.log(`✅ Match ${match.homeTeam} vs ${match.awayTeam} - League ID: ${matchLeagueId}`);
+                }
+                return matches;
             }
 
             // Fallback: match by league name (for older data format with string league)
             const matchLeague = typeof match.league === 'string' ? match.league : (match.league?.name || '');
-            if (!matchLeague) return false;
+            if (!matchLeague) {
+                console.log(`⚠️ No league info for: ${match.homeTeam} vs ${match.awayTeam}`);
+                return false;
+            }
 
             for (const leagueId of selectedLeagues) {
                 const leagueName = leagueNames[leagueId];
@@ -398,11 +408,15 @@ function applyLeagueFilter() {
                 if (matchLeague.includes(leagueName) ||
                     leagueName.includes(matchLeague) ||
                     matchLeague.toLowerCase().includes(leagueName.toLowerCase())) {
+                    console.log(`✅ Match ${match.homeTeam} vs ${match.awayTeam} - League: ${matchLeague} (matched by name)`);
                     return true;
                 }
             }
+            console.log(`❌ No match for: ${match.homeTeam} vs ${match.awayTeam} - League: ${matchLeague}`);
             return false;
         });
+
+        console.log('📊 Matches after filter:', leagueFilteredMatches.length);
     }
 
     // After applying league filter, apply date filter
