@@ -3063,6 +3063,22 @@ header h1 {
     background: #f0fdf4;
 }
 
+.tip-cell.exact-result {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    font-weight: 600;
+}
+
+.tip-cell.exact-result .tip-score {
+    color: #92400e;
+    font-weight: 700;
+}
+
+.tip-cell.exact-result .tip-points {
+    color: #92400e;
+    font-weight: 700;
+}
+
 .tip-score {
     font-weight: 600;
     font-size: 14px;

@@ -1,16 +1,16 @@
 // Import utility modules
-import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251106a';
-import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251106a';
-import { formatDate } from './js/utils/dateUtils.js?v=20251106a';
-import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251106a';
-import { ErrorHandler } from './js/utils/errorHandler.js?v=20251106a';
+import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251106b';
+import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251106b';
+import { formatDate } from './js/utils/dateUtils.js?v=20251106b';
+import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251106b';
+import { ErrorHandler } from './js/utils/errorHandler.js?v=20251106b';
 
 // Import services
-import * as competitionService from './js/services/competitionService.js?v=20251106a';
-import * as leaderboardService from './js/services/leaderboardService.js?v=20251106a';
+import * as competitionService from './js/services/competitionService.js?v=20251106b';
+import * as leaderboardService from './js/services/leaderboardService.js?v=20251106b';
 
 // Import renderers
-import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251106a';
+import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251106b';
 
 // Competition detail page
 let competitionId = null;
@@ -712,10 +712,19 @@ async function renderMatchesWithAllTips() {
             if (tip) {
                 const points = match.result ? calculateMatchPoints(tip, match) : 0;
                 const hasPoints = points > 0;
+
+                // Check if exact result (both scores match)
+                const isExactResult = match.result &&
+                    tip.homeScore === match.result.home &&
+                    tip.awayScore === match.result.away;
+
                 const pointsDisplay = match.result ? `<span class="tip-points ${hasPoints ? 'has-points' : ''}">${points.toFixed(1)}p</span>` : '';
 
+                // Apply different CSS class for exact result
+                const cellClass = isExactResult ? 'exact-result' : (hasPoints ? 'correct-tip' : '');
+
                 html += `
-                    <td class="tip-cell ${hasPoints ? 'correct-tip' : ''}">
+                    <td class="tip-cell ${cellClass}">
                         <div class="tip-score">${tip.homeScore} - ${tip.awayScore}</div>
                         ${pointsDisplay}
                     </td>
