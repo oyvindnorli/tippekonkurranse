@@ -283,47 +283,57 @@ async function showUserTips(userId, userName) {
                 </div>
         `;
 
-        // Group tips by match
-        const matchTips = [];
-        const userTipCount = tips.filter(t =>
-            Object.keys(matchResults).includes(String(t.matchId))
-        ).length;
-
-        Object.keys(matchResults).forEach(matchId => {
-            const match = matchResults[matchId];
-            const tip = tips.find(t => String(t.matchId) === String(matchId));
-
-            if (tip && match.result) {
-                const points = calculateMatchPoints(tip, match);
-                matchTips.push({
-                    match: match,
-                    tip: tip,
-                    points: points
-                });
-            }
+        // Show all matches that have started (not just matches with tips)
+        const startedMatches = competitionMatches.filter(match => {
+            const matchDate = new Date(match.commence_time || match.date);
+            return matchDate <= now;
         });
 
-        if (matchTips.length === 0) {
-            if (userTipCount > 0) {
-                modalContent += '<p style="color: #64748b; font-style: italic;">Ingen kamper har startet ennå. Tips vises når kampene er i gang.</p>';
-            } else {
-                modalContent += '<p style="color: #64748b;">Ingen tips funnet for denne konkurransen</p>';
-            }
+        if (startedMatches.length === 0) {
+            modalContent += '<p style="color: #64748b; font-style: italic;">Ingen kamper har startet ennå. Tips vises når kampene er i gang.</p>';
         } else {
-            matchTips.forEach(({ match, tip, points }) => {
-                const pointsColor = points > 0 ? 'color: #22c55e; font-weight: bold;' : 'color: #64748b;';
-                modalContent += `
-                    <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #f8fafc;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <strong>${match.homeTeam} vs ${match.awayTeam}</strong>
-                            <span style="${pointsColor}">${points.toFixed(1)} poeng</span>
+            startedMatches.forEach(match => {
+                const tip = tips.find(t => String(t.matchId) === String(match.id));
+
+                if (tip) {
+                    // User has tipped - show tip and points
+                    const points = calculateMatchPoints(tip, match);
+                    const pointsColor = points > 0 ? 'color: #22c55e; font-weight: bold;' : 'color: #64748b;';
+                    const resultText = match.result
+                        ? `<div>Resultat: <strong>${match.result.home} - ${match.result.away}</strong></div>`
+                        : '<div style="color: #64748b; font-style: italic;">Pågående kamp</div>';
+
+                    modalContent += `
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #f8fafc;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <strong>${match.homeTeam} vs ${match.awayTeam}</strong>
+                                <span style="${pointsColor}">${points.toFixed(1)} poeng</span>
+                            </div>
+                            <div style="display: flex; gap: 20px; font-size: 14px;">
+                                <div>Tips: <strong>${tip.homeScore} - ${tip.awayScore}</strong></div>
+                                ${resultText}
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 20px; font-size: 14px;">
-                            <div>Tips: <strong>${tip.homeScore} - ${tip.awayScore}</strong></div>
-                            <div>Resultat: <strong>${match.result.home} - ${match.result.away}</strong></div>
+                    `;
+                } else {
+                    // User has not tipped - show "Ikke tippet"
+                    const resultText = match.result
+                        ? `<div>Resultat: <strong>${match.result.home} - ${match.result.away}</strong></div>`
+                        : '<div style="color: #64748b; font-style: italic;">Pågående kamp</div>';
+
+                    modalContent += `
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #f8fafc;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <strong>${match.homeTeam} vs ${match.awayTeam}</strong>
+                                <span style="color: #94a3b8;">0 poeng</span>
+                            </div>
+                            <div style="display: flex; gap: 20px; font-size: 14px;">
+                                <div style="color: #94a3b8; font-style: italic;">Ikke tippet</div>
+                                ${resultText}
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             });
         }
 
