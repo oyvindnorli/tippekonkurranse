@@ -1215,8 +1215,11 @@ function toggleLeagueFilter(leagueId) {
     // Update UI
     populateLeagueFilter();
 
-    // Re-apply filters
-    applyLeagueFilter();
+    // Clear cache and reload matches with new leagues
+    if (footballApi && footballApi.clearCache) {
+        footballApi.clearCache();
+    }
+    loadMatches();
 }
 
 async function selectAllLeaguesFilter() {
@@ -1229,7 +1232,12 @@ async function selectAllLeaguesFilter() {
 
     await saveLeaguePreferences();
     populateLeagueFilter();
-    applyLeagueFilter();
+
+    // Clear cache and reload matches with new leagues
+    if (footballApi && footballApi.clearCache) {
+        footballApi.clearCache();
+    }
+    loadMatches();
 }
 
 async function deselectAllLeaguesFilter() {
@@ -1242,6 +1250,9 @@ async function deselectAllLeaguesFilter() {
 
     await saveLeaguePreferences();
     populateLeagueFilter();
+
+    // Clear matches since no leagues are selected
+    allMatches = [];
     applyLeagueFilter();
 }
 
