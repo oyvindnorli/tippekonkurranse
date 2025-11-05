@@ -220,34 +220,35 @@ async function loadCompetitions() {
             }
 
             // Categorize competition based on match completion status
-            if (start > now) {
-                // Competition hasn't started yet
+            const allMatchesCompleted = competitionMatches.length > 0 &&
+                competitionMatches.every(match => match.completed);
+
+            // Check if any match has started (is in the past or currently playing)
+            const anyMatchStarted = competitionMatches.some(match => {
+                const matchDate = new Date(match.commence_time || match.date);
+                return matchDate <= now;
+            });
+
+            if (allMatchesCompleted) {
+                // All matches are completed
+                completed.push(c);
+            } else if (!anyMatchStarted) {
+                // No matches have started yet - all are in the future
                 upcoming.push(c);
             } else {
-                // Competition has started - check if all matches are completed
-                const allMatchesCompleted = competitionMatches.length > 0 &&
-                    competitionMatches.every(match => match.completed);
+                // Some matches have started but not all are completed
+                active.push(c);
 
                 // Debug logging for active competitions
-                if (!allMatchesCompleted && competitionMatches.length > 0) {
-                    console.log(`⚠️ Competition "${c.name}" marked as ACTIVE:`);
-                    console.log(`  - Total matches: ${competitionMatches.length}`);
-                    console.log(`  - Completed: ${competitionMatches.filter(m => m.completed).length}`);
-                    console.log(`  - Has cachedMatches: ${c.cachedMatches ? 'YES' : 'NO'}`);
-                    const incomplete = competitionMatches.filter(m => !m.completed);
-                    if (incomplete.length > 0 && incomplete.length <= 3) {
-                        incomplete.forEach(m => {
-                            console.log(`  - Incomplete: ${m.homeTeam} vs ${m.awayTeam} (status: ${m.statusShort})`);
-                        });
-                    }
-                }
-
-                if (allMatchesCompleted) {
-                    // All matches are completed
-                    completed.push(c);
-                } else {
-                    // Some matches are still pending
-                    active.push(c);
+                console.log(`⚠️ Competition "${c.name}" marked as ACTIVE:`);
+                console.log(`  - Total matches: ${competitionMatches.length}`);
+                console.log(`  - Completed: ${competitionMatches.filter(m => m.completed).length}`);
+                console.log(`  - Has cachedMatches: ${c.cachedMatches ? 'YES' : 'NO'}`);
+                const incomplete = competitionMatches.filter(m => !m.completed);
+                if (incomplete.length > 0 && incomplete.length <= 3) {
+                    incomplete.forEach(m => {
+                        console.log(`  - Incomplete: ${m.homeTeam} vs ${m.awayTeam} (status: ${m.statusShort})`);
+                    });
                 }
             }
         });
