@@ -1,16 +1,16 @@
 // Import utility modules
-import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251105h';
-import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251105h';
-import { formatDate } from './js/utils/dateUtils.js?v=20251105h';
-import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251105h';
-import { ErrorHandler } from './js/utils/errorHandler.js?v=20251105h';
+import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251106a';
+import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251106a';
+import { formatDate } from './js/utils/dateUtils.js?v=20251106a';
+import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251106a';
+import { ErrorHandler } from './js/utils/errorHandler.js?v=20251106a';
 
 // Import services
-import * as competitionService from './js/services/competitionService.js?v=20251105h';
-import * as leaderboardService from './js/services/leaderboardService.js?v=20251105h';
+import * as competitionService from './js/services/competitionService.js?v=20251106a';
+import * as leaderboardService from './js/services/leaderboardService.js?v=20251106a';
 
 // Import renderers
-import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251105h';
+import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251106a';
 
 // Competition detail page
 let competitionId = null;
@@ -635,11 +635,13 @@ async function renderMatchesWithAllTips() {
         });
     });
 
-    // Fetch all tips for all participants
+    // Fetch all tips for all participants and get their display names
     const allTipsPromises = participants.map(async (p) => {
-        const tipsSnapshot = await db.collection('tips')
-            .where('userId', '==', p.userId)
-            .get();
+        // Fetch tips and displayName in parallel
+        const [tipsSnapshot, userDoc] = await Promise.all([
+            db.collection('tips').where('userId', '==', p.userId).get(),
+            db.collection('users').doc(p.userId).get()
+        ]);
 
         const tips = {};
         tipsSnapshot.forEach(doc => {
@@ -647,81 +649,87 @@ async function renderMatchesWithAllTips() {
             tips[tipData.matchId] = tipData;
         });
 
-        return { userId: p.userId, userName: p.userName, tips };
+        // Use displayName if available, otherwise fall back to userName (email)
+        const displayName = userDoc.exists && userDoc.data().displayName
+            ? userDoc.data().displayName
+            : p.userName;
+
+        return { userId: p.userId, userName: displayName, tips };
     });
 
     const participantTips = await Promise.all(allTipsPromises);
 
-    // Render table
-    let html = '';
-
-    competitionMatches.forEach(match => {
+    // Filter matches that have started
+    const startedMatches = competitionMatches.filter(match => {
         const matchDate = new Date(match.commence_time || match.date);
-        const hasStarted = matchDate <= now;
+        return matchDate <= now;
+    });
 
-        if (!hasStarted) return; // Skip matches that haven't started
+    if (startedMatches.length === 0) {
+        container.innerHTML = '<div class="info-message">Ingen kamper har startet ennå</div>';
+        return;
+    }
 
+    // Build table HTML
+    let html = '<div class="tips-table-wrapper"><table class="tips-comparison-table">';
+
+    // Header row with participant names
+    html += '<thead><tr><th class="match-column">Kamp</th>';
+    participantTips.forEach(({ userName }) => {
+        html += `<th class="participant-column">${userName}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    // One row per match
+    startedMatches.forEach(match => {
+        const matchDate = new Date(match.commence_time || match.date);
         const matchTime = matchDate.toLocaleString('no-NO', {
-            weekday: 'short',
             day: '2-digit',
             month: '2-digit',
             hour: '2-digit',
             minute: '2-digit'
         });
 
+        const resultText = match.result
+            ? `<div class="match-result">${match.result.home} - ${match.result.away}</div>`
+            : '<div class="match-live">Pågår</div>';
+
         html += `
-            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px; background: white;">
-                <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;">
-                    <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">
-                        ${match.homeTeam} vs ${match.awayTeam}
+            <tr>
+                <td class="match-column">
+                    <div class="match-info">
+                        <div class="match-teams">${match.homeTeam} - ${match.awayTeam}</div>
+                        <div class="match-time">${matchTime}</div>
+                        ${resultText}
                     </div>
-                    <div style="color: #64748b; font-size: 14px;">
-                        ${matchTime}
-                        ${match.result ? ` • Resultat: <strong>${match.result.home} - ${match.result.away}</strong>` : ' • Pågående'}
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;">
+                </td>
         `;
 
-        // Show tips from all participants
-        participantTips.forEach(({ userName, tips }) => {
+        // One cell per participant with their tip
+        participantTips.forEach(({ tips }) => {
             const tip = tips[match.id];
 
             if (tip) {
                 const points = match.result ? calculateMatchPoints(tip, match) : 0;
-                const pointsColor = points > 0 ? '#22c55e' : '#64748b';
-                const pointsDisplay = match.result ? `${points.toFixed(1)}p` : '';
+                const hasPoints = points > 0;
+                const pointsDisplay = match.result ? `<span class="tip-points ${hasPoints ? 'has-points' : ''}">${points.toFixed(1)}p</span>` : '';
 
                 html += `
-                    <div style="padding: 8px; background: #f8fafc; border-radius: 6px; border-left: 3px solid ${points > 0 ? '#22c55e' : '#e2e8f0'};">
-                        <div style="font-size: 13px; color: #475569; margin-bottom: 2px;">${userName}</div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: bold;">${tip.homeScore} - ${tip.awayScore}</span>
-                            <span style="color: ${pointsColor}; font-weight: bold; font-size: 12px;">${pointsDisplay}</span>
-                        </div>
-                    </div>
+                    <td class="tip-cell ${hasPoints ? 'correct-tip' : ''}">
+                        <div class="tip-score">${tip.homeScore} - ${tip.awayScore}</div>
+                        ${pointsDisplay}
+                    </td>
                 `;
             } else {
-                html += `
-                    <div style="padding: 8px; background: #f8fafc; border-radius: 6px; border-left: 3px solid #cbd5e1;">
-                        <div style="font-size: 13px; color: #475569; margin-bottom: 2px;">${userName}</div>
-                        <div style="color: #94a3b8; font-style: italic; font-size: 13px;">Ikke tippet</div>
-                    </div>
-                `;
+                html += `<td class="tip-cell no-tip">-</td>`;
             }
         });
 
-        html += `
-                </div>
-            </div>
-        `;
+        html += '</tr>';
     });
 
-    if (!html) {
-        container.innerHTML = '<div class="info-message">Ingen kamper har startet ennå</div>';
-    } else {
-        container.innerHTML = html;
-    }
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
 }
 
 // Create competition match card
