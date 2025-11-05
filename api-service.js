@@ -218,6 +218,18 @@ class FootballApiService {
                 roundsMap.get(round).push(match);
             });
 
+            // Debug logging for Serie A
+            if (leagueId === '135') {
+                console.log(`🔍 Serie A rounds:`, Array.from(roundsMap.keys()));
+                roundsMap.forEach((matches, roundKey) => {
+                    console.log(`   Round "${roundKey}": ${matches.length} matches`);
+                    matches.forEach(m => {
+                        const date = new Date(m.commence_time);
+                        console.log(`      ${m.homeTeam} vs ${m.awayTeam} - ${date.toLocaleString('no-NO')}`);
+                    });
+                });
+            }
+
             // Find the earliest round by date (not just first key)
             let earliestRound = null;
             let earliestDate = null;
