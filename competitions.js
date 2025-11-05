@@ -44,6 +44,9 @@ function init() {
             selectedLeagues = await loadUserLeaguePreferences(user.uid);
             console.log('✅ User preferences loaded for competitions:', Array.from(selectedLeagues));
 
+            // Check if user is admin and show create button
+            await checkAdminStatus(user.uid);
+
             loadCompetitions();
         } else {
             // Hide loading message when not logged in
@@ -54,6 +57,26 @@ function init() {
             window.location.href = 'index.html';
         }
     });
+}
+
+// Check if user is admin
+async function checkAdminStatus(userId) {
+    try {
+        const db = firebase.firestore();
+        const userDoc = await db.collection('users').doc(userId).get();
+
+        if (userDoc.exists && userDoc.data().isAdmin === true) {
+            const createBtn = document.getElementById('createCompetitionBtn');
+            if (createBtn) {
+                createBtn.style.display = 'inline-block';
+            }
+            console.log('✅ User is admin - showing create competition button');
+        } else {
+            console.log('ℹ️ User is not admin - hiding create competition button');
+        }
+    } catch (error) {
+        console.warn('⚠️ Could not check admin status:', error);
+    }
 }
 
 // Load all competitions
@@ -288,6 +311,14 @@ async function showCreateCompetitionModal() {
     const user = firebase.auth().currentUser;
     if (!user) {
         alert('Du må være innlogget for å opprette en konkurranse');
+        return;
+    }
+
+    // Double-check admin status
+    const db = firebase.firestore();
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (!userDoc.exists || userDoc.data().isAdmin !== true) {
+        alert('Kun administratorer kan opprette konkurranser');
         return;
     }
 
