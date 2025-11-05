@@ -268,8 +268,11 @@ async function showUserTips(userId, userName) {
             tips.push({ id: doc.id, ...doc.data() });
         });
 
-        // Fetch match results for competition
-        const matchResults = await fetchMatchResultsForCompetition();
+        // Build match results map from competition matches
+        const matchResults = {};
+        competitionMatches.forEach(match => {
+            matchResults[match.id] = match;
+        });
 
         // Build modal content
         let modalContent = `
