@@ -1,16 +1,16 @@
 // Import utility modules
-import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js';
-import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js';
-import { formatDate } from './js/utils/dateUtils.js';
-import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js';
-import { ErrorHandler } from './js/utils/errorHandler.js';
+import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251105g';
+import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251105g';
+import { formatDate } from './js/utils/dateUtils.js?v=20251105g';
+import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251105g';
+import { ErrorHandler } from './js/utils/errorHandler.js?v=20251105g';
 
 // Import services
-import * as competitionService from './js/services/competitionService.js';
-import * as leaderboardService from './js/services/leaderboardService.js';
+import * as competitionService from './js/services/competitionService.js?v=20251105g';
+import * as leaderboardService from './js/services/leaderboardService.js?v=20251105g';
 
 // Import renderers
-import * as competitionRenderer from './js/renderers/competitionRenderer.js';
+import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251105g';
 
 // Competition detail page
 let competitionId = null;
