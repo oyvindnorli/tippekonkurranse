@@ -1,16 +1,16 @@
 // Import utility modules
-import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251105g';
-import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251105g';
-import { formatDate } from './js/utils/dateUtils.js?v=20251105g';
-import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251105g';
-import { ErrorHandler } from './js/utils/errorHandler.js?v=20251105g';
+import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251105h';
+import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251105h';
+import { formatDate } from './js/utils/dateUtils.js?v=20251105h';
+import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251105h';
+import { ErrorHandler } from './js/utils/errorHandler.js?v=20251105h';
 
 // Import services
-import * as competitionService from './js/services/competitionService.js?v=20251105g';
-import * as leaderboardService from './js/services/leaderboardService.js?v=20251105g';
+import * as competitionService from './js/services/competitionService.js?v=20251105h';
+import * as leaderboardService from './js/services/leaderboardService.js?v=20251105h';
 
 // Import renderers
-import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251105g';
+import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251105h';
 
 // Competition detail page
 let competitionId = null;
@@ -620,18 +620,18 @@ async function renderMatchesWithAllTips() {
         return;
     }
 
-    // Get all participants
+    // Get all participants using flat structure (same as leaderboard)
     const db = firebase.firestore();
-    const participantsSnapshot = await db.collection('competitions')
-        .doc(competitionId)
-        .collection('participants')
+    const participantsSnapshot = await db.collection('competitionParticipants')
+        .where('competitionId', '==', competitionId)
         .get();
 
     const participants = [];
     participantsSnapshot.forEach(doc => {
+        const data = doc.data();
         participants.push({
-            userId: doc.id,
-            userName: doc.data().userName || 'Ukjent'
+            userId: data.userId,
+            userName: data.userName || 'Ukjent'
         });
     });
 
