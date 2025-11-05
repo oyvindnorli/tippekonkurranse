@@ -378,6 +378,19 @@ function applyLeagueFilter() {
         console.log('🔍 Filtering matches. Selected leagues:', Array.from(selectedLeagues));
         console.log('📊 Total matches before filter:', allMatches.length);
 
+        // Sample first 3 matches to see their structure
+        if (allMatches.length > 0) {
+            console.log('📝 Sample match data (first 3):');
+            allMatches.slice(0, 3).forEach((m, i) => {
+                console.log(`  ${i+1}. ${m.homeTeam} vs ${m.awayTeam}:`, {
+                    league: m.league,
+                    league_id: m.league_id,
+                    leagueId: m.leagueId,
+                    leagueName: m.leagueName
+                });
+            });
+        }
+
         leagueFilteredMatches = allMatches.filter(match => {
             // Check if match league ID matches any selected league
             // Support multiple field names: league (new), league_id, leagueId (old)
