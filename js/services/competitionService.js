@@ -68,20 +68,18 @@ export async function joinCompetition(competitionId, user) {
 export async function deleteCompetition(competitionId) {
     const db = firebase.firestore();
 
-    // Delete all competition participants
+    // Delete all competition participants first
     const participantsSnapshot = await db.collection('competitionParticipants')
         .where('competitionId', '==', competitionId)
         .get();
 
-    const deletePromises = [];
-    participantsSnapshot.forEach(doc => {
-        deletePromises.push(doc.ref.delete());
-    });
+    // Delete participants sequentially to avoid issues with security rules
+    for (const doc of participantsSnapshot.docs) {
+        await doc.ref.delete();
+    }
 
-    // Delete the competition itself
-    deletePromises.push(db.collection('competitions').doc(competitionId).delete());
-
-    await Promise.all(deletePromises);
+    // Then delete the competition itself
+    await db.collection('competitions').doc(competitionId).delete();
 }
 
 /**
