@@ -94,6 +94,11 @@ async function loadCompetition() {
         await loadLeaderboard();
         console.log(`⏱️ Load leaderboard: ${((performance.now() - t5) / 1000).toFixed(2)}s`);
 
+        // Render matches with all tips table
+        const t6 = performance.now();
+        await renderMatchesWithAllTips();
+        console.log(`⏱️ Render matches with tips: ${((performance.now() - t6) / 1000).toFixed(2)}s`);
+
         loadingMessage.style.display = 'none';
         detailsSection.style.display = 'block';
 
@@ -596,6 +601,127 @@ async function loadCompetitionMatches() {
 // Render competition matches
 function renderCompetitionMatches(matches) {
     competitionRenderer.renderCompetitionMatches(matches, userTips, calculateMatchPoints, footballApi);
+}
+
+// Render matches with all participants' tips
+async function renderMatchesWithAllTips() {
+    const container = document.getElementById('matchesWithTipsTable');
+    if (!container) return;
+
+    // Check if at least one match has started
+    const now = new Date();
+    const anyMatchStarted = competitionMatches.some(match => {
+        const matchDate = new Date(match.commence_time || match.date);
+        return matchDate <= now;
+    });
+
+    if (!anyMatchStarted) {
+        container.innerHTML = '<div class="info-message">Tips vises når første kamp har startet</div>';
+        return;
+    }
+
+    // Get all participants
+    const db = firebase.firestore();
+    const participantsSnapshot = await db.collection('competitions')
+        .doc(competitionId)
+        .collection('participants')
+        .get();
+
+    const participants = [];
+    participantsSnapshot.forEach(doc => {
+        participants.push({
+            userId: doc.id,
+            userName: doc.data().userName || 'Ukjent'
+        });
+    });
+
+    // Fetch all tips for all participants
+    const allTipsPromises = participants.map(async (p) => {
+        const tipsSnapshot = await db.collection('tips')
+            .where('userId', '==', p.userId)
+            .get();
+
+        const tips = {};
+        tipsSnapshot.forEach(doc => {
+            const tipData = doc.data();
+            tips[tipData.matchId] = tipData;
+        });
+
+        return { userId: p.userId, userName: p.userName, tips };
+    });
+
+    const participantTips = await Promise.all(allTipsPromises);
+
+    // Render table
+    let html = '';
+
+    competitionMatches.forEach(match => {
+        const matchDate = new Date(match.commence_time || match.date);
+        const hasStarted = matchDate <= now;
+
+        if (!hasStarted) return; // Skip matches that haven't started
+
+        const matchTime = matchDate.toLocaleString('no-NO', {
+            weekday: 'short',
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        html += `
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px; background: white;">
+                <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;">
+                    <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">
+                        ${match.homeTeam} vs ${match.awayTeam}
+                    </div>
+                    <div style="color: #64748b; font-size: 14px;">
+                        ${matchTime}
+                        ${match.result ? ` • Resultat: <strong>${match.result.home} - ${match.result.away}</strong>` : ' • Pågående'}
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;">
+        `;
+
+        // Show tips from all participants
+        participantTips.forEach(({ userName, tips }) => {
+            const tip = tips[match.id];
+
+            if (tip) {
+                const points = match.result ? calculateMatchPoints(tip, match) : 0;
+                const pointsColor = points > 0 ? '#22c55e' : '#64748b';
+                const pointsDisplay = match.result ? `${points.toFixed(1)}p` : '';
+
+                html += `
+                    <div style="padding: 8px; background: #f8fafc; border-radius: 6px; border-left: 3px solid ${points > 0 ? '#22c55e' : '#e2e8f0'};">
+                        <div style="font-size: 13px; color: #475569; margin-bottom: 2px;">${userName}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: bold;">${tip.homeScore} - ${tip.awayScore}</span>
+                            <span style="color: ${pointsColor}; font-weight: bold; font-size: 12px;">${pointsDisplay}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div style="padding: 8px; background: #f8fafc; border-radius: 6px; border-left: 3px solid #cbd5e1;">
+                        <div style="font-size: 13px; color: #475569; margin-bottom: 2px;">${userName}</div>
+                        <div style="color: #94a3b8; font-style: italic; font-size: 13px;">Ikke tippet</div>
+                    </div>
+                `;
+            }
+        });
+
+        html += `
+                </div>
+            </div>
+        `;
+    });
+
+    if (!html) {
+        container.innerHTML = '<div class="info-message">Ingen kamper har startet ennå</div>';
+    } else {
+        container.innerHTML = html;
+    }
 }
 
 // Create competition match card
