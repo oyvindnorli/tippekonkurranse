@@ -57,8 +57,14 @@ export function createCompetitionCard(competition) {
 
         if (competition.selectedRounds?.championsLeague) {
             const rounds = competition.selectedRounds.championsLeague;
-            const roundText = rounds.map(r => r.replace('League Stage - ', '').replace('Matchday', 'MD')).join(', ');
+            const roundText = rounds.map(r => r.replace('League Stage - ', 'Runde ').replace('Matchday', 'MD')).join(', ');
             parts.push(`CL (${roundText})`);
+        }
+
+        if (competition.selectedRounds?.europaLeague) {
+            const rounds = competition.selectedRounds.europaLeague;
+            const roundText = rounds.map(r => r.replace('League Stage - ', 'Runde ').replace('Matchday', 'MD')).join(', ');
+            parts.push(`EL (${roundText})`);
         }
 
         leaguesList = parts.join(' + ');
