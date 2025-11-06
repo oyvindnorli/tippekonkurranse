@@ -373,18 +373,8 @@ class FootballApiService {
                     foundAnyOdds = true;
                 }
 
-                // Early exit: if we've made 2+ calls and found no odds, API likely has none
-                if (oddsCallCount >= 2 && !foundAnyOdds) {
-                    console.log('⚡ No odds found after 2 calls, skipping rest');
-                    break;
-                }
-
-                await new Promise(resolve => setTimeout(resolve, 100)); // Reduced delay
-            }
-
-            // Break outer loop too if we're skipping
-            if (oddsCallCount >= 2 && !foundAnyOdds) {
-                break;
+                // Small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
         }
 
