@@ -532,6 +532,16 @@ async function loadCompetitionMatches() {
                         return roundMatches; // Return immediately for CL matches
                     }
 
+                    // Europa League round filtering
+                    const isEuropaLeague = (typeof match.league === 'number' && match.league === LEAGUE_IDS.EUROPA_LEAGUE) ||
+                                          (typeof match.league === 'string' && match.league.includes('Europa League'));
+                    if (competition.selectedRounds.europaLeague && competition.selectedRounds.europaLeague.length > 0 && isEuropaLeague) {
+                        if (match.round) {
+                            roundMatches = competition.selectedRounds.europaLeague.includes(match.round);
+                        }
+                        return roundMatches; // Return immediately for EL matches
+                    }
+
                     // If we have selectedRounds but this match doesn't match any, exclude it
                     return false;
                 }
