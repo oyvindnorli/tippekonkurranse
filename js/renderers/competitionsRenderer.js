@@ -5,6 +5,7 @@
 
 import { LEAGUE_NAMES_SIMPLE } from '../utils/leagueConfig.js';
 import { formatDate } from '../utils/dateUtils.js';
+import { cleanCompetitionName } from '../utils/stringUtils.js';
 
 /**
  * Render competitions list
@@ -84,14 +85,9 @@ export function createCompetitionCard(competition) {
             : 'Alle ligaer';
     }
 
-    // Clean up competition name - remove duplicate "League" and format nicely
-    let displayName = competition.name;
-    displayName = displayName.replace(/League Stage - (\d+)/g, '(Runde $1)');
-    displayName = displayName.replace(/Matchday (\d+)/g, '(MD $1)');
-
     card.innerHTML = `
         <div class="competition-header">
-            <h3 class="competition-name">${displayName}</h3>
+            <h3 class="competition-name">${cleanCompetitionName(competition.name)}</h3>
             ${isCreator ? '<span class="creator-badge">👑 Opprettet av deg</span>' : ''}
         </div>
         <p class="competition-description">${competition.description || 'Ingen beskrivelse'}</p>

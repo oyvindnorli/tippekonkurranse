@@ -6,6 +6,7 @@
 import { LEAGUE_NAMES_SIMPLE } from '../utils/leagueConfig.js';
 import { calculatePoints } from '../utils/matchUtils.js';
 import { formatDate } from '../utils/dateUtils.js';
+import { cleanCompetitionName } from '../utils/stringUtils.js';
 
 /**
  * Render competition details
@@ -14,12 +15,7 @@ import { formatDate } from '../utils/dateUtils.js';
  * @param {Array} competitionMatches - All matches in competition
  */
 export function renderCompetitionDetails(competition, allMatchesCompleted, competitionMatches) {
-    // Clean up competition name - remove duplicate "League" and format nicely
-    let displayName = competition.name;
-    displayName = displayName.replace(/League Stage - (\d+)/g, '(Runde $1)');
-    displayName = displayName.replace(/Matchday (\d+)/g, '(MD $1)');
-
-    document.getElementById('competitionName').textContent = displayName;
+    document.getElementById('competitionName').textContent = cleanCompetitionName(competition.name);
     document.getElementById('competitionDescription').textContent = competition.description || 'Ingen beskrivelse';
     document.getElementById('creatorName').textContent = competition.creatorName;
 
