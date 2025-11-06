@@ -12,6 +12,8 @@ const LEAGUE_NAME_TO_ID = {
     'Premier League': 39,
     'UEFA Champions League': 2,
     'Champions League': 2,
+    'UEFA Europa League': 3,
+    'Europa League': 3,
     'Serie A': 135,
     'EFL Cup': 48,
     'Carabao Cup': 48
@@ -424,6 +426,55 @@ export async function updateMatchResults(matches) {
  * Delete ALL matches from Firestore (fresh start)
  * @returns {Promise<number>} Number of matches deleted
  */
+/**
+ * Delete Europa League matches from Firestore (to refetch with odds)
+ * @returns {Promise<number>} Number of matches deleted
+ */
+export async function deleteEuropaLeagueMatches() {
+    try {
+        const db = firebase.firestore();
+        const snapshot = await db.collection('matches')
+            .where('league', '==', 3) // Europa League ID
+            .get();
+
+        console.log(`🗑️ Deleting ${snapshot.size} Europa League matches from Firestore...`);
+
+        if (snapshot.empty) {
+            console.log('ℹ️ No Europa League matches to delete');
+            return 0;
+        }
+
+        let deletedCount = 0;
+        const BATCH_SIZE = 500;
+
+        // Delete in batches (Firestore limit is 500 per batch)
+        for (let i = 0; i < snapshot.docs.length; i += BATCH_SIZE) {
+            const batch = db.batch();
+            const batchDocs = snapshot.docs.slice(i, i + BATCH_SIZE);
+
+            console.log(`  ⏳ Deleting batch ${Math.floor(i/BATCH_SIZE) + 1}...`);
+
+            batchDocs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+
+            try {
+                await batch.commit();
+                deletedCount += batchDocs.length;
+                console.log(`  ✅ Deleted ${deletedCount}/${snapshot.size} Europa League matches`);
+            } catch (batchError) {
+                console.error('  ❌ Batch delete failed:', batchError);
+            }
+        }
+
+        console.log(`🎉 Successfully deleted ${deletedCount} Europa League matches`);
+        return deletedCount;
+    } catch (error) {
+        console.error('❌ Error deleting Europa League matches:', error);
+        return 0;
+    }
+}
+
 export async function deleteAllMatches() {
     try {
         const db = firebase.firestore();

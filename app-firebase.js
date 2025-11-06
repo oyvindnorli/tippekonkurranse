@@ -1440,10 +1440,27 @@ window.deleteAllMatchesFromFirestore = async function() {
     await refreshData();
 };
 
+// Delete Europa League matches and refetch with odds
+window.deleteEuropaLeagueMatches = async function() {
+    console.log('🌟 Sletter Europa League-kamper fra Firestore...');
+    const { deleteEuropaLeagueMatches } = await import('./js/utils/matchCache.js');
+    const deleted = await deleteEuropaLeagueMatches();
+    console.log(`✅ Slettet ${deleted} Europa League-kamper.`);
+    console.log('🔄 Refresher data fra API for å hente kamper med odds...');
+
+    // Clear localStorage cache too
+    localStorage.removeItem('footballMatches');
+    localStorage.removeItem('footballMatchesTimestamp');
+    localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES);
+    localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES_TIME);
+
+    await refreshData();
+};
+
 // Add button to simulate results for testing (can be removed later)
 window.addEventListener('DOMContentLoaded', () => {
     init();
 
     // Add debug functions in console
-    console.log('🔥 Tippekonkurranse loaded | simulateResult(matchId) | refreshData() | cleanupFirestore() | convertOldMatches() | deleteAllMatchesFromFirestore()');
+    console.log('🔥 Tippekonkurranse loaded | simulateResult(matchId) | refreshData() | cleanupFirestore() | convertOldMatches() | deleteAllMatchesFromFirestore() | deleteEuropaLeagueMatches()');
 });
