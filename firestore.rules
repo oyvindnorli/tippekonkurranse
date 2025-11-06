@@ -52,10 +52,17 @@ service cloud.firestore {
     match /matches/{matchId} {
       allow read: if true;
       allow create: if request.auth != null;
-      // Only allow updating result/completed fields, never odds
-      allow update: if request.auth != null &&
+      // Allow updating result/completed fields
+      // ALSO allow odds update if current odds are null (e.g. Europa League fix)
+      allow update: if request.auth != null && (
+                      // Allow if not changing protected fields
                       (!request.resource.data.diff(resource.data).affectedKeys()
-                        .hasAny(['odds', 'oddsLockedAt', 'homeTeam', 'awayTeam', 'league']));
+                        .hasAny(['odds', 'oddsLockedAt', 'homeTeam', 'awayTeam', 'league']))
+                      ||
+                      // OR allow odds/oddsLockedAt update if current odds are null (missing odds scenario)
+                      (resource.data.odds == null &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['odds', 'oddsLockedAt', 'result', 'completed', 'lastUpdated']))
+                    );
       // Only admin users can delete matches (for cache cleanup)
       allow delete: if request.auth != null &&
                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
