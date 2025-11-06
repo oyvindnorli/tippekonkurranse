@@ -39,8 +39,14 @@ export function renderCompetitionDetails(competition, allMatchesCompleted, compe
 
         if (competition.selectedRounds?.championsLeague) {
             const rounds = competition.selectedRounds.championsLeague;
-            const roundText = rounds.map(r => r.replace('League Stage - ', '').replace('Matchday', 'MD')).join(', ');
+            const roundText = rounds.map(r => r.replace('League Stage - ', 'Runde ').replace('Matchday', 'MD')).join(', ');
             parts.push(`Champions League (${roundText})`);
+        }
+
+        if (competition.selectedRounds?.europaLeague) {
+            const rounds = competition.selectedRounds.europaLeague;
+            const roundText = rounds.map(r => r.replace('League Stage - ', 'Runde ').replace('Matchday', 'MD')).join(', ');
+            parts.push(`Europa League (${roundText})`);
         }
 
         leaguesText = parts.join(' + ');
