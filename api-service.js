@@ -395,6 +395,14 @@ class FootballApiService {
 
         console.log(`💰 Odds: ${successCount} fetched${defaultCount > 0 ? `, ${defaultCount} missing` : ''}`);
 
+        // Log all fixtures with IDs and odds status for debugging
+        console.table(fixtures.map(f => ({
+            id: f.id,
+            match: `${f.homeTeam} - ${f.awayTeam}`,
+            hasOdds: f.odds ? '✅' : '❌',
+            date: f.commence_time ? new Date(f.commence_time).toLocaleDateString('no-NO') : 'N/A'
+        })));
+
         // Save to Firestore for consistent odds across all users
         try {
             const { saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
