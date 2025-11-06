@@ -7,6 +7,7 @@
 export const LEAGUE_IDS = {
     PREMIER_LEAGUE: 39,
     CHAMPIONS_LEAGUE: 2,
+    EUROPA_LEAGUE: 3,
     LA_LIGA: 140,
     BUNDESLIGA: 78,
     SERIE_A: 135,

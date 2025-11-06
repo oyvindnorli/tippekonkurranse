@@ -7,6 +7,7 @@
 export const LEAGUE_NAMES = {
     1: '🏆 World Cup',
     2: '⭐ Champions League',
+    3: '🌟 Europa League',
     39: '⚽ Premier League',
     48: '🏆 EFL Cup',
     78: '🇩🇪 Bundesliga',
@@ -18,6 +19,7 @@ export const LEAGUE_NAMES = {
 export const LEAGUE_NAMES_SIMPLE = {
     1: 'World Cup',
     2: 'UEFA Champions League',
+    3: 'UEFA Europa League',
     39: 'Premier League',
     48: 'EFL Cup',
     78: 'Bundesliga',
