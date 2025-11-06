@@ -1,16 +1,16 @@
 // Import utility modules
-import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251106c';
-import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251106c';
-import { formatDate } from './js/utils/dateUtils.js?v=20251106c';
-import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251106c';
-import { ErrorHandler } from './js/utils/errorHandler.js?v=20251106c';
+import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251106d';
+import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251106d';
+import { formatDate } from './js/utils/dateUtils.js?v=20251106d';
+import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251106d';
+import { ErrorHandler } from './js/utils/errorHandler.js?v=20251106d';
 
 // Import services
-import * as competitionService from './js/services/competitionService.js?v=20251106c';
-import * as leaderboardService from './js/services/leaderboardService.js?v=20251106c';
+import * as competitionService from './js/services/competitionService.js?v=20251106d';
+import * as leaderboardService from './js/services/leaderboardService.js?v=20251106d';
 
 // Import renderers
-import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251106c';
+import * as competitionRenderer from './js/renderers/competitionRenderer.js?v=20251106d';
 
 // Competition detail page
 let competitionId = null;
@@ -18,6 +18,7 @@ let competition = null;
 let userTips = [];
 let competitionMatches = []; // Store competition matches globally
 let hasLoaded = false; // Track if we've already loaded the competition
+let refreshInterval = null; // Auto-refresh interval for live matches
 
 // Performance tracking
 const pageLoadStart = performance.now();
@@ -98,6 +99,9 @@ async function loadCompetition() {
         const t6 = performance.now();
         await renderMatchesWithAllTips();
         console.log(`⏱️ Render matches with tips: ${((performance.now() - t6) / 1000).toFixed(2)}s`);
+
+        // Setup auto-refresh for live matches
+        setupAutoRefresh();
 
         loadingMessage.style.display = 'none';
         detailsSection.style.display = 'block';
@@ -386,10 +390,27 @@ async function loadCompetitionMatches() {
         const db = firebase.firestore();
         competitionMatches = []; // Reset global variable
 
-        // Check if competition has cached matches
+        // Check if competition has cached matches AND no live matches
+        const shouldFetchFreshData = !competition.cachedMatches || competition.cachedMatches.length === 0;
+
         if (competition.cachedMatches && competition.cachedMatches.length > 0) {
-            competitionMatches = competition.cachedMatches;
-        } else {
+            // Use cached matches, but check if we need fresh data for live matches
+            const now = new Date();
+            const hasLiveMatches = competition.cachedMatches.some(match => {
+                const matchDate = new Date(match.commence_time || match.date);
+                const matchEndTime = new Date(matchDate.getTime() + 120 * 60000); // 120 min after start
+                return matchDate <= now && now <= matchEndTime && !match.completed;
+            });
+
+            if (hasLiveMatches) {
+                console.log('🔴 Live matches detected, fetching fresh data...');
+                // Don't use cached data, fetch fresh
+            } else {
+                competitionMatches = competition.cachedMatches;
+            }
+        }
+
+        if (competitionMatches.length === 0) {
             let uniqueMatches;
 
             // For round-based competitions, fetch a wider range to include future rounds
@@ -417,6 +438,8 @@ async function loadCompetitionMatches() {
                             if (recentData.response) {
                                 // Convert API format to our format
                                 recentData.response.forEach(f => {
+                                    // Include live scores for ongoing matches
+                                    const hasScore = f.goals.home !== null && f.goals.away !== null;
                                     allFixtures.push({
                                         id: f.fixture.id,
                                         league: leagueId,
@@ -426,11 +449,12 @@ async function loadCompetitionMatches() {
                                         commence_time: f.fixture.date,
                                         date: f.fixture.date,
                                         completed: f.fixture.status.short === 'FT',
-                                        result: f.fixture.status.short === 'FT' ? {
+                                        result: hasScore ? {
                                             home: f.goals.home,
                                             away: f.goals.away
                                         } : null,
-                                        statusShort: f.fixture.status.short
+                                        statusShort: f.fixture.status.short,
+                                        elapsed: f.fixture.status.elapsed || null
                                     });
                                 });
                             }
@@ -443,6 +467,8 @@ async function loadCompetitionMatches() {
                             console.log(`   Upcoming fixtures for league ${leagueId}:`, upcomingData.response?.length || 0);
                             if (upcomingData.response) {
                                 upcomingData.response.forEach(f => {
+                                    // Include live scores for ongoing matches
+                                    const hasScore = f.goals.home !== null && f.goals.away !== null;
                                     allFixtures.push({
                                         id: f.fixture.id,
                                         league: leagueId,
@@ -452,11 +478,12 @@ async function loadCompetitionMatches() {
                                         commence_time: f.fixture.date,
                                         date: f.fixture.date,
                                         completed: f.fixture.status.short === 'FT',
-                                        result: f.fixture.status.short === 'FT' ? {
+                                        result: hasScore ? {
                                             home: f.goals.home,
                                             away: f.goals.away
                                         } : null,
-                                        statusShort: f.fixture.status.short
+                                        statusShort: f.fixture.status.short,
+                                        elapsed: f.fixture.status.elapsed || null
                                     });
                                 });
                             }
@@ -721,9 +748,17 @@ async function renderMatchesWithAllTips() {
 
         // One row per match on this date
         matches.forEach(match => {
-            const resultText = match.result
-                ? `<div class="match-result">${match.result.home} - ${match.result.away}</div>`
-                : '<div class="match-live">Pågår</div>';
+            // Show live score if available (even if not completed)
+            let resultText;
+            if (match.result && match.result.home !== null && match.result.away !== null) {
+                // Has score (live or completed)
+                const isLive = !match.completed;
+                const liveIndicator = isLive && match.elapsed ? ` <span class="live-minutes">${match.elapsed}'</span>` : '';
+                resultText = `<div class="match-result ${isLive ? 'match-live' : ''}">${match.result.home} - ${match.result.away}${liveIndicator}</div>`;
+            } else {
+                // No score yet
+                resultText = '<div class="match-live">Pågår</div>';
+            }
 
             html += `
                 <tr>
@@ -740,15 +775,21 @@ async function renderMatchesWithAllTips() {
                 const tip = tips[match.id];
 
                 if (tip) {
-                    const points = match.result ? calculateMatchPoints(tip, match) : 0;
+                    // Calculate points for both live and completed matches
+                    const hasResult = match.result && match.result.home !== null && match.result.away !== null;
+                    const points = hasResult ? calculateMatchPoints(tip, match) : 0;
                     const hasPoints = points > 0;
 
                     // Check if exact result (both scores match)
-                    const isExactResult = match.result &&
+                    const isExactResult = hasResult &&
                         tip.homeScore === match.result.home &&
                         tip.awayScore === match.result.away;
 
-                    const pointsDisplay = match.result ? `<span class="tip-points ${hasPoints ? 'has-points' : ''}">${points.toFixed(1)}p</span>` : '';
+                    // Show points for both live and completed matches
+                    const isLive = hasResult && !match.completed;
+                    const pointsDisplay = hasResult
+                        ? `<span class="tip-points ${hasPoints ? 'has-points' : ''} ${isLive ? 'live-points' : ''}">${points.toFixed(1)}p ${isLive ? '⚡' : ''}</span>`
+                        : '';
 
                     // Apply different CSS class for exact result
                     const cellClass = isExactResult ? 'exact-result' : (hasPoints ? 'correct-tip' : '');
@@ -776,6 +817,61 @@ async function renderMatchesWithAllTips() {
 function createCompetitionMatchCard(match) {
     return competitionRenderer.createCompetitionMatchCard(match, userTips, calculateMatchPoints, footballApi);
 }
+
+// Auto-refresh for live matches
+function setupAutoRefresh() {
+    // Clear any existing interval
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+
+    // Check if there are any live matches
+    const now = new Date();
+    const hasLiveMatches = competitionMatches.some(match => {
+        const matchDate = new Date(match.commence_time || match.date);
+        const matchEndTime = new Date(matchDate.getTime() + 120 * 60000); // 120 min after start
+        return matchDate <= now && now <= matchEndTime && !match.completed;
+    });
+
+    const liveIndicator = document.getElementById('liveIndicator');
+
+    if (hasLiveMatches) {
+        console.log('🔴 Live matches detected - setting up auto-refresh (every 60 seconds)');
+
+        // Show live indicator
+        if (liveIndicator) {
+            liveIndicator.style.display = 'block';
+        }
+
+        // Refresh every 60 seconds
+        refreshInterval = setInterval(async () => {
+            console.log('🔄 Auto-refreshing live scores...');
+
+            // Reload matches and leaderboard
+            await loadCompetitionMatches();
+            await loadLeaderboard();
+            await renderMatchesWithAllTips();
+
+            // Re-check if we still have live matches
+            setupAutoRefresh();
+        }, 60000); // 60 seconds
+    } else {
+        console.log('✅ No live matches - auto-refresh not needed');
+
+        // Hide live indicator
+        if (liveIndicator) {
+            liveIndicator.style.display = 'none';
+        }
+    }
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+});
 
 // Export functions to window for onclick handlers
 window.joinCompetition = joinCompetition;

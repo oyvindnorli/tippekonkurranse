@@ -3118,6 +3118,40 @@ header h1 {
     font-weight: 700;
 }
 
+/* Live match styling */
+.match-result.match-live {
+    color: #ef4444;
+    font-weight: 700;
+    animation: pulse-live 2s ease-in-out infinite;
+}
+
+.live-minutes {
+    display: inline-block;
+    background: #ef4444;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+    animation: pulse-live 2s ease-in-out infinite;
+}
+
+.tip-points.live-points {
+    color: #ef4444;
+    font-weight: 700;
+    animation: pulse-live 2s ease-in-out infinite;
+}
+
+@keyframes pulse-live {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
     .tips-comparison-table {
