@@ -380,7 +380,8 @@ class FootballApiService {
 
         console.log(`📊 Bulk fetch complete. Found odds for ${Object.keys(allOddsMap).length} fixtures`);
 
-        // Assign odds to fixtures (no individual fallback - too slow)
+        // Assign odds to fixtures from bulk fetch
+        const missingOddsFixtures = [];
         for (let i = 0; i < fixtures.length; i++) {
             const fixture = fixtures[i];
 
@@ -390,10 +391,39 @@ class FootballApiService {
             } else {
                 fixture.odds = null;
                 defaultCount++;
+                missingOddsFixtures.push(fixture);
             }
         }
 
-        console.log(`💰 Odds: ${successCount} fetched${defaultCount > 0 ? `, ${defaultCount} missing` : ''}`);
+        console.log(`💰 Bulk odds: ${successCount} fetched${defaultCount > 0 ? `, ${defaultCount} missing` : ''}`);
+
+        // Fallback: fetch missing odds individually (only if we have missing fixtures)
+        if (missingOddsFixtures.length > 0 && missingOddsFixtures.length <= 10) {
+            console.log(`🔄 Fetching ${missingOddsFixtures.length} missing odds individually...`);
+            let fallbackSuccess = 0;
+
+            for (const fixture of missingOddsFixtures) {
+                try {
+                    const fixtureOdds = await this.fetchOddsForFixture(fixture.id);
+                    if (fixtureOdds) {
+                        fixture.odds = fixtureOdds;
+                        fallbackSuccess++;
+                        successCount++;
+                        defaultCount--;
+                    }
+                    // Small delay to avoid rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                } catch (error) {
+                    console.warn(`⚠️ Failed to fetch odds for fixture ${fixture.id}`);
+                }
+            }
+
+            console.log(`✅ Fallback fetch: ${fallbackSuccess} additional odds found`);
+        } else if (missingOddsFixtures.length > 10) {
+            console.log(`⚠️ Too many missing odds (${missingOddsFixtures.length}), skipping individual fetch`);
+        }
+
+        console.log(`💰 Total odds: ${successCount} fetched${defaultCount > 0 ? `, ${defaultCount} missing` : ''}`);
 
         // Log all fixtures with IDs and odds status for debugging
         console.table(fixtures.map(f => ({
