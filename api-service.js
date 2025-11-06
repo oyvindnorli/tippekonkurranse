@@ -497,7 +497,7 @@ class FootballApiService {
     }
 
     /**
-     * Fetch available rounds for Premier League and Champions League
+     * Fetch available rounds for Premier League, Champions League and Europa League
      * Returns upcoming and recent rounds for competition creation
      */
     async fetchAvailableRounds() {
@@ -509,6 +509,10 @@ class FootballApiService {
                     { value: 12, label: 'Runde 12', status: 'upcoming' }
                 ],
                 championsLeague: [
+                    { value: 'League Stage - Matchday 3', label: 'Matchday 3', status: 'upcoming' },
+                    { value: 'League Stage - Matchday 4', label: 'Matchday 4', status: 'upcoming' }
+                ],
+                europaLeague: [
                     { value: 'League Stage - Matchday 3', label: 'Matchday 3', status: 'upcoming' },
                     { value: 'League Stage - Matchday 4', label: 'Matchday 4', status: 'upcoming' }
                 ]
@@ -526,10 +530,11 @@ class FootballApiService {
 
             const plRoundsMap = new Map(); // Map<roundNumber, { fixtures: [...], hasStarted: boolean }>
             const clRoundsMap = new Map(); // Map<roundString, { fixtures: [...], hasStarted: boolean }>
+            const elRoundsMap = new Map(); // Map<roundString, { fixtures: [...], hasStarted: boolean }>
 
             // Fetch fixtures for both past (to find started matches) and future (to find upcoming rounds)
             // We need a wide range to capture all matches in each round
-            for (const leagueId of [39, 2]) { // Only PL and CL for round-based competitions
+            for (const leagueId of [39, 2, 3]) { // PL, CL and EL for round-based competitions
                 // Fetch recent completed matches (last 7 days)
                 const recentUrl = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&last=20`;
 
@@ -582,6 +587,15 @@ class FootballApiService {
                         clRoundsMap.get(round).fixtures.push(fixture);
                         if (hasStarted) {
                             clRoundsMap.get(round).hasStarted = true;
+                        }
+                    } else if (leagueId === 3) {
+                        // Europa League
+                        if (!elRoundsMap.has(round)) {
+                            elRoundsMap.set(round, { fixtures: [], hasStarted: false });
+                        }
+                        elRoundsMap.get(round).fixtures.push(fixture);
+                        if (hasStarted) {
+                            elRoundsMap.get(round).hasStarted = true;
                         }
                     }
                 });
@@ -650,8 +664,35 @@ class FootballApiService {
                     };
                 });
 
+            const elRoundsArray = Array.from(elRoundsMap.entries())
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .filter(([round, data]) => {
+                    // Only include rounds that haven't started yet
+                    return !data.hasStarted;
+                })
+                .slice(0, 10)
+                .map(([round, data]) => {
+                    // Find earliest and latest fixture dates
+                    const dates = data.fixtures.map(f => new Date(f.fixture.date));
+                    const startDate = new Date(Math.min(...dates));
+                    const endDate = new Date(Math.max(...dates));
+
+                    // Extract matchday number from "League Stage - Matchday 4"
+                    const match = round.match(/Matchday (\d+)/);
+                    const label = match ? `Runde ${match[1]}` : round;
+
+                    return {
+                        value: round,
+                        label: label,
+                        status: 'upcoming',
+                        startDate: startDate,
+                        endDate: endDate,
+                        dateRange: this.formatDateRange(startDate, endDate)
+                    };
+                });
+
             // Debug logging
-            console.log('✅ Found available rounds (not started):', { pl: plRoundsArray.length, cl: clRoundsArray.length });
+            console.log('✅ Found available rounds (not started):', { pl: plRoundsArray.length, cl: clRoundsArray.length, el: elRoundsArray.length });
 
             // Show first available round for each league
             if (plRoundsArray.length > 0) {
@@ -666,16 +707,24 @@ class FootballApiService {
                 console.log(`   Champions League: No upcoming rounds found (all have started)`);
             }
 
+            if (elRoundsArray.length > 0) {
+                console.log(`   Europa League: ${elRoundsArray[0].label} (${elRoundsArray[0].dateRange})`);
+            } else {
+                console.log(`   Europa League: No upcoming rounds found (all have started)`);
+            }
+
             return {
                 premierLeague: plRoundsArray,
-                championsLeague: clRoundsArray
+                championsLeague: clRoundsArray,
+                europaLeague: elRoundsArray
             };
 
         } catch (error) {
             console.error('Failed to fetch available rounds:', error);
             return {
                 premierLeague: [],
-                championsLeague: []
+                championsLeague: [],
+                europaLeague: []
             };
         }
     }

@@ -76,7 +76,7 @@
 
                 <div class="form-group">
                     <label>Velg runde *</label>
-                    <p class="form-help-text">Velg neste runde i Premier League eller Champions League</p>
+                    <p class="form-help-text">Velg neste runde i Premier League, Champions League eller Europa League</p>
 
                     <div class="round-selection-simple">
                         <div class="round-option">
@@ -93,10 +93,21 @@
                         <div class="round-option">
                             <input type="radio" id="nextCL" name="selectedRound" value="cl" onchange="updateCompetitionName()">
                             <label for="nextCL">
-                                <span class="round-icon">🏆</span>
+                                <span class="round-icon">⭐</span>
                                 <span class="round-text">
                                     <strong>Champions League</strong>
                                     <span id="clNextRound" class="round-detail">Laster...</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="round-option">
+                            <input type="radio" id="nextEL" name="selectedRound" value="el" onchange="updateCompetitionName()">
+                            <label for="nextEL">
+                                <span class="round-icon">🌟</span>
+                                <span class="round-text">
+                                    <strong>Europa League</strong>
+                                    <span id="elNextRound" class="round-detail">Laster...</span>
                                 </span>
                             </label>
                         </div>
@@ -119,7 +130,7 @@
     <script src="firebase-config.js"></script>
     <script src="firebase-auth.js"></script>
     <script src="api-config.js"></script>
-    <script type="module" src="api-service.js?v=20251103k"></script>
-    <script type="module" src="competitions.js?v=20251103k"></script>
+    <script type="module" src="api-service.js?v=20251106m"></script>
+    <script type="module" src="competitions.js?v=20251106m"></script>
 </body>
 </html>

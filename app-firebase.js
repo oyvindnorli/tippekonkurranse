@@ -17,7 +17,7 @@ let userTips = [];
 let selectedDate = null; // null = show all dates, otherwise show only this date
 
 // All available leagues that can be enabled
-const AVAILABLE_LEAGUES = [39, 2, 48, 135]; // PL, CL, EFL Cup, Serie A
+const AVAILABLE_LEAGUES = [39, 2, 3, 48, 135]; // PL, CL, EL, EFL Cup, Serie A
 
 // Save league preferences to Firestore
 async function saveLeaguePreferences() {
@@ -41,7 +41,7 @@ async function loadSelectedLeagues(userId) {
     try {
         if (!userId) {
             console.log('⚠️ No user logged in, using default leagues');
-            return new Set([39, 2, 48, 135]); // Default: Premier League, Champions League, EFL Cup, Serie A
+            return new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
         }
 
         const db = firebase.firestore();
@@ -50,8 +50,8 @@ async function loadSelectedLeagues(userId) {
         if (prefsDoc.exists && prefsDoc.data().leagues !== undefined) {
             const leagueArray = prefsDoc.data().leagues;
 
-            // Only allow Premier League (39), Champions League (2), EFL Cup (48), and Serie A (135)
-            const validLeagues = [39, 2, 48, 135];
+            // Only allow Premier League (39), Champions League (2), Europa League (3), EFL Cup (48), and Serie A (135)
+            const validLeagues = [39, 2, 3, 48, 135];
             const filteredLeagues = leagueArray.filter(id => validLeagues.includes(id));
 
             // Check if user has invalid leagues (needs cleanup)
@@ -71,11 +71,11 @@ async function loadSelectedLeagues(userId) {
             return new Set(filteredLeagues);
         } else {
             console.log('📂 No preferences found, using defaults');
-            return new Set([39, 2, 48, 135]); // Default: Premier League, Champions League, EFL Cup, Serie A
+            return new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
         }
     } catch (error) {
         console.warn('⚠️ Could not load league preferences:', error);
-        return new Set([39, 2, 48, 135]); // Default on error
+        return new Set([39, 2, 3, 48, 135]); // Default on error
     }
 }
 
@@ -105,7 +105,7 @@ async function saveSelectedLeagues() {
 }
 
 // Selected leagues for filtering (will be updated when user logs in)
-let selectedLeagues = new Set([39, 2, 48, 135]); // Default: Premier League, Champions League, EFL Cup, Serie A
+let selectedLeagues = new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
 
 // Load user tips from Firebase
 async function loadUserTips() {

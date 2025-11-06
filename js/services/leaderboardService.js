@@ -209,6 +209,8 @@ async function fetchMatchResultsForCompetition(competition, footballApi) {
                                (typeof match.league === 'string' && match.league.includes('Premier League'));
         const isChampionsLeague = (typeof match.league === 'number' && match.league === 2) ||
                                  (typeof match.league === 'string' && match.league.includes('Champions League'));
+        const isEuropaLeague = (typeof match.league === 'number' && match.league === 3) ||
+                              (typeof match.league === 'string' && match.league.includes('Europa League'));
 
         // If we have selected rounds, filter by them
         if (competition.selectedRounds) {
@@ -226,6 +228,12 @@ async function fetchMatchResultsForCompetition(competition, footballApi) {
             else if (competition.selectedRounds.championsLeague && competition.selectedRounds.championsLeague.length > 0 && isChampionsLeague) {
                 if (match.round) {
                     includeMatch = competition.selectedRounds.championsLeague.includes(match.round);
+                }
+            }
+            // Europa League round filtering
+            else if (competition.selectedRounds.europaLeague && competition.selectedRounds.europaLeague.length > 0 && isEuropaLeague) {
+                if (match.round) {
+                    includeMatch = competition.selectedRounds.europaLeague.includes(match.round);
                 }
             }
         }

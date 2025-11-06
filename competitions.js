@@ -5,10 +5,11 @@ import { deduplicateMatches } from './js/utils/matchUtils.js';
 import * as competitionsRenderer from './js/renderers/competitionsRenderer.js';
 
 // Competitions functionality
-let selectedLeagues = new Set([39, 2]); // Default: Premier League and Champions League
+let selectedLeagues = new Set([39, 2, 3]); // Default: Premier League, Champions League and Europa League
 let availableRounds = null; // Store fetched rounds
 let selectedPLRounds = new Set(); // Selected Premier League rounds
 let selectedCLRounds = new Set(); // Selected Champions League rounds
+let selectedELRounds = new Set(); // Selected Europa League rounds
 
 // Performance tracking
 const pageLoadStart = performance.now();
@@ -27,7 +28,7 @@ async function loadUserLeaguePreferences(userId) {
     } catch (error) {
         console.warn('⚠️ Could not load league preferences:', error);
     }
-    return new Set([39, 2]); // Default
+    return new Set([39, 2, 3]); // Default: PL, CL, EL
 }
 
 // Initialize page
@@ -176,6 +177,11 @@ async function loadCompetitions() {
                     // Check CL rounds
                     if (c.selectedRounds?.championsLeague && matchLeague.includes('Champions League')) {
                         return c.selectedRounds.championsLeague.includes(match.round);
+                    }
+
+                    // Check EL rounds
+                    if (c.selectedRounds?.europaLeague && matchLeague.includes('Europa League')) {
+                        return c.selectedRounds.europaLeague.includes(match.round);
                     }
 
                     return false;
@@ -353,11 +359,21 @@ async function loadNextRounds() {
             clNextRound.textContent = 'Ingen kommende runder';
         }
 
+        // Display next Europa League round
+        const elNextRound = document.getElementById('elNextRound');
+        if (availableRounds.europaLeague.length > 0) {
+            const nextRound = availableRounds.europaLeague[0];
+            elNextRound.innerHTML = `${nextRound.label}<br><span class="round-date">${nextRound.dateRange}</span>`;
+        } else {
+            elNextRound.textContent = 'Ingen kommende runder';
+        }
+
         console.log('✅ Next rounds loaded');
     } catch (error) {
         console.error('Failed to load next rounds:', error);
         document.getElementById('plNextRound').textContent = 'Feil ved lasting';
         document.getElementById('clNextRound').textContent = 'Feil ved lasting';
+        document.getElementById('elNextRound').textContent = 'Feil ved lasting';
     }
 }
 
@@ -400,6 +416,9 @@ function updateCompetitionName() {
     } else if (roundType === 'cl' && availableRounds.championsLeague.length > 0) {
         const nextRound = availableRounds.championsLeague[0];
         nameInput.value = `Champions League ${nextRound.label}`;
+    } else if (roundType === 'el' && availableRounds.europaLeague.length > 0) {
+        const nextRound = availableRounds.europaLeague[0];
+        nameInput.value = `Europa League ${nextRound.label}`;
     }
 }
 
@@ -438,7 +457,7 @@ async function createCompetition() {
             throw new Error('Du må velge en runde');
         }
 
-        const roundType = selectedRound.value; // 'pl' or 'cl'
+        const roundType = selectedRound.value; // 'pl', 'cl' or 'el'
         const leagues = [];
         const rounds = {};
 
@@ -450,7 +469,7 @@ async function createCompetition() {
             const nextRound = availableRounds.premierLeague[0];
             leagues.push(39);
             rounds.premierLeague = [nextRound.value];
-        } else {
+        } else if (roundType === 'cl') {
             // Champions League next round
             if (!availableRounds || !availableRounds.championsLeague.length) {
                 throw new Error('Ingen Champions League runder tilgjengelig');
@@ -458,6 +477,14 @@ async function createCompetition() {
             const nextRound = availableRounds.championsLeague[0];
             leagues.push(2);
             rounds.championsLeague = [nextRound.value];
+        } else if (roundType === 'el') {
+            // Europa League next round
+            if (!availableRounds || !availableRounds.europaLeague.length) {
+                throw new Error('Ingen Europa League runder tilgjengelig');
+            }
+            const nextRound = availableRounds.europaLeague[0];
+            leagues.push(3);
+            rounds.europaLeague = [nextRound.value];
         }
 
         let competitionData = {
