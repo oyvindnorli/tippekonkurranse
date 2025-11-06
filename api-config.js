@@ -8,6 +8,7 @@ const API_CONFIG = {
     LEAGUES: [
         39,  // Premier League
         2,   // Champions League
+        3,   // Europa League
         48,  // EFL Cup
         135  // Serie A
     ],
