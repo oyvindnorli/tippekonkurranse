@@ -334,13 +334,26 @@ export async function saveMatchesToFirestore(matches) {
                 const existing = existingMatches.get(String(match.id));
 
                 if (existing) {
-                    // Only update result and completed status, NEVER update odds
-                    if (match.result || match.completed) {
-                        batch.update(docRef, {
+                    // Update result and completed status
+                    // ALSO update odds if they were null before but are now available (e.g. Europa League fix)
+                    const needsUpdate = match.result || match.completed ||
+                                       (existing.odds === null && match.odds !== null);
+
+                    if (needsUpdate) {
+                        const updates = {
                             result: match.result || null,
                             completed: match.completed || false,
                             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                        });
+                        };
+
+                        // Only update odds if they were missing before and are now available
+                        if (existing.odds === null && match.odds !== null) {
+                            updates.odds = match.odds;
+                            updates.oddsLockedAt = firebase.firestore.FieldValue.serverTimestamp();
+                            console.log(`📈 Adding odds to match ${match.id} (${match.homeTeam} - ${match.awayTeam})`);
+                        }
+
+                        batch.update(docRef, updates);
                         batchCount++;
                     }
                 } else {
