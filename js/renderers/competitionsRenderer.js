@@ -84,9 +84,14 @@ export function createCompetitionCard(competition) {
             : 'Alle ligaer';
     }
 
+    // Clean up competition name - remove duplicate "League" and format nicely
+    let displayName = competition.name;
+    displayName = displayName.replace(/League Stage - (\d+)/g, '(Runde $1)');
+    displayName = displayName.replace(/Matchday (\d+)/g, '(MD $1)');
+
     card.innerHTML = `
         <div class="competition-header">
-            <h3 class="competition-name">${competition.name}</h3>
+            <h3 class="competition-name">${displayName}</h3>
             ${isCreator ? '<span class="creator-badge">👑 Opprettet av deg</span>' : ''}
         </div>
         <p class="competition-description">${competition.description || 'Ingen beskrivelse'}</p>

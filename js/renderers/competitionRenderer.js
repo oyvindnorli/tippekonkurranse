@@ -14,7 +14,12 @@ import { formatDate } from '../utils/dateUtils.js';
  * @param {Array} competitionMatches - All matches in competition
  */
 export function renderCompetitionDetails(competition, allMatchesCompleted, competitionMatches) {
-    document.getElementById('competitionName').textContent = competition.name;
+    // Clean up competition name - remove duplicate "League" and format nicely
+    let displayName = competition.name;
+    displayName = displayName.replace(/League Stage - (\d+)/g, '(Runde $1)');
+    displayName = displayName.replace(/Matchday (\d+)/g, '(MD $1)');
+
+    document.getElementById('competitionName').textContent = displayName;
     document.getElementById('competitionDescription').textContent = competition.description || 'Ingen beskrivelse';
     document.getElementById('creatorName').textContent = competition.creatorName;
 
