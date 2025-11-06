@@ -1457,9 +1457,72 @@ window.deleteEuropaLeagueMatches = async function() {
     await refreshData();
 };
 
+// Automatic odds fetching for matches without odds
+let oddsRetryInterval = null;
+
+async function checkAndFetchMissingOdds() {
+    try {
+        // Only run if user is logged in
+        if (!currentUser) return;
+
+        // Check if we have matches without odds
+        const matchesWithoutOdds = allMatches.filter(m => {
+            // Only check upcoming matches (not started yet)
+            const matchDate = new Date(m.commence_time || m.date);
+            const now = new Date();
+            const isUpcoming = matchDate > now;
+
+            return isUpcoming && !m.odds;
+        });
+
+        if (matchesWithoutOdds.length > 0) {
+            console.log(`🔄 Found ${matchesWithoutOdds.length} matches without odds, fetching in background...`);
+
+            // Fetch fresh data in background (this will get odds via fallback)
+            await refreshData();
+
+            console.log(`✅ Background odds fetch complete`);
+        } else {
+            console.log('✅ All upcoming matches have odds');
+            // Stop the interval if all matches have odds
+            if (oddsRetryInterval) {
+                clearInterval(oddsRetryInterval);
+                oddsRetryInterval = null;
+                console.log('⏹️ Stopped automatic odds checking');
+            }
+        }
+    } catch (error) {
+        console.warn('⚠️ Error in automatic odds checking:', error);
+    }
+}
+
+function startAutomaticOddsChecking() {
+    // Run first check after 30 seconds (let page load first)
+    setTimeout(() => {
+        checkAndFetchMissingOdds();
+    }, 30000);
+
+    // Then check every 30 minutes
+    oddsRetryInterval = setInterval(() => {
+        checkAndFetchMissingOdds();
+    }, 30 * 60 * 1000); // 30 minutes
+
+    console.log('🤖 Automatic odds checking enabled (runs every 30 min)');
+}
+
 // Add button to simulate results for testing (can be removed later)
 window.addEventListener('DOMContentLoaded', () => {
     init();
+
+    // Start automatic odds checking when user is logged in
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user && !oddsRetryInterval) {
+            startAutomaticOddsChecking();
+        } else if (!user && oddsRetryInterval) {
+            clearInterval(oddsRetryInterval);
+            oddsRetryInterval = null;
+        }
+    });
 
     // Add debug functions in console
     console.log('🔥 Tippekonkurranse loaded | simulateResult(matchId) | refreshData() | cleanupFirestore() | convertOldMatches() | deleteAllMatchesFromFirestore() | deleteEuropaLeagueMatches()');
