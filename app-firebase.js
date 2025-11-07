@@ -755,29 +755,19 @@ function renderMatches() {
 
                         <!-- Inputs and Odds section -->
                         <div class="inputs-odds-section">
-                            <!-- Score inputs -->
+                            <!-- Score inputs with +/- buttons -->
                             <div class="score-inputs-v3">
-                                <input type="number"
-                                    class="score-input-v3"
-                                    id="home-score-${match.id}"
-                                    data-match-id="${match.id}"
-                                    data-type="home"
-                                    value="${homeScore === '?' ? '' : homeScore}"
-                                    placeholder="?"
-                                    min="0"
-                                    max="20"
-                                    ${match.result ? 'disabled' : ''}>
+                                <div class="score-controls-inline">
+                                    <button class="score-btn-inline" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
+                                    <span class="score-display-inline" id="home-score-${match.id}">${homeScore === '?' ? 0 : homeScore}</span>
+                                    <button class="score-btn-inline" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
+                                </div>
                                 <span class="score-dash-v3">-</span>
-                                <input type="number"
-                                    class="score-input-v3"
-                                    id="away-score-${match.id}"
-                                    data-match-id="${match.id}"
-                                    data-type="away"
-                                    value="${awayScore === '?' ? '' : awayScore}"
-                                    placeholder="?"
-                                    min="0"
-                                    max="20"
-                                    ${match.result ? 'disabled' : ''}>
+                                <div class="score-controls-inline">
+                                    <button class="score-btn-inline" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
+                                    <span class="score-display-inline" id="away-score-${match.id}">${awayScore === '?' ? 0 : awayScore}</span>
+                                    <button class="score-btn-inline" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
+                                </div>
                             </div>
 
                             <!-- Odds compact column -->
@@ -801,51 +791,6 @@ function renderMatches() {
                     </div>
                 `;
                 dateGroup.appendChild(matchCard);
-
-                // Add event listeners for input fields and buttons
-                if (!match.result) {
-                    const homeInput = document.getElementById(`home-score-${match.id}`);
-                    const awayInput = document.getElementById(`away-score-${match.id}`);
-
-                    if (homeInput && awayInput) {
-                        // Handle input changes
-                        const handleInputChange = async (inputElement) => {
-                            const matchId = inputElement.dataset.matchId;
-                            let homeScore = parseInt(homeInput.value);
-                            let awayScore = parseInt(awayInput.value);
-
-                            // Validate values
-                            if (isNaN(homeScore) || homeScore < 0) homeScore = 0;
-                            if (isNaN(awayScore) || awayScore < 0) awayScore = 0;
-                            if (homeScore > 20) homeScore = 20;
-                            if (awayScore > 20) awayScore = 20;
-
-                            // Update display
-                            homeInput.value = homeScore;
-                            awayInput.value = awayScore;
-
-                            // Save tip
-                            await submitTip(matchId, homeScore, awayScore);
-                        };
-
-                        // Add change listeners (fires when user is done editing)
-                        homeInput.addEventListener('change', () => handleInputChange(homeInput));
-                        awayInput.addEventListener('change', () => handleInputChange(awayInput));
-
-                        // Add input listeners for real-time validation
-                        homeInput.addEventListener('input', (e) => {
-                            const value = parseInt(e.target.value);
-                            if (value > 20) e.target.value = 20;
-                            if (value < 0) e.target.value = 0;
-                        });
-                        awayInput.addEventListener('input', (e) => {
-                            const value = parseInt(e.target.value);
-                            if (value > 20) e.target.value = 20;
-                            if (value < 0) e.target.value = 0;
-                        });
-                    }
-
-                }
             });
         });
 
@@ -889,12 +834,14 @@ function setScoreFromOdds(matchId, type) {
 
 // Update score with +/- buttons
 function updateScore(matchId, type, isPlus) {
+    console.log('updateScore called:', { matchId, type, isPlus });
     const scoreElement = document.getElementById(`${type}-score-${matchId}`);
 
     if (!scoreElement) {
         console.error(`Score element not found: ${type}-score-${matchId}`);
         return;
     }
+    console.log('Score element found:', scoreElement);
 
     let currentScore = scoreElement.textContent === '?' ? 0 : parseInt(scoreElement.textContent);
 
@@ -1242,6 +1189,7 @@ window.showLeagueFilter = showLeagueFilter;
 window.toggleLeagueFilter = toggleLeagueFilter;
 window.selectAllLeaguesFilter = selectAllLeaguesFilter;
 window.deselectAllLeaguesFilter = deselectAllLeaguesFilter;
+window.updateScore = updateScore;
 
 // Close auth modal when clicking outside of it (but not on modal content)
 window.onclick = function(event) {
