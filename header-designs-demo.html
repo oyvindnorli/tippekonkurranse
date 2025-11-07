@@ -10,42 +10,88 @@
     <div class="demo-container">
         <div class="demo-intro">
             <h1>📱 Header Design Forslag</h1>
-            <p>Test forskjellige header-stiler for tippekonkurransen</p>
+            <p>Basert på nåværende design - mørk header</p>
         </div>
 
-        <!-- Design 1: Gradient Hero -->
+        <!-- Current Design (for reference) -->
         <section class="design-showcase">
             <div class="design-label">
-                <h2>Design 1: Gradient Hero</h2>
-                <span class="badge">Moderne</span>
+                <h2>Nåværende Design</h2>
+                <span class="badge current">Slik det er nå</span>
+            </div>
+            <header class="header-design header-current">
+                <div class="top-bar-current">
+                    <div class="brand-current">
+                        <span class="globe-icon">🌐</span>
+                        <h1 class="title-current">Tippekonkurranse</h1>
+                    </div>
+                    <div class="user-section-current">
+                        <span class="user-text-current">Innlogget som: <strong>Øyvind</strong></span>
+                        <button class="btn-logout-current">Logg ut</button>
+                    </div>
+                </div>
+                <nav class="nav-current">
+                    <a href="#" class="nav-btn-current active">
+                        <span class="nav-icon-current">🏠</span>
+                        Tipp
+                    </a>
+                    <a href="#" class="nav-btn-current">
+                        <span class="nav-icon-current">🏆</span>
+                        Konkurranser
+                    </a>
+                    <a href="#" class="nav-btn-current">
+                        <span class="nav-icon-current">⚙️</span>
+                        Innstillinger
+                    </a>
+                </nav>
+            </header>
+        </section>
+
+        <!-- Design 1: Dark Premium -->
+        <section class="design-showcase">
+            <div class="design-label">
+                <h2>Design 1: Dark Premium</h2>
+                <span class="badge recommended">⭐ Anbefalt</span>
             </div>
             <header class="header-design header-1">
-                <div class="header-gradient-bg"></div>
-                <div class="header-content">
-                    <div class="header-top">
-                        <h1 class="header-title">⚽ Tippekonkurranse</h1>
-                        <button class="btn-logout-1">Logg ut</button>
+                <div class="top-bar-1">
+                    <div class="brand-1">
+                        <span class="ball-icon-1">⚽</span>
+                        <h1 class="title-1">Tippekonkurranse</h1>
                     </div>
-                    <div class="user-info-1">
-                        <span class="username-1">Innlogget som: <strong>Ole Nordmann</strong></span>
-                    </div>
-                    <div class="score-card-1">
-                        <div class="score-item-1">
-                            <span class="score-label-1">Poeng</span>
-                            <span class="score-value-1">47</span>
-                        </div>
-                        <div class="score-divider-1"></div>
-                        <div class="score-item-1">
-                            <span class="score-label-1">Tips</span>
-                            <span class="score-value-1">12</span>
-                        </div>
-                    </div>
-                    <nav class="nav-1">
-                        <a href="#" class="nav-btn-1 active">🏠 Tipp</a>
-                        <a href="#" class="nav-btn-1">🏆 Konkurranser</a>
-                        <a href="#" class="nav-btn-1">⚙️ Innstillinger</a>
-                    </nav>
+                    <button class="btn-logout-1">Logg ut</button>
                 </div>
+                <div class="user-stats-bar-1">
+                    <div class="user-info-1">
+                        <span class="user-label-1">Bruker:</span>
+                        <span class="user-name-1">Øyvind</span>
+                    </div>
+                    <div class="stats-1">
+                        <div class="stat-item-1">
+                            <span class="stat-value-1">47</span>
+                            <span class="stat-label-1">Poeng</span>
+                        </div>
+                        <div class="stat-divider-1"></div>
+                        <div class="stat-item-1">
+                            <span class="stat-value-1">12</span>
+                            <span class="stat-label-1">Tips</span>
+                        </div>
+                    </div>
+                </div>
+                <nav class="nav-1">
+                    <a href="#" class="nav-btn-1 active">
+                        <span class="nav-icon-1">🏠</span>
+                        Tipp
+                    </a>
+                    <a href="#" class="nav-btn-1">
+                        <span class="nav-icon-1">🏆</span>
+                        Konkurranser
+                    </a>
+                    <a href="#" class="nav-btn-1">
+                        <span class="nav-icon-1">⚙️</span>
+                        Innstillinger
+                    </a>
+                </nav>
             </header>
         </section>
 
