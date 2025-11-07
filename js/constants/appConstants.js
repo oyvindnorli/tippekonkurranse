@@ -26,6 +26,13 @@ export const TIMEOUTS = {
     CACHE_CLEANUP_DELAY: 2000,      // Delay før cache cleanup starter
     DEBOUNCE_SAVE_TIP: 500,         // Debounce for tip lagring
     API_RETRY_DELAY: 1000,          // Delay før API retry
+    AUTO_REFRESH_INTERVAL: 60000,   // Auto-refresh interval for live matches (60 sekunder)
+};
+
+// Tid-relaterte konstanter
+export const TIME = {
+    MILLISECONDS_PER_MINUTE: 60000,     // 1 minutt i millisekunder
+    MATCH_DURATION_MINUTES: 120,        // Antatt varighet av fotballkamp i minutter (90 + overtid)
 };
 
 // Cache varighet (i millisekunder)

@@ -2,7 +2,7 @@
 import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251106e';
 import { calculatePoints, deduplicateMatches } from './js/utils/matchUtils.js?v=20251106e';
 import { formatDate } from './js/utils/dateUtils.js?v=20251106e';
-import { LEAGUE_IDS, ERROR_MESSAGES } from './js/constants/appConstants.js?v=20251106e';
+import { LEAGUE_IDS, ERROR_MESSAGES, TIME, TIMEOUTS } from './js/constants/appConstants.js?v=20251106e';
 import { ErrorHandler } from './js/utils/errorHandler.js?v=20251106e';
 
 // Import services
@@ -398,7 +398,7 @@ async function loadCompetitionMatches() {
             const now = new Date();
             const hasLiveMatches = competition.cachedMatches.some(match => {
                 const matchDate = new Date(match.commence_time || match.date);
-                const matchEndTime = new Date(matchDate.getTime() + 120 * 60000); // 120 min after start
+                const matchEndTime = new Date(matchDate.getTime() + TIME.MATCH_DURATION_MINUTES * TIME.MILLISECONDS_PER_MINUTE);
                 return matchDate <= now && now <= matchEndTime && !match.completed;
             });
 
@@ -830,7 +830,7 @@ function setupAutoRefresh() {
     const now = new Date();
     const hasLiveMatches = competitionMatches.some(match => {
         const matchDate = new Date(match.commence_time || match.date);
-        const matchEndTime = new Date(matchDate.getTime() + 120 * 60000); // 120 min after start
+        const matchEndTime = new Date(matchDate.getTime() + TIME.MATCH_DURATION_MINUTES * TIME.MILLISECONDS_PER_MINUTE);
         return matchDate <= now && now <= matchEndTime && !match.completed;
     });
 
@@ -844,7 +844,7 @@ function setupAutoRefresh() {
             liveIndicator.style.display = 'block';
         }
 
-        // Refresh every 60 seconds
+        // Refresh at regular intervals
         refreshInterval = setInterval(async () => {
             console.log('🔄 Auto-refreshing live scores...');
 
@@ -855,7 +855,7 @@ function setupAutoRefresh() {
 
             // Re-check if we still have live matches
             setupAutoRefresh();
-        }, 60000); // 60 seconds
+        }, TIMEOUTS.AUTO_REFRESH_INTERVAL);
     } else {
         console.log('✅ No live matches - auto-refresh not needed');
 
