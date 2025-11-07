@@ -223,6 +223,12 @@ function onUserLoggedIn(user) {
         signOutBtn.style.display = 'inline-block';
     }
 
+    // Show user stats bar (for premium header)
+    const userStatsBar = document.getElementById('userStatsBar');
+    if (userStatsBar) {
+        userStatsBar.style.display = 'flex';
+    }
+
     // Show navigation buttons immediately
     const mainNavButtons = document.getElementById('mainNavButtons');
     if (mainNavButtons) {

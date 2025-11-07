@@ -929,9 +929,21 @@ function updateTotalScore() {
         console.log(`💰 ${totalScore.toFixed(1)} poeng (${tipsWithPoints} riktige${oldTipsCount > 0 ? `, ${oldTipsCount} gamle` : ''})`);
     }
 
+    // Update old score element (if it exists)
     const scoreElement = document.getElementById('totalScore');
     if (scoreElement) {
         scoreElement.textContent = totalScore.toFixed(1);
+    }
+
+    // Update new premium header elements
+    const totalPointsDisplay = document.getElementById('totalPointsDisplay');
+    if (totalPointsDisplay) {
+        totalPointsDisplay.textContent = Math.round(totalScore);
+    }
+
+    const totalTipsDisplay = document.getElementById('totalTipsDisplay');
+    if (totalTipsDisplay) {
+        totalTipsDisplay.textContent = userTips.length;
     }
 }
 
