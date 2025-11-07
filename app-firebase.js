@@ -757,13 +757,27 @@ function renderMatches() {
                         <div class="inputs-odds-section">
                             <!-- Score inputs -->
                             <div class="score-inputs-v3">
-                                <button class="score-btn-v3 minus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Reduser hjemmelag">−</button>
-                                <span class="score-display-v3" id="home-score-${match.id}">${homeScore}</span>
-                                <button class="score-btn-v3 plus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Øk hjemmelag">+</button>
+                                <input type="number"
+                                    class="score-input-v3"
+                                    id="home-score-${match.id}"
+                                    data-match-id="${match.id}"
+                                    data-type="home"
+                                    value="${homeScore === '?' ? '' : homeScore}"
+                                    placeholder="?"
+                                    min="0"
+                                    max="20"
+                                    ${match.result ? 'disabled' : ''}>
                                 <span class="score-dash-v3">-</span>
-                                <button class="score-btn-v3 minus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Reduser bortelag">−</button>
-                                <span class="score-display-v3" id="away-score-${match.id}">${awayScore}</span>
-                                <button class="score-btn-v3 plus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Øk bortelag">+</button>
+                                <input type="number"
+                                    class="score-input-v3"
+                                    id="away-score-${match.id}"
+                                    data-match-id="${match.id}"
+                                    data-type="away"
+                                    value="${awayScore === '?' ? '' : awayScore}"
+                                    placeholder="?"
+                                    min="0"
+                                    max="20"
+                                    ${match.result ? 'disabled' : ''}>
                             </div>
 
                             <!-- Odds compact column -->
@@ -788,77 +802,46 @@ function renderMatches() {
                 `;
                 dateGroup.appendChild(matchCard);
 
-                // Add event listeners for +/- buttons
+                // Add event listeners for input fields
                 if (!match.result) {
-                    const buttons = matchCard.querySelectorAll('.score-btn-v3');
-                    buttons.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const matchId = e.target.dataset.matchId;
-                            const type = e.target.dataset.type;
-                            const isPlus = e.target.classList.contains('plus-btn');
+                    const homeInput = document.getElementById(`home-score-${match.id}`);
+                    const awayInput = document.getElementById(`away-score-${match.id}`);
 
-                            console.log('Button clicked:', { matchId, type, isPlus });
-                            updateScore(matchId, type, isPlus);
+                    if (homeInput && awayInput) {
+                        // Handle input changes
+                        const handleInputChange = async (inputElement) => {
+                            const matchId = inputElement.dataset.matchId;
+                            let homeScore = parseInt(homeInput.value);
+                            let awayScore = parseInt(awayInput.value);
+
+                            // Validate values
+                            if (isNaN(homeScore) || homeScore < 0) homeScore = 0;
+                            if (isNaN(awayScore) || awayScore < 0) awayScore = 0;
+                            if (homeScore > 20) homeScore = 20;
+                            if (awayScore > 20) awayScore = 20;
+
+                            // Update display
+                            homeInput.value = homeScore;
+                            awayInput.value = awayScore;
+
+                            // Save tip
+                            await saveTip(matchId, homeScore, awayScore);
+                        };
+
+                        // Add change listeners (fires when user is done editing)
+                        homeInput.addEventListener('change', () => handleInputChange(homeInput));
+                        awayInput.addEventListener('change', () => handleInputChange(awayInput));
+
+                        // Add input listeners for real-time validation
+                        homeInput.addEventListener('input', (e) => {
+                            const value = parseInt(e.target.value);
+                            if (value > 20) e.target.value = 20;
+                            if (value < 0) e.target.value = 0;
                         });
-                    });
-
-                    // Add horizontal swipe functionality for score displays (mobile friendly)
-                    const homeScoreElement = document.getElementById(`home-score-${match.id}`);
-                    const awayScoreElement = document.getElementById(`away-score-${match.id}`);
-
-                    if (homeScoreElement && awayScoreElement) {
-                        [
-                            { element: homeScoreElement, type: 'home' },
-                            { element: awayScoreElement, type: 'away' }
-                        ].forEach(({ element, type }) => {
-                            let touchStartX = 0;
-                            let touchStartY = 0;
-                            let touchStartTime = 0;
-
-                            element.addEventListener('touchstart', (e) => {
-                                touchStartX = e.touches[0].clientX;
-                                touchStartY = e.touches[0].clientY;
-                                touchStartTime = Date.now();
-                                element.style.backgroundColor = 'rgba(34, 211, 238, 0.1)';
-                            }, { passive: true });
-
-                            element.addEventListener('touchmove', (e) => {
-                                // Visual feedback during swipe
-                                const touchCurrentX = e.touches[0].clientX;
-                                const deltaX = touchCurrentX - touchStartX;
-                                if (Math.abs(deltaX) > 10) {
-                                    element.style.transform = `translateX(${deltaX * 0.3}px)`;
-                                }
-                            }, { passive: true });
-
-                            element.addEventListener('touchend', (e) => {
-                                const touchEndX = e.changedTouches[0].clientX;
-                                const touchEndY = e.changedTouches[0].clientY;
-                                const deltaX = touchEndX - touchStartX;
-                                const deltaY = Math.abs(touchEndY - touchStartY);
-                                const swipeTime = Date.now() - touchStartTime;
-
-                                // Reset visual feedback
-                                element.style.backgroundColor = '';
-                                element.style.transform = '';
-
-                                // Lower threshold (30px instead of 50px) and allow faster swipes
-                                if (Math.abs(deltaX) > 30 && deltaY < 40 && swipeTime < 500) {
-                                    if (deltaX > 0) {
-                                        // Swipe right - increase
-                                        updateScore(match.id, type, true);
-                                    } else {
-                                        // Swipe left - decrease
-                                        updateScore(match.id, type, false);
-                                    }
-                                }
-                            }, { passive: true });
-
-                            element.addEventListener('touchcancel', (e) => {
-                                // Reset visual feedback on cancel
-                                element.style.backgroundColor = '';
-                                element.style.transform = '';
-                            }, { passive: true });
+                        awayInput.addEventListener('input', (e) => {
+                            const value = parseInt(e.target.value);
+                            if (value > 20) e.target.value = 20;
+                            if (value < 0) e.target.value = 0;
                         });
                     }
 
