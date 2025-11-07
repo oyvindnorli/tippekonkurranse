@@ -3,7 +3,25 @@
  * Funksjoner for beregning av poeng, formatering og match-logikk
  */
 
-import { POINTS, OUTCOME } from '../constants/appConstants.js';
+import { POINTS, OUTCOME, TIME } from '../constants/appConstants.js';
+
+/**
+ * Sjekk om en match er live (har startet men ikke fullført)
+ * @param {Object} match - Match objekt
+ * @param {string} match.commence_time - Start tid for kampen
+ * @param {string} match.date - Alternativ dato
+ * @param {boolean} match.completed - Om kampen er fullført
+ * @param {Date} [now=new Date()] - Nåværende tidspunkt (kan overstyres for testing)
+ * @returns {boolean} True hvis kampen er live
+ */
+export function isMatchLive(match, now = new Date()) {
+    if (match.completed) return false;
+
+    const matchDate = new Date(match.commence_time || match.date);
+    const matchEndTime = new Date(matchDate.getTime() + TIME.MATCH_DURATION_MINUTES * TIME.MILLISECONDS_PER_MINUTE);
+
+    return matchDate <= now && now <= matchEndTime;
+}
 
 /**
  * Bestem utfall av en kamp (H/U/B)
