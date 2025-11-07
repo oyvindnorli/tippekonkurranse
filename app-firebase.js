@@ -825,7 +825,7 @@ function renderMatches() {
                             awayInput.value = awayScore;
 
                             // Save tip
-                            await saveTip(matchId, homeScore, awayScore);
+                            await submitTip(matchId, homeScore, awayScore);
                         };
 
                         // Add change listeners (fires when user is done editing)
