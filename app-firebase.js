@@ -743,7 +743,7 @@ function renderMatches() {
                     <!-- Design 4: Splittet Layout -->
                     <div class="split-container-v4">
                         <!-- Home Team Half -->
-                        <div class="team-half-v4 home">
+                        <div class="team-half-v4 home" style="${homeLogo ? `background: linear-gradient(135deg, rgba(219, 234, 254, 0.85), rgba(191, 219, 254, 0.85)), url('${homeLogo}') center/cover no-repeat;` : ''}">
                             ${homeLogo ? `<img src="${homeLogo}" alt="${match.homeTeam}" class="team-logo-v4" onerror="this.style.display='none'">` : ''}
                             <span class="team-name-v4">${match.homeTeam}</span>
                             <div class="score-controls-v4">
@@ -759,7 +759,7 @@ function renderMatches() {
                         </div>
 
                         <!-- Away Team Half -->
-                        <div class="team-half-v4 away">
+                        <div class="team-half-v4 away" style="${awayLogo ? `background: linear-gradient(135deg, rgba(252, 231, 243, 0.85), rgba(251, 207, 232, 0.85)), url('${awayLogo}') center/cover no-repeat;` : ''}">
                             ${awayLogo ? `<img src="${awayLogo}" alt="${match.awayTeam}" class="team-logo-v4" onerror="this.style.display='none'">` : ''}
                             <span class="team-name-v4">${match.awayTeam}</span>
                             <div class="score-controls-v4">
