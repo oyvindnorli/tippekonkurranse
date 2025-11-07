@@ -739,9 +739,9 @@ function renderMatches() {
                 }
 
                 matchCard.innerHTML = `
-                    <div class="match-info-inline">
-                        <!-- Team names and logos -->
-                        <div class="teams-section">
+                    <div class="match-content-row">
+                        <!-- Teams section -->
+                        <div class="teams-section-v3">
                             <div class="team-inline">
                                 ${homeLogo ? `<img src="${homeLogo}" alt="${match.homeTeam}" class="team-logo-inline" onerror="this.style.display='none'">` : ''}
                                 <span class="team-name-inline">${match.homeTeam}</span>
@@ -753,56 +753,44 @@ function renderMatches() {
                             </div>
                         </div>
 
-                        <!-- Score controls -->
-                        <div class="score-section">
-                            <div class="score-controls-inline">
-                                <button class="score-btn-inline minus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Reduser hjemmelag">−</button>
-                                <span class="score-display-inline" id="home-score-${match.id}">${homeScore}</span>
-                                <button class="score-btn-inline plus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Øk hjemmelag">+</button>
-                                <span class="score-separator">-</span>
-                                <button class="score-btn-inline minus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Reduser bortelag">−</button>
-                                <span class="score-display-inline" id="away-score-${match.id}">${awayScore}</span>
-                                <button class="score-btn-inline plus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Øk bortelag">+</button>
+                        <!-- Inputs and Odds section -->
+                        <div class="inputs-odds-section">
+                            <!-- Score inputs -->
+                            <div class="score-inputs-v3">
+                                <button class="score-btn-v3 minus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Reduser hjemmelag">−</button>
+                                <span class="score-display-v3" id="home-score-${match.id}">${homeScore}</span>
+                                <button class="score-btn-v3 plus-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Øk hjemmelag">+</button>
+                                <span class="score-dash-v3">-</span>
+                                <button class="score-btn-v3 minus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Reduser bortelag">−</button>
+                                <span class="score-display-v3" id="away-score-${match.id}">${awayScore}</span>
+                                <button class="score-btn-v3 plus-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Øk bortelag">+</button>
                             </div>
-                        </div>
 
-                        <!-- Odds buttons -->
-                        ${match.odds ? `
-                            <div class="odds-section">
-                                <button class="odd-btn-inline home-btn" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Hjemmeseier 1-0">
-                                    <span class="odd-label-inline">H</span>
-                                    <span class="odd-value-inline">${match.odds.H.toFixed(1)}</span>
-                                </button>
-                                <button class="odd-btn-inline draw-btn" data-match-id="${match.id}" data-type="draw" ${match.result ? 'disabled' : ''} title="Uavgjort 0-0">
-                                    <span class="odd-label-inline">U</span>
-                                    <span class="odd-value-inline">${match.odds.U.toFixed(1)}</span>
-                                </button>
-                                <button class="odd-btn-inline away-btn" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Borteseier 0-1">
-                                    <span class="odd-label-inline">B</span>
-                                    <span class="odd-value-inline">${match.odds.B.toFixed(1)}</span>
-                                </button>
-                            </div>
-                        ` : '<div class="odds-section"><span class="no-odds">Ingen odds</span></div>'}
+                            <!-- Odds compact column -->
+                            ${match.odds ? `
+                                <div class="odds-compact-v3">
+                                    <div class="odds-row-v3">
+                                        <span class="odds-label-v3">H</span>
+                                        <span class="odds-value-v3">${match.odds.H.toFixed(1)}</span>
+                                    </div>
+                                    <div class="odds-row-v3">
+                                        <span class="odds-label-v3">U</span>
+                                        <span class="odds-value-v3">${match.odds.U.toFixed(1)}</span>
+                                    </div>
+                                    <div class="odds-row-v3">
+                                        <span class="odds-label-v3">B</span>
+                                        <span class="odds-value-v3">${match.odds.B.toFixed(1)}</span>
+                                    </div>
+                                </div>
+                            ` : '<div class="odds-compact-v3"><span class="no-odds-v3">-</span></div>'}
+                        </div>
                     </div>
                 `;
                 dateGroup.appendChild(matchCard);
 
-                // Add event listeners for odds buttons
+                // Add event listeners for +/- buttons
                 if (!match.result) {
-                    const oddsButtons = matchCard.querySelectorAll('.odd-btn-inline');
-                    oddsButtons.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            const matchId = btn.dataset.matchId;
-                            const type = btn.dataset.type;
-
-                            console.log('Odds button clicked:', { matchId, type });
-                            setScoreFromOdds(matchId, type);
-                        });
-                    });
-
-                    // Add event listeners for +/- buttons
-                    const buttons = matchCard.querySelectorAll('.score-btn-inline');
+                    const buttons = matchCard.querySelectorAll('.score-btn-v3');
                     buttons.forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             const matchId = e.target.dataset.matchId;

@@ -477,19 +477,19 @@ header h1 {
 
 /* Match cards - Compact inline layout */
 .match-card {
-    background: #ffffff;
-    border-radius: 6px;
-    padding: 8px 12px;
-    margin-bottom: 4px;
-    border: 1.5px solid #e5e7eb;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    background: white;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
 }
 
 .match-card:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     border-color: #cbd5e1;
-    transform: translateY(-1px);
 }
 
 .match-card.has-tip {
@@ -702,6 +702,133 @@ header h1 {
     color: #94a3b8;
     font-style: italic;
 }
+
+/* ========================================
+   DESIGN 3: Compact Pro Layout
+======================================== */
+.match-content-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.teams-section-v3 {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.inputs-odds-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.score-inputs-v3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.score-btn-v3 {
+    background: #e2e8f0;
+    border: none;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    color: #475569;
+    transition: all 0.2s ease;
+}
+
+.score-btn-v3:hover:not(:disabled) {
+    background: #cbd5e1;
+    transform: scale(1.08);
+}
+
+.score-btn-v3:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.score-btn-v3:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.score-display-v3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    min-width: 24px;
+    text-align: center;
+    user-select: none;
+    padding: 4px 6px;
+    cursor: pointer;
+    touch-action: pan-y;
+    -webkit-tap-highlight-color: rgba(34, 211, 238, 0.1);
+    transition: background-color 0.15s ease, transform 0.15s ease;
+    border-radius: 6px;
+}
+
+.score-display-v3:active {
+    background-color: rgba(34, 211, 238, 0.1);
+}
+
+.score-dash-v3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #cbd5e1;
+    margin: 0 2px;
+}
+
+.odds-compact-v3 {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    padding: 6px 8px;
+    border-radius: 8px;
+    min-width: 52px;
+    box-shadow: 0 1px 3px rgba(146, 64, 14, 0.1);
+}
+
+.odds-row-v3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    line-height: 1;
+}
+
+.odds-label-v3 {
+    font-weight: 600;
+    color: #92400e;
+    opacity: 0.7;
+    text-transform: uppercase;
+}
+
+.odds-value-v3 {
+    font-weight: 700;
+    color: #92400e;
+    font-size: 11px;
+}
+
+.no-odds-v3 {
+    font-size: 11px;
+    color: #92400e;
+    font-weight: 600;
+    text-align: center;
+    opacity: 0.5;
+}
+
 
 .match-info {
     display: flex;
