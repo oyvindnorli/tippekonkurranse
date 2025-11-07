@@ -9,21 +9,8 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>⚽ Tippekonkurranse</h1>
-            <div class="user-section">
-                <div class="current-user">
-                    <span id="usernameDisplay" style="display: none;">Innlogget som: <strong id="currentUsername"></strong></span>
-                    <button id="signOutBtn" onclick="signOut()" class="btn-small" style="display: none;">Logg ut</button>
-                </div>
-            </div>
-            <div class="score-display"></div>
-            <nav class="nav-buttons" id="mainNavButtons" style="display: none;">
-                <a href="index.html" class="nav-btn">🏠 Tipp</a>
-                <a href="competitions.html" class="nav-btn active">🏆 Konkurranser</a>
-                <a href="preferences.html" class="nav-btn">⚙️ Innstillinger</a>
-            </nav>
-        </header>
+        <!-- Header injected by header.js -->
+        <div id="headerContainer"></div>
 
         <main>
             <div id="loadingMessage" class="loading-message">Laster konkurranse...</div>
@@ -106,6 +93,10 @@
     <script src="firebase-config.js"></script>
     <script src="firebase-auth.js"></script>
     <script src="api-config.js"></script>
+    <script type="module">
+        import { initHeader } from './header.js';
+        initHeader('competitions');
+    </script>
     <script type="module" src="api-service.js?v=20251106w"></script>
     <script type="module" src="competition-detail-v2.js?v=20251106w"></script>
 </body>

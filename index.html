@@ -9,51 +9,8 @@
 </head>
 <body>
     <div class="container">
-        <header class="header-premium">
-            <!-- Top Bar with Brand and Logout -->
-            <div class="header-top-bar">
-                <div class="header-brand">
-                    <span class="brand-icon">⚽</span>
-                    <h1 class="brand-title">Tippekonkurranse</h1>
-                </div>
-                <button id="signOutBtn" onclick="signOut()" class="btn-logout-premium" style="display: none;">Logg ut</button>
-            </div>
-
-            <!-- User Stats Bar -->
-            <div class="user-stats-bar" id="userStatsBar" style="display: none;">
-                <div class="user-info-premium">
-                    <span class="user-label-premium">Bruker:</span>
-                    <span class="user-name-premium" id="currentUsername"></span>
-                </div>
-                <div class="stats-premium">
-                    <div class="stat-item-premium">
-                        <span class="stat-value-premium" id="totalPointsDisplay">0</span>
-                        <span class="stat-label-premium">Poeng</span>
-                    </div>
-                    <div class="stat-divider-premium"></div>
-                    <div class="stat-item-premium">
-                        <span class="stat-value-premium" id="totalTipsDisplay">0</span>
-                        <span class="stat-label-premium">Tips</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation -->
-            <nav class="nav-premium" id="mainNavButtons" style="display: none;">
-                <a href="index.html" class="nav-btn-premium active">
-                    <span class="nav-icon-premium">🏠</span>
-                    Tipp
-                </a>
-                <a href="competitions.html" class="nav-btn-premium">
-                    <span class="nav-icon-premium">🏆</span>
-                    Konkurranser
-                </a>
-                <a href="preferences.html" class="nav-btn-premium">
-                    <span class="nav-icon-premium">⚙️</span>
-                    Innstillinger
-                </a>
-            </nav>
-        </header>
+        <!-- Header injected by header.js -->
+        <div id="headerContainer"></div>
 
         <!-- Auth Modal -->
         <div id="authModal" class="modal" style="display: none;">
@@ -194,6 +151,10 @@
     <script src="firebase-config.js"></script>
     <script src="firebase-auth.js"></script>
     <script src="api-config.js"></script>
+    <script type="module">
+        import { initHeader } from './header.js';
+        initHeader('index');
+    </script>
     <script type="module" src="api-service.js?v=20251107d"></script>
     <script type="module" src="app-firebase.js?v=20251107d"></script>
 </body>

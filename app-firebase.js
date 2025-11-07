@@ -4,6 +4,7 @@ import { calculatePoints, getOutcome, formatMatchTime, sortMatchesByDate, filter
 import { formatDateRange, getDateLabel, groupMatchesByDate, toISODate, getStartOfDay, getEndOfDay } from './js/utils/dateUtils.js';
 import { STORAGE_KEYS, TIMEOUTS, ERROR_MESSAGES } from './js/constants/appConstants.js';
 import { ErrorHandler, retryOperation } from './js/utils/errorHandler.js';
+import { updateHeaderStats } from './header.js';
 
 // Match data - will be loaded from API or mock data
 let matches = [];
@@ -935,16 +936,8 @@ function updateTotalScore() {
         scoreElement.textContent = totalScore.toFixed(1);
     }
 
-    // Update new premium header elements
-    const totalPointsDisplay = document.getElementById('totalPointsDisplay');
-    if (totalPointsDisplay) {
-        totalPointsDisplay.textContent = Math.round(totalScore);
-    }
-
-    const totalTipsDisplay = document.getElementById('totalTipsDisplay');
-    if (totalTipsDisplay) {
-        totalTipsDisplay.textContent = userTips.length;
-    }
+    // Update header stats using shared header component
+    updateHeaderStats(totalScore, userTips.length);
 }
 
 // Simulate match results (for testing)
