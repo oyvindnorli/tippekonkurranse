@@ -733,46 +733,9 @@ header h1 {
     gap: 8px;
 }
 
-.input-with-buttons {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.adjust-btn-v3 {
-    width: 24px;
-    height: 24px;
-    border: none;
-    border-radius: 6px;
-    background: #e2e8f0;
-    color: #475569;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
-.adjust-btn-v3:hover:not(:disabled) {
-    background: #cbd5e1;
-    transform: scale(1.1);
-}
-
-.adjust-btn-v3:active:not(:disabled) {
-    transform: scale(0.95);
-}
-
-.adjust-btn-v3:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
 .score-input-v3 {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border: 2px solid #cbd5e1;
     border-radius: 8px;
     text-align: center;
@@ -795,16 +758,7 @@ header h1 {
     cursor: not-allowed;
 }
 
-/* Hide number input spinners */
-.score-input-v3::-webkit-inner-spin-button,
-.score-input-v3::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.score-input-v3[type=number] {
-    -moz-appearance: textfield;
-}
+/* Show native number input spinners (arrows inside the input) */
 
 .score-dash-v3 {
     font-size: 16px;
