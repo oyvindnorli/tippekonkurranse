@@ -1,0 +1,659 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f1f5f9;
+    min-height: 100vh;
+}
+
+.demo-container {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+.demo-intro {
+    background: white;
+    padding: 20px;
+    margin: 0 10px 20px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.demo-intro h1 {
+    font-size: 24px;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.demo-intro p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.design-showcase {
+    margin-bottom: 40px;
+}
+
+.design-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    margin: 0 10px;
+}
+
+.design-label h2 {
+    font-size: 16px;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.badge {
+    background: #3b82f6;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge.recommended {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.header-design {
+    position: relative;
+    overflow: hidden;
+}
+
+/* ========================================
+   DESIGN 1: GRADIENT HERO
+======================================== */
+.header-1 {
+    position: relative;
+    min-height: 240px;
+}
+
+.header-gradient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.header-1 .header-content {
+    position: relative;
+    padding: 20px;
+    color: white;
+}
+
+.header-1 .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.header-1 .header-title {
+    font-size: 24px;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-logout-1 {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
+.user-info-1 {
+    margin-bottom: 16px;
+    font-size: 14px;
+    opacity: 0.95;
+}
+
+.score-card-1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 16px;
+}
+
+.score-item-1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.score-label-1 {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+}
+
+.score-value-1 {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.score-divider-1 {
+    width: 1px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.nav-1 {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-btn-1 {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.nav-btn-1.active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========================================
+   DESIGN 2: SPLIT COLOR
+======================================== */
+.header-2 {
+    position: relative;
+    min-height: 240px;
+}
+
+.split-bg-2 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    display: flex;
+}
+
+.split-left-2 {
+    flex: 1;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+}
+
+.split-right-2 {
+    flex: 1;
+    background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+}
+
+.header-2 .header-content {
+    position: relative;
+    padding: 20px;
+}
+
+.header-top-2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.header-title-2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.btn-logout-2 {
+    background: white;
+    color: #1e293b;
+    border: 2px solid #e2e8f0;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.user-score-row-2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.username-2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.score-badge-2 {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.nav-2 {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-btn-2 {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    background: white;
+    border-radius: 12px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.nav-btn-2.active {
+    background: #3b82f6;
+    color: white;
+}
+
+/* ========================================
+   DESIGN 3: MINIMALISTISK CARD
+======================================== */
+.header-3 {
+    padding: 16px;
+    background: #f8fafc;
+}
+
+.header-card-3 {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.header-top-3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.brand-3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ball-icon-3 {
+    font-size: 28px;
+}
+
+.header-title-3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.btn-logout-3 {
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-logout-3:active {
+    background: #e2e8f0;
+}
+
+.user-row-3 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.user-avatar-3 {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.user-details-3 {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.username-3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.user-stats-3 {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.nav-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.nav-btn-3 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    background: #f8fafc;
+    border-radius: 12px;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.nav-btn-3.active {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.nav-icon-3 {
+    font-size: 20px;
+}
+
+.nav-text-3 {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ========================================
+   DESIGN 4: GLASS MORPHISM
+======================================== */
+.header-4 {
+    position: relative;
+    min-height: 260px;
+    padding: 16px;
+}
+
+.glass-bg-4 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%);
+}
+
+.glass-card-4 {
+    position: relative;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.header-top-4 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.header-title-4 {
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-logout-4 {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.stats-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.stat-card-4 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 12px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-icon-4 {
+    font-size: 24px;
+}
+
+.stat-info-4 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.stat-label-4 {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.stat-value-4 {
+    font-size: 16px;
+    color: white;
+    font-weight: 800;
+}
+
+.nav-4 {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-btn-4 {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.nav-btn-4.active {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ========================================
+   DESIGN 5: COMPACT PRO
+======================================== */
+.header-5 {
+    background: white;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.compact-header-5 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.left-section-5 {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.title-5 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.subtitle-5 {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.btn-logout-5 {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-5 {
+    display: flex;
+    padding: 8px;
+    gap: 4px;
+}
+
+.nav-btn-5 {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 8px;
+    background: transparent;
+    border-radius: 10px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.nav-btn-5.active {
+    background: #f1f5f9;
+    color: #3b82f6;
+}
+
+.nav-icon-5 {
+    font-size: 16px;
+}
+
+/* ========================================
+   FOOTER & MOCK CONTENT
+======================================== */
+.demo-footer {
+    background: white;
+    padding: 20px;
+    margin: 20px 10px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.demo-footer p {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.footer-note {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.mock-content {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 0 10px 40px;
+}
+
+.mock-match-card {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    color: #94a3b8;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
