@@ -1,6 +1,6 @@
 // Import utility modules
 import { LEAGUE_NAMES_SIMPLE } from './js/utils/leagueConfig.js?v=20251106e';
-import { calculatePoints, deduplicateMatches, isMatchLive } from './js/utils/matchUtils.js?v=20251106e';
+import { calculatePoints, deduplicateMatches, isMatchInLiveWindow } from './js/utils/matchUtils.js?v=20251106e';
 import { formatDate } from './js/utils/dateUtils.js?v=20251106e';
 import { LEAGUE_IDS, ERROR_MESSAGES, TIME, TIMEOUTS } from './js/constants/appConstants.js?v=20251106e';
 import { ErrorHandler } from './js/utils/errorHandler.js?v=20251106e';
@@ -395,7 +395,7 @@ async function loadCompetitionMatches() {
 
         if (competition.cachedMatches && competition.cachedMatches.length > 0) {
             // Use cached matches, but check if we need fresh data for live matches
-            const hasLiveMatches = competition.cachedMatches.some(match => isMatchLive(match));
+            const hasLiveMatches = competition.cachedMatches.some(match => isMatchInLiveWindow(match));
 
             if (hasLiveMatches) {
                 console.log('🔴 Live matches detected, fetching fresh data...');
@@ -822,7 +822,7 @@ function setupAutoRefresh() {
     }
 
     // Check if there are any live matches
-    const hasLiveMatches = competitionMatches.some(match => isMatchLive(match));
+    const hasLiveMatches = competitionMatches.some(match => isMatchInLiveWindow(match));
 
     const liveIndicator = document.getElementById('liveIndicator');
 

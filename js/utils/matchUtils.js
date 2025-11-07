@@ -6,15 +6,16 @@
 import { POINTS, OUTCOME, TIME } from '../constants/appConstants.js';
 
 /**
- * Sjekk om en match er live (har startet men ikke fullført)
+ * Sjekk om en match er i live-vinduet (har startet men ikke fullført)
+ * Basert på tid, ikke status fra API
  * @param {Object} match - Match objekt
  * @param {string} match.commence_time - Start tid for kampen
  * @param {string} match.date - Alternativ dato
  * @param {boolean} match.completed - Om kampen er fullført
  * @param {Date} [now=new Date()] - Nåværende tidspunkt (kan overstyres for testing)
- * @returns {boolean} True hvis kampen er live
+ * @returns {boolean} True hvis kampen er i live-vinduet
  */
-export function isMatchLive(match, now = new Date()) {
+export function isMatchInLiveWindow(match, now = new Date()) {
     if (match.completed) return false;
 
     const matchDate = new Date(match.commence_time || match.date);
