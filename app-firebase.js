@@ -757,27 +757,35 @@ function renderMatches() {
                         <div class="inputs-odds-section">
                             <!-- Score inputs -->
                             <div class="score-inputs-v3">
-                                <input type="number"
-                                    class="score-input-v3"
-                                    id="home-score-${match.id}"
-                                    data-match-id="${match.id}"
-                                    data-type="home"
-                                    value="${homeScore === '?' ? '' : homeScore}"
-                                    placeholder="?"
-                                    min="0"
-                                    max="20"
-                                    ${match.result ? 'disabled' : ''}>
+                                <div class="input-with-buttons">
+                                    <button class="adjust-btn-v3 minus" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Reduser">−</button>
+                                    <input type="number"
+                                        class="score-input-v3"
+                                        id="home-score-${match.id}"
+                                        data-match-id="${match.id}"
+                                        data-type="home"
+                                        value="${homeScore === '?' ? '' : homeScore}"
+                                        placeholder="?"
+                                        min="0"
+                                        max="20"
+                                        ${match.result ? 'disabled' : ''}>
+                                    <button class="adjust-btn-v3 plus" data-match-id="${match.id}" data-type="home" ${match.result ? 'disabled' : ''} title="Øk">+</button>
+                                </div>
                                 <span class="score-dash-v3">-</span>
-                                <input type="number"
-                                    class="score-input-v3"
-                                    id="away-score-${match.id}"
-                                    data-match-id="${match.id}"
-                                    data-type="away"
-                                    value="${awayScore === '?' ? '' : awayScore}"
-                                    placeholder="?"
-                                    min="0"
-                                    max="20"
-                                    ${match.result ? 'disabled' : ''}>
+                                <div class="input-with-buttons">
+                                    <button class="adjust-btn-v3 minus" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Reduser">−</button>
+                                    <input type="number"
+                                        class="score-input-v3"
+                                        id="away-score-${match.id}"
+                                        data-match-id="${match.id}"
+                                        data-type="away"
+                                        value="${awayScore === '?' ? '' : awayScore}"
+                                        placeholder="?"
+                                        min="0"
+                                        max="20"
+                                        ${match.result ? 'disabled' : ''}>
+                                    <button class="adjust-btn-v3 plus" data-match-id="${match.id}" data-type="away" ${match.result ? 'disabled' : ''} title="Øk">+</button>
+                                </div>
                             </div>
 
                             <!-- Odds compact column -->
@@ -802,7 +810,7 @@ function renderMatches() {
                 `;
                 dateGroup.appendChild(matchCard);
 
-                // Add event listeners for input fields
+                // Add event listeners for input fields and buttons
                 if (!match.result) {
                     const homeInput = document.getElementById(`home-score-${match.id}`);
                     const awayInput = document.getElementById(`away-score-${match.id}`);
@@ -842,6 +850,32 @@ function renderMatches() {
                             const value = parseInt(e.target.value);
                             if (value > 20) e.target.value = 20;
                             if (value < 0) e.target.value = 0;
+                        });
+
+                        // Add +/- button listeners
+                        const adjustButtons = matchCard.querySelectorAll('.adjust-btn-v3');
+                        adjustButtons.forEach(btn => {
+                            btn.addEventListener('click', async (e) => {
+                                const matchId = btn.dataset.matchId;
+                                const type = btn.dataset.type;
+                                const isPlus = btn.classList.contains('plus');
+
+                                const inputElement = type === 'home' ? homeInput : awayInput;
+                                let currentValue = parseInt(inputElement.value) || 0;
+
+                                // Adjust value
+                                if (isPlus) {
+                                    currentValue = Math.min(currentValue + 1, 20);
+                                } else {
+                                    currentValue = Math.max(currentValue - 1, 0);
+                                }
+
+                                // Update input
+                                inputElement.value = currentValue;
+
+                                // Save
+                                await handleInputChange(inputElement);
+                            });
                         });
                     }
 
