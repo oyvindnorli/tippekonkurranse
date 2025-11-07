@@ -261,6 +261,12 @@ function onUserLoggedOut() {
         signOutBtn.style.display = 'none';
     }
 
+    // Hide user stats bar (for premium header)
+    const userStatsBar = document.getElementById('userStatsBar');
+    if (userStatsBar) {
+        userStatsBar.style.display = 'none';
+    }
+
     // Hide navigation buttons
     const mainNavButtons = document.getElementById('mainNavButtons');
     if (mainNavButtons) {
