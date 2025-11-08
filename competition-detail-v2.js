@@ -741,14 +741,22 @@ async function renderMatchesWithAllTips() {
         matches.forEach(match => {
             // Show live score if available (even if not completed)
             let resultText;
+            const now = new Date();
+            const matchDate = new Date(match.commence_time || match.date);
+            const hasStarted = matchDate <= now;
+
             if (match.result && match.result.home !== null && match.result.away !== null) {
                 // Has score (live or completed)
                 const isLive = !match.completed;
                 const liveIndicator = isLive && match.elapsed ? ` <span class="live-minutes">${match.elapsed}'</span>` : '';
                 resultText = `<div class="match-result ${isLive ? 'match-live' : ''}">${match.result.home} - ${match.result.away}${liveIndicator}</div>`;
-            } else {
-                // No score yet
+            } else if (hasStarted) {
+                // Match has started but no score yet
                 resultText = '<div class="match-live">Pågår</div>';
+            } else {
+                // Match not started yet - show time
+                const time = matchDate.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' });
+                resultText = `<div class="match-upcoming">${time}</div>`;
             }
 
             html += `
