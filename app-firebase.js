@@ -744,7 +744,6 @@ function renderMatches() {
                     <div class="split-container-v4">
                         <!-- Home Team Half -->
                         <div class="team-half-v4 home" style="${homeLogo ? `background: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)), url('${homeLogo}') center/cover no-repeat;` : ''}">
-                            ${homeLogo ? `<img src="${homeLogo}" alt="${match.homeTeam}" class="team-logo-v4" onerror="this.style.display='none'">` : ''}
                             <span class="team-name-v4">${match.homeTeam}</span>
                             <div class="score-controls-v4">
                                 <button class="score-btn-v4" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
@@ -760,7 +759,6 @@ function renderMatches() {
 
                         <!-- Away Team Half -->
                         <div class="team-half-v4 away" style="${awayLogo ? `background: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)), url('${awayLogo}') center/cover no-repeat;` : ''}">
-                            ${awayLogo ? `<img src="${awayLogo}" alt="${match.awayTeam}" class="team-logo-v4" onerror="this.style.display='none'">` : ''}
                             <span class="team-name-v4">${match.awayTeam}</span>
                             <div class="score-controls-v4">
                                 <button class="score-btn-v4" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
