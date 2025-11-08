@@ -691,20 +691,16 @@ async function renderMatchesWithAllTips() {
 
     const participantTips = await Promise.all(allTipsPromises);
 
-    // Filter matches that have started
-    const startedMatches = competitionMatches.filter(match => {
-        const matchDate = new Date(match.commence_time || match.date);
-        return matchDate <= now;
-    });
-
-    if (startedMatches.length === 0) {
-        container.innerHTML = '<div class="info-message">Ingen kamper har startet ennå</div>';
+    // Show ALL matches in the competition (not just started ones)
+    // This allows users to see all their tips, even for upcoming matches
+    if (competitionMatches.length === 0) {
+        container.innerHTML = '<div class="info-message">Ingen kamper funnet</div>';
         return;
     }
 
     // Group matches by date
     const matchesByDate = {};
-    startedMatches.forEach(match => {
+    competitionMatches.forEach(match => {
         const matchDate = new Date(match.commence_time || match.date);
         const dateKey = matchDate.toLocaleDateString('no-NO', {
             day: '2-digit',
