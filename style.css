@@ -972,12 +972,12 @@ header h1 {
 }
 
 .team-half-v4.home {
-    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    background: #ffffff;
     border-radius: 12px 0 0 12px;
 }
 
 .team-half-v4.away {
-    background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+    background: #ffffff;
     border-radius: 0 12px 12px 0;
 }
 
