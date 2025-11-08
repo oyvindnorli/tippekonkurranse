@@ -19,11 +19,39 @@ export async function loadLeaderboard(competitionId, competition, footballApi) {
 
     try {
         // Get all participants for this competition
-        const participantsSnapshot = await db.collection('competitionParticipants')
+        let participantsSnapshot = await db.collection('competitionParticipants')
             .where('competitionId', '==', competitionId)
             .get();
 
         console.log('✅ [leaderboardService] Loaded', participantsSnapshot.size, 'participants');
+
+        // If no participants found, automatically add the creator
+        if (participantsSnapshot.size === 0 && competition.creatorId) {
+            console.log('⚠️ No participants found, adding creator as participant');
+            try {
+                await db.collection('competitionParticipants').doc(`${competitionId}_${competition.creatorId}`).set({
+                    competitionId: competitionId,
+                    userId: competition.creatorId,
+                    userName: competition.creatorName || 'Creator',
+                    totalPoints: 0,
+                    joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Also add to competition's participants array
+                await db.collection('competitions').doc(competitionId).update({
+                    participants: firebase.firestore.FieldValue.arrayUnion(competition.creatorId)
+                });
+
+                // Reload participants after adding creator
+                participantsSnapshot = await db.collection('competitionParticipants')
+                    .where('competitionId', '==', competitionId)
+                    .get();
+
+                console.log('✅ Creator added as participant');
+            } catch (error) {
+                console.error('❌ Failed to add creator as participant:', error);
+            }
+        }
 
         // Fetch match results ONCE for all participants (instead of per participant)
         const matchResults = await fetchMatchResultsForCompetition(competition, footballApi);
