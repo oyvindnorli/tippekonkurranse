@@ -49,12 +49,19 @@ async function loadUserStats(userId) {
             ...doc.data()
         }));
 
+        console.log('Sample tip:', userTips[0]);
+
         // Load all matches to get results
         const matchesSnapshot = await db.collection('matches').get();
         matches = matchesSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
+
+        console.log('Total matches:', matches.length);
+        console.log('Matches with results:', matches.filter(m => m.result).length);
+        console.log('Sample match:', matches[0]);
+        console.log('Sample match with result:', matches.find(m => m.result));
 
         // Calculate and display statistics
         calculateAndDisplayStats();
