@@ -1,7 +1,6 @@
 // Import utility modules
 import { calculatePoints, getOutcome } from './js/utils/matchUtils.js';
 import { LEAGUE_NAMES } from './js/utils/leagueConfig.js';
-import { footballApi } from './api-service.js';
 
 // Global state
 let userTips = [];
@@ -50,28 +49,32 @@ async function loadUserStats(userId) {
             ...doc.data()
         }));
 
-        // Load cached matches from Firestore
-        const matchesSnapshot = await db.collection('matches').get();
-        const cachedMatches = matchesSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        console.log('Loading matches with results...');
 
-        // Fetch live scores to get results for completed matches
-        console.log('Fetching live scores for results...');
-        const liveScores = await footballApi.fetchScores();
-        console.log('Live scores fetched:', liveScores.length, 'matches');
+        // Strategy: Get all competitions user is member of, then get their matches with results
+        const competitionsSnapshot = await db.collection('competitions')
+            .where('members', 'array-contains', userId)
+            .get();
 
-        // Merge: use live scores if available (has results), otherwise use cached
-        matches = cachedMatches.map(cached => {
-            const live = liveScores.find(s => String(s.id) === String(cached.id));
-            if (live && live.result) {
-                return { ...cached, result: live.result, completed: live.completed };
+        const allMatches = new Map(); // Use Map to deduplicate by match ID
+
+        // For each competition, get its matches (which have results)
+        for (const compDoc of competitionsSnapshot.docs) {
+            const competition = compDoc.data();
+            if (competition.matches && Array.isArray(competition.matches)) {
+                competition.matches.forEach(match => {
+                    // Use match ID as key to avoid duplicates
+                    if (!allMatches.has(match.id) || match.result) {
+                        // Prefer matches with results
+                        allMatches.set(match.id, match);
+                    }
+                });
             }
-            return cached;
-        });
+        }
 
-        console.log('Matches with results after merge:', matches.filter(m => m.result).length);
+        matches = Array.from(allMatches.values());
+        console.log('Loaded', matches.length, 'unique matches from competitions');
+        console.log('Matches with results:', matches.filter(m => m.result).length);
 
         // Calculate and display statistics
         calculateAndDisplayStats();
