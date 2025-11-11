@@ -11,53 +11,41 @@ let userTips = [];
 let matches = [];
 let filteredHistory = 'all';
 
-// Wait for Firebase to be initialized
-function waitForFirebase() {
-    console.log('waitForFirebase called');
-    return new Promise((resolve) => {
-        console.log('Checking Firebase...', typeof firebase, firebase?.apps?.length);
-        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-            console.log('Firebase already initialized');
-            resolve();
-        } else {
-            console.log('Waiting for Firebase initialization...');
-            const checkInterval = setInterval(() => {
-                console.log('Checking Firebase again...', typeof firebase, firebase?.apps?.length);
-                if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-                    console.log('Firebase now initialized!');
-                    clearInterval(checkInterval);
-                    resolve();
-                }
-            }, 100);
-        }
-    });
+// Initialize Firebase if not already initialized
+function initializeFirebaseIfNeeded() {
+    console.log('Checking if Firebase needs initialization');
+    if (firebase.apps.length === 0) {
+        console.log('Initializing Firebase...');
+        firebase.initializeApp(firebaseConfig);
+        console.log('Firebase initialized!');
+    } else {
+        console.log('Firebase already initialized');
+    }
 }
 
 // Initialize the page
-console.log('About to call waitForFirebase');
-waitForFirebase().then(() => {
-    console.log('Firebase initialized, setting up auth listener');
-    firebase.auth().onAuthStateChanged(async (user) => {
-        console.log('Auth state changed:', user ? 'logged in' : 'not logged in');
+console.log('About to initialize Firebase');
+initializeFirebaseIfNeeded();
 
-        // Hide loading spinner
-        const loadingState = document.getElementById('loadingState');
-        if (loadingState) loadingState.style.display = 'none';
+console.log('Setting up auth listener');
+firebase.auth().onAuthStateChanged(async (user) => {
+    console.log('Auth state changed:', user ? 'logged in' : 'not logged in');
 
-        if (user) {
-            console.log('Loading stats for user:', user.uid);
-            document.getElementById('authRequired').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
+    // Hide loading spinner
+    const loadingState = document.getElementById('loadingState');
+    if (loadingState) loadingState.style.display = 'none';
 
-            await loadUserStats(user.uid);
-        } else {
-            console.log('User not logged in, showing auth required');
-            document.getElementById('authRequired').style.display = 'flex';
-            document.getElementById('mainContent').style.display = 'none';
-        }
-    });
-}).catch(error => {
-    console.error('Error waiting for Firebase:', error);
+    if (user) {
+        console.log('Loading stats for user:', user.uid);
+        document.getElementById('authRequired').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+
+        await loadUserStats(user.uid);
+    } else {
+        console.log('User not logged in, showing auth required');
+        document.getElementById('authRequired').style.display = 'flex';
+        document.getElementById('mainContent').style.display = 'none';
+    }
 });
 
 // Load all user statistics
