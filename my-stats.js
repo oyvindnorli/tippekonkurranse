@@ -25,17 +25,28 @@ function waitForFirebase() {
 
 // Initialize the page
 waitForFirebase().then(() => {
+    console.log('Firebase initialized, setting up auth listener');
     firebase.auth().onAuthStateChanged(async (user) => {
+        console.log('Auth state changed:', user ? 'logged in' : 'not logged in');
+
+        // Hide loading spinner
+        const loadingState = document.getElementById('loadingState');
+        if (loadingState) loadingState.style.display = 'none';
+
         if (user) {
+            console.log('Loading stats for user:', user.uid);
             document.getElementById('authRequired').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
 
             await loadUserStats(user.uid);
         } else {
+            console.log('User not logged in, showing auth required');
             document.getElementById('authRequired').style.display = 'flex';
             document.getElementById('mainContent').style.display = 'none';
         }
     });
+}).catch(error => {
+    console.error('Error waiting for Firebase:', error);
 });
 
 // Load all user statistics
