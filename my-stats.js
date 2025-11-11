@@ -179,11 +179,15 @@ function calculateAndDisplayStats() {
 
 // Display stats per league
 function displayLeagueStats(tipsWithResults) {
+    console.log('displayLeagueStats called with', tipsWithResults.length, 'tips');
     const leagueStats = {};
 
     tipsWithResults.forEach(({ tip, match, points }) => {
         const leagueId = match.league || match.league_id || match.leagueId;
-        if (!leagueId) return;
+        if (!leagueId) {
+            console.log('No leagueId found for match:', match);
+            return;
+        }
 
         if (!leagueStats[leagueId]) {
             leagueStats[leagueId] = {
@@ -199,10 +203,24 @@ function displayLeagueStats(tipsWithResults) {
         if (points === 3) leagueStats[leagueId].exact++;
     });
 
+    console.log('League stats calculated:', leagueStats);
+
     const leagueStatsContainer = document.getElementById('leagueStats');
+    if (!leagueStatsContainer) {
+        console.error('leagueStats container not found!');
+        return;
+    }
     leagueStatsContainer.innerHTML = '';
 
-    Object.values(leagueStats).forEach(league => {
+    const leagueStatsArray = Object.values(leagueStats);
+    console.log('Displaying', leagueStatsArray.length, 'leagues');
+
+    if (leagueStatsArray.length === 0) {
+        leagueStatsContainer.innerHTML = '<div class="stats-row"><span>Ingen data tilgjengelig</span></div>';
+        return;
+    }
+
+    leagueStatsArray.forEach(league => {
         const avgPoints = (league.points / league.total).toFixed(2);
         const exactRate = ((league.exact / league.total) * 100).toFixed(1);
 
