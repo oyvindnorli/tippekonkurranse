@@ -301,7 +301,7 @@ function calculateAndDisplayStats() {
 
     // Update summary stats
     document.getElementById('totalPoints').textContent = totalPoints;
-    document.getElementById('totalMatches').textContent = finishedTips.length;
+    document.getElementById('totalMatches').textContent = userTips.length; // Show TOTAL tips, not just finished
     document.getElementById('exactMatches').textContent = exactMatches;
     document.getElementById('correctDirection').textContent = correctDirection;
     document.getElementById('exactPercentage').textContent =
