@@ -54,6 +54,10 @@ export function initHeader(activePage = 'index') {
                     <span class="nav-icon-premium">🏆</span>
                     Konkurranser
                 </a>
+                <a href="my-stats.html" class="nav-btn-premium ${activePage === 'my-stats' ? 'active' : ''}">
+                    <span class="nav-icon-premium">📊</span>
+                    Min Statistikk
+                </a>
                 <a href="preferences.html" class="nav-btn-premium ${activePage === 'preferences' ? 'active' : ''}">
                     <span class="nav-icon-premium">⚙️</span>
                     Innstillinger
