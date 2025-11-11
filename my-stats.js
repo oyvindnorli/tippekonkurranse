@@ -60,6 +60,16 @@ async function loadUserStats(userId) {
             ...doc.data()
         }));
 
+        console.log('Total user tips loaded:', userTips.length);
+        console.log('Last 3 tips:', userTips.slice(-3).map(t => ({
+            matchId: t.matchId,
+            homeTeam: t.homeTeam,
+            awayTeam: t.awayTeam,
+            homeScore: t.homeScore,
+            awayScore: t.awayScore,
+            timestamp: t.timestamp
+        })));
+
         console.log('Loading matches...');
 
         // Step 1: Load ALL matches from matches collection (fast, cached)
