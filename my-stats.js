@@ -30,10 +30,18 @@ firebase.auth().onAuthStateChanged(async (user) => {
         document.getElementById('authRequired').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
 
+        // Show navigation
+        const navButtons = document.getElementById('mainNavButtons');
+        if (navButtons) navButtons.style.display = 'flex';
+
         await loadUserStats(user.uid);
     } else {
         document.getElementById('authRequired').style.display = 'flex';
         document.getElementById('mainContent').style.display = 'none';
+
+        // Hide navigation
+        const navButtons = document.getElementById('mainNavButtons');
+        if (navButtons) navButtons.style.display = 'none';
     }
 });
 
