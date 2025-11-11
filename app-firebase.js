@@ -708,7 +708,10 @@ function renderMatches() {
             const leagueLogo = firstMatch.leagueLogo ? `<img src="${firstMatch.leagueLogo}" alt="${firstMatch.leagueName || 'Liga'}" class="league-logo-small" onerror="this.style.display='none'">` : '';
             const leagueName = firstMatch.leagueName ? `<span class="league-name">${firstMatch.leagueName}</span>` : '';
 
-            timeHeader.innerHTML = cleanTime ? `<strong>${cleanTime}</strong> ${leagueLogo} ${leagueName}` : `${leagueLogo} ${leagueName}`;
+            // Get round info
+            const roundInfo = firstMatch.round ? `<span class="round-info">${firstMatch.round}</span>` : '';
+
+            timeHeader.innerHTML = cleanTime ? `<strong>${cleanTime}</strong> ${leagueLogo} ${leagueName} ${roundInfo}` : `${leagueLogo} ${leagueName} ${roundInfo}`;
             dateGroup.appendChild(timeHeader);
 
             // Render all upcoming matches for this time

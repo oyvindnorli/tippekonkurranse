@@ -620,6 +620,13 @@ header h1 {
     font-weight: 500;
 }
 
+.time-header .round-info {
+    font-size: 10px;
+    color: #22d3ee;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
 /* Match cards - Compact inline layout */
 .match-card {
     background: white;
