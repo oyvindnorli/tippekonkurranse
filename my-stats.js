@@ -1,6 +1,10 @@
+console.log('my-stats.js loading...');
+
 // Import utility modules
 import { calculatePoints, getOutcome } from './js/utils/matchUtils.js';
 import { LEAGUE_NAMES } from './js/utils/leagueConfig.js';
+
+console.log('Imports successful');
 
 // Global state
 let userTips = [];
