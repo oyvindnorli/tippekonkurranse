@@ -51,9 +51,11 @@ firebase.auth().onAuthStateChanged(async (user) => {
 // Load all user statistics
 async function loadUserStats(userId) {
     try {
+        console.log('loadUserStats started for:', userId);
         const db = firebase.firestore();
 
         // Load user tips
+        console.log('Loading user tips...');
         const tipsSnapshot = await db.collection('tips')
             .where('userId', '==', userId)
             .get();
@@ -62,17 +64,23 @@ async function loadUserStats(userId) {
             id: doc.id,
             ...doc.data()
         }));
+        console.log('User tips loaded:', userTips.length);
 
         // Load all matches to get results
+        console.log('Loading matches...');
         const matchesSnapshot = await db.collection('matches').get();
         matches = matchesSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
+        console.log('Matches loaded:', matches.length);
 
         // Calculate and display statistics
+        console.log('Calculating stats...');
         calculateAndDisplayStats();
+        console.log('Displaying match history...');
         displayMatchHistory();
+        console.log('Stats loaded successfully!');
     } catch (error) {
         console.error('Error loading stats:', error);
     }
