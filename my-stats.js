@@ -62,22 +62,48 @@ async function loadUserStats(userId) {
 
         // Sort by timestamp (newest first)
         userTips.sort((a, b) => {
-            const timeA = a.timestamp?.seconds || a.timestamp || 0;
-            const timeB = b.timestamp?.seconds || b.timestamp || 0;
+            // Handle both Firestore Timestamp objects and ISO string timestamps
+            let timeA, timeB;
+
+            if (typeof a.timestamp === 'string') {
+                timeA = new Date(a.timestamp).getTime();
+            } else if (a.timestamp?.seconds) {
+                timeA = a.timestamp.seconds * 1000;
+            } else {
+                timeA = 0;
+            }
+
+            if (typeof b.timestamp === 'string') {
+                timeB = new Date(b.timestamp).getTime();
+            } else if (b.timestamp?.seconds) {
+                timeB = b.timestamp.seconds * 1000;
+            } else {
+                timeB = 0;
+            }
+
             return timeB - timeA;
         });
 
         console.log('Total user tips loaded:', userTips.length);
-        console.log('Last 5 tips (nyeste først):', userTips.slice(0, 5).map(t => ({
-            matchId: t.matchId,
-            homeTeam: t.homeTeam,
-            awayTeam: t.awayTeam,
-            homeScore: t.homeScore,
-            awayScore: t.awayScore,
-            timestamp: t.timestamp,
-            timestampSeconds: t.timestamp?.seconds || t.timestamp,
-            date: t.timestamp?.seconds ? new Date(t.timestamp.seconds * 1000).toLocaleString('nb-NO') : 'No date'
-        })));
+        console.log('Last 5 tips (nyeste først):', userTips.slice(0, 5).map(t => {
+            let dateStr;
+            if (typeof t.timestamp === 'string') {
+                dateStr = new Date(t.timestamp).toLocaleString('nb-NO');
+            } else if (t.timestamp?.seconds) {
+                dateStr = new Date(t.timestamp.seconds * 1000).toLocaleString('nb-NO');
+            } else {
+                dateStr = 'No date';
+            }
+
+            return {
+                matchId: t.matchId,
+                homeTeam: t.homeTeam,
+                awayTeam: t.awayTeam,
+                homeScore: t.homeScore,
+                awayScore: t.awayScore,
+                date: dateStr
+            };
+        }));
 
         console.log('Loading matches...');
 
