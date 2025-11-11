@@ -266,6 +266,9 @@ function calculateAndDisplayStats() {
 
         if (index < 3) {
             console.log(`Tip ${index + 1}:`, tip.homeScore, '-', tip.awayScore, 'Result:', match.result.home, '-', match.result.away, 'Points:', points);
+            console.log('  Tip odds:', tip.odds);
+            console.log('  Match odds:', match.odds);
+            console.log('  Match object:', match);
         }
 
         totalPoints += points;
