@@ -1,6 +1,7 @@
 // Import utility modules
 import { calculatePoints, getOutcome } from './js/utils/matchUtils.js';
 import { LEAGUE_NAMES } from './js/utils/leagueConfig.js';
+import { FootballAPI } from './api-service.js';
 
 // Global state
 let userTips = [];
@@ -49,19 +50,29 @@ async function loadUserStats(userId) {
             ...doc.data()
         }));
 
-        console.log('Sample tip:', userTips[0]);
-
-        // Load all matches to get results
+        // Load cached matches from Firestore
         const matchesSnapshot = await db.collection('matches').get();
-        matches = matchesSnapshot.docs.map(doc => ({
+        const cachedMatches = matchesSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
 
-        console.log('Total matches:', matches.length);
-        console.log('Matches with results:', matches.filter(m => m.result).length);
-        console.log('Sample match:', matches[0]);
-        console.log('Sample match with result:', matches.find(m => m.result));
+        // Fetch live scores to get results for completed matches
+        console.log('Fetching live scores for results...');
+        const footballApi = new FootballAPI();
+        const liveScores = await footballApi.fetchScores();
+        console.log('Live scores fetched:', liveScores.length, 'matches');
+
+        // Merge: use live scores if available (has results), otherwise use cached
+        matches = cachedMatches.map(cached => {
+            const live = liveScores.find(s => String(s.id) === String(cached.id));
+            if (live && live.result) {
+                return { ...cached, result: live.result, completed: live.completed };
+            }
+            return cached;
+        });
+
+        console.log('Matches with results after merge:', matches.filter(m => m.result).length);
 
         // Calculate and display statistics
         calculateAndDisplayStats();
