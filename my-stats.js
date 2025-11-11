@@ -8,6 +8,7 @@ import { footballApi } from './api-service.js';
 let userTips = [];
 let matches = [];
 let filteredHistory = 'all';
+let isUpdatingInBackground = false; // Prevent multiple simultaneous updates
 
 // Initialize Firebase if not already initialized
 function initializeFirebaseIfNeeded() {
@@ -87,16 +88,16 @@ async function loadUserStats(userId) {
         console.log('Total unique matches:', matches.length);
         console.log('Matches with results:', matchesWithResults);
 
-        // Step 3: If some matches don't have results, update them in background
-        const incompleteMatches = matches.filter(m => !m.result && !m.completed);
-        if (incompleteMatches.length > 0) {
-            console.log('Updating', incompleteMatches.length, 'incomplete matches in background...');
-            updateResultsInBackground();
-        }
-
         // Calculate and display statistics with what we have now
         calculateAndDisplayStats();
         displayMatchHistory();
+
+        // Step 3: If some matches don't have results, update them in background (once)
+        const incompleteMatches = matches.filter(m => !m.result && !m.completed);
+        if (incompleteMatches.length > 0 && !isUpdatingInBackground) {
+            console.log('Updating', incompleteMatches.length, 'incomplete matches in background...');
+            updateResultsInBackground();
+        }
     } catch (error) {
         console.error('Error loading stats:', error);
     }
@@ -104,6 +105,13 @@ async function loadUserStats(userId) {
 
 // Background update of match results
 async function updateResultsInBackground() {
+    if (isUpdatingInBackground) {
+        console.log('Background update already running, skipping...');
+        return;
+    }
+
+    isUpdatingInBackground = true;
+
     try {
         // Fetch live scores
         const liveScores = await footballApi.fetchScores();
@@ -111,17 +119,30 @@ async function updateResultsInBackground() {
         // Update Firestore with new results
         const matchesWithResults = liveScores.filter(m => m.result && m.completed);
         if (matchesWithResults.length > 0) {
-            await updateMatchResults(matchesWithResults);
-            console.log('✅ Background update complete, reloading stats...');
+            const updated = await updateMatchResults(matchesWithResults);
+            console.log(`✅ Background update complete: ${updated} matches updated`);
 
-            // Reload stats to show updated data
-            const user = firebase.auth().currentUser;
-            if (user) {
-                await loadUserStats(user.uid);
-            }
+            // Refresh the page data without triggering another background update
+            const db = firebase.firestore();
+            const matchesSnapshot = await db.collection('matches').get();
+            const allMatches = new Map();
+
+            matchesSnapshot.docs.forEach(doc => {
+                const match = { id: doc.id, ...doc.data() };
+                allMatches.set(match.id, match);
+            });
+
+            matches = Array.from(allMatches.values());
+            console.log('Refreshed matches, now have', matches.filter(m => m.result).length, 'with results');
+
+            // Recalculate stats with new data
+            calculateAndDisplayStats();
+            displayMatchHistory();
         }
     } catch (error) {
         console.warn('Background update failed:', error);
+    } finally {
+        isUpdatingInBackground = false;
     }
 }
 
