@@ -148,11 +148,26 @@ async function updateResultsInBackground() {
 
 // Calculate all statistics
 function calculateAndDisplayStats() {
+    console.log('=== Calculating stats ===');
+    console.log('User tips:', userTips.length);
+    console.log('Matches:', matches.length);
+
     // Filter tips that have results
     const finishedTips = userTips.filter(tip => {
         const match = matches.find(m => String(m.id) === String(tip.matchId));
-        return match && match.result;
+        const hasResult = match && match.result;
+        if (match && !match.result) {
+            console.log('Match found but no result:', match.homeTeam, 'vs', match.awayTeam);
+        }
+        return hasResult;
     });
+
+    console.log('Finished tips (tips with match results):', finishedTips.length);
+    if (finishedTips.length > 0) {
+        console.log('Sample finished tip:', finishedTips[0]);
+        const sampleMatch = matches.find(m => String(m.id) === String(finishedTips[0].matchId));
+        console.log('Sample match:', sampleMatch);
+    }
 
     if (finishedTips.length === 0) {
         document.getElementById('totalPoints').textContent = '0';
@@ -185,9 +200,14 @@ function calculateAndDisplayStats() {
     let totalOddsValue = 0;
     let oddsCount = 0;
 
-    const tipsWithResults = finishedTips.map(tip => {
+    const tipsWithResults = finishedTips.map((tip, index) => {
         const match = matches.find(m => String(m.id) === String(tip.matchId));
         const points = calculatePoints(tip, match.result);
+
+        if (index < 3) {
+            console.log(`Tip ${index + 1}:`, tip.homeScore, '-', tip.awayScore, 'Result:', match.result.home, '-', match.result.away, 'Points:', points);
+        }
+
         totalPoints += points;
 
         if (points === 3) {
