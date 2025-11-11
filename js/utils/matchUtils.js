@@ -41,23 +41,26 @@ export function getOutcome(homeScore, awayScore) {
  * @param {Object} tip - Brukerens tips
  * @param {number} tip.homeScore - Tippet hjemmescore
  * @param {number} tip.awayScore - Tippet bortescore
- * @param {Object} tip.odds - Odds for kampen {H, U, B}
+ * @param {Object} tip.odds - Odds for kampen {H, U, B} (optional)
  * @param {Object} match - Kampen med resultat
  * @param {Object} match.result - Faktisk resultat {home, away}
+ * @param {Object} match.odds - Odds fra match (fallback hvis tip.odds mangler)
  * @returns {number} Poeng opptjent
  */
 export function calculatePoints(tip, match) {
     if (!match.result) return 0;
-    if (!tip.odds) return 0; // Skip if tip has no odds
 
     const tipOutcome = getOutcome(tip.homeScore, tip.awayScore);
     const resultOutcome = getOutcome(match.result.home, match.result.away);
 
     let points = 0;
 
+    // Use odds from tip, or fallback to match odds, or use default odds
+    const odds = tip.odds || match.odds || { H: 2.0, U: 3.0, B: 2.0 };
+
     // Correct outcome: points equal to odds
     if (tipOutcome === resultOutcome) {
-        points += tip.odds[resultOutcome];
+        points += odds[resultOutcome];
     }
 
     // Exact score: bonus points (in addition to outcome points)

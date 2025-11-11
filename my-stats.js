@@ -1,5 +1,5 @@
 // Import utility modules
-import { getOutcome } from './js/utils/matchUtils.js';
+import { calculatePoints, getOutcome } from './js/utils/matchUtils.js';
 import { LEAGUE_NAMES } from './js/utils/leagueConfig.js';
 import { updateMatchResults } from './js/utils/matchCache.js';
 import { footballApi } from './api-service.js';
@@ -15,32 +15,6 @@ function initializeFirebaseIfNeeded() {
     if (firebase.apps.length === 0) {
         firebase.initializeApp(firebaseConfig);
     }
-}
-
-// Simple points calculation for my-stats (3-1-0 system)
-function calculatePointsSimple(tip, result) {
-    if (!result) return 0;
-
-    const tipHomeScore = tip.homeScore;
-    const tipAwayScore = tip.awayScore;
-    const actualHomeScore = result.home;
-    const actualAwayScore = result.away;
-
-    // Exact score: 3 points
-    if (tipHomeScore === actualHomeScore && tipAwayScore === actualAwayScore) {
-        return 3;
-    }
-
-    // Correct outcome (winner/draw): 1 point
-    const tipOutcome = getOutcome(tipHomeScore, tipAwayScore);
-    const actualOutcome = getOutcome(actualHomeScore, actualAwayScore);
-
-    if (tipOutcome === actualOutcome) {
-        return 1;
-    }
-
-    // Wrong: 0 points
-    return 0;
 }
 
 // Initialize the page
@@ -288,7 +262,7 @@ function calculateAndDisplayStats() {
 
     const tipsWithResults = finishedTips.map((tip, index) => {
         const match = matches.find(m => String(m.id) === String(tip.matchId));
-        const points = calculatePointsSimple(tip, match.result);
+        const points = calculatePoints(tip, match);
 
         if (index < 3) {
             console.log(`Tip ${index + 1}:`, tip.homeScore, '-', tip.awayScore, 'Result:', match.result.home, '-', match.result.away, 'Points:', points);
@@ -408,7 +382,7 @@ function displayMatchHistory() {
         return match && match.result;
     }).map(tip => {
         const match = matches.find(m => String(m.id) === String(tip.matchId));
-        const points = calculatePointsSimple(tip, match.result);
+        const points = calculatePoints(tip, match);
         return { tip, match, points };
     });
 
