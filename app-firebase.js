@@ -108,24 +108,6 @@ async function saveSelectedLeagues() {
 // Selected leagues for filtering (will be updated when user logs in)
 let selectedLeagues = new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
 
-// Helper function to get color based on odds (green for low/likely, red for high/unlikely)
-function getOddsColor(odds) {
-    // Typical range: 1.1 (very likely) to 15+ (very unlikely)
-    // Map to hue: green (120) for low odds, red (0) for high odds
-    const minOdds = 1.1;
-    const maxOdds = 10.0;
-    const clampedOdds = Math.max(minOdds, Math.min(maxOdds, odds));
-
-    // Normalize to 0-1 range (0 = low odds/likely, 1 = high odds/unlikely)
-    const normalized = (clampedOdds - minOdds) / (maxOdds - minOdds);
-
-    // Calculate hue: 120 (green) to 0 (red)
-    const hue = 120 * (1 - normalized);
-
-    // Return HSL color with good saturation and lightness
-    return `hsl(${hue}, 70%, 45%)`;
-}
-
 // Load user tips from Firebase
 async function loadUserTips() {
     userTips = await getCurrentUserTips();
@@ -789,15 +771,15 @@ function renderMatches() {
                     <!-- Odds Buttons (from Design 3) -->
                     ${match.odds ? `
                         <div class="odds-buttons-v4">
-                            <button class="odd-btn-v4" onclick="setScoreFromOdds('${match.id}', 'H')" ${match.result ? 'disabled' : ''} style="background-color: ${getOddsColor(match.odds.H)}; color: white; border-color: ${getOddsColor(match.odds.H)};">
+                            <button class="odd-btn-v4" onclick="setScoreFromOdds('${match.id}', 'H')" ${match.result ? 'disabled' : ''}>
                                 <span class="odd-label-v4">H</span>
                                 <span class="odd-value-v4">${match.odds.H.toFixed(1)}</span>
                             </button>
-                            <button class="odd-btn-v4" onclick="setScoreFromOdds('${match.id}', 'U')" ${match.result ? 'disabled' : ''} style="background-color: ${getOddsColor(match.odds.U)}; color: white; border-color: ${getOddsColor(match.odds.U)};">
+                            <button class="odd-btn-v4" onclick="setScoreFromOdds('${match.id}', 'U')" ${match.result ? 'disabled' : ''}>
                                 <span class="odd-label-v4">U</span>
                                 <span class="odd-value-v4">${match.odds.U.toFixed(1)}</span>
                             </button>
-                            <button class="odd-btn-v4" onclick="setScoreFromOdds('${match.id}', 'B')" ${match.result ? 'disabled' : ''} style="background-color: ${getOddsColor(match.odds.B)}; color: white; border-color: ${getOddsColor(match.odds.B)};">
+                            <button class="odd-btn-v4" onclick="setScoreFromOdds('${match.id}', 'B')" ${match.result ? 'disabled' : ''}>
                                 <span class="odd-label-v4">B</span>
                                 <span class="odd-value-v4">${match.odds.B.toFixed(1)}</span>
                             </button>
