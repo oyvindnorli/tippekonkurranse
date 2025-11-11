@@ -1,6 +1,8 @@
 // Import utility modules
 import { calculatePoints, getOutcome } from './js/utils/matchUtils.js';
 import { LEAGUE_NAMES } from './js/utils/leagueConfig.js';
+import { updateMatchResults } from './js/utils/matchCache.js';
+import { footballApi } from './api-service.js';
 
 // Global state
 let userTips = [];
@@ -49,23 +51,31 @@ async function loadUserStats(userId) {
             ...doc.data()
         }));
 
-        console.log('Loading matches with results...');
+        console.log('Loading matches...');
 
-        // Strategy: Get all competitions user is member of, then get their matches with results
+        // Step 1: Load ALL matches from matches collection (fast, cached)
+        const matchesSnapshot = await db.collection('matches').get();
+        const allMatches = new Map();
+
+        matchesSnapshot.docs.forEach(doc => {
+            const match = { id: doc.id, ...doc.data() };
+            allMatches.set(match.id, match);
+        });
+
+        console.log('Loaded', allMatches.size, 'matches from cache');
+
+        // Step 2: Also get matches from competitions (they may have results)
         const competitionsSnapshot = await db.collection('competitions')
             .where('members', 'array-contains', userId)
             .get();
 
-        const allMatches = new Map(); // Use Map to deduplicate by match ID
-
-        // For each competition, get its matches (which have results)
         for (const compDoc of competitionsSnapshot.docs) {
             const competition = compDoc.data();
             if (competition.matches && Array.isArray(competition.matches)) {
                 competition.matches.forEach(match => {
-                    // Use match ID as key to avoid duplicates
-                    if (!allMatches.has(match.id) || match.result) {
-                        // Prefer matches with results
+                    const existing = allMatches.get(match.id);
+                    // Prefer competition match if it has result and cache doesn't
+                    if (!existing || (match.result && !existing.result)) {
                         allMatches.set(match.id, match);
                     }
                 });
@@ -73,14 +83,45 @@ async function loadUserStats(userId) {
         }
 
         matches = Array.from(allMatches.values());
-        console.log('Loaded', matches.length, 'unique matches from competitions');
-        console.log('Matches with results:', matches.filter(m => m.result).length);
+        const matchesWithResults = matches.filter(m => m.result).length;
+        console.log('Total unique matches:', matches.length);
+        console.log('Matches with results:', matchesWithResults);
 
-        // Calculate and display statistics
+        // Step 3: If some matches don't have results, update them in background
+        const incompleteMatches = matches.filter(m => !m.result && !m.completed);
+        if (incompleteMatches.length > 0) {
+            console.log('Updating', incompleteMatches.length, 'incomplete matches in background...');
+            updateResultsInBackground();
+        }
+
+        // Calculate and display statistics with what we have now
         calculateAndDisplayStats();
         displayMatchHistory();
     } catch (error) {
         console.error('Error loading stats:', error);
+    }
+}
+
+// Background update of match results
+async function updateResultsInBackground() {
+    try {
+        // Fetch live scores
+        const liveScores = await footballApi.fetchScores();
+
+        // Update Firestore with new results
+        const matchesWithResults = liveScores.filter(m => m.result && m.completed);
+        if (matchesWithResults.length > 0) {
+            await updateMatchResults(matchesWithResults);
+            console.log('✅ Background update complete, reloading stats...');
+
+            // Reload stats to show updated data
+            const user = firebase.auth().currentUser;
+            if (user) {
+                await loadUserStats(user.uid);
+            }
+        }
+    } catch (error) {
+        console.warn('Background update failed:', error);
     }
 }
 
