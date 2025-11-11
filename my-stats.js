@@ -411,9 +411,19 @@ function displayMatchHistory() {
     // Apply filter
     let filteredTips = finishedTips;
     if (filteredHistory === 'correct') {
-        filteredTips = finishedTips.filter(t => t.points === 3);
+        // Exact score match
+        filteredTips = finishedTips.filter(t =>
+            t.tip.homeScore === t.match.result.home &&
+            t.tip.awayScore === t.match.result.away
+        );
     } else if (filteredHistory === 'direction') {
-        filteredTips = finishedTips.filter(t => t.points === 1);
+        // Correct direction but not exact
+        filteredTips = finishedTips.filter(t => {
+            const isExact = t.tip.homeScore === t.match.result.home && t.tip.awayScore === t.match.result.away;
+            const tipOutcome = getOutcome(t.tip.homeScore, t.tip.awayScore);
+            const resultOutcome = getOutcome(t.match.result.home, t.match.result.away);
+            return tipOutcome === resultOutcome && !isExact;
+        });
     } else if (filteredHistory === 'wrong') {
         filteredTips = finishedTips.filter(t => t.points === 0);
     }
