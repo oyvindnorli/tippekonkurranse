@@ -1,7 +1,7 @@
 // Import utility modules
 import { calculatePoints, getOutcome } from './js/utils/matchUtils.js';
 import { LEAGUE_NAMES } from './js/utils/leagueConfig.js';
-import { FootballAPI } from './api-service.js';
+import { footballApi } from './api-service.js';
 
 // Global state
 let userTips = [];
@@ -59,7 +59,6 @@ async function loadUserStats(userId) {
 
         // Fetch live scores to get results for completed matches
         console.log('Fetching live scores for results...');
-        const footballApi = new FootballAPI();
         const liveScores = await footballApi.fetchScores();
         console.log('Live scores fetched:', liveScores.length, 'matches');
 
