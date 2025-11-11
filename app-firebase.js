@@ -750,7 +750,7 @@ function renderMatches() {
                             <span class="team-name-v4">${match.homeTeam}</span>
                             <div class="score-controls-v4">
                                 <button class="score-btn-v4" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <span class="score-display-v4" id="home-score-${match.id}">${homeScore === '?' ? 0 : homeScore}</span>
+                                <span class="score-display-v4" id="home-score-${match.id}">${homeScore === '?' ? '?' : homeScore}</span>
                                 <button class="score-btn-v4" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
                             </div>
                         </div>
@@ -765,7 +765,7 @@ function renderMatches() {
                             <span class="team-name-v4">${match.awayTeam}</span>
                             <div class="score-controls-v4">
                                 <button class="score-btn-v4" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <span class="score-display-v4" id="away-score-${match.id}">${awayScore === '?' ? 0 : awayScore}</span>
+                                <span class="score-display-v4" id="away-score-${match.id}">${awayScore === '?' ? '?' : awayScore}</span>
                                 <button class="score-btn-v4" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
                             </div>
                         </div>
