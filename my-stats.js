@@ -88,13 +88,18 @@ async function loadUserStats(userId) {
 
 // Calculate all statistics
 function calculateAndDisplayStats() {
+    console.log('calculateAndDisplayStats: userTips:', userTips.length, 'matches:', matches.length);
+
     // Filter tips that have results
     const finishedTips = userTips.filter(tip => {
         const match = matches.find(m => String(m.id) === String(tip.matchId));
         return match && match.result;
     });
 
+    console.log('Finished tips (with results):', finishedTips.length);
+
     if (finishedTips.length === 0) {
+        console.log('No finished tips found, setting all stats to 0');
         document.getElementById('totalPoints').textContent = '0';
         document.getElementById('totalMatches').textContent = '0';
         document.getElementById('exactMatches').textContent = '0';
@@ -106,6 +111,12 @@ function calculateAndDisplayStats() {
         document.getElementById('currentStreak').textContent = '0';
         document.getElementById('oddsValue').textContent = '0';
         document.getElementById('avgOdds').textContent = '-';
+
+        // Still update league stats container to show message
+        const leagueStatsContainer = document.getElementById('leagueStats');
+        if (leagueStatsContainer) {
+            leagueStatsContainer.innerHTML = '<div class="stats-row"><span>Ingen ferdige kamper ennå</span></div>';
+        }
         return;
     }
 
