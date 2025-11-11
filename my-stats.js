@@ -164,7 +164,14 @@ function calculateAndDisplayStats() {
 
     console.log('Finished tips (tips with match results):', finishedTips.length);
     if (finishedTips.length > 0) {
-        console.log('Sample finished tip:', finishedTips[0]);
+        console.log('Sample finished tip FULL:', finishedTips[0]);
+        console.log('Tip fields:', {
+            homeScore: finishedTips[0].homeScore,
+            awayScore: finishedTips[0].awayScore,
+            homeTeam: finishedTips[0].homeTeam,
+            awayTeam: finishedTips[0].awayTeam,
+            matchId: finishedTips[0].matchId
+        });
         const sampleMatch = matches.find(m => String(m.id) === String(finishedTips[0].matchId));
         console.log('Sample match:', sampleMatch);
     }
