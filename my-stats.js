@@ -273,12 +273,19 @@ function calculateAndDisplayStats() {
 
         totalPoints += points;
 
-        if (points === 3) {
+        // Check if exact match (exact score)
+        const isExact = tip.homeScore === match.result.home && tip.awayScore === match.result.away;
+        // Check if correct direction
+        const tipOutcome = getOutcome(tip.homeScore, tip.awayScore);
+        const resultOutcome = getOutcome(match.result.home, match.result.away);
+        const isCorrectDirection = tipOutcome === resultOutcome && !isExact;
+
+        if (isExact) {
             exactMatches++;
             tempStreak++;
             currentStreak = tempStreak;
             if (tempStreak > bestStreak) bestStreak = tempStreak;
-        } else if (points === 1) {
+        } else if (isCorrectDirection) {
             correctDirection++;
             tempStreak = 0;
         } else {
@@ -424,8 +431,10 @@ function displayMatchHistory() {
             year: 'numeric'
         });
 
-        const pointsClass = points === 3 ? 'points-exact' : points === 1 ? 'points-direction' : 'points-wrong';
-        const pointsText = points === 3 ? '3 poeng' : points === 1 ? '1 poeng' : '0 poeng';
+        // Determine if exact score (bonus points >= 3)
+        const isExact = tip.homeScore === match.result.home && tip.awayScore === match.result.away;
+        const pointsClass = isExact ? 'points-exact' : points > 0 ? 'points-direction' : 'points-wrong';
+        const pointsText = points > 0 ? `${points.toFixed(1)} poeng` : '0 poeng';
 
         const historyItem = document.createElement('div');
         historyItem.className = 'history-item';
