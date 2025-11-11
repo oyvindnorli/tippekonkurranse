@@ -1,10 +1,6 @@
-console.log('my-stats.js loading...');
-
 // Import utility modules
 import { calculatePoints, getOutcome } from './js/utils/matchUtils.js';
 import { LEAGUE_NAMES } from './js/utils/leagueConfig.js';
-
-console.log('Imports successful');
 
 // Global state
 let userTips = [];
@@ -13,36 +9,26 @@ let filteredHistory = 'all';
 
 // Initialize Firebase if not already initialized
 function initializeFirebaseIfNeeded() {
-    console.log('Checking if Firebase needs initialization');
     if (firebase.apps.length === 0) {
-        console.log('Initializing Firebase...');
         firebase.initializeApp(firebaseConfig);
-        console.log('Firebase initialized!');
-    } else {
-        console.log('Firebase already initialized');
     }
 }
 
 // Initialize the page
-console.log('About to initialize Firebase');
 initializeFirebaseIfNeeded();
 
-console.log('Setting up auth listener');
 firebase.auth().onAuthStateChanged(async (user) => {
-    console.log('Auth state changed:', user ? 'logged in' : 'not logged in');
 
     // Hide loading spinner
     const loadingState = document.getElementById('loadingState');
     if (loadingState) loadingState.style.display = 'none';
 
     if (user) {
-        console.log('Loading stats for user:', user.uid);
         document.getElementById('authRequired').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
 
         await loadUserStats(user.uid);
     } else {
-        console.log('User not logged in, showing auth required');
         document.getElementById('authRequired').style.display = 'flex';
         document.getElementById('mainContent').style.display = 'none';
     }
@@ -51,11 +37,9 @@ firebase.auth().onAuthStateChanged(async (user) => {
 // Load all user statistics
 async function loadUserStats(userId) {
     try {
-        console.log('loadUserStats started for:', userId);
         const db = firebase.firestore();
 
         // Load user tips
-        console.log('Loading user tips...');
         const tipsSnapshot = await db.collection('tips')
             .where('userId', '==', userId)
             .get();
@@ -64,23 +48,17 @@ async function loadUserStats(userId) {
             id: doc.id,
             ...doc.data()
         }));
-        console.log('User tips loaded:', userTips.length);
 
         // Load all matches to get results
-        console.log('Loading matches...');
         const matchesSnapshot = await db.collection('matches').get();
         matches = matchesSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
-        console.log('Matches loaded:', matches.length);
 
         // Calculate and display statistics
-        console.log('Calculating stats...');
         calculateAndDisplayStats();
-        console.log('Displaying match history...');
         displayMatchHistory();
-        console.log('Stats loaded successfully!');
     } catch (error) {
         console.error('Error loading stats:', error);
     }
@@ -88,18 +66,13 @@ async function loadUserStats(userId) {
 
 // Calculate all statistics
 function calculateAndDisplayStats() {
-    console.log('calculateAndDisplayStats: userTips:', userTips.length, 'matches:', matches.length);
-
     // Filter tips that have results
     const finishedTips = userTips.filter(tip => {
         const match = matches.find(m => String(m.id) === String(tip.matchId));
         return match && match.result;
     });
 
-    console.log('Finished tips (with results):', finishedTips.length);
-
     if (finishedTips.length === 0) {
-        console.log('No finished tips found, setting all stats to 0');
         document.getElementById('totalPoints').textContent = '0';
         document.getElementById('totalMatches').textContent = '0';
         document.getElementById('exactMatches').textContent = '0';
@@ -190,15 +163,11 @@ function calculateAndDisplayStats() {
 
 // Display stats per league
 function displayLeagueStats(tipsWithResults) {
-    console.log('displayLeagueStats called with', tipsWithResults.length, 'tips');
     const leagueStats = {};
 
     tipsWithResults.forEach(({ tip, match, points }) => {
         const leagueId = match.league || match.league_id || match.leagueId;
-        if (!leagueId) {
-            console.log('No leagueId found for match:', match);
-            return;
-        }
+        if (!leagueId) return;
 
         if (!leagueStats[leagueId]) {
             leagueStats[leagueId] = {
@@ -214,17 +183,12 @@ function displayLeagueStats(tipsWithResults) {
         if (points === 3) leagueStats[leagueId].exact++;
     });
 
-    console.log('League stats calculated:', leagueStats);
-
     const leagueStatsContainer = document.getElementById('leagueStats');
-    if (!leagueStatsContainer) {
-        console.error('leagueStats container not found!');
-        return;
-    }
+    if (!leagueStatsContainer) return;
+
     leagueStatsContainer.innerHTML = '';
 
     const leagueStatsArray = Object.values(leagueStats);
-    console.log('Displaying', leagueStatsArray.length, 'leagues');
 
     if (leagueStatsArray.length === 0) {
         leagueStatsContainer.innerHTML = '<div class="stats-row"><span>Ingen data tilgjengelig</span></div>';
@@ -259,6 +223,11 @@ function displayMatchHistory() {
         const points = calculatePoints(tip, match.result);
         return { tip, match, points };
     });
+
+    if (finishedTips.length === 0) {
+        historyContainer.innerHTML = '<p style="text-align: center; color: #64748b; padding: 40px 20px; font-size: 15px;">📊 Ingen ferdige kamper ennå. Statistikk vil vises når kampene er ferdige!</p>';
+        return;
+    }
 
     // Sort by date (newest first)
     finishedTips.sort((a, b) => {
