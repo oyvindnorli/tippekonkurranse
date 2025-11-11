@@ -13,12 +13,18 @@ let filteredHistory = 'all';
 
 // Wait for Firebase to be initialized
 function waitForFirebase() {
+    console.log('waitForFirebase called');
     return new Promise((resolve) => {
+        console.log('Checking Firebase...', typeof firebase, firebase?.apps?.length);
         if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+            console.log('Firebase already initialized');
             resolve();
         } else {
+            console.log('Waiting for Firebase initialization...');
             const checkInterval = setInterval(() => {
+                console.log('Checking Firebase again...', typeof firebase, firebase?.apps?.length);
                 if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                    console.log('Firebase now initialized!');
                     clearInterval(checkInterval);
                     resolve();
                 }
@@ -28,6 +34,7 @@ function waitForFirebase() {
 }
 
 // Initialize the page
+console.log('About to call waitForFirebase');
 waitForFirebase().then(() => {
     console.log('Firebase initialized, setting up auth listener');
     firebase.auth().onAuthStateChanged(async (user) => {
