@@ -7,17 +7,35 @@ let userTips = [];
 let matches = [];
 let filteredHistory = 'all';
 
-// Initialize the page
-firebase.auth().onAuthStateChanged(async (user) => {
-    if (user) {
-        document.getElementById('authRequired').style.display = 'none';
-        document.getElementById('mainContent').style.display = 'block';
+// Wait for Firebase to be initialized
+function waitForFirebase() {
+    return new Promise((resolve) => {
+        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+            resolve();
+        } else {
+            const checkInterval = setInterval(() => {
+                if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 100);
+        }
+    });
+}
 
-        await loadUserStats(user.uid);
-    } else {
-        document.getElementById('authRequired').style.display = 'flex';
-        document.getElementById('mainContent').style.display = 'none';
-    }
+// Initialize the page
+waitForFirebase().then(() => {
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+            document.getElementById('authRequired').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+
+            await loadUserStats(user.uid);
+        } else {
+            document.getElementById('authRequired').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+        }
+    });
 });
 
 // Load all user statistics
