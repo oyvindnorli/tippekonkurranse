@@ -60,14 +60,23 @@ async function loadUserStats(userId) {
             ...doc.data()
         }));
 
+        // Sort by timestamp (newest first)
+        userTips.sort((a, b) => {
+            const timeA = a.timestamp?.seconds || a.timestamp || 0;
+            const timeB = b.timestamp?.seconds || b.timestamp || 0;
+            return timeB - timeA;
+        });
+
         console.log('Total user tips loaded:', userTips.length);
-        console.log('Last 3 tips:', userTips.slice(-3).map(t => ({
+        console.log('Last 5 tips (nyeste først):', userTips.slice(0, 5).map(t => ({
             matchId: t.matchId,
             homeTeam: t.homeTeam,
             awayTeam: t.awayTeam,
             homeScore: t.homeScore,
             awayScore: t.awayScore,
-            timestamp: t.timestamp
+            timestamp: t.timestamp,
+            timestampSeconds: t.timestamp?.seconds || t.timestamp,
+            date: t.timestamp?.seconds ? new Date(t.timestamp.seconds * 1000).toLocaleString('nb-NO') : 'No date'
         })));
 
         console.log('Loading matches...');
