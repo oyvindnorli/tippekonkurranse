@@ -352,7 +352,9 @@ function displayLeagueStats(tipsWithResults) {
 
         leagueStats[leagueId].total++;
         leagueStats[leagueId].points += points;
-        if (points === 3) leagueStats[leagueId].exact++;
+        // Check if exact match by comparing scores, not just points
+        const isExact = tip.homeScore === match.result.home && tip.awayScore === match.result.away;
+        if (isExact) leagueStats[leagueId].exact++;
     });
 
     const leagueStatsContainer = document.getElementById('leagueStats');
@@ -370,12 +372,14 @@ function displayLeagueStats(tipsWithResults) {
     leagueStatsArray.forEach(league => {
         const avgPoints = (league.points / league.total).toFixed(2);
         const exactRate = ((league.exact / league.total) * 100).toFixed(1);
+        // Round total points to avoid floating point precision issues
+        const totalPoints = Math.round(league.points * 10) / 10;
 
         const leagueDiv = document.createElement('div');
         leagueDiv.className = 'stats-row';
         leagueDiv.innerHTML = `
             <span>${league.name}:</span>
-            <strong>${league.points} poeng (${avgPoints} snitt, ${exactRate}% riktig)</strong>
+            <strong>${totalPoints} poeng (${avgPoints} snitt, ${exactRate}% riktig)</strong>
         `;
         leagueStatsContainer.appendChild(leagueDiv);
     });
