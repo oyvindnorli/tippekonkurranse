@@ -18,7 +18,7 @@ let userTips = [];
 let selectedDate = null; // null = show all dates, otherwise show only this date
 
 // All available leagues that can be enabled
-const AVAILABLE_LEAGUES = [39, 2, 3, 48, 135]; // PL, CL, EL, EFL Cup, Serie A
+const AVAILABLE_LEAGUES = [39, 2, 3, 32, 48, 135]; // PL, CL, EL, WCQ, EFL Cup, Serie A
 
 // Save league preferences to Firestore
 async function saveLeaguePreferences() {
@@ -106,7 +106,7 @@ async function saveSelectedLeagues() {
 }
 
 // Selected leagues for filtering (will be updated when user logs in)
-let selectedLeagues = new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
+let selectedLeagues = new Set([39, 2, 3, 32, 48, 135]); // Default: Premier League, Champions League, Europa League, WCQ, EFL Cup, Serie A
 
 // Load user tips from Firebase
 async function loadUserTips() {
