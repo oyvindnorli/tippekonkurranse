@@ -5,14 +5,14 @@ let preferencesUser = null;
 const AVAILABLE_LEAGUES = [
     { id: 2, name: 'Champions League', country: '🌍 UEFA', icon: '⭐' },
     { id: 3, name: 'Europa League', country: '🌍 UEFA', icon: '🌟' },
-    { id: 35, name: 'WC Kvalifisering Europa', country: '🇪🇺 Europa', icon: '🇪🇺' },
+    { id: 32, name: 'WC Kvalifisering Europa', country: '🇪🇺 Europa', icon: '🇪🇺' },
     { id: 39, name: 'Premier League', country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', icon: '⚽' },
     { id: 48, name: 'EFL Cup', country: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', icon: '🏆' },
     { id: 135, name: 'Serie A', country: '🇮🇹 Italy', icon: '🇮🇹' }
 ];
 
 // Default leagues (Premier League, Champions League, Europa League, EFL Cup, Serie A and WC Kvalifisering Europa)
-const DEFAULT_LEAGUES = [39, 2, 3, 48, 135, 35];
+const DEFAULT_LEAGUES = [39, 2, 3, 48, 135, 32];
 
 // Initialize
 function init() {

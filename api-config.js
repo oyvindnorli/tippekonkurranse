@@ -9,7 +9,7 @@ const API_CONFIG = {
         39,  // Premier League
         2,   // Champions League
         3,   // Europa League
-        35,  // WC Qualification Europe
+        32,  // WC Qualification Europe
         48,  // EFL Cup
         135  // Serie A
     ],
