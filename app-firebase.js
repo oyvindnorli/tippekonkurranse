@@ -590,9 +590,17 @@ function init() {
     if (mainContent) mainContent.style.display = 'none';
 
     // Wait for auth state before loading matches
+    let preferencesUnsubscribe = null;
+
     firebase.auth().onAuthStateChanged(async (user) => {
         // Hide loading spinner
         if (authLoading) authLoading.style.display = 'none';
+
+        // Clean up previous listener if exists
+        if (preferencesUnsubscribe) {
+            preferencesUnsubscribe();
+            preferencesUnsubscribe = null;
+        }
 
         if (user) {
             // User is signed in, load preferences first
@@ -621,6 +629,60 @@ function init() {
 
             // Load matches with user's preferred leagues
             loadMatches();
+
+            // Set up real-time listener for preferences changes
+            const db = firebase.firestore();
+            preferencesUnsubscribe = db.collection('userPreferences').doc(user.uid)
+                .onSnapshot(async (doc) => {
+                    if (doc.exists && doc.data().leagues) {
+                        let newPreferences = doc.data().leagues;
+
+                        // Migrate old WCQ ID (35 → 32) if present
+                        const needsMigration = newPreferences.includes(35);
+                        if (needsMigration) {
+                            console.log('🔄 Migrating WCQ from 35 to 32');
+                            newPreferences = newPreferences.map(id => id === 35 ? 32 : id);
+                            // Remove duplicates
+                            newPreferences = [...new Set(newPreferences)];
+
+                            // Save migrated preferences back
+                            await db.collection('userPreferences').doc(user.uid).set({
+                                leagues: newPreferences,
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true });
+                        }
+
+                        // Filter to only valid leagues
+                        const validPreferences = newPreferences.filter(id => AVAILABLE_LEAGUES.includes(id));
+
+                        const currentLeagues = Array.from(selectedLeagues);
+
+                        // Check if preferences actually changed
+                        if (JSON.stringify(validPreferences.sort()) !== JSON.stringify(currentLeagues.sort())) {
+                            console.log('🔄 Preferences changed remotely, reloading...', validPreferences);
+
+                            // Update selectedLeagues
+                            selectedLeagues = new Set(validPreferences);
+                            API_CONFIG.LEAGUES = validPreferences;
+
+                            // Clear cache and reload
+                            if (footballApi && footballApi.clearCache) {
+                                footballApi.clearCache();
+                            }
+
+                            // Update filter UI if it's open
+                            const filterModal = document.querySelector('.filter-modal');
+                            if (filterModal && filterModal.style.display !== 'none') {
+                                populateLeagueFilter();
+                            }
+
+                            // Reload matches with new preferences
+                            loadMatches();
+                        }
+                    }
+                }, (error) => {
+                    console.warn('Error listening to preferences:', error);
+                });
 
             // Clean up old matches from Firestore in background (don't await)
             // DISABLED: User doesn't have delete permissions, causes console errors
