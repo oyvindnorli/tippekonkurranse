@@ -51,32 +51,37 @@ async function loadSelectedLeagues(userId) {
         if (prefsDoc.exists && prefsDoc.data().leagues !== undefined) {
             const leagueArray = prefsDoc.data().leagues;
 
-            // Only allow Premier League (39), Champions League (2), Europa League (3), EFL Cup (48), and Serie A (135)
-            const validLeagues = [39, 2, 3, 48, 135];
-            const filteredLeagues = leagueArray.filter(id => validLeagues.includes(id));
+            // Only allow valid leagues from AVAILABLE_LEAGUES
+            const filteredLeagues = leagueArray.filter(id => AVAILABLE_LEAGUES.includes(id));
 
-            // Check if user has invalid leagues (needs cleanup)
-            const needsMigration = filteredLeagues.length !== leagueArray.length;
+            // Migrate old WCQ league ID (35) to new ID (32)
+            const migratedLeagues = filteredLeagues.map(id => id === 35 ? 32 : id);
+
+            // Remove duplicates in case user somehow has both 35 and 32
+            const uniqueLeagues = [...new Set(migratedLeagues)];
+
+            // Check if user needs migration
+            const needsMigration = JSON.stringify(uniqueLeagues.sort()) !== JSON.stringify(leagueArray.sort());
 
             if (needsMigration) {
-                console.log('🔄 Cleaning up invalid league preferences');
+                console.log('🔄 Migrating league preferences (35 → 32)');
 
-                // Save corrected preferences back to Firestore (keep only valid leagues)
+                // Save migrated preferences back to Firestore
                 await db.collection('userPreferences').doc(userId).set({
-                    leagues: filteredLeagues,
+                    leagues: uniqueLeagues,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
             }
 
             // Empty array is valid (user wants to see nothing)
-            return new Set(filteredLeagues);
+            return new Set(uniqueLeagues);
         } else {
             console.log('📂 No preferences found, using defaults');
-            return new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
+            return new Set([39, 2, 3, 32, 48, 135]); // Default: Premier League, Champions League, Europa League, WCQ Europe, EFL Cup, Serie A
         }
     } catch (error) {
         console.warn('⚠️ Could not load league preferences:', error);
-        return new Set([39, 2, 3, 48, 135]); // Default on error
+        return new Set([39, 2, 3, 32, 48, 135]); // Default on error
     }
 }
 
