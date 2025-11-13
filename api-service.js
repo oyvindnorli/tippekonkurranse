@@ -263,7 +263,9 @@ class FootballApiService {
 
         for (const leagueId of API_CONFIG.LEAGUES) {
             try {
-                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${API_CONFIG.SEASON}&next=20`;
+                // Special handling for WC Qualification Europe - always use 2026
+                const season = leagueId === 35 ? 2026 : API_CONFIG.SEASON;
+                const url = `${API_CONFIG.BASE_URL}?endpoint=fixtures&league=${leagueId}&season=${season}&next=20`;
                 const response = await fetch(url, { method: 'GET' });
 
                 if (!response.ok) {

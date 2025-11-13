@@ -18,7 +18,9 @@ export async function fetchFixtures(baseUrl, leagues, season, from, to) {
 
     // Fetch fixtures for each league
     for (const leagueId of leagues) {
-        const url = `${baseUrl}?endpoint=fixtures&league=${leagueId}&season=${season}&from=${from}&to=${to}`;
+        // Special handling for WC Qualification Europe - always use 2026
+        const leagueSeason = leagueId === 35 ? 2026 : season;
+        const url = `${baseUrl}?endpoint=fixtures&league=${leagueId}&season=${leagueSeason}&from=${from}&to=${to}`;
 
         const response = await fetch(url, {
             method: 'GET'
@@ -55,8 +57,10 @@ export async function fetchFixtures(baseUrl, leagues, season, from, to) {
  */
 export async function fetchOddsForLeague(baseUrl, leagueId, season, date) {
     try {
+        // Special handling for WC Qualification Europe - always use 2026
+        const leagueSeason = leagueId === 35 ? 2026 : season;
         // Try to fetch all odds for the league on this date
-        const url = `${baseUrl}?endpoint=odds&league=${leagueId}&season=${season}&date=${date}`;
+        const url = `${baseUrl}?endpoint=odds&league=${leagueId}&season=${leagueSeason}&date=${date}`;
 
         const response = await fetch(url, {
             method: 'GET'
@@ -136,8 +140,10 @@ export async function fetchScores(baseUrl, leagues, season) {
 
     // Fetch live and recent matches for each league - WITH EVENTS
     for (const leagueId of leagues) {
+        // Special handling for WC Qualification Europe - always use 2026
+        const leagueSeason = leagueId === 35 ? 2026 : season;
         // Use timezone parameter to get events data
-        const url = `${baseUrl}?endpoint=fixtures&league=${leagueId}&season=${season}&from=${fromDate}&to=${toDate}&timezone=Europe/Oslo`;
+        const url = `${baseUrl}?endpoint=fixtures&league=${leagueId}&season=${leagueSeason}&from=${fromDate}&to=${toDate}&timezone=Europe/Oslo`;
 
         const response = await fetch(url, {
             method: 'GET'
