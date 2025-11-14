@@ -5,9 +5,6 @@
 
 import { LEAGUE_NAMES } from './js/utils/leagueConfig.js';
 
-// Initialize Firebase
-initializeFirebase();
-
 let currentUser = null;
 let allMatches = [];
 let userTips = new Map(); // Map of fixtureId -> tip
