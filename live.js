@@ -322,7 +322,7 @@ async function renderMatchCard(match) {
 
     // Tip section
     let tipHTML = '';
-    if (tip && inCompetition) {
+    if (tip) {
         const points = finished ? calculatePoints(tip, match.goals.home, match.goals.away) : null;
         let pointsHTML = '';
 
@@ -333,6 +333,11 @@ async function renderMatchCard(match) {
             pointsHTML = `<span class="tip-points pending">?</span>`;
         }
 
+        const competitionLinkHTML = inCompetition ?
+            `<a href="competition-detail.html?id=${competitionId}" class="competition-link">
+                Vis konkurranse →
+            </a>` : '';
+
         tipHTML = `
             <div class="user-tip">
                 <div>
@@ -342,9 +347,7 @@ async function renderMatchCard(match) {
                         ${pointsHTML}
                     </span>
                 </div>
-                <a href="competition-detail.html?id=${competitionId}" class="competition-link">
-                    Vis konkurranse →
-                </a>
+                ${competitionLinkHTML}
             </div>
         `;
     }
