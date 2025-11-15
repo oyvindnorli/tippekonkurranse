@@ -248,8 +248,6 @@ async function renderMatches() {
 
     if (activeFilter === 'live') {
         filteredMatches = allMatches.filter(m => isLive(m));
-    } else if (activeFilter === 'upcoming') {
-        filteredMatches = allMatches.filter(m => isUpcoming(m));
     } else if (activeFilter === 'finished') {
         filteredMatches = allMatches.filter(m => isFinished(m));
     } else if (activeFilter === 'my-tips') {
@@ -434,7 +432,6 @@ async function renderMatchCard(match) {
  */
 function updateCounts() {
     const liveCount = allMatches.filter(m => isLive(m)).length;
-    const upcomingCount = allMatches.filter(m => isUpcoming(m)).length;
     const finishedCount = allMatches.filter(m => isFinished(m)).length;
     const myTipsCount = allMatches.filter(m => userTips.has(m.fixture.id)).length;
     const allCount = allMatches.filter(m => isLive(m) || isFinished(m)).length; // "Alle" = live + fullført
@@ -449,7 +446,6 @@ function updateCounts() {
 
     document.getElementById('count-all').textContent = allCount;
     document.getElementById('count-live').textContent = liveCount;
-    document.getElementById('count-upcoming').textContent = upcomingCount;
     document.getElementById('count-finished').textContent = finishedCount;
     document.getElementById('count-my-tips').textContent = myTipsCount;
 }
