@@ -168,40 +168,87 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .teams {
-            flex: 1;
             display: flex;
             flex-direction: column;
             gap: 8px;
+            min-width: 180px;
         }
 
         .team {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .team-logo {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             object-fit: contain;
         }
 
         .team-name {
             font-weight: 500;
             color: #1f2937;
-            font-size: 15px;
-            flex: 1;
+            font-size: 14px;
+        }
+
+        /* Score comparison (when user has tip) */
+        .score-comparison {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: #f9fafb;
+            padding: 10px 16px;
+            border-radius: 8px;
+            min-width: 140px;
+        }
+
+        .comparison-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .comparison-label {
+            font-size: 11px;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .comparison-score {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .comparison-score.actual {
+            color: #1f2937;
+        }
+
+        .comparison-score.tip {
+            color: #6366f1;
+        }
+
+        /* Score only (when no tip) */
+        .score-only {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
         }
 
         .score {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             color: #1f2937;
-            min-width: 32px;
+            min-width: 36px;
             text-align: center;
         }
 
@@ -209,11 +256,26 @@
             color: #ef4444;
         }
 
-        .match-time {
-            font-size: 13px;
+        .score-separator {
+            font-size: 20px;
             color: #9ca3af;
-            text-align: center;
-            min-width: 80px;
+            font-weight: 500;
+        }
+
+        /* Match info section */
+        .match-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            min-width: 100px;
+        }
+
+        .match-time {
+            font-size: 12px;
+            color: #9ca3af;
+            text-align: right;
+            white-space: nowrap;
         }
 
         .match-time.live {
@@ -221,55 +283,25 @@
             font-weight: 600;
         }
 
-        /* User tip section */
-        .user-tip {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .tip-label {
-            font-size: 12px;
-            color: #6b7280;
-            font-weight: 500;
-        }
-
-        .tip-prediction {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .tip-score {
-            font-size: 16px;
-            font-weight: 600;
-            color: #4b5563;
-            padding: 4px 10px;
-            background: #f9fafb;
-            border-radius: 6px;
-        }
-
-        .tip-points {
+        .tip-points-badge {
             font-size: 13px;
             font-weight: 600;
             padding: 4px 10px;
             border-radius: 6px;
+            white-space: nowrap;
         }
 
-        .tip-points.correct {
+        .tip-points-badge.correct {
             background: #d1fae5;
             color: #059669;
         }
 
-        .tip-points.wrong {
+        .tip-points-badge.wrong {
             background: #fee2e2;
             color: #dc2626;
         }
 
-        .tip-points.pending {
+        .tip-points-badge.pending {
             background: #fef3c7;
             color: #d97706;
         }
@@ -295,15 +327,12 @@
 
         /* Competition link */
         .competition-link {
-            margin-top: 8px;
-            font-size: 12px;
+            font-size: 11px;
             color: #059669;
             font-weight: 500;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
             text-decoration: none;
+            white-space: nowrap;
         }
 
         .competition-link:hover {
@@ -329,6 +358,42 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .match-content {
+                flex-wrap: wrap;
+            }
+
+            .teams {
+                min-width: 140px;
+                font-size: 13px;
+            }
+
+            .team-name {
+                font-size: 13px;
+            }
+
+            .score-comparison {
+                min-width: 120px;
+                padding: 8px 12px;
+            }
+
+            .comparison-score {
+                font-size: 16px;
+            }
+
+            .score {
+                font-size: 24px;
+            }
+
+            .match-info {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
         }
     </style>
 </head>

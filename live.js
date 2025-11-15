@@ -353,40 +353,44 @@ async function renderMatchCard(match) {
     const homeScore = match.goals.home !== null ? match.goals.home : '-';
     const awayScore = match.goals.away !== null ? match.goals.away : '-';
 
-    // Tip section
-    let tipHTML = '';
+    // Tip section and scores with tips
+    let tipScoreHTML = '';
+    let competitionLinkHTML = '';
+    let pointsBadgeHTML = '';
+
     if (tip) {
         const points = finished ? calculatePoints(tip, match.goals.home, match.goals.away) : null;
-        let pointsHTML = '';
 
+        // Points badge to show next to time
         if (points !== null) {
             const pointsClass = points > 0 ? 'correct' : 'wrong';
-            pointsHTML = `<span class="tip-points ${pointsClass}">+${points}p</span>`;
+            pointsBadgeHTML = `<span class="tip-points-badge ${pointsClass}">+${points}p</span>`;
         } else if (live) {
-            pointsHTML = `<span class="tip-points pending">?</span>`;
+            pointsBadgeHTML = `<span class="tip-points-badge pending">Live</span>`;
         }
 
-        const competitionLinkHTML = inCompetition ?
-            `<a href="competition-detail.html?id=${competitionId}" class="competition-link">
-                Vis konkurranse →
-            </a>` : '';
+        // Competition link
+        if (inCompetition) {
+            competitionLinkHTML = `<a href="competition-detail.html?id=${competitionId}" class="competition-link">Konkurranse →</a>`;
+        }
 
-        tipHTML = `
-            <div class="user-tip">
-                <div>
-                    <span class="tip-label">Ditt tips:</span>
-                    <span class="tip-prediction">
-                        <span class="tip-score">${tip.homeScore}-${tip.awayScore}</span>
-                        ${pointsHTML}
-                    </span>
+        // Show tip scores inline
+        tipScoreHTML = `
+            <div class="score-comparison">
+                <div class="comparison-row">
+                    <span class="comparison-label">Resultat:</span>
+                    <span class="comparison-score actual">${homeScore} - ${awayScore}</span>
                 </div>
-                ${competitionLinkHTML}
+                <div class="comparison-row">
+                    <span class="comparison-label">Ditt tips:</span>
+                    <span class="comparison-score tip">${tip.homeScore} - ${tip.awayScore}</span>
+                </div>
             </div>
         `;
     }
 
     return `
-        <div class="match-card ${live ? 'live' : ''} ${inCompetition ? 'in-competition' : ''}">
+        <div class="match-card ${live ? 'live' : ''} ${inCompetition ? 'in-competition' : ''} ${tip ? 'has-tip' : ''}">
             <div class="match-header">
                 <span class="league-name">${leagueName}</span>
                 <div class="status-badges">
@@ -399,17 +403,25 @@ async function renderMatchCard(match) {
                     <div class="team">
                         <img src="${match.teams.home.logo}" alt="${match.teams.home.name}" class="team-logo">
                         <span class="team-name">${match.teams.home.name}</span>
-                        <span class="score ${live ? 'live' : ''}">${homeScore}</span>
                     </div>
                     <div class="team">
                         <img src="${match.teams.away.logo}" alt="${match.teams.away.name}" class="team-logo">
                         <span class="team-name">${match.teams.away.name}</span>
-                        <span class="score ${live ? 'live' : ''}">${awayScore}</span>
                     </div>
                 </div>
-                <div class="match-time ${live ? 'live' : ''}">${timeDisplay}</div>
+                ${tip ? tipScoreHTML : `
+                    <div class="score-only">
+                        <span class="score ${live ? 'live' : ''}">${homeScore}</span>
+                        <span class="score-separator">-</span>
+                        <span class="score ${live ? 'live' : ''}">${awayScore}</span>
+                    </div>
+                `}
+                <div class="match-info">
+                    <div class="match-time ${live ? 'live' : ''}">${timeDisplay}</div>
+                    ${pointsBadgeHTML}
+                    ${competitionLinkHTML}
+                </div>
             </div>
-            ${tipHTML}
         </div>
     `;
 }
