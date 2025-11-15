@@ -37,13 +37,15 @@ async function loadMatches() {
     try {
         console.log('📡 Fetching live and recent matches...');
 
-        // Get date range - last 7 days to today
+        // Get date range - last 7 days to 7 days ahead
         const today = new Date();
         const weekAgo = new Date();
         weekAgo.setDate(today.getDate() - 7);
+        const weekAhead = new Date();
+        weekAhead.setDate(today.getDate() + 7);
 
         const fromDate = weekAgo.toISOString().split('T')[0];
-        const toDate = today.toISOString().split('T')[0];
+        const toDate = weekAhead.toISOString().split('T')[0];
 
         // Fetch fixtures for all leagues
         const allFixtures = [];
@@ -68,20 +70,29 @@ async function loadMatches() {
             allMatches = allFixtures
                 .filter(match => {
                     const status = match.fixture.status.short;
-                    // Include live matches and finished matches
+                    // Include live matches, finished matches, and upcoming matches
                     const isLiveMatch = ['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].includes(status);
                     const isFinished = status === 'FT';
-                    return isLiveMatch || isFinished;
+                    const isUpcoming = status === 'NS'; // Not Started
+                    return isLiveMatch || isFinished || isUpcoming;
                 })
                 .sort((a, b) => {
-                    // Sort: Live first, then by date (newest first)
+                    // Sort: Live first, then upcoming, then finished (by date)
                     const aLive = isLive(a);
                     const bLive = isLive(b);
+                    const aStatus = a.fixture.status.short;
+                    const bStatus = b.fixture.status.short;
 
+                    // Live matches first
                     if (aLive && !bLive) return -1;
                     if (!aLive && bLive) return 1;
 
-                    return new Date(b.fixture.date) - new Date(a.fixture.date);
+                    // Among non-live: upcoming before finished
+                    if (aStatus === 'NS' && bStatus === 'FT') return -1;
+                    if (aStatus === 'FT' && bStatus === 'NS') return 1;
+
+                    // Within same category, sort by date
+                    return new Date(a.fixture.date) - new Date(b.fixture.date);
                 });
 
             console.log(`✅ Loaded ${allMatches.length} matches`);
@@ -148,6 +159,13 @@ function isLive(match) {
  */
 function isFinished(match) {
     return match.fixture.status.short === 'FT';
+}
+
+/**
+ * Check if match is upcoming
+ */
+function isUpcoming(match) {
+    return match.fixture.status.short === 'NS';
 }
 
 /**
@@ -230,8 +248,12 @@ async function renderMatches() {
 
     if (activeFilter === 'live') {
         filteredMatches = allMatches.filter(m => isLive(m));
+    } else if (activeFilter === 'upcoming') {
+        filteredMatches = allMatches.filter(m => isUpcoming(m));
     } else if (activeFilter === 'finished') {
         filteredMatches = allMatches.filter(m => isFinished(m));
+    } else if (activeFilter === 'my-tips') {
+        filteredMatches = allMatches.filter(m => userTips.has(m.fixture.id));
     } else if (activeFilter === 'competition') {
         // Check which matches are in user's competitions (async)
         const matchesInCompetitions = [];
@@ -279,6 +301,8 @@ async function renderMatchCard(match) {
     // Status text
     let statusText = '';
     let statusClass = '';
+    const upcoming = isUpcoming(match);
+
     if (live) {
         const elapsed = match.fixture.status.elapsed;
         const short = match.fixture.status.short;
@@ -293,6 +317,9 @@ async function renderMatchCard(match) {
     } else if (finished) {
         statusText = 'Fullført';
         statusClass = 'finished';
+    } else if (upcoming) {
+        statusText = 'Kommende';
+        statusClass = 'upcoming';
     }
 
     // Time display
@@ -306,13 +333,19 @@ async function renderMatchCard(match) {
         const today = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
 
         if (matchDate.toDateString() === today.toDateString()) {
             timeDisplay = `I dag ${matchDate.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}`;
         } else if (matchDate.toDateString() === yesterday.toDateString()) {
             timeDisplay = `I går ${matchDate.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}`;
+        } else if (matchDate.toDateString() === tomorrow.toDateString()) {
+            timeDisplay = `I morgen ${matchDate.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}`;
         } else {
-            timeDisplay = matchDate.toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' });
+            const time = matchDate.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' });
+            const date = matchDate.toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' });
+            timeDisplay = `${date} ${time}`;
         }
     }
 
@@ -386,7 +419,9 @@ async function renderMatchCard(match) {
  */
 function updateCounts() {
     const liveCount = allMatches.filter(m => isLive(m)).length;
+    const upcomingCount = allMatches.filter(m => isUpcoming(m)).length;
     const finishedCount = allMatches.filter(m => isFinished(m)).length;
+    const myTipsCount = allMatches.filter(m => userTips.has(m.fixture.id)).length;
 
     // Count competitions (async - will update after)
     let competitionCount = 0;
@@ -398,7 +433,9 @@ function updateCounts() {
 
     document.getElementById('count-all').textContent = allMatches.length;
     document.getElementById('count-live').textContent = liveCount;
+    document.getElementById('count-upcoming').textContent = upcomingCount;
     document.getElementById('count-finished').textContent = finishedCount;
+    document.getElementById('count-my-tips').textContent = myTipsCount;
 }
 
 /**
