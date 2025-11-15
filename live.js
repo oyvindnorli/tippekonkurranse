@@ -77,21 +77,31 @@ async function loadMatches() {
                     return isLiveMatch || isFinished || isUpcoming;
                 })
                 .sort((a, b) => {
-                    // Sort: Live first, then upcoming, then finished (by date)
+                    // Sort: Live first, then finished (newest first)
                     const aLive = isLive(a);
                     const bLive = isLive(b);
-                    const aStatus = a.fixture.status.short;
-                    const bStatus = b.fixture.status.short;
+                    const aFinished = isFinished(a);
+                    const bFinished = isFinished(b);
 
                     // Live matches first
                     if (aLive && !bLive) return -1;
                     if (!aLive && bLive) return 1;
 
-                    // Among non-live: upcoming before finished
-                    if (aStatus === 'NS' && bStatus === 'FT') return -1;
-                    if (aStatus === 'FT' && bStatus === 'NS') return 1;
+                    // Both live: sort by date (most recent first)
+                    if (aLive && bLive) {
+                        return new Date(b.fixture.date) - new Date(a.fixture.date);
+                    }
 
-                    // Within same category, sort by date
+                    // Finished matches: newest first (descending)
+                    if (aFinished && bFinished) {
+                        return new Date(b.fixture.date) - new Date(a.fixture.date);
+                    }
+
+                    // Finished before upcoming
+                    if (aFinished && !bFinished) return -1;
+                    if (!aFinished && bFinished) return 1;
+
+                    // Upcoming: sort by date (soonest first)
                     return new Date(a.fixture.date) - new Date(b.fixture.date);
                 });
 
