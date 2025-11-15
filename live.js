@@ -264,6 +264,9 @@ async function renderMatches() {
             }
         }
         filteredMatches = matchesInCompetitions;
+    } else if (activeFilter === 'all') {
+        // "Alle" viser kun live og fullførte - ikke kommende
+        filteredMatches = allMatches.filter(m => isLive(m) || isFinished(m));
     }
 
     if (filteredMatches.length === 0) {
@@ -434,6 +437,7 @@ function updateCounts() {
     const upcomingCount = allMatches.filter(m => isUpcoming(m)).length;
     const finishedCount = allMatches.filter(m => isFinished(m)).length;
     const myTipsCount = allMatches.filter(m => userTips.has(m.fixture.id)).length;
+    const allCount = allMatches.filter(m => isLive(m) || isFinished(m)).length; // "Alle" = live + fullført
 
     // Count competitions (async - will update after)
     let competitionCount = 0;
@@ -443,7 +447,7 @@ function updateCounts() {
             document.getElementById('count-competition').textContent = competitionCount;
         });
 
-    document.getElementById('count-all').textContent = allMatches.length;
+    document.getElementById('count-all').textContent = allCount;
     document.getElementById('count-live').textContent = liveCount;
     document.getElementById('count-upcoming').textContent = upcomingCount;
     document.getElementById('count-finished').textContent = finishedCount;
