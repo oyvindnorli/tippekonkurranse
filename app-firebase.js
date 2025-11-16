@@ -159,32 +159,54 @@ async function handleSignIn() {
 }
 
 async function handleSignUp() {
+    console.log('🔵 handleSignUp called');
+
     const name = document.getElementById('signupName').value;
     const email = document.getElementById('signupEmail').value;
     const password = document.getElementById('signupPassword').value;
+
+    console.log('📝 Form values:', { name, email, passwordLength: password?.length });
 
     if (!name || !email || !password) {
         alert('Vennligst fyll ut alle feltene');
         return;
     }
 
-    // Disable button to prevent double-clicks
-    const btn = event?.target;
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Registrerer...';
+    if (password.length < 6) {
+        alert('Passord må være minst 6 tegn');
+        return;
     }
 
+    // Disable button to prevent double-clicks
+    const buttons = document.querySelectorAll('#signupForm button');
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === 'Registrer') {
+            btn.textContent = 'Registrerer...';
+        }
+    });
+
     try {
+        console.log('🚀 Calling signUp...');
         const result = await signUp(email, password, name);
+        console.log('✅ signUp result:', result);
+
         if (!result.success) {
             alert('Registrering feilet: ' + result.error);
+        } else {
+            console.log('🎉 Registration successful!');
+            alert('Registrering vellykket! Du blir nå logget inn...');
         }
+    } catch (error) {
+        console.error('❌ Unexpected error in handleSignUp:', error);
+        alert('En uventet feil oppstod: ' + error.message);
     } finally {
-        if (btn) {
+        buttons.forEach(btn => {
             btn.disabled = false;
-            btn.textContent = 'Registrer';
-        }
+            if (btn.textContent === 'Registrerer...') {
+                btn.textContent = 'Registrer';
+            }
+        });
     }
 }
 
