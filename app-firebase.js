@@ -615,6 +615,27 @@ async function loadMatches() {
 
 // League checkboxes removed - preferences are now managed via preferences page
 
+// Load all data (called by supabase-auth.js when user logs in)
+async function loadFirebaseData() {
+    console.log('🔄 Loading Firebase data...');
+
+    // Show main content, hide welcome
+    const welcomeSection = document.getElementById('welcomeSection');
+    const mainContent = document.getElementById('mainContent');
+    if (welcomeSection) {
+        welcomeSection.style.display = 'none';
+    }
+    if (mainContent) {
+        mainContent.style.display = 'block';
+    }
+
+    // Load matches
+    await loadMatches();
+}
+
+// Make loadFirebaseData globally available
+window.loadFirebaseData = loadFirebaseData;
+
 // Initialize the app
 function init() {
     // Initialize Supabase first
