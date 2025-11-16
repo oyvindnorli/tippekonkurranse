@@ -4,6 +4,7 @@
  */
 
 import { LEAGUE_NAMES } from './js/utils/leagueConfig.js';
+import { calculatePoints } from './js/utils/matchUtils.js';
 
 let currentUser = null;
 let allMatches = [];
@@ -106,9 +107,6 @@ async function loadMatches() {
                 });
 
             console.log(`✅ Loaded ${allMatches.length} matches`);
-            if (allMatches.length > 0) {
-                console.log('First 3 match fixture.ids:', allMatches.slice(0, 3).map(m => m.fixture.id));
-            }
         }
     } catch (error) {
         console.error('Error loading matches:', error);
@@ -133,9 +131,6 @@ async function loadUserTips() {
         });
 
         console.log(`✅ Loaded ${userTips.size} user tips`);
-        if (userTips.size > 0) {
-            console.log('First 3 tip matchIds:', Array.from(userTips.keys()).slice(0, 3));
-        }
     } catch (error) {
         console.error('Error loading user tips:', error);
     }
@@ -210,38 +205,7 @@ async function isInUserCompetition(fixtureId) {
     }
 }
 
-/**
- * Calculate points for a tip
- */
-function calculatePoints(tip, actualHome, actualAway) {
-    if (actualHome === null || actualAway === null) {
-        return null; // Match not finished
-    }
-
-    const tipHome = tip.homeScore;
-    const tipAway = tip.awayScore;
-
-    // Exact score
-    if (tipHome === actualHome && tipAway === actualAway) {
-        return 3 + 1; // 3 bonus + 1 for correct outcome = 4 total
-    }
-
-    // Correct goal difference
-    const tipDiff = tipHome - tipAway;
-    const actualDiff = actualHome - actualAway;
-    if (tipDiff === actualDiff && tipDiff !== 0) {
-        return 2;
-    }
-
-    // Correct outcome (H/D/A)
-    const tipOutcome = tipHome > tipAway ? 'H' : tipHome < tipAway ? 'A' : 'D';
-    const actualOutcome = actualHome > actualAway ? 'H' : actualHome < actualAway ? 'A' : 'D';
-    if (tipOutcome === actualOutcome) {
-        return 1;
-    }
-
-    return 0;
-}
+// calculatePoints is now imported from matchUtils.js
 
 /**
  * Render all matches
@@ -382,7 +346,15 @@ async function renderMatchCard(match) {
 
         if (live || finished) {
             // Has result (live or finished)
-            points = calculatePoints(tip, match.goals.home, match.goals.away);
+            // Create match object in the format expected by calculatePoints
+            const matchForPoints = {
+                result: {
+                    home: match.goals.home,
+                    away: match.goals.away
+                },
+                odds: tip.odds || null // Use odds from tip if available
+            };
+            points = calculatePoints(tip, matchForPoints);
             const pointsClass = points > 0 ? 'has-points' : 'no-points';
             const liveText = live ? ' (live)' : '';
             pointsDisplay = `<span class="tip-points ${pointsClass}">${points.toFixed(1)} poeng${liveText}</span>`;
@@ -451,16 +423,8 @@ async function renderMatchCard(match) {
 function updateCounts() {
     const liveCount = allMatches.filter(m => isLive(m)).length;
     const finishedCount = allMatches.filter(m => isFinished(m)).length;
-    const myTipsCount = allMatches.filter(m => {
-        const hasTip = userTips.has(String(m.fixture.id));
-        if (hasTip) {
-            console.log(`Match ${m.fixture.id} has tip`);
-        }
-        return hasTip;
-    }).length;
+    const myTipsCount = allMatches.filter(m => userTips.has(String(m.fixture.id))).length;
     const allCount = allMatches.filter(m => isLive(m) || isFinished(m)).length; // "Alle" = live + fullført
-
-    console.log(`Tip count debug: ${myTipsCount} tips found out of ${allMatches.length} matches`);
 
     // Count competitions (async - will update after)
     let competitionCount = 0;
