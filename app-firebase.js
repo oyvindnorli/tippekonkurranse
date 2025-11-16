@@ -20,16 +20,17 @@ let selectedDate = null; // null = show all dates, otherwise show only this date
 // All available leagues that can be enabled
 const AVAILABLE_LEAGUES = [39, 2, 3, 32, 48, 135]; // PL, CL, EL, WCQ Europe, EFL Cup, Serie A
 
-// Save league preferences to Firestore
+// Save league preferences to Supabase
 async function saveLeaguePreferences() {
     try {
-        const user = firebase.auth().currentUser;
-        if (!user) return;
+        if (!currentUser) return;
 
-        const db = firebase.firestore();
-        await db.collection('userPreferences').doc(user.uid).set({
-            leagues: Array.from(selectedLeagues)
-        }, { merge: true });
+        await supabase
+            .from('user_preferences')
+            .upsert({
+                user_id: currentUser.id,
+                selected_leagues: Array.from(selectedLeagues)
+            });
 
         console.log('✅ League preferences saved:', Array.from(selectedLeagues));
     } catch (error) {
@@ -37,7 +38,7 @@ async function saveLeaguePreferences() {
     }
 }
 
-// Load league preferences from Firestore (user preferences)
+// Load league preferences from Supabase (user preferences)
 async function loadSelectedLeagues(userId) {
     try {
         if (!userId) {
@@ -45,11 +46,14 @@ async function loadSelectedLeagues(userId) {
             return new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
         }
 
-        const db = firebase.firestore();
-        const prefsDoc = await db.collection('userPreferences').doc(userId).get();
+        const { data, error } = await supabase
+            .from('user_preferences')
+            .select('selected_leagues')
+            .eq('user_id', userId)
+            .single();
 
-        if (prefsDoc.exists && prefsDoc.data().leagues !== undefined) {
-            const leagueArray = prefsDoc.data().leagues;
+        if (!error && data && data.selected_leagues) {
+            const leagueArray = data.selected_leagues;
 
             // Only allow valid leagues from AVAILABLE_LEAGUES
             const filteredLeagues = leagueArray.filter(id => AVAILABLE_LEAGUES.includes(id));
@@ -66,11 +70,13 @@ async function loadSelectedLeagues(userId) {
             if (needsMigration) {
                 console.log('🔄 Migrating league preferences (35 → 32)');
 
-                // Save migrated preferences back to Firestore
-                await db.collection('userPreferences').doc(userId).set({
-                    leagues: uniqueLeagues,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                // Save migrated preferences back to Supabase
+                await supabase
+                    .from('user_preferences')
+                    .upsert({
+                        user_id: userId,
+                        selected_leagues: uniqueLeagues
+                    });
             }
 
             // Empty array is valid (user wants to see nothing)
@@ -85,7 +91,7 @@ async function loadSelectedLeagues(userId) {
     }
 }
 
-// Save league preferences to Firestore
+// Save league preferences to Supabase
 async function saveSelectedLeagues() {
     try {
         if (!currentUser) {
@@ -94,14 +100,15 @@ async function saveSelectedLeagues() {
         }
 
         const leagueArray = Array.from(selectedLeagues);
-        const db = firebase.firestore();
 
-        await db.collection('userPreferences').doc(currentUser.uid).set({
-            leagues: leagueArray,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
+        await supabase
+            .from('user_preferences')
+            .upsert({
+                user_id: currentUser.id,
+                selected_leagues: leagueArray
+            });
 
-        console.log('💾 Saved league preferences to Firestore:', leagueArray);
+        console.log('💾 Saved league preferences to Supabase:', leagueArray);
 
         // Also update API_CONFIG.LEAGUES for immediate effect
         API_CONFIG.LEAGUES = leagueArray;
@@ -574,8 +581,8 @@ async function loadMatches() {
 
 // Initialize the app
 function init() {
-    // Initialize Firebase first
-    initializeFirebase();
+    // Initialize Supabase first
+    initializeSupabase();
 
     // Initialize date navigation
     initDateNavigation();
@@ -592,7 +599,8 @@ function init() {
     // Wait for auth state before loading matches
     let preferencesUnsubscribe = null;
 
-    firebase.auth().onAuthStateChanged(async (user) => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        const user = session?.user;
         // Hide loading spinner
         if (authLoading) authLoading.style.display = 'none';
 
@@ -605,7 +613,7 @@ function init() {
         if (user) {
             // User is signed in, load preferences first
             const previousLeagues = API_CONFIG.LEAGUES ? [...API_CONFIG.LEAGUES] : [];
-            selectedLeagues = await loadSelectedLeagues(user.uid);
+            selectedLeagues = await loadSelectedLeagues(user.id);
 
             // Update API_CONFIG.LEAGUES to use user's preferred leagues
             const newLeagues = Array.from(selectedLeagues);
@@ -631,58 +639,71 @@ function init() {
             loadMatches();
 
             // Set up real-time listener for preferences changes
-            const db = firebase.firestore();
-            preferencesUnsubscribe = db.collection('userPreferences').doc(user.uid)
-                .onSnapshot(async (doc) => {
-                    if (doc.exists && doc.data().leagues) {
-                        let newPreferences = doc.data().leagues;
+            const channel = supabase
+                .channel(`preferences:${user.id}`)
+                .on('postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'user_preferences',
+                        filter: `user_id=eq.${user.id}`
+                    },
+                    async (payload) => {
+                        if (payload.new && payload.new.selected_leagues) {
+                            let newPreferences = payload.new.selected_leagues;
 
-                        // Migrate old WCQ ID (35 → 32) if present
-                        const needsMigration = newPreferences.includes(35);
-                        if (needsMigration) {
-                            console.log('🔄 Migrating WCQ from 35 to 32');
-                            newPreferences = newPreferences.map(id => id === 35 ? 32 : id);
-                            // Remove duplicates
-                            newPreferences = [...new Set(newPreferences)];
+                            // Migrate old WCQ ID (35 → 32) if present
+                            const needsMigration = newPreferences.includes(35);
+                            if (needsMigration) {
+                                console.log('🔄 Migrating WCQ from 35 to 32');
+                                newPreferences = newPreferences.map(id => id === 35 ? 32 : id);
+                                // Remove duplicates
+                                newPreferences = [...new Set(newPreferences)];
 
-                            // Save migrated preferences back
-                            await db.collection('userPreferences').doc(user.uid).set({
-                                leagues: newPreferences,
-                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                            }, { merge: true });
-                        }
-
-                        // Filter to only valid leagues
-                        const validPreferences = newPreferences.filter(id => AVAILABLE_LEAGUES.includes(id));
-
-                        const currentLeagues = Array.from(selectedLeagues);
-
-                        // Check if preferences actually changed
-                        if (JSON.stringify(validPreferences.sort()) !== JSON.stringify(currentLeagues.sort())) {
-                            console.log('🔄 Preferences changed remotely, reloading...', validPreferences);
-
-                            // Update selectedLeagues
-                            selectedLeagues = new Set(validPreferences);
-                            API_CONFIG.LEAGUES = validPreferences;
-
-                            // Clear cache and reload
-                            if (footballApi && footballApi.clearCache) {
-                                footballApi.clearCache();
+                                // Save migrated preferences back
+                                await supabase
+                                    .from('user_preferences')
+                                    .upsert({
+                                        user_id: user.id,
+                                        selected_leagues: newPreferences
+                                    });
                             }
 
-                            // Update filter UI if it's open
-                            const filterModal = document.querySelector('.filter-modal');
-                            if (filterModal && filterModal.style.display !== 'none') {
-                                populateLeagueFilter();
-                            }
+                            // Filter to only valid leagues
+                            const validPreferences = newPreferences.filter(id => AVAILABLE_LEAGUES.includes(id));
 
-                            // Reload matches with new preferences
-                            loadMatches();
+                            const currentLeagues = Array.from(selectedLeagues);
+
+                            // Check if preferences actually changed
+                            if (JSON.stringify(validPreferences.sort()) !== JSON.stringify(currentLeagues.sort())) {
+                                console.log('🔄 Preferences changed remotely, reloading...', validPreferences);
+
+                                // Update selectedLeagues
+                                selectedLeagues = new Set(validPreferences);
+                                API_CONFIG.LEAGUES = validPreferences;
+
+                                // Clear cache and reload
+                                if (footballApi && footballApi.clearCache) {
+                                    footballApi.clearCache();
+                                }
+
+                                // Update filter UI if it's open
+                                const filterModal = document.querySelector('.filter-modal');
+                                if (filterModal && filterModal.style.display !== 'none') {
+                                    populateLeagueFilter();
+                                }
+
+                                // Reload matches with new preferences
+                                loadMatches();
+                            }
                         }
                     }
-                }, (error) => {
-                    console.warn('Error listening to preferences:', error);
-                });
+                )
+                .subscribe();
+
+            preferencesUnsubscribe = () => {
+                supabase.removeChannel(channel);
+            };
 
             // Clean up old matches from Firestore in background (don't await)
             // DISABLED: User doesn't have delete permissions, causes console errors
@@ -1504,7 +1525,8 @@ window.addEventListener('DOMContentLoaded', () => {
     init();
 
     // Start automatic odds checking when user is logged in
-    firebase.auth().onAuthStateChanged((user) => {
+    supabase.auth.onAuthStateChange((event, session) => {
+        const user = session?.user;
         if (user && !oddsRetryInterval) {
             startAutomaticOddsChecking();
         } else if (!user && oddsRetryInterval) {
