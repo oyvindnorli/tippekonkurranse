@@ -125,7 +125,8 @@ async function loadUserTips() {
         userTips.clear();
         snapshot.forEach(doc => {
             const tip = doc.data();
-            userTips.set(tip.fixtureId, tip);
+            // Tips are stored with matchId, not fixtureId
+            userTips.set(tip.matchId, tip);
         });
 
         console.log(`✅ Loaded ${userTips.size} user tips`);
