@@ -55,19 +55,7 @@ async function signUp(email, password, displayName) {
 
         if (error) throw error;
 
-        // Create user document in database
-        const { error: dbError } = await supabase
-            .from('users')
-            .insert({
-                id: data.user.id,
-                email: email,
-                display_name: displayName
-            });
-
-        if (dbError && dbError.code !== '23505') { // Ignore duplicate key error
-            console.warn('⚠️ User record creation warning:', dbError);
-        }
-
+        // User record is automatically created by database trigger
         console.log('✅ User registered:', displayName);
         return { success: true };
     } catch (error) {
