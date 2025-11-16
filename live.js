@@ -106,6 +106,9 @@ async function loadMatches() {
                 });
 
             console.log(`✅ Loaded ${allMatches.length} matches`);
+            if (allMatches.length > 0) {
+                console.log('First 3 match fixture.ids:', allMatches.slice(0, 3).map(m => m.fixture.id));
+            }
         }
     } catch (error) {
         console.error('Error loading matches:', error);
@@ -130,6 +133,9 @@ async function loadUserTips() {
         });
 
         console.log(`✅ Loaded ${userTips.size} user tips`);
+        if (userTips.size > 0) {
+            console.log('First 3 tip matchIds:', Array.from(userTips.keys()).slice(0, 3));
+        }
     } catch (error) {
         console.error('Error loading user tips:', error);
     }
@@ -445,8 +451,16 @@ async function renderMatchCard(match) {
 function updateCounts() {
     const liveCount = allMatches.filter(m => isLive(m)).length;
     const finishedCount = allMatches.filter(m => isFinished(m)).length;
-    const myTipsCount = allMatches.filter(m => userTips.has(m.fixture.id)).length;
+    const myTipsCount = allMatches.filter(m => {
+        const hasTip = userTips.has(m.fixture.id);
+        if (hasTip) {
+            console.log(`Match ${m.fixture.id} has tip`);
+        }
+        return hasTip;
+    }).length;
     const allCount = allMatches.filter(m => isLive(m) || isFinished(m)).length; // "Alle" = live + fullført
+
+    console.log(`Tip count debug: ${myTipsCount} tips found out of ${allMatches.length} matches`);
 
     // Count competitions (async - will update after)
     let competitionCount = 0;
