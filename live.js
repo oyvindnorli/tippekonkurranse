@@ -12,6 +12,8 @@ let userTips = new Map(); // Map of fixtureId -> tip
 let userCompetitions = new Set(); // Set of competition IDs user is in
 let activeFilter = 'all';
 let refreshInterval = null;
+let displayedMatchCount = 20; // Number of matches to show initially
+const MATCHES_PER_PAGE = 20;
 
 // Initialize
 firebase.auth().onAuthStateChanged(async (user) => {
@@ -36,16 +38,15 @@ firebase.auth().onAuthStateChanged(async (user) => {
  */
 async function loadMatches() {
     try {
-        console.log('📡 Fetching live and recent matches...');
+        console.log('📡 Fetching matches...');
 
-        // Get date range - last 7 days to 7 days ahead
+        // Get date range - entire season to today (for finished matches) + 7 days ahead (for upcoming/live)
         const today = new Date();
-        const weekAgo = new Date();
-        weekAgo.setDate(today.getDate() - 7);
+        const seasonStart = new Date('2024-08-01'); // Start of 2024/2025 season
         const weekAhead = new Date();
         weekAhead.setDate(today.getDate() + 7);
 
-        const fromDate = weekAgo.toISOString().split('T')[0];
+        const fromDate = seasonStart.toISOString().split('T')[0];
         const toDate = weekAhead.toISOString().split('T')[0];
 
         // Fetch fixtures for all leagues
@@ -232,7 +233,12 @@ async function renderMatches() {
     } else if (activeFilter === 'finished') {
         filteredMatches = allMatches.filter(m => isFinished(m));
     } else if (activeFilter === 'my-tips') {
-        filteredMatches = allMatches.filter(m => userTips.has(String(m.fixture.id)));
+        // Only show live and finished matches where user has tipped
+        filteredMatches = allMatches.filter(m => {
+            const hasTip = userTips.has(String(m.fixture.id));
+            const isLiveOrFinished = isLive(m) || isFinished(m);
+            return hasTip && isLiveOrFinished;
+        });
     } else if (activeFilter === 'competition') {
         // Check which matches are in user's competitions (async)
         const matchesInCompetitions = [];
@@ -259,12 +265,36 @@ async function renderMatches() {
         return;
     }
 
+    // Paginate matches - only show first displayedMatchCount
+    const matchesToShow = filteredMatches.slice(0, displayedMatchCount);
+    const hasMore = filteredMatches.length > displayedMatchCount;
+
     // Render match cards
-    const cardsHTML = await Promise.all(filteredMatches.map(match => renderMatchCard(match)));
+    const cardsHTML = await Promise.all(matchesToShow.map(match => renderMatchCard(match)));
     container.innerHTML = cardsHTML.join('');
+
+    // Add "Load more" button if there are more matches
+    if (hasMore) {
+        const loadMoreBtn = document.createElement('div');
+        loadMoreBtn.className = 'load-more-container';
+        loadMoreBtn.innerHTML = `
+            <button class="load-more-btn" onclick="loadMoreMatches()">
+                Last inn flere kamper (${filteredMatches.length - displayedMatchCount} til)
+            </button>
+        `;
+        container.appendChild(loadMoreBtn);
+    }
 
     updateCounts();
 }
+
+/**
+ * Load more matches (pagination)
+ */
+window.loadMoreMatches = function() {
+    displayedMatchCount += MATCHES_PER_PAGE;
+    renderMatches();
+};
 
 /**
  * Render a single match card
@@ -423,7 +453,12 @@ async function renderMatchCard(match) {
 function updateCounts() {
     const liveCount = allMatches.filter(m => isLive(m)).length;
     const finishedCount = allMatches.filter(m => isFinished(m)).length;
-    const myTipsCount = allMatches.filter(m => userTips.has(String(m.fixture.id))).length;
+    // Mine tips: only live and finished matches where user has tipped
+    const myTipsCount = allMatches.filter(m => {
+        const hasTip = userTips.has(String(m.fixture.id));
+        const isLiveOrFinished = isLive(m) || isFinished(m);
+        return hasTip && isLiveOrFinished;
+    }).length;
     const allCount = allMatches.filter(m => isLive(m) || isFinished(m)).length; // "Alle" = live + fullført
 
     // Count competitions (async - will update after)
@@ -467,6 +502,9 @@ document.querySelectorAll('.filter-tab').forEach(tab => {
     tab.addEventListener('click', () => {
         const filter = tab.dataset.filter;
         activeFilter = filter;
+
+        // Reset pagination when changing filters
+        displayedMatchCount = MATCHES_PER_PAGE;
 
         // Update active state
         document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
