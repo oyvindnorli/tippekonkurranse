@@ -233,11 +233,11 @@ async function renderMatches() {
     } else if (activeFilter === 'finished') {
         filteredMatches = allMatches.filter(m => isFinished(m));
     } else if (activeFilter === 'my-tips') {
-        // Only show live and finished matches where user has tipped
+        // Only show finished matches where user has tipped (to match Min Statistikk page)
         filteredMatches = allMatches.filter(m => {
             const hasTip = userTips.has(String(m.fixture.id));
-            const isLiveOrFinished = isLive(m) || isFinished(m);
-            return hasTip && isLiveOrFinished;
+            const finished = isFinished(m);
+            return hasTip && finished;
         });
     } else if (activeFilter === 'competition') {
         // Check which matches are in user's competitions (async)
@@ -453,11 +453,12 @@ async function renderMatchCard(match) {
 function updateCounts() {
     const liveCount = allMatches.filter(m => isLive(m)).length;
     const finishedCount = allMatches.filter(m => isFinished(m)).length;
-    // Mine tips: only live and finished matches where user has tipped
+    // Mine tips: only finished matches where user has tipped (same as Min Statistikk)
+    // Don't count live matches to match the stats page behavior
     const myTipsCount = allMatches.filter(m => {
         const hasTip = userTips.has(String(m.fixture.id));
-        const isLiveOrFinished = isLive(m) || isFinished(m);
-        return hasTip && isLiveOrFinished;
+        const finished = isFinished(m);
+        return hasTip && finished;
     }).length;
     const allCount = allMatches.filter(m => isLive(m) || isFinished(m)).length; // "Alle" = live + fullført
 
