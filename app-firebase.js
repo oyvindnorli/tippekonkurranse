@@ -168,9 +168,23 @@ async function handleSignUp() {
         return;
     }
 
-    const result = await signUp(email, password, name);
-    if (!result.success) {
-        alert('Registrering feilet: ' + result.error);
+    // Disable button to prevent double-clicks
+    const btn = event?.target;
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Registrerer...';
+    }
+
+    try {
+        const result = await signUp(email, password, name);
+        if (!result.success) {
+            alert('Registrering feilet: ' + result.error);
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Registrer';
+        }
     }
 }
 
