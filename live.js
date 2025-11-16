@@ -367,17 +367,18 @@ async function renderMatchCard(match) {
     // Tip section and scores with tips
     let tipScoreHTML = '';
     let competitionLinkHTML = '';
-    let pointsBadgeHTML = '';
 
     if (tip) {
-        const points = finished ? calculatePoints(tip, match.goals.home, match.goals.away) : null;
+        // Calculate points for both live and finished matches
+        let points = 0;
+        let pointsDisplay = '';
 
-        // Points badge to show next to time
-        if (points !== null) {
-            const pointsClass = points > 0 ? 'correct' : 'wrong';
-            pointsBadgeHTML = `<span class="tip-points-badge ${pointsClass}">+${points}p</span>`;
-        } else if (live) {
-            pointsBadgeHTML = `<span class="tip-points-badge pending">Live</span>`;
+        if (live || finished) {
+            // Has result (live or finished)
+            points = calculatePoints(tip, match.goals.home, match.goals.away);
+            const pointsClass = points > 0 ? 'has-points' : 'no-points';
+            const liveText = live ? ' (live)' : '';
+            pointsDisplay = `<span class="tip-points ${pointsClass}">${points.toFixed(1)} poeng${liveText}</span>`;
         }
 
         // Competition link
@@ -385,7 +386,7 @@ async function renderMatchCard(match) {
             competitionLinkHTML = `<a href="competition-detail.html?id=${competitionId}" class="competition-link">Konkurranse →</a>`;
         }
 
-        // Show tip scores inline
+        // Show tip with result
         tipScoreHTML = `
             <div class="score-comparison">
                 <div class="comparison-row">
@@ -395,6 +396,7 @@ async function renderMatchCard(match) {
                 <div class="comparison-row">
                     <span class="comparison-label">Ditt tips:</span>
                     <span class="comparison-score tip">${tip.homeScore} - ${tip.awayScore}</span>
+                    ${pointsDisplay}
                 </div>
             </div>
         `;
@@ -429,7 +431,6 @@ async function renderMatchCard(match) {
                 `}
                 <div class="match-info">
                     <div class="match-time ${live ? 'live' : ''}">${timeDisplay}</div>
-                    ${pointsBadgeHTML}
                     ${competitionLinkHTML}
                 </div>
             </div>
