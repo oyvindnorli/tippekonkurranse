@@ -6,12 +6,16 @@ let supabase, currentUser = null;
 // Initialize Supabase
 function initializeSupabase() {
     try {
-        // Create Supabase client
+        // Create Supabase client globally
         const { createClient } = window.supabase;
         supabase = createClient(
             'https://ntbhjbstmbnfiaywfkkz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E'
         );
+
+        // Make supabase globally available
+        window.supabase = supabase;
+        window.currentUser = currentUser;
 
         console.log('✅ Supabase initialized successfully');
 
@@ -19,9 +23,11 @@ function initializeSupabase() {
         supabase.auth.onAuthStateChange((event, session) => {
             if (session?.user) {
                 currentUser = session.user;
+                window.currentUser = currentUser; // Update global
                 onUserLoggedIn(session.user);
             } else {
                 currentUser = null;
+                window.currentUser = null; // Update global
                 onUserLoggedOut();
             }
         });
@@ -30,6 +36,7 @@ function initializeSupabase() {
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session?.user) {
                 currentUser = session.user;
+                window.currentUser = currentUser; // Update global
                 onUserLoggedIn(session.user);
             }
         });
