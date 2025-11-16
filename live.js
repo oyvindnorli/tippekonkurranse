@@ -128,8 +128,8 @@ async function loadUserTips() {
         userTips.clear();
         snapshot.forEach(doc => {
             const tip = doc.data();
-            // Tips are stored with matchId, not fixtureId
-            userTips.set(tip.matchId, tip);
+            // Tips are stored with matchId, convert to string for consistent comparison
+            userTips.set(String(tip.matchId), tip);
         });
 
         console.log(`✅ Loaded ${userTips.size} user tips`);
@@ -268,7 +268,7 @@ async function renderMatches() {
     } else if (activeFilter === 'finished') {
         filteredMatches = allMatches.filter(m => isFinished(m));
     } else if (activeFilter === 'my-tips') {
-        filteredMatches = allMatches.filter(m => userTips.has(m.fixture.id));
+        filteredMatches = allMatches.filter(m => userTips.has(String(m.fixture.id)));
     } else if (activeFilter === 'competition') {
         // Check which matches are in user's competitions (async)
         const matchesInCompetitions = [];
@@ -306,11 +306,11 @@ async function renderMatches() {
  * Render a single match card
  */
 async function renderMatchCard(match) {
-    const fixtureId = match.fixture.id;
+    const fixtureId = String(match.fixture.id); // Convert to string for consistent comparison
     const live = isLive(match);
     const finished = isFinished(match);
     const tip = userTips.get(fixtureId);
-    const competitionId = await isInUserCompetition(fixtureId);
+    const competitionId = await isInUserCompetition(match.fixture.id);
     const inCompetition = !!competitionId;
 
     // League name
@@ -452,7 +452,7 @@ function updateCounts() {
     const liveCount = allMatches.filter(m => isLive(m)).length;
     const finishedCount = allMatches.filter(m => isFinished(m)).length;
     const myTipsCount = allMatches.filter(m => {
-        const hasTip = userTips.has(m.fixture.id);
+        const hasTip = userTips.has(String(m.fixture.id));
         if (hasTip) {
             console.log(`Match ${m.fixture.id} has tip`);
         }
