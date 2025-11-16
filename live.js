@@ -16,7 +16,8 @@ let displayedMatchCount = 20; // Number of matches to show initially
 const MATCHES_PER_PAGE = 20;
 
 // Initialize
-firebase.auth().onAuthStateChanged(async (user) => {
+supabase.auth.onAuthStateChange(async (event, session) => {
+    const user = session?.user;
     if (user) {
         currentUser = user;
         await Promise.all([
@@ -115,20 +116,30 @@ async function loadMatches() {
 }
 
 /**
- * Load user's tips from Firebase
+ * Load user's tips from Supabase
  */
 async function loadUserTips() {
     try {
-        const db = firebase.firestore();
-        const snapshot = await db.collection('tips')
-            .where('userId', '==', currentUser.uid)
-            .get();
+        const { data, error } = await supabase
+            .from('tips')
+            .select('*')
+            .eq('user_id', currentUser.id);
+
+        if (error) throw error;
 
         userTips.clear();
-        snapshot.forEach(doc => {
-            const tip = doc.data();
-            // Tips are stored with matchId, convert to string for consistent comparison
-            userTips.set(String(tip.matchId), tip);
+        data.forEach(tip => {
+            // Tips stored with match_id, convert to Firebase-compatible format
+            const tipData = {
+                matchId: String(tip.match_id),
+                homeScore: tip.home_score,
+                awayScore: tip.away_score,
+                homeTeam: tip.home_team,
+                awayTeam: tip.away_team,
+                odds: tip.odds,
+                timestamp: tip.timestamp
+            };
+            userTips.set(String(tip.match_id), tipData);
         });
 
         console.log(`✅ Loaded ${userTips.size} user tips`);
@@ -142,15 +153,16 @@ async function loadUserTips() {
  */
 async function loadUserCompetitions() {
     try {
-        const db = firebase.firestore();
-        const snapshot = await db.collection('competitionParticipants')
-            .where('userId', '==', currentUser.uid)
-            .get();
+        const { data, error } = await supabase
+            .from('competition_participants')
+            .select('competition_id')
+            .eq('user_id', currentUser.id);
+
+        if (error) throw error;
 
         userCompetitions.clear();
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            userCompetitions.add(data.competitionId);
+        data.forEach(row => {
+            userCompetitions.add(row.competition_id);
         });
 
         console.log(`✅ User is in ${userCompetitions.size} competitions`);
@@ -186,14 +198,17 @@ function isUpcoming(match) {
  */
 async function isInUserCompetition(fixtureId) {
     try {
-        const db = firebase.firestore();
-
         // Check if this fixture is in any competition the user is in
         for (const competitionId of userCompetitions) {
-            const compDoc = await db.collection('competitions').doc(competitionId).get();
-            if (compDoc.exists) {
-                const fixtures = compDoc.data().fixtures || [];
-                if (fixtures.includes(fixtureId)) {
+            const { data, error } = await supabase
+                .from('competitions')
+                .select('match_ids')
+                .eq('id', competitionId)
+                .single();
+
+            if (!error && data) {
+                const matchIds = data.match_ids || [];
+                if (matchIds.includes(parseInt(fixtureId))) {
                     return competitionId;
                 }
             }
