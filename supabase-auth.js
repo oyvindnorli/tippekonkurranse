@@ -233,7 +233,7 @@ async function getAllUsersWithTips() {
 
 // Called when user logs in
 async function onUserLoggedIn(user) {
-    console.log('User logged in:', user.user_metadata?.display_name || user.email);
+    console.log('🔵 onUserLoggedIn called for:', user.user_metadata?.display_name || user.email);
 
     // Hide auth modal (only exists on index.html)
     const authModal = document.getElementById('authModal');
@@ -293,12 +293,17 @@ async function onUserLoggedIn(user) {
     }
 
     // Load user data (wait for function to be available)
+    console.log('🔍 Checking if loadFirebaseData is available:', typeof window.loadFirebaseData);
     if (typeof window.loadFirebaseData === 'function') {
+        console.log('✅ loadFirebaseData found, calling it now...');
         window.loadFirebaseData();
     } else {
         // Function not loaded yet, wait and retry
         console.log('⏳ Waiting for loadFirebaseData to be available...');
+        let attempts = 0;
         const checkInterval = setInterval(() => {
+            attempts++;
+            console.log(`⏳ Retry attempt ${attempts}...`);
             if (typeof window.loadFirebaseData === 'function') {
                 clearInterval(checkInterval);
                 console.log('✅ loadFirebaseData is now available, calling it...');
@@ -310,7 +315,7 @@ async function onUserLoggedIn(user) {
         setTimeout(() => {
             clearInterval(checkInterval);
             if (typeof window.loadFirebaseData !== 'function') {
-                console.error('❌ loadFirebaseData never became available');
+                console.error('❌ loadFirebaseData never became available after 5 seconds');
             }
         }, 5000);
     }
