@@ -376,35 +376,8 @@ function onUserLoggedOut() {
     }
 }
 
-// Load all data from Supabase
-async function loadFirebaseData() {
-    console.log('🔄 Loading Supabase data...');
-
-    // Load user tips (only if userTips variable exists, i.e., on index.html)
-    if (typeof userTips !== 'undefined') {
-        userTips = await getCurrentUserTips();
-        console.log('📥 Loaded tips from Supabase:', userTips.length);
-    }
-
-    // Re-render everything with the loaded tips (only on index.html)
-    if (typeof renderMatches === 'function') {
-        renderMatches();
-    }
-
-    if (typeof updateTotalScore === 'function') {
-        updateTotalScore();
-    }
-
-    // On leaderboard page, trigger reload if matches are ready
-    if (typeof loadLeaderboardData === 'function' && typeof matches !== 'undefined' && matches.length > 0) {
-        console.log('🔄 User logged in, reloading leaderboard with existing matches...');
-        await loadFirebaseLeaderboard();
-    }
-    // On other pages, load leaderboard normally
-    else if (typeof loadLeaderboardData === 'undefined') {
-        await loadFirebaseLeaderboard();
-    }
-}
+// NOTE: loadFirebaseData() is now defined in app-firebase.js and exported to window
+// This file calls window.loadFirebaseData() when user logs in
 
 // Load leaderboard from Supabase
 async function loadFirebaseLeaderboard() {

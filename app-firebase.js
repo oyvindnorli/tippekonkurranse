@@ -617,7 +617,7 @@ async function loadMatches() {
 
 // Load all data (called by supabase-auth.js when user logs in)
 async function loadFirebaseData() {
-    console.log('🔄 Loading Firebase data...');
+    console.log('🔄 Loading data from Supabase...');
 
     // Show main content, hide welcome
     const welcomeSection = document.getElementById('welcomeSection');
@@ -631,6 +631,21 @@ async function loadFirebaseData() {
 
     // Load matches
     await loadMatches();
+
+    // Load user tips (if on index.html where userTips exists)
+    if (typeof userTips !== 'undefined' && typeof getCurrentUserTips === 'function') {
+        userTips = await getCurrentUserTips();
+        console.log('📥 Loaded tips from Supabase:', userTips.length);
+    }
+
+    // Re-render with loaded tips
+    if (typeof renderMatches === 'function') {
+        renderMatches();
+    }
+
+    if (typeof updateTotalScore === 'function') {
+        updateTotalScore();
+    }
 }
 
 // Make loadFirebaseData globally available
