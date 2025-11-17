@@ -246,26 +246,8 @@ async function onUserLoggedIn(user) {
     const usernameDisplay = document.getElementById('usernameDisplay');
 
     if (currentUsername) {
-        console.log('📝 Fetching displayName from database...');
-        try {
-            // Fetch displayName from users table
-            const { data, error } = await supabase
-                .from('users')
-                .select('display_name')
-                .eq('id', user.id)
-                .single();
-
-            console.log('📝 displayName query result:', { data, error });
-
-            if (data && !error) {
-                currentUsername.textContent = data.display_name || user.email;
-            } else {
-                currentUsername.textContent = user.user_metadata?.display_name || user.email;
-            }
-        } catch (error) {
-            console.warn('Could not fetch displayName:', error);
-            currentUsername.textContent = user.user_metadata?.display_name || user.email;
-        }
+        // Use displayName from user metadata (set during signup)
+        currentUsername.textContent = user.user_metadata?.display_name || user.email.split('@')[0];
         console.log('✅ displayName set to:', currentUsername.textContent);
 
         // Show username display
