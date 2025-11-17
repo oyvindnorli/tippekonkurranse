@@ -246,6 +246,7 @@ async function onUserLoggedIn(user) {
     const usernameDisplay = document.getElementById('usernameDisplay');
 
     if (currentUsername) {
+        console.log('📝 Fetching displayName from database...');
         try {
             // Fetch displayName from users table
             const { data, error } = await supabase
@@ -253,6 +254,8 @@ async function onUserLoggedIn(user) {
                 .select('display_name')
                 .eq('id', user.id)
                 .single();
+
+            console.log('📝 displayName query result:', { data, error });
 
             if (data && !error) {
                 currentUsername.textContent = data.display_name || user.email;
@@ -263,6 +266,7 @@ async function onUserLoggedIn(user) {
             console.warn('Could not fetch displayName:', error);
             currentUsername.textContent = user.user_metadata?.display_name || user.email;
         }
+        console.log('✅ displayName set to:', currentUsername.textContent);
 
         // Show username display
         if (usernameDisplay) {
