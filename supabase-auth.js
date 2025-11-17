@@ -292,8 +292,28 @@ async function onUserLoggedIn(user) {
         mainNavButtons.style.display = 'flex';
     }
 
-    // Load user data
-    loadFirebaseData();
+    // Load user data (wait for function to be available)
+    if (typeof window.loadFirebaseData === 'function') {
+        window.loadFirebaseData();
+    } else {
+        // Function not loaded yet, wait and retry
+        console.log('⏳ Waiting for loadFirebaseData to be available...');
+        const checkInterval = setInterval(() => {
+            if (typeof window.loadFirebaseData === 'function') {
+                clearInterval(checkInterval);
+                console.log('✅ loadFirebaseData is now available, calling it...');
+                window.loadFirebaseData();
+            }
+        }, 100);
+
+        // Timeout after 5 seconds
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            if (typeof window.loadFirebaseData !== 'function') {
+                console.error('❌ loadFirebaseData never became available');
+            }
+        }, 5000);
+    }
 }
 
 // Called when user logs out
