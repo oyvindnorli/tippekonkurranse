@@ -347,21 +347,24 @@ function displayLeagueStats(tipsWithResults) {
                 total: 0,
                 points: 0,
                 exact: 0,
-                correctDirection: 0
+                direction: 0
             };
         }
 
         leagueStats[leagueId].total++;
         leagueStats[leagueId].points += points;
-        // Check if exact match by comparing scores, not just points
-        const isExact = tip.homeScore === match.result.home && tip.awayScore === match.result.away;
-        if (isExact) leagueStats[leagueId].exact++;
 
-        // Check if correct direction (H/U/B)
-        const tipOutcome = getOutcome(tip.homeScore, tip.awayScore);
-        const resultOutcome = getOutcome(match.result.home, match.result.away);
-        if (tipOutcome === resultOutcome) {
-            leagueStats[leagueId].correctDirection++;
+        // Check if exact match by comparing scores
+        const isExact = tip.homeScore === match.result.home && tip.awayScore === match.result.away;
+        if (isExact) {
+            leagueStats[leagueId].exact++;
+        } else {
+            // Check if correct direction (but not exact)
+            const tipOutcome = getOutcome(tip.homeScore, tip.awayScore);
+            const resultOutcome = getOutcome(match.result.home, match.result.away);
+            if (tipOutcome === resultOutcome) {
+                leagueStats[leagueId].direction++;
+            }
         }
     });
 
@@ -380,7 +383,7 @@ function displayLeagueStats(tipsWithResults) {
     leagueStatsArray.forEach(league => {
         const avgPoints = (league.points / league.total).toFixed(2);
         const exactRate = ((league.exact / league.total) * 100).toFixed(1);
-        const directionRate = ((league.correctDirection / league.total) * 100).toFixed(1);
+        const directionRate = ((league.direction / league.total) * 100).toFixed(1);
         // Round total points to avoid floating point precision issues
         const totalPoints = Math.round(league.points * 10) / 10;
 
@@ -388,7 +391,7 @@ function displayLeagueStats(tipsWithResults) {
         leagueDiv.className = 'stats-row';
         leagueDiv.innerHTML = `
             <span>${league.name}:</span>
-            <strong>${totalPoints} poeng (${avgPoints} snitt, ${exactRate}% eksakt, ${directionRate}% riktig retning)</strong>
+            <strong>${totalPoints} poeng (${avgPoints} snitt) • ${exactRate}% eksakt • ${directionRate}% retning</strong>
         `;
         leagueStatsContainer.appendChild(leagueDiv);
     });
