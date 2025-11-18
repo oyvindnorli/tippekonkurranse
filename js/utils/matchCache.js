@@ -152,7 +152,19 @@ export async function getCachedMatches(matchIds) {
  * @returns {Promise<Array>}
  */
 export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds) {
-    const supabase = getSupabase();
+    console.log('🔧 getUpcomingMatchesFromCache called');
+    console.log('   startDate:', startDate);
+    console.log('   endDate:', endDate);
+    console.log('   leagueIds:', leagueIds);
+
+    let supabase;
+    try {
+        supabase = getSupabase();
+        console.log('   ✅ Supabase instance obtained');
+    } catch (error) {
+        console.error('   ❌ Failed to get Supabase instance:', error);
+        return [];
+    }
 
     try {
         const startISO = startDate.toISOString();
@@ -161,6 +173,7 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
         console.log(`🔍 Supabase query: ${startISO.split('T')[0]} to ${endISO.split('T')[0]} for leagues ${leagueIds.join(',')}`);
 
         // Query matches in date range and filter by league IDs
+        console.log('   🔄 Executing Supabase query...');
         const { data, error } = await supabase
             .from('matches')
             .select('*')
@@ -168,6 +181,10 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
             .lte('commence_time', endISO)
             .in('league_id', leagueIds)
             .order('commence_time', { ascending: true });
+
+        console.log('   ✅ Query completed');
+        console.log('   error:', error);
+        console.log('   data length:', data?.length);
 
         if (error) {
             console.error('❌ Supabase error:', error);
@@ -177,9 +194,11 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
         console.log(`📦 Supabase cache: ${data?.length || 0} matches matched leagues ${leagueIds.join(',')}`);
 
         const matches = (data || []).map(convertSupabaseMatch);
+        console.log(`   ✅ Converted ${matches.length} matches`);
         return matches;
     } catch (error) {
         console.error('❌ Error fetching upcoming matches from Supabase:', error);
+        console.error('   Stack:', error.stack);
         return [];
     }
 }
