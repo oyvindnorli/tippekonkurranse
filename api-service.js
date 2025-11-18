@@ -435,16 +435,9 @@ class FootballApiService {
             date: f.commence_time ? new Date(f.commence_time).toLocaleDateString('no-NO') : 'N/A'
         })));
 
-        // Save to Firestore for consistent odds across all users
-        try {
-            const { saveMatchesToFirestore } = await import('./js/utils/matchCache.js');
-            const saved = await saveMatchesToFirestore(fixtures);
-            if (saved === 0) {
-                console.log('ℹ️ No new matches to save (all already in Firestore)');
-            }
-        } catch (error) {
-            console.error('⚠️ Failed to save matches to Firestore:', error);
-        }
+        // Note: Matches are populated by admin script (see populate_matches.py)
+        // Client-side code only reads from Supabase, never writes
+        console.log('ℹ️ Matches are managed by admin script. Client has read-only access.');
 
         // Also save to localStorage for faster initial load
         this.saveCache(fixtures);
