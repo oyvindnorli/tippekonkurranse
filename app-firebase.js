@@ -48,11 +48,8 @@ async function saveLeaguePreferences() {
 async function loadSelectedLeagues(userId) {
     try {
         if (!userId) {
-            console.log('⚠️ No user logged in, using default leagues');
             return new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
         }
-
-        console.log('🔍 Fetching preferences from Supabase for user:', userId);
 
         const { data, error } = await Promise.race([
             supabase
@@ -64,8 +61,6 @@ async function loadSelectedLeagues(userId) {
                 setTimeout(() => reject(new Error('Timeout fetching preferences')), 5000)
             )
         ]);
-
-        console.log('📦 Supabase response:', { data, error });
 
         if (!error && data && data.selected_leagues) {
             const leagueArray = data.selected_leagues;
@@ -97,11 +92,9 @@ async function loadSelectedLeagues(userId) {
             // Empty array is valid (user wants to see nothing)
             return new Set(uniqueLeagues);
         } else {
-            console.log('📂 No preferences found, using defaults');
             return new Set([39, 2, 3, 32, 48, 135]); // Default: Premier League, Champions League, Europa League, WCQ Europe, EFL Cup, Serie A
         }
     } catch (error) {
-        console.warn('⚠️ Could not load league preferences:', error);
         return new Set([39, 2, 3, 32, 48, 135]); // Default on error
     }
 }
@@ -685,9 +678,9 @@ function init() {
 
     // Wait for auth state before loading matches
     let preferencesUnsubscribe = null;
+    let hasLoadedInitialMatches = false;
 
     supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('🔐 Auth state changed:', event, 'User:', session?.user?.email);
         const user = session?.user;
         // Hide loading spinner
         if (authLoading) authLoading.style.display = 'none';
@@ -699,12 +692,9 @@ function init() {
         }
 
         if (user) {
-            console.log('✅ User is signed in:', user.email);
             // User is signed in, load preferences first
             const previousLeagues = API_CONFIG.LEAGUES ? [...API_CONFIG.LEAGUES] : [];
-            console.log('📋 Loading user preferences...');
             selectedLeagues = await loadSelectedLeagues(user.id);
-            console.log('✅ Preferences loaded:', Array.from(selectedLeagues));
 
             // Update API_CONFIG.LEAGUES to use user's preferred leagues
             const newLeagues = Array.from(selectedLeagues);
@@ -712,12 +702,10 @@ function init() {
             // Only clear cache if leagues actually changed
             const leaguesChanged = JSON.stringify(previousLeagues.sort()) !== JSON.stringify(newLeagues.sort());
             if (leaguesChanged && footballApi && footballApi.clearCache) {
-                console.log('🔄 Leagues changed, clearing cache');
                 footballApi.clearCache();
             }
 
             API_CONFIG.LEAGUES = newLeagues;
-            console.log('⚙️ API_CONFIG.LEAGUES set to:', API_CONFIG.LEAGUES);
 
             // Show main content, hide welcome
             if (welcomeSection) {
@@ -727,9 +715,11 @@ function init() {
                 mainContent.style.display = 'block';
             }
 
-            // Load matches with user's preferred leagues
-            console.log('🎯 Calling loadMatches()...');
-            loadMatches();
+            // Load matches only once on initial auth
+            if (!hasLoadedInitialMatches || leaguesChanged) {
+                hasLoadedInitialMatches = true;
+                loadMatches();
+            }
 
             // Set up real-time listener for preferences changes
             const channel = supabase
