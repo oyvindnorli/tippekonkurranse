@@ -466,33 +466,7 @@ function applyLeagueFilter() {
     applyDateFilter();
 }
 
-// Cache matches in localStorage for faster loading
-function getCachedMatches() {
-    try {
-        const cached = localStorage.getItem(STORAGE_KEYS.CACHED_MATCHES);
-        const cacheTime = localStorage.getItem(STORAGE_KEYS.CACHED_MATCHES_TIME);
-
-        if (cached && cacheTime) {
-            const age = Date.now() - parseInt(cacheTime);
-            // Cache valid for configured duration
-            if (age < import.meta.env?.VITE_CACHE_DURATION || 5 * 60 * 1000) {
-                return JSON.parse(cached);
-            }
-        }
-    } catch (error) {
-    }
-    return null;
-}
-
-function setCachedMatches(matches) {
-    try {
-        localStorage.setItem(STORAGE_KEYS.CACHED_MATCHES, JSON.stringify(matches));
-        localStorage.setItem(STORAGE_KEYS.CACHED_MATCHES_TIME, Date.now().toString());
-    } catch (error) {
-    }
-}
-
-// Load matches from API
+// Load matches from Supabase only
 async function loadMatches() {
     const startTime = performance.now();
 
@@ -503,121 +477,67 @@ async function loadMatches() {
         loadingMessage.style.display = 'block';
         errorMessage.style.display = 'none';
 
-        // Try to load from cache first for instant display
-        const cachedMatches = getCachedMatches();
-        if (cachedMatches && cachedMatches.length > 0) {
-            const cacheTime = performance.now();
+        // Import matchCache module
+        const { getUpcomingMatchesFromCache } = await import('./js/utils/matchCache.js?v=20251118c');
 
-            allMatches = cachedMatches;
+        // Fetch ALL matches from Supabase (no date filtering - get everything)
+        const today = new Date();
+        const futureDate = new Date();
+        futureDate.setDate(today.getDate() + 365); // Get matches for next year
 
-            // Ensure cached matches are sorted by date
-            allMatches.sort((a, b) => {
-                const dateA = new Date(a.commence_time || a.date || a.timestamp * 1000);
-                const dateB = new Date(b.commence_time || b.date || b.timestamp * 1000);
-                return dateA - dateB;
-            });
+        const leagueIds = API_CONFIG.LEAGUES && API_CONFIG.LEAGUES.length > 0
+            ? API_CONFIG.LEAGUES
+            : [39, 2, 3, 32, 48, 135]; // Default leagues
 
-            applyLeagueFilter();
+        // Fetch from Supabase only
+        const matchesFromSupabase = await getUpcomingMatchesFromCache(today, futureDate, leagueIds);
 
-            // Load user tips in parallel
-            const tipsPromise = currentUser ? loadUserTips() : Promise.resolve();
-
-            // Hide loading message since we have cached data
+        if (!matchesFromSupabase || matchesFromSupabase.length === 0) {
+            console.warn('⚠️ No matches found in Supabase');
+            errorMessage.textContent = 'Ingen kamper funnet. Venter på at GitHub Actions skal oppdatere...';
+            errorMessage.style.display = 'block';
             loadingMessage.style.display = 'none';
-
-            // Render immediately with cached data
-            renderMatches();
-
-            await tipsPromise;
-            updateTotalScore();
+            return;
         }
 
-        // Fetch fresh data from API (in parallel)
-        const apiStartTime = performance.now();
-        const [upcomingMatches, completedMatches] = await Promise.all([
-            footballApi.getUpcomingFixtures(),
-            footballApi.fetchScores().catch(error => {
-                return [];
-            })
-        ]);
-        const apiEndTime = performance.now();
+        allMatches = matchesFromSupabase;
 
-        // Deduplicate matches
-        const existingIds = new Set(upcomingMatches.map(m => String(m.id)));
-        const uniqueCompletedMatches = completedMatches.filter(m => {
-            const id = String(m.id);
-            if (existingIds.has(id)) {
-                return false;
-            }
-            existingIds.add(id);
-            return true;
-        });
-
-        // Combine all matches
-        allMatches = upcomingMatches.concat(uniqueCompletedMatches);
-
-        // Sort all matches by date (chronological order)
+        // Sort by date (chronological order)
         allMatches.sort((a, b) => {
             const dateA = new Date(a.commence_time || a.date || a.timestamp * 1000);
             const dateB = new Date(b.commence_time || b.date || b.timestamp * 1000);
             return dateA - dateB;
         });
 
-        console.log(`📊 ${upcomingMatches.length} upcoming, ${completedMatches.length} completed`);
+        console.log(`✅ Loaded ${allMatches.length} matches from Supabase`);
 
-        // Cache the fresh data
-        setCachedMatches(allMatches);
-
-        // Apply initial filter
+        // Apply league filter
         applyLeagueFilter();
 
-        // Load user tips if not already loaded
-        if (currentUser && !cachedMatches) {
-            await loadUserTips();
-        }
-
-        loadingMessage.style.display = 'none';
-
-        // Re-render with fresh data
-        renderMatches();
-        updateTotalScore();
-
-        const endTime = performance.now();
-        const duration = ((endTime - startTime) / 1000).toFixed(2);
-        console.log(`✅ Matches loaded successfully in ${duration}s`);
-    } catch (error) {
-        ErrorHandler.handle(error, {
-            context: 'loadMatches',
-            showUser: true,
-            userMessage: ERROR_MESSAGES.LOAD_MATCHES_FAILED + ' Bruker mock-data.',
-            logToConsole: true
-        });
-
-        loadingMessage.style.display = 'none';
-
-        // Fallback to mock data
-        allMatches = await footballApi.getMockFixtures();
-
-        // Sort mock data by date too
-        allMatches.sort((a, b) => {
-            const dateA = new Date(a.commence_time || a.date || a.timestamp * 1000);
-            const dateB = new Date(b.commence_time || b.date || b.timestamp * 1000);
-            return dateA - dateB;
-        });
-
-        applyLeagueFilter();
-
-        // Load user tips first before rendering
+        // Load user tips
         if (currentUser) {
             await loadUserTips();
         }
 
+        loadingMessage.style.display = 'none';
+
+        // Render matches
         renderMatches();
         updateTotalScore();
 
         const endTime = performance.now();
         const duration = ((endTime - startTime) / 1000).toFixed(2);
-        console.log(`⚠️ Matches loaded with fallback in ${duration}s`);
+        console.log(`✅ Matches loaded in ${duration}s (Supabase only)`);
+    } catch (error) {
+        console.error('❌ Error loading matches:', error);
+
+        loadingMessage.style.display = 'none';
+        errorMessage.textContent = 'Kunne ikke laste kamper. Prøv å refresh siden.';
+        errorMessage.style.display = 'block';
+
+        // Show empty state
+        allMatches = [];
+        renderMatches();
     }
 }
 
