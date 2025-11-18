@@ -289,21 +289,21 @@ class FootballApiService {
 
     /**
      * Get upcoming fixtures (main method)
-     * Now uses Firestore as single source of truth for odds consistency
+     * Now uses Supabase as single source of truth for odds consistency
      */
     async getUpcomingFixtures(skipCache = false) {
         const today = new Date();
         const futureDate = new Date();
         futureDate.setDate(today.getDate() + 60); // Fetch up to 60 days ahead to catch next round
 
-        // Try Firestore first (fastest and ensures consistent odds)
+        // Try Supabase first (fastest and ensures consistent odds)
         if (!skipCache) {
             try {
                 const { getUpcomingMatchesFromCache, saveMatchesToFirestore, convertOldFormatMatches } = await import('./js/utils/matchCache.js');
                 const cachedMatches = await getUpcomingMatchesFromCache(today, futureDate, API_CONFIG.LEAGUES);
 
                 if (cachedMatches && cachedMatches.length > 0) {
-                    console.log(`⚡ Loaded ${cachedMatches.length} matches from Firestore cache for leagues ${API_CONFIG.LEAGUES.join(',')}`);
+                    console.log(`⚡ Loaded ${cachedMatches.length} matches from Supabase cache for leagues ${API_CONFIG.LEAGUES.join(',')}`);
 
                     // Filter to only show next round for each league
                     const nextRoundMatches = this.filterToNextRound(cachedMatches);
@@ -313,19 +313,19 @@ class FootballApiService {
                     // Note: Results will be updated by loadMatches() which calls fetchScores() separately
                     return nextRoundMatches;
                 } else {
-                    console.log(`⚠️ Firestore cache returned 0 matches for leagues ${API_CONFIG.LEAGUES.join(',')}, fetching from API...`);
+                    console.log(`⚠️ Supabase cache returned 0 matches for leagues ${API_CONFIG.LEAGUES.join(',')}, fetching from API...`);
 
                     // If cache is empty/invalid, convert old format matches in background
                     convertOldFormatMatches().catch(err => console.warn('Conversion failed:', err));
                 }
             } catch (error) {
-                console.warn('⚠️ Firestore cache failed, falling back to API:', error);
+                console.warn('⚠️ Supabase cache failed, falling back to API:', error);
             }
         } else {
-            console.log('🔄 Skipping Firestore cache, fetching fresh data from API...');
+            console.log('🔄 Skipping Supabase cache, fetching fresh data from API...');
         }
 
-        // Firestore cache miss - fetch from API using next=X parameter for each league
+        // Supabase cache miss - fetch from API using next=X parameter for each league
         console.log(`📅 Fetching next round fixtures from API for leagues ${API_CONFIG.LEAGUES.join(',')}`);
         const fixtures = await this.fetchNextRoundFixtures();
 
