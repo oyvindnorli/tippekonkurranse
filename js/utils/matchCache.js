@@ -152,55 +152,48 @@ export async function getCachedMatches(matchIds) {
  * @returns {Promise<Array>}
  */
 export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds) {
-    console.log('🔧 getUpcomingMatchesFromCache called');
-    console.log('   startDate:', startDate);
-    console.log('   endDate:', endDate);
-    console.log('   leagueIds:', leagueIds);
+    console.log('🔧 SIMPLIFIED: Getting matches from Supabase...');
 
-    let supabase;
-    try {
-        supabase = getSupabase();
-        console.log('   ✅ Supabase instance obtained');
-    } catch (error) {
-        console.error('   ❌ Failed to get Supabase instance:', error);
+    // Just get ALL matches, don't filter by date yet
+    const { data, error } = await window.supabase
+        .from('matches')
+        .select('*')
+        .in('league_id', leagueIds);
+
+    console.log('📊 Raw Supabase result:', { error, dataCount: data?.length });
+
+    if (error) {
+        console.error('❌ Supabase error:', error);
         return [];
     }
 
-    try {
-        const startISO = startDate.toISOString();
-        const endISO = endDate.toISOString();
-
-        console.log(`🔍 Supabase query: ${startISO.split('T')[0]} to ${endISO.split('T')[0]} for leagues ${leagueIds.join(',')}`);
-
-        // Query matches in date range and filter by league IDs
-        console.log('   🔄 Executing Supabase query...');
-        const { data, error } = await supabase
-            .from('matches')
-            .select('*')
-            .gte('commence_time', startISO)
-            .lte('commence_time', endISO)
-            .in('league_id', leagueIds)
-            .order('commence_time', { ascending: true });
-
-        console.log('   ✅ Query completed');
-        console.log('   error:', error);
-        console.log('   data length:', data?.length);
-
-        if (error) {
-            console.error('❌ Supabase error:', error);
-            return [];
-        }
-
-        console.log(`📦 Supabase cache: ${data?.length || 0} matches matched leagues ${leagueIds.join(',')}`);
-
-        const matches = (data || []).map(convertSupabaseMatch);
-        console.log(`   ✅ Converted ${matches.length} matches`);
-        return matches;
-    } catch (error) {
-        console.error('❌ Error fetching upcoming matches from Supabase:', error);
-        console.error('   Stack:', error.stack);
+    if (!data || data.length === 0) {
+        console.log('⚠️ No matches found in Supabase');
         return [];
     }
+
+    console.log(`✅ Found ${data.length} matches in Supabase`);
+
+    // Convert to our format
+    const matches = data.map(m => ({
+        id: m.id,
+        homeTeam: m.home_team,
+        awayTeam: m.away_team,
+        homeLogo: m.home_logo,
+        awayLogo: m.away_logo,
+        commence_time: m.commence_time,
+        league: m.league_id,
+        leagueName: m.league_name,
+        season: m.season,
+        status: m.status,
+        result: m.home_score !== null && m.away_score !== null ? { home: m.home_score, away: m.away_score } : null,
+        completed: m.completed,
+        odds: m.odds,
+        elapsed: m.elapsed
+    }));
+
+    console.log(`✅ Converted ${matches.length} matches`);
+    return matches;
 }
 
 /**
