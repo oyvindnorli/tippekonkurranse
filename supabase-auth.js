@@ -140,7 +140,9 @@ async function saveTipToFirestore(tip) {
 
         const { error } = await supabase
             .from('tips')
-            .upsert(tipData);
+            .upsert(tipData, {
+                onConflict: 'user_id,match_id'
+            });
 
         if (error) throw error;
 
