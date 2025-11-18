@@ -1311,8 +1311,13 @@ function toggleLeagueFilter(leagueId) {
 }
 
 async function selectAllLeaguesFilter() {
+    console.log('✅ SELECT ALL clicked!');
+    console.log('   Before:', Array.from(selectedLeagues));
+
     // Select all available leagues
     selectedLeagues = new Set(AVAILABLE_LEAGUES);
+
+    console.log('   After:', Array.from(selectedLeagues));
 
     // Update API_CONFIG.LEAGUES to match selectedLeagues
     API_CONFIG.LEAGUES = Array.from(selectedLeagues);
@@ -1328,8 +1333,13 @@ async function selectAllLeaguesFilter() {
 }
 
 async function deselectAllLeaguesFilter() {
+    console.log('❌ DESELECT ALL clicked!');
+    console.log('   Before:', Array.from(selectedLeagues));
+
     // Empty set = show nothing
     selectedLeagues = new Set();
+
+    console.log('   After:', Array.from(selectedLeagues));
 
     // Update API_CONFIG.LEAGUES to match selectedLeagues
     API_CONFIG.LEAGUES = [];
