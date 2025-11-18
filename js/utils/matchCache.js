@@ -58,7 +58,7 @@ function convertSupabaseMatch(match) {
  * @returns {Promise<number>} Number of matches converted
  */
 export async function convertOldFormatMatches() {
-    console.log('⚠️ convertOldFormatMatches is deprecated with Supabase (schema enforces INTEGER league_id)');
+    // Deprecated - no longer needed with Supabase
     return 0;
 }
 
@@ -152,41 +152,33 @@ export async function getCachedMatches(matchIds) {
  * @returns {Promise<Array>}
  */
 export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds) {
-    console.log('🔧 SIMPLIFIED: Getting matches from Supabase...');
-    console.log('   window.supabase exists?', !!window.supabase);
-
     try {
-        // Add timeout wrapper
+        // Add 30s timeout for slower connections
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Supabase query timeout after 10s')), 10000)
+            setTimeout(() => reject(new Error('Timeout')), 30000)
         );
 
-        console.log('   Starting query...');
         const queryPromise = window.supabase
             .from('matches')
             .select('*')
             .in('league_id', leagueIds);
 
         const result = await Promise.race([queryPromise, timeoutPromise]);
-        console.log('   Query finished!');
-
         const { data, error } = result;
-        console.log('📊 Raw Supabase result:', { error, dataCount: data?.length });
 
         if (error) {
-            console.error('❌ Supabase error:', error);
+            console.warn('⚠️ Supabase error, will use API fallback:', error.message);
             return [];
         }
 
         if (!data || data.length === 0) {
-            console.log('⚠️ No matches found in Supabase');
             return [];
         }
 
-        console.log(`✅ Found ${data.length} matches in Supabase`);
+        console.log(`✅ Loaded ${data.length} matches from Supabase`);
 
         // Convert to our format
-        const matches = data.map(m => ({
+        return data.map(m => ({
             id: m.id,
             homeTeam: m.home_team,
             awayTeam: m.away_team,
@@ -202,13 +194,8 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
             odds: m.odds,
             elapsed: m.elapsed
         }));
-
-        console.log(`✅ Converted ${matches.length} matches`);
-        return matches;
     } catch (err) {
-        console.error('❌ CATCH: Error fetching from Supabase:', err);
-        console.error('   Error type:', err.constructor.name);
-        console.error('   Error message:', err.message);
+        // Silent fallback to API - this is normal if Supabase is slow
         return [];
     }
 }

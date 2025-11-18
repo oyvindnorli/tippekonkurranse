@@ -299,7 +299,7 @@ class FootballApiService {
         // Try Supabase first (fastest and ensures consistent odds)
         if (!skipCache) {
             try {
-                const { getUpcomingMatchesFromCache, saveMatchesToFirestore, convertOldFormatMatches } = await import('./js/utils/matchCache.js?v=20251118b');
+                const { getUpcomingMatchesFromCache, saveMatchesToFirestore, convertOldFormatMatches } = await import('./js/utils/matchCache.js?v=20251118c');
                 const cachedMatches = await getUpcomingMatchesFromCache(today, futureDate, API_CONFIG.LEAGUES);
 
                 if (cachedMatches && cachedMatches.length > 0) {
@@ -313,10 +313,7 @@ class FootballApiService {
                     // Note: Results will be updated by loadMatches() which calls fetchScores() separately
                     return nextRoundMatches;
                 } else {
-                    console.log(`⚠️ Supabase cache returned 0 matches for leagues ${API_CONFIG.LEAGUES.join(',')}, fetching from API...`);
-
-                    // If cache is empty/invalid, convert old format matches in background
-                    convertOldFormatMatches().catch(err => console.warn('Conversion failed:', err));
+                    // Cache miss - will fetch from API below
                 }
             } catch (error) {
                 console.warn('⚠️ Supabase cache failed, falling back to API:', error);
