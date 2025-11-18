@@ -1243,6 +1243,12 @@ function showLeagueFilter() {
 
 function populateLeagueFilter() {
     const listContainer = document.getElementById('leagueFilterList');
+    if (!listContainer) {
+        console.error('❌ leagueFilterList not found!');
+        return;
+    }
+
+    console.log('📋 Populating league filter. Selected leagues:', Array.from(selectedLeagues));
     listContainer.innerHTML = '';
 
     // Show all available leagues (not just selected ones)
@@ -1250,6 +1256,7 @@ function populateLeagueFilter() {
     AVAILABLE_LEAGUES.forEach(leagueId => {
         const leagueName = getLeagueName(leagueId);
         const isSelected = selectedLeagues.has(leagueId);
+        console.log(`  League ${leagueId} (${leagueName}): ${isSelected ? 'CHECKED' : 'unchecked'}`);
 
         const checkbox = document.createElement('div');
         checkbox.className = 'league-filter-item';
