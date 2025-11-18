@@ -678,6 +678,7 @@ function init() {
     let preferencesUnsubscribe = null;
 
     supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('🔐 Auth state changed:', event, 'User:', session?.user?.email);
         const user = session?.user;
         // Hide loading spinner
         if (authLoading) authLoading.style.display = 'none';
@@ -689,9 +690,12 @@ function init() {
         }
 
         if (user) {
+            console.log('✅ User is signed in:', user.email);
             // User is signed in, load preferences first
             const previousLeagues = API_CONFIG.LEAGUES ? [...API_CONFIG.LEAGUES] : [];
+            console.log('📋 Loading user preferences...');
             selectedLeagues = await loadSelectedLeagues(user.id);
+            console.log('✅ Preferences loaded:', Array.from(selectedLeagues));
 
             // Update API_CONFIG.LEAGUES to use user's preferred leagues
             const newLeagues = Array.from(selectedLeagues);
@@ -704,6 +708,7 @@ function init() {
             }
 
             API_CONFIG.LEAGUES = newLeagues;
+            console.log('⚙️ API_CONFIG.LEAGUES set to:', API_CONFIG.LEAGUES);
 
             // Show main content, hide welcome
             if (welcomeSection) {
@@ -714,6 +719,7 @@ function init() {
             }
 
             // Load matches with user's preferred leagues
+            console.log('🎯 Calling loadMatches()...');
             loadMatches();
 
             // Set up real-time listener for preferences changes
