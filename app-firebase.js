@@ -1030,8 +1030,16 @@ function updateScore(matchId, type, isPlus) {
         return;
     }
 
-    const homeScore = homeScoreElement.textContent === '?' ? 0 : parseInt(homeScoreElement.textContent);
-    const awayScore = awayScoreElement.textContent === '?' ? 0 : parseInt(awayScoreElement.textContent);
+    // If the other score is still '?', set it to 0 visually
+    if (homeScoreElement.textContent === '?') {
+        homeScoreElement.textContent = '0';
+    }
+    if (awayScoreElement.textContent === '?') {
+        awayScoreElement.textContent = '0';
+    }
+
+    const homeScore = parseInt(homeScoreElement.textContent);
+    const awayScore = parseInt(awayScoreElement.textContent);
 
     submitTip(matchId, homeScore, awayScore);
 }
