@@ -514,6 +514,9 @@ async function loadMatches() {
             // Load user tips in parallel
             const tipsPromise = currentUser ? loadUserTips() : Promise.resolve();
 
+            // Hide loading message since we have cached data
+            loadingMessage.style.display = 'none';
+
             // Render immediately with cached data
             renderMatches();
 
@@ -530,7 +533,6 @@ async function loadMatches() {
             })
         ]);
         const apiEndTime = performance.now();
-        console.log(`🌐 API fetch completed in ${((apiEndTime - apiStartTime) / 1000).toFixed(2)}s`);
 
         // Deduplicate matches
         const existingIds = new Set(upcomingMatches.map(m => String(m.id)));
@@ -1307,7 +1309,6 @@ async function selectAllLeaguesFilter() {
 
     // Update API_CONFIG.LEAGUES to match selectedLeagues
     API_CONFIG.LEAGUES = Array.from(selectedLeagues);
-    console.log('🔄 Updated API_CONFIG.LEAGUES (select all):', API_CONFIG.LEAGUES);
 
     await saveLeaguePreferences();
     populateLeagueFilter();
@@ -1325,7 +1326,6 @@ async function deselectAllLeaguesFilter() {
 
     // Update API_CONFIG.LEAGUES to match selectedLeagues
     API_CONFIG.LEAGUES = [];
-    console.log('🔄 Updated API_CONFIG.LEAGUES (deselect all):', API_CONFIG.LEAGUES);
 
     await saveLeaguePreferences();
     populateLeagueFilter();
