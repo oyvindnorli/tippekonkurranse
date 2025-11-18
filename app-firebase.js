@@ -23,18 +23,24 @@ const AVAILABLE_LEAGUES = [39, 2, 3, 32, 48, 135]; // PL, CL, EL, WCQ Europe, EF
 // Save league preferences to Supabase
 async function saveLeaguePreferences() {
     try {
-        if (!currentUser) return;
+        console.log('   💾 saveLeaguePreferences starting...');
+        if (!currentUser) {
+            console.log('   ⚠️ No user logged in, skipping save');
+            return;
+        }
 
-        await supabase
+        console.log('   Calling Supabase upsert...');
+        const result = await supabase
             .from('user_preferences')
             .upsert({
                 user_id: currentUser.id,
                 selected_leagues: Array.from(selectedLeagues)
             });
 
+        console.log('   Supabase upsert result:', result);
         console.log('✅ League preferences saved:', Array.from(selectedLeagues));
     } catch (error) {
-        console.warn('Failed to save league preferences:', error);
+        console.warn('❌ Failed to save league preferences:', error);
     }
 }
 
