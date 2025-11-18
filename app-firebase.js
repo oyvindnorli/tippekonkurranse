@@ -692,20 +692,14 @@ function init() {
         }
 
         if (user) {
-            // User is signed in, load preferences first
-            const previousLeagues = API_CONFIG.LEAGUES ? [...API_CONFIG.LEAGUES] : [];
-            selectedLeagues = await loadSelectedLeagues(user.id);
-
-            // Update API_CONFIG.LEAGUES to use user's preferred leagues
-            const newLeagues = Array.from(selectedLeagues);
-
-            // Only clear cache if leagues actually changed
-            const leaguesChanged = JSON.stringify(previousLeagues.sort()) !== JSON.stringify(newLeagues.sort());
-            if (leaguesChanged && footballApi && footballApi.clearCache) {
-                footballApi.clearCache();
+            // Skip if we've already initialized for this user
+            if (hasLoadedInitialMatches) {
+                return;
             }
 
-            API_CONFIG.LEAGUES = newLeagues;
+            // User is signed in, load preferences first
+            selectedLeagues = await loadSelectedLeagues(user.id);
+            API_CONFIG.LEAGUES = Array.from(selectedLeagues);
 
             // Show main content, hide welcome
             if (welcomeSection) {
@@ -715,11 +709,9 @@ function init() {
                 mainContent.style.display = 'block';
             }
 
-            // Load matches only once on initial auth
-            if (!hasLoadedInitialMatches || leaguesChanged) {
-                hasLoadedInitialMatches = true;
-                loadMatches();
-            }
+            // Load matches once
+            hasLoadedInitialMatches = true;
+            loadMatches();
 
             // Set up real-time listener for preferences changes
             const channel = supabase
@@ -1261,11 +1253,9 @@ function showLeagueFilter() {
 function populateLeagueFilter() {
     const listContainer = document.getElementById('leagueFilterList');
     if (!listContainer) {
-        console.error('❌ leagueFilterList not found!');
         return;
     }
 
-    console.log('📋 Populating league filter. Selected leagues:', Array.from(selectedLeagues));
     listContainer.innerHTML = '';
 
     // Show all available leagues (not just selected ones)
@@ -1273,7 +1263,6 @@ function populateLeagueFilter() {
     AVAILABLE_LEAGUES.forEach(leagueId => {
         const leagueName = getLeagueName(leagueId);
         const isSelected = selectedLeagues.has(leagueId);
-        console.log(`  League ${leagueId} (${leagueName}): ${isSelected ? 'CHECKED' : 'unchecked'}`);
 
         const checkbox = document.createElement('div');
         checkbox.className = 'league-filter-item';
