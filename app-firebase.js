@@ -1314,42 +1314,58 @@ async function selectAllLeaguesFilter() {
     console.log('✅ SELECT ALL clicked!');
     console.log('   Before:', Array.from(selectedLeagues));
 
-    // Select all available leagues
-    selectedLeagues = new Set(AVAILABLE_LEAGUES);
+    try {
+        // Select all available leagues
+        selectedLeagues = new Set(AVAILABLE_LEAGUES);
 
-    console.log('   After:', Array.from(selectedLeagues));
+        console.log('   After:', Array.from(selectedLeagues));
 
-    // Update API_CONFIG.LEAGUES to match selectedLeagues
-    API_CONFIG.LEAGUES = Array.from(selectedLeagues);
+        // Update API_CONFIG.LEAGUES to match selectedLeagues
+        API_CONFIG.LEAGUES = Array.from(selectedLeagues);
 
-    await saveLeaguePreferences();
-    populateLeagueFilter();
+        console.log('   Saving preferences...');
+        await saveLeaguePreferences();
 
-    // Clear cache and reload matches with new leagues
-    if (footballApi && footballApi.clearCache) {
-        footballApi.clearCache();
+        console.log('   Calling populateLeagueFilter...');
+        populateLeagueFilter();
+
+        console.log('   Clearing cache and reloading...');
+        // Clear cache and reload matches with new leagues
+        if (footballApi && footballApi.clearCache) {
+            footballApi.clearCache();
+        }
+        loadMatches();
+    } catch (error) {
+        console.error('❌ Error in selectAllLeaguesFilter:', error);
     }
-    loadMatches();
 }
 
 async function deselectAllLeaguesFilter() {
     console.log('❌ DESELECT ALL clicked!');
     console.log('   Before:', Array.from(selectedLeagues));
 
-    // Empty set = show nothing
-    selectedLeagues = new Set();
+    try {
+        // Empty set = show nothing
+        selectedLeagues = new Set();
 
-    console.log('   After:', Array.from(selectedLeagues));
+        console.log('   After:', Array.from(selectedLeagues));
 
-    // Update API_CONFIG.LEAGUES to match selectedLeagues
-    API_CONFIG.LEAGUES = [];
+        // Update API_CONFIG.LEAGUES to match selectedLeagues
+        API_CONFIG.LEAGUES = [];
 
-    await saveLeaguePreferences();
-    populateLeagueFilter();
+        console.log('   Saving preferences...');
+        await saveLeaguePreferences();
 
-    // Clear matches since no leagues are selected
-    allMatches = [];
-    applyLeagueFilter();
+        console.log('   Calling populateLeagueFilter...');
+        populateLeagueFilter();
+
+        console.log('   Clearing matches...');
+        // Clear matches since no leagues are selected
+        allMatches = [];
+        applyLeagueFilter();
+    } catch (error) {
+        console.error('❌ Error in deselectAllLeaguesFilter:', error);
+    }
 }
 
 // Export functions to window object so they're accessible from HTML onclick attributes
