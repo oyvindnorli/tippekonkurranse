@@ -999,14 +999,12 @@ function setScoreFromOdds(matchId, type) {
 
 // Update score with +/- buttons
 function updateScore(matchId, type, isPlus) {
-    console.log('updateScore called:', { matchId, type, isPlus });
     const scoreElement = document.getElementById(`${type}-score-${matchId}`);
 
     if (!scoreElement) {
         console.error(`Score element not found: ${type}-score-${matchId}`);
         return;
     }
-    console.log('Score element found:', scoreElement);
 
     let currentScore = scoreElement.textContent === '?' ? 0 : parseInt(scoreElement.textContent);
 
