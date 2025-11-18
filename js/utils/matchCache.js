@@ -189,19 +189,26 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
  * @param {Array} matches - Array of match objects from API
  * @returns {Promise<number>} Number of matches saved
  */
-export async function saveMatchesToFirestore(matches) {
+export async function saveMatchesToCache(matches) {
     const supabase = getSupabase();
     let totalSaved = 0;
+
+    console.log(`💾 Attempting to save ${matches.length} matches to Supabase...`);
 
     try {
         for (const match of matches) {
             try {
-                // Check if match already exists
-                const { data: existing } = await supabase
+                // Check if match already exists (use maybeSingle to avoid error on not found)
+                const { data: existing, error: selectError } = await supabase
                     .from('matches')
                     .select('id, odds, home_score, away_score')
                     .eq('id', match.id)
-                    .single();
+                    .maybeSingle();
+
+                if (selectError) {
+                    console.error(`Error checking match ${match.id}:`, selectError);
+                    continue;
+                }
 
                 if (existing) {
                     // Update only if result changed or odds were missing
@@ -234,10 +241,15 @@ export async function saveMatchesToFirestore(matches) {
                             .update(updates)
                             .eq('id', match.id);
 
-                        if (!error) totalSaved++;
+                        if (error) {
+                            console.error(`Error updating match ${match.id}:`, error);
+                        } else {
+                            totalSaved++;
+                        }
                     }
                 } else {
                     // Insert new match
+                    console.log(`➕ Inserting new match ${match.id}: ${match.homeTeam} - ${match.awayTeam}`);
                     const { error } = await supabase
                         .from('matches')
                         .insert({
@@ -258,20 +270,27 @@ export async function saveMatchesToFirestore(matches) {
                             elapsed: match.elapsed || null
                         });
 
-                    if (!error) totalSaved++;
+                    if (error) {
+                        console.error(`❌ Error inserting match ${match.id}:`, error);
+                    } else {
+                        console.log(`✅ Successfully inserted match ${match.id}`);
+                        totalSaved++;
+                    }
                 }
             } catch (error) {
-                console.error(`Error saving match ${match.id}:`, error);
+                console.error(`❌ Error saving match ${match.id}:`, error);
             }
         }
 
         if (totalSaved > 0) {
-            console.log(`💾 Saved ${totalSaved} matches to Supabase`);
+            console.log(`✅ Successfully saved ${totalSaved}/${matches.length} matches to Supabase`);
+        } else {
+            console.log(`ℹ️ No matches were saved (0/${matches.length})`);
         }
 
         return totalSaved;
     } catch (error) {
-        console.error('Error saving matches to Supabase:', error);
+        console.error('❌ Fatal error saving matches to Supabase:', error);
         return totalSaved;
     }
 }
@@ -422,3 +441,6 @@ export async function cleanupOldMatches() {
         return 0;
     }
 }
+
+// Backward compatibility alias
+export const saveMatchesToFirestore = saveMatchesToCache;
