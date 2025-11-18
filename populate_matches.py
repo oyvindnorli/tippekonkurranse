@@ -142,28 +142,78 @@ def transform_fixture(fixture, odds=None):
     }
 
 def save_matches_to_supabase(matches):
-    """Save matches to Supabase using service_role key"""
+    """Save matches to Supabase using service_role key
+
+    IMPORTANT: Does NOT overwrite existing odds!
+    - If match doesn't exist → Insert with odds
+    - If match exists WITHOUT odds → Add odds
+    - If match exists WITH odds → Keep existing odds, only update result/status
+    """
     url = f"{SUPABASE_URL}/rest/v1/matches"
     headers = {
         'apikey': SUPABASE_SERVICE_KEY,
         'Authorization': f'Bearer {SUPABASE_SERVICE_KEY}',
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
+        'Content-Type': 'application/json'
     }
 
     saved_count = 0
     error_count = 0
 
     for match in matches:
-        # Try to upsert (insert or update)
-        response = requests.post(url, headers=headers, json=match)
+        match_id = match['id']
 
-        if response.status_code in [200, 201]:
-            saved_count += 1
-            print(f"✅ Saved: {match['home_team']} - {match['away_team']}")
+        # Check if match already exists
+        check_url = f"{url}?id=eq.{match_id}&select=id,odds,home_score,away_score"
+        check_response = requests.get(check_url, headers=headers)
+
+        if check_response.status_code == 200:
+            existing = check_response.json()
+
+            if existing:  # Match exists
+                existing_match = existing[0]
+
+                # Prepare update data
+                updates = {
+                    'updated_at': datetime.now().isoformat()
+                }
+
+                # Always update result/status if available
+                if match.get('home_score') is not None:
+                    updates['home_score'] = match['home_score']
+                    updates['away_score'] = match['away_score']
+                    updates['completed'] = match.get('completed', True)
+                    updates['status'] = match.get('status', 'FT')
+
+                # Only add odds if they were missing
+                if existing_match.get('odds') is None and match.get('odds') is not None:
+                    updates['odds'] = match['odds']
+                    print(f"📈 Adding odds to: {match['home_team']} - {match['away_team']}")
+                elif existing_match.get('odds') is not None:
+                    print(f"⏭️ Keeping existing odds: {match['home_team']} - {match['away_team']}")
+
+                # Update the match
+                update_url = f"{url}?id=eq.{match_id}"
+                response = requests.patch(update_url, headers=headers, json=updates)
+
+                if response.status_code in [200, 204]:
+                    saved_count += 1
+                    print(f"✅ Updated: {match['home_team']} - {match['away_team']}")
+                else:
+                    error_count += 1
+                    print(f"❌ Error updating match {match_id}: {response.status_code} - {response.text}")
+
+            else:  # Match doesn't exist - insert it
+                response = requests.post(url, headers=headers, json=match)
+
+                if response.status_code in [200, 201]:
+                    saved_count += 1
+                    print(f"✅ Inserted: {match['home_team']} - {match['away_team']}")
+                else:
+                    error_count += 1
+                    print(f"❌ Error inserting match {match_id}: {response.status_code} - {response.text}")
         else:
             error_count += 1
-            print(f"❌ Error saving match {match['id']}: {response.status_code} - {response.text}")
+            print(f"❌ Error checking match {match_id}: {check_response.status_code}")
 
     return saved_count, error_count
 
