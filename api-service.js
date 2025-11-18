@@ -202,11 +202,8 @@ class FootballApiService {
             });
 
             if (upcomingMatches.length === 0) {
-                console.log(`ℹ️ Liga ${leagueId}: Ingen kommende kamper funnet`);
                 return;
             }
-
-            console.log(`ℹ️ Liga ${leagueId}: ${upcomingMatches.length} kommende kamper`);
 
             // Group by round
             const roundsMap = new Map();
@@ -217,18 +214,6 @@ class FootballApiService {
                 }
                 roundsMap.get(round).push(match);
             });
-
-            // Debug logging for Serie A
-            if (leagueId === '135') {
-                console.log(`🔍 Serie A rounds:`, Array.from(roundsMap.keys()));
-                roundsMap.forEach((matches, roundKey) => {
-                    console.log(`   Round "${roundKey}": ${matches.length} matches`);
-                    matches.forEach(m => {
-                        const date = new Date(m.commence_time);
-                        console.log(`      ${m.homeTeam} vs ${m.awayTeam} - ${date.toLocaleString('no-NO')}`);
-                    });
-                });
-            }
 
             // Find the earliest round by date (not just first key)
             let earliestRound = null;
@@ -244,10 +229,7 @@ class FootballApiService {
 
             if (earliestRound) {
                 const firstRoundMatches = roundsMap.get(earliestRound) || [];
-                console.log(`   ✅ Neste runde for liga ${leagueId}: "${earliestRound}" (${firstRoundMatches.length} kamper)`);
                 nextRoundMatches.push(...firstRoundMatches);
-            } else {
-                console.log(`   ⚠️ Ingen runde funnet for liga ${leagueId}`);
             }
         });
 
@@ -303,11 +285,8 @@ class FootballApiService {
                 const cachedMatches = await getUpcomingMatchesFromCache(today, futureDate, API_CONFIG.LEAGUES);
 
                 if (cachedMatches && cachedMatches.length > 0) {
-                    console.log(`⚡ Loaded ${cachedMatches.length} matches from Supabase cache for leagues ${API_CONFIG.LEAGUES.join(',')}`);
-
                     // Filter to only show next round for each league
                     const nextRoundMatches = this.filterToNextRound(cachedMatches);
-                    console.log(`📋 Filtered to ${nextRoundMatches.length} matches (next round only)`);
 
                     // Return cached matches immediately for fast loading
                     // Note: Results will be updated by loadMatches() which calls fetchScores() separately
@@ -318,22 +297,17 @@ class FootballApiService {
             } catch (error) {
                 console.warn('⚠️ Supabase cache failed, falling back to API:', error);
             }
-        } else {
-            console.log('🔄 Skipping Supabase cache, fetching fresh data from API...');
         }
 
         // Supabase cache miss - fetch from API using next=X parameter for each league
-        console.log(`📅 Fetching next round fixtures from API for leagues ${API_CONFIG.LEAGUES.join(',')}`);
         const fixtures = await this.fetchNextRoundFixtures();
 
         // Skip odds fetching if no fixtures
         if (fixtures.length === 0) {
-            console.log('ℹ️ No upcoming fixtures, skipping odds fetch');
             return [];
         }
 
         // Fetch odds - new strategy: fetch all odds by league and date first
-        console.log(`💰 Fetching odds for ${fixtures.length} fixtures...`);
         let successCount = 0;
         let defaultCount = 0;
 
@@ -424,17 +398,7 @@ class FootballApiService {
 
         console.log(`💰 Total odds: ${successCount} fetched${defaultCount > 0 ? `, ${defaultCount} missing` : ''}`);
 
-        // Log all fixtures with IDs and odds status for debugging
-        console.table(fixtures.map(f => ({
-            id: f.id,
-            match: `${f.homeTeam} - ${f.awayTeam}`,
-            hasOdds: f.odds ? '✅' : '❌',
-            date: f.commence_time ? new Date(f.commence_time).toLocaleDateString('no-NO') : 'N/A'
-        })));
-
-        // Note: Matches are populated by admin script (see populate_matches.py)
-        // Client-side code only reads from Supabase, never writes
-        console.log('ℹ️ Matches are managed by admin script. Client has read-only access.');
+        // Matches are populated by admin script (see populate_matches.py)
 
         // Also save to localStorage for faster initial load
         this.saveCache(fixtures);
