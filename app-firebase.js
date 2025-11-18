@@ -52,11 +52,20 @@ async function loadSelectedLeagues(userId) {
             return new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
         }
 
-        const { data, error } = await supabase
-            .from('user_preferences')
-            .select('selected_leagues')
-            .eq('user_id', userId)
-            .single();
+        console.log('🔍 Fetching preferences from Supabase for user:', userId);
+
+        const { data, error } = await Promise.race([
+            supabase
+                .from('user_preferences')
+                .select('selected_leagues')
+                .eq('user_id', userId)
+                .maybeSingle(),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Timeout fetching preferences')), 5000)
+            )
+        ]);
+
+        console.log('📦 Supabase response:', { data, error });
 
         if (!error && data && data.selected_leagues) {
             const leagueArray = data.selected_leagues;
