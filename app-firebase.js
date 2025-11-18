@@ -953,7 +953,7 @@ function renderMatches() {
                     </div>
 
                     <!-- Odds Buttons (from Design 3) -->
-                    ${match.odds ? `
+                    ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
                         <div class="odds-buttons-v4">
                             <button class="odd-btn-v4" onclick="setScoreFromOdds('${match.id}', 'H')" ${match.result ? 'disabled' : ''}>
                                 <span class="odd-label-v4">H</span>
