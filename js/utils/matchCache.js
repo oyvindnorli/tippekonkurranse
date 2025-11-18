@@ -153,47 +153,64 @@ export async function getCachedMatches(matchIds) {
  */
 export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds) {
     console.log('🔧 SIMPLIFIED: Getting matches from Supabase...');
+    console.log('   window.supabase exists?', !!window.supabase);
 
-    // Just get ALL matches, don't filter by date yet
-    const { data, error } = await window.supabase
-        .from('matches')
-        .select('*')
-        .in('league_id', leagueIds);
+    try {
+        // Add timeout wrapper
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Supabase query timeout after 10s')), 10000)
+        );
 
-    console.log('📊 Raw Supabase result:', { error, dataCount: data?.length });
+        console.log('   Starting query...');
+        const queryPromise = window.supabase
+            .from('matches')
+            .select('*')
+            .in('league_id', leagueIds);
 
-    if (error) {
-        console.error('❌ Supabase error:', error);
+        const result = await Promise.race([queryPromise, timeoutPromise]);
+        console.log('   Query finished!');
+
+        const { data, error } = result;
+        console.log('📊 Raw Supabase result:', { error, dataCount: data?.length });
+
+        if (error) {
+            console.error('❌ Supabase error:', error);
+            return [];
+        }
+
+        if (!data || data.length === 0) {
+            console.log('⚠️ No matches found in Supabase');
+            return [];
+        }
+
+        console.log(`✅ Found ${data.length} matches in Supabase`);
+
+        // Convert to our format
+        const matches = data.map(m => ({
+            id: m.id,
+            homeTeam: m.home_team,
+            awayTeam: m.away_team,
+            homeLogo: m.home_logo,
+            awayLogo: m.away_logo,
+            commence_time: m.commence_time,
+            league: m.league_id,
+            leagueName: m.league_name,
+            season: m.season,
+            status: m.status,
+            result: m.home_score !== null && m.away_score !== null ? { home: m.home_score, away: m.away_score } : null,
+            completed: m.completed,
+            odds: m.odds,
+            elapsed: m.elapsed
+        }));
+
+        console.log(`✅ Converted ${matches.length} matches`);
+        return matches;
+    } catch (err) {
+        console.error('❌ CATCH: Error fetching from Supabase:', err);
+        console.error('   Error type:', err.constructor.name);
+        console.error('   Error message:', err.message);
         return [];
     }
-
-    if (!data || data.length === 0) {
-        console.log('⚠️ No matches found in Supabase');
-        return [];
-    }
-
-    console.log(`✅ Found ${data.length} matches in Supabase`);
-
-    // Convert to our format
-    const matches = data.map(m => ({
-        id: m.id,
-        homeTeam: m.home_team,
-        awayTeam: m.away_team,
-        homeLogo: m.home_logo,
-        awayLogo: m.away_logo,
-        commence_time: m.commence_time,
-        league: m.league_id,
-        leagueName: m.league_name,
-        season: m.season,
-        status: m.status,
-        result: m.home_score !== null && m.away_score !== null ? { home: m.home_score, away: m.away_score } : null,
-        completed: m.completed,
-        odds: m.odds,
-        elapsed: m.elapsed
-    }));
-
-    console.log(`✅ Converted ${matches.length} matches`);
-    return matches;
 }
 
 /**

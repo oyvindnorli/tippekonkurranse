@@ -1390,7 +1390,7 @@ async function refreshData() {
         loadingMessage.style.display = 'block';
 
         // Clean up old format matches from Firestore first
-        const { cleanupOldFormatMatches } = await import('./js/utils/matchCache.js?v=20251118');
+        const { cleanupOldFormatMatches } = await import('./js/utils/matchCache.js?v=20251118b');
         await cleanupOldFormatMatches();
 
         // Fetch fresh data from API (skip Firestore cache)
@@ -1455,7 +1455,7 @@ async function cleanupOldMatchesInBackground() {
         localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES);
         localStorage.removeItem(STORAGE_KEYS.CACHED_MATCHES_TIME);
 
-        const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js?v=20251118');
+        const { cleanupAllOutdatedMatches } = await import('./js/utils/matchCache.js?v=20251118b');
         const deleted = await cleanupAllOutdatedMatches();
 
         if (deleted > 0) {

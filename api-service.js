@@ -299,7 +299,7 @@ class FootballApiService {
         // Try Supabase first (fastest and ensures consistent odds)
         if (!skipCache) {
             try {
-                const { getUpcomingMatchesFromCache, saveMatchesToFirestore, convertOldFormatMatches } = await import('./js/utils/matchCache.js?v=20251118');
+                const { getUpcomingMatchesFromCache, saveMatchesToFirestore, convertOldFormatMatches } = await import('./js/utils/matchCache.js?v=20251118b');
                 const cachedMatches = await getUpcomingMatchesFromCache(today, futureDate, API_CONFIG.LEAGUES);
 
                 if (cachedMatches && cachedMatches.length > 0) {
