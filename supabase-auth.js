@@ -233,7 +233,7 @@ async function getAllUsersWithTips() {
 
 // Called when user logs in
 async function onUserLoggedIn(user) {
-    console.log('🔵 onUserLoggedIn called for:', user.user_metadata?.display_name || user.email);
+    // Logged in
 
     // Hide auth modal (only exists on index.html)
     const authModal = document.getElementById('authModal');
@@ -248,7 +248,6 @@ async function onUserLoggedIn(user) {
     if (currentUsername) {
         // Use displayName from user metadata (set during signup)
         currentUsername.textContent = user.user_metadata?.display_name || user.email.split('@')[0];
-        console.log('✅ displayName set to:', currentUsername.textContent);
 
         // Show username display
         if (usernameDisplay) {
@@ -279,31 +278,21 @@ async function onUserLoggedIn(user) {
     }
 
     // Load user data (wait for function to be available)
-    console.log('🔍 Checking if loadFirebaseData is available:', typeof window.loadFirebaseData);
     if (typeof window.loadFirebaseData === 'function') {
-        console.log('✅ loadFirebaseData found, calling it now...');
         window.loadFirebaseData();
     } else {
         // Function not loaded yet, wait and retry
-        console.log('⏳ Waiting for loadFirebaseData to be available...');
         let attempts = 0;
         const checkInterval = setInterval(() => {
             attempts++;
-            console.log(`⏳ Retry attempt ${attempts}...`);
             if (typeof window.loadFirebaseData === 'function') {
                 clearInterval(checkInterval);
-                console.log('✅ loadFirebaseData is now available, calling it...');
                 window.loadFirebaseData();
             }
         }, 100);
 
         // Timeout after 5 seconds
-        setTimeout(() => {
-            clearInterval(checkInterval);
-            if (typeof window.loadFirebaseData !== 'function') {
-                console.error('❌ loadFirebaseData never became available after 5 seconds');
-            }
-        }, 5000);
+        setTimeout(() => clearInterval(checkInterval), 5000);
     }
 }
 

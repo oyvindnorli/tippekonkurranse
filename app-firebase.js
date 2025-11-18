@@ -487,7 +487,6 @@ function setCachedMatches(matches) {
 // Load matches from API
 async function loadMatches() {
     const startTime = performance.now();
-    console.log('⏱️ Starting to load matches...');
 
     const loadingMessage = document.getElementById('loadingMessage');
     const errorMessage = document.getElementById('errorMessage');
@@ -500,7 +499,6 @@ async function loadMatches() {
         const cachedMatches = getCachedMatches();
         if (cachedMatches && cachedMatches.length > 0) {
             const cacheTime = performance.now();
-            console.log(`📦 Loaded ${cachedMatches.length} matches from cache in ${((cacheTime - startTime) / 1000).toFixed(2)}s`);
 
             allMatches = cachedMatches;
 
@@ -617,7 +615,7 @@ async function loadMatches() {
 
 // Load all data (called by supabase-auth.js when user logs in)
 async function loadFirebaseData() {
-    console.log('🔄 Loading data from Supabase...');
+    // Loading data from Supabase
 
     // Show main content, hide welcome
     const welcomeSection = document.getElementById('welcomeSection');
