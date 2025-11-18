@@ -1329,8 +1329,8 @@ async function selectAllLeaguesFilter() {
         // Update API_CONFIG.LEAGUES to match selectedLeagues
         API_CONFIG.LEAGUES = Array.from(selectedLeagues);
 
-        console.log('   Saving preferences...');
-        await saveLeaguePreferences();
+        console.log('   Saving preferences (in background)...');
+        saveLeaguePreferences(); // Don't await - run in background
 
         console.log('   Calling populateLeagueFilter...');
         populateLeagueFilter();
@@ -1359,8 +1359,8 @@ async function deselectAllLeaguesFilter() {
         // Update API_CONFIG.LEAGUES to match selectedLeagues
         API_CONFIG.LEAGUES = [];
 
-        console.log('   Saving preferences...');
-        await saveLeaguePreferences();
+        console.log('   Saving preferences (in background)...');
+        saveLeaguePreferences(); // Don't await - run in background
 
         console.log('   Calling populateLeagueFilter...');
         populateLeagueFilter();
