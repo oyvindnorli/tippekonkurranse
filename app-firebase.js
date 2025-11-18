@@ -697,6 +697,9 @@ function init() {
                 return;
             }
 
+            // Set flag IMMEDIATELY to prevent race condition
+            hasLoadedInitialMatches = true;
+
             // User is signed in, load preferences first
             selectedLeagues = await loadSelectedLeagues(user.id);
             API_CONFIG.LEAGUES = Array.from(selectedLeagues);
@@ -710,7 +713,6 @@ function init() {
             }
 
             // Load matches once
-            hasLoadedInitialMatches = true;
             loadMatches();
 
             // Set up real-time listener for preferences changes

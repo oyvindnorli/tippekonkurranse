@@ -279,23 +279,8 @@ async function onUserLoggedIn(user) {
         mainNavButtons.style.display = 'flex';
     }
 
-    // Load user data (wait for function to be available)
-    if (typeof window.loadFirebaseData === 'function') {
-        window.loadFirebaseData();
-    } else {
-        // Function not loaded yet, wait and retry
-        let attempts = 0;
-        const checkInterval = setInterval(() => {
-            attempts++;
-            if (typeof window.loadFirebaseData === 'function') {
-                clearInterval(checkInterval);
-                window.loadFirebaseData();
-            }
-        }, 100);
-
-        // Timeout after 5 seconds
-        setTimeout(() => clearInterval(checkInterval), 5000);
-    }
+    // NOTE: Data loading is handled by app-firebase.js onAuthStateChange listener
+    // No need to call loadFirebaseData here as it causes duplicate loads
 }
 
 // Called when user logs out
