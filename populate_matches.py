@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Admin script for populating matches in Supabase
 This script uses the service_role key to write matches to Supabase.
@@ -16,9 +17,14 @@ Or create a .env file with these variables.
 
 import os
 import sys
+import io
 import requests
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+
+# Force UTF-8 output encoding
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Load environment variables from .env file
 load_dotenv()
@@ -102,11 +108,11 @@ def fetch_odds(fixture_id):
                     values = bet.get('values', [])
                     if len(values) >= 3:
                         odds = {
-                            'home': float(values[0]['odd']),
-                            'draw': float(values[1]['odd']),
-                            'away': float(values[2]['odd'])
+                            'H': float(values[0]['odd']),
+                            'U': float(values[1]['odd']),
+                            'B': float(values[2]['odd'])
                         }
-                        print(f"      ✅ Odds from {bookmaker_name}: H{odds['home']} D{odds['draw']} A{odds['away']}")
+                        print(f"      ✅ Odds from {bookmaker_name}: H{odds['H']} U{odds['U']} B{odds['B']}")
                         return odds
 
     print(f"      ⚠️ No Match Winner odds found for fixture {fixture_id}")
