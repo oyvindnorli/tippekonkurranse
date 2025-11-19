@@ -115,21 +115,36 @@ async function loadSelectedLeagues(userId) {
         try {
             const sessionData = await Promise.race([
                 window.supabase.auth.getSession(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
             ]);
             accessToken = sessionData?.data?.session?.access_token || SUPABASE_ANON_KEY;
+            console.log('✅ Got session successfully');
         } catch (err) {
-            console.warn('⚠️ Could not get session, using anon key');
+            console.warn('⚠️ Could not get session, using anon key:', err.message);
         }
         console.log('🔑 Access token available:', !!accessToken);
 
         console.log('📡 Fetching preferences from:', url);
-        const response = await fetch(url, {
-            headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
+
+        // Add timeout to fetch (3 seconds)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+        let response;
+        try {
+            response = await fetch(url, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+        } catch (err) {
+            clearTimeout(timeoutId);
+            console.warn('⚠️ Fetch preferences timeout or error, using defaults:', err.message);
+            return new Set([39, 2, 3, 32, 48, 135]);
+        }
 
         console.log('📡 Response status:', response.status);
         if (!response.ok) {
