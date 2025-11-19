@@ -155,29 +155,33 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
     try {
         console.log('🔍 getUpcomingMatchesFromCache called with leagues:', leagueIds);
 
-        // Get Supabase instance
-        const supabase = getSupabase();
-        console.log('✅ Got Supabase instance');
+        // Use fetch() directly instead of Supabase SDK
+        // This bypasses any SDK issues
+        const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
 
-        console.log('📡 Starting Supabase query (no timeout)...');
+        // Build query URL
+        const leagueFilter = leagueIds.map(id => `league_id.eq.${id}`).join(',');
+        const url = `${SUPABASE_URL}/rest/v1/matches?select=*&or=(${leagueFilter})`;
 
-        // Just do the query directly - no Promise.race, no timeout
-        const { data, error } = await supabase
-            .from('matches')
-            .select('*')
-            .in('league_id', leagueIds);
+        console.log('📡 Fetching with direct REST API...');
+        console.log('   URL:', url);
 
-        console.log('✅ Query completed!');
+        const response = await fetch(url, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
 
-        if (error) {
-            console.warn('⚠️ Supabase error, will use API fallback:', error.message);
+        console.log('✅ Fetch completed! Status:', response.status);
+
+        if (!response.ok) {
+            console.error('❌ HTTP error:', response.status, response.statusText);
             return [];
         }
 
-        if (!data || data.length === 0) {
-            return [];
-        }
-
+        const data = await response.json();
         console.log(`✅ Loaded ${data.length} matches from Supabase`);
 
         // Convert to our format
