@@ -1003,51 +1003,34 @@ function renderMatches() {
                 }
 
                 matchCard.innerHTML = `
-                    <!-- Design 4: Splittet Layout -->
-                    <div class="split-container-v4">
-                        <!-- Home Team Half -->
-                        <div class="team-half-v4 home" style="${homeLogo ? `background: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)), url('${homeLogo}') center/cover no-repeat;` : ''}">
-                            <span class="team-name-v4">${match.homeTeam}</span>
-                            <div class="score-controls-v4">
-                                <button class="score-btn-v4" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <span class="score-display-v4" id="home-score-${match.id}">${homeScore === '?' ? '?' : homeScore}</span>
-                                <button class="score-btn-v4" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
+                    <!-- Design 1: Ultra-Minimal Line -->
+                    <div class="match-content">
+                        <div class="teams">
+                            <span>${match.homeTeam}</span>
+                            <span class="vs">vs</span>
+                            <span>${match.awayTeam}</span>
+                        </div>
+                        <div class="score-input">
+                            <div class="score-group">
+                                <button class="btn" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
+                                <span class="score" id="home-score-${match.id}">${homeScore === '?' ? '?' : homeScore}</span>
+                                <button class="btn" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
+                            </div>
+                            <span class="separator">-</span>
+                            <div class="score-group">
+                                <button class="btn" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
+                                <span class="score" id="away-score-${match.id}">${awayScore === '?' ? '?' : awayScore}</span>
+                                <button class="btn" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
                             </div>
                         </div>
-
-                        <!-- VS Divider -->
-                        <div class="split-divider-v4">
-                            <span class="vs-split-v4">VS</span>
-                        </div>
-
-                        <!-- Away Team Half -->
-                        <div class="team-half-v4 away" style="${awayLogo ? `background: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)), url('${awayLogo}') center/cover no-repeat;` : ''}">
-                            <span class="team-name-v4">${match.awayTeam}</span>
-                            <div class="score-controls-v4">
-                                <button class="score-btn-v4" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <span class="score-display-v4" id="away-score-${match.id}">${awayScore === '?' ? '?' : awayScore}</span>
-                                <button class="score-btn-v4" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
+                        ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
+                            <div class="odds">
+                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>H ${match.odds.H.toFixed(2)}</div>
+                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>U ${match.odds.U.toFixed(2)}</div>
+                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>B ${match.odds.B.toFixed(2)}</div>
                             </div>
-                        </div>
+                        ` : '<div class="no-odds">Ingen odds</div>'}
                     </div>
-
-                    <!-- Odds Buttons (from Design 3) -->
-                    ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
-                        <div class="odds-buttons-v4">
-                            <button class="odd-btn-v4" onclick="setScoreFromOdds('${match.id}', 'H')" ${match.result ? 'disabled' : ''}>
-                                <span class="odd-label-v4">H</span>
-                                <span class="odd-value-v4">${match.odds.H.toFixed(1)}</span>
-                            </button>
-                            <button class="odd-btn-v4" onclick="setScoreFromOdds('${match.id}', 'U')" ${match.result ? 'disabled' : ''}>
-                                <span class="odd-label-v4">U</span>
-                                <span class="odd-value-v4">${match.odds.U.toFixed(1)}</span>
-                            </button>
-                            <button class="odd-btn-v4" onclick="setScoreFromOdds('${match.id}', 'B')" ${match.result ? 'disabled' : ''}>
-                                <span class="odd-label-v4">B</span>
-                                <span class="odd-value-v4">${match.odds.B.toFixed(1)}</span>
-                            </button>
-                        </div>
-                    ` : ''}
                 `;
                 dateGroup.appendChild(matchCard);
             });

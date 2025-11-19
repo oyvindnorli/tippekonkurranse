@@ -627,28 +627,167 @@ header h1 {
     margin-left: 4px;
 }
 
-/* Match cards - Compact inline layout */
+/* ====================================
+   Design 1: Ultra-Minimal Line Layout
+   ==================================== */
 .match-card {
-    background: white;
-    border-radius: 12px;
     padding: 12px 16px;
-    margin-bottom: 8px;
-    border: 2px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s ease;
+    border-bottom: 1px solid #f1f5f9;
+    background: white;
+    transition: background 0.2s ease;
 }
 
 .match-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    border-color: #cbd5e1;
+    background: #fafbfc;
+}
+
+.match-card:last-child {
+    border-bottom: none;
 }
 
 .match-card.has-tip {
-    background: linear-gradient(135deg, #f0fdf4 0%, #f0fdfa 100%);
-    border: 2px solid #10b981;
-    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+    background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%);
+    border-left: 3px solid #10b981;
 }
+
+.match-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.teams {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.teams .vs {
+    font-size: 10px;
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+.score-input {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #f8fafc;
+    padding: 4px 6px;
+    border-radius: 6px;
+}
+
+.score-group {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.score-input .btn {
+    background: #e2e8f0;
+    border: none;
+    border-radius: 3px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    transition: all 0.15s ease;
+}
+
+.score-input .btn:hover:not(:disabled) {
+    background: #cbd5e1;
+    transform: scale(1.1);
+}
+
+.score-input .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.score-input .score {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    min-width: 20px;
+    text-align: center;
+}
+
+.score-input .separator {
+    color: #cbd5e1;
+    font-weight: 600;
+    font-size: 13px;
+    margin: 0 2px;
+}
+
+.odds {
+    display: flex;
+    gap: 4px;
+}
+
+.odd-chip {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.odd-chip:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-1px);
+}
+
+.no-odds {
+    font-size: 10px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* Design 1: Mobile responsive */
+@media (max-width: 768px) {
+    .match-content {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .teams {
+        width: 100%;
+        font-size: 12px;
+    }
+
+    .score-input {
+        flex: 1;
+    }
+
+    .odds {
+        flex: 1;
+        justify-content: flex-end;
+    }
+
+    .odd-chip {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+}
+
+/* ====================================
+   OLD STYLES (kept for compatibility)
+   ==================================== */
 
 /* Inline layout - everything on one line */
 .match-info-inline {
