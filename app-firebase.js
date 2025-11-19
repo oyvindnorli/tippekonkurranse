@@ -51,18 +51,28 @@ async function loadSelectedLeagues(userId) {
             return new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
         }
 
-        const { data, error } = await Promise.race([
-            supabase
-                .from('user_preferences')
-                .select('selected_leagues')
-                .eq('user_id', userId)
-                .maybeSingle(),
-            new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Timeout fetching preferences')), 5000)
-            )
-        ]);
+        // Use fetch() directly instead of Supabase SDK (same issue as matches)
+        const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
 
-        if (!error && data && data.selected_leagues) {
+        const url = `${SUPABASE_URL}/rest/v1/user_preferences?select=selected_leagues&user_id=eq.${userId}`;
+
+        const response = await fetch(url, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch preferences:', response.status);
+            return new Set([39, 2, 3, 32, 48, 135]);
+        }
+
+        const results = await response.json();
+        const data = results[0]; // Get first result
+
+        if (data && data.selected_leagues) {
             const leagueArray = data.selected_leagues;
 
             // Only allow valid leagues from AVAILABLE_LEAGUES
@@ -80,13 +90,20 @@ async function loadSelectedLeagues(userId) {
             if (needsMigration) {
                 console.log('🔄 Migrating league preferences (35 → 32)');
 
-                // Save migrated preferences back to Supabase
-                await supabase
-                    .from('user_preferences')
-                    .upsert({
+                // Save migrated preferences back to Supabase using fetch()
+                await fetch(`${SUPABASE_URL}/rest/v1/user_preferences`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'resolution=merge-duplicates'
+                    },
+                    body: JSON.stringify({
                         user_id: userId,
                         selected_leagues: uniqueLeagues
-                    });
+                    })
+                });
             }
 
             // Empty array is valid (user wants to see nothing)
