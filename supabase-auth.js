@@ -158,16 +158,48 @@ async function saveTipToFirestore(tip) {
             throw new Error('No access token available');
         }
 
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/tips?on_conflict=user_id,match_id`, {
-            method: 'POST',
+        // Check if tip already exists
+        const checkUrl = `${SUPABASE_URL}/rest/v1/tips?select=id&user_id=eq.${currentUser.id}&match_id=eq.${tip.matchId}`;
+        const checkResponse = await fetch(checkUrl, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-duplicates'
-            },
-            body: JSON.stringify(tipData)
+                'Authorization': `Bearer ${accessToken}`
+            }
         });
+
+        if (!checkResponse.ok) throw new Error(`HTTP ${checkResponse.status}`);
+
+        const existing = await checkResponse.json();
+
+        let response;
+        if (existing && existing.length > 0) {
+            // Update existing tip
+            const updateUrl = `${SUPABASE_URL}/rest/v1/tips?user_id=eq.${currentUser.id}&match_id=eq.${tip.matchId}`;
+            response = await fetch(updateUrl, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    home_score: tip.homeScore,
+                    away_score: tip.awayScore,
+                    updated_at: new Date().toISOString()
+                })
+            });
+        } else {
+            // Insert new tip
+            response = await fetch(`${SUPABASE_URL}/rest/v1/tips`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(tipData)
+            });
+        }
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
