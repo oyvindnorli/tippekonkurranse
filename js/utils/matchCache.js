@@ -156,41 +156,18 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
         console.log('🔍 getUpcomingMatchesFromCache called with leagues:', leagueIds);
 
         // Get Supabase instance
-        let supabase;
-        try {
-            supabase = getSupabase();
-            console.log('✅ Got Supabase instance:', typeof supabase);
-            console.log('   - Has .from():', typeof supabase.from === 'function');
-            console.log('   - Object keys:', Object.keys(supabase).slice(0, 10));
-        } catch (error) {
-            console.error('❌ getSupabase() failed:', error.message);
-            return [];
-        }
+        const supabase = getSupabase();
+        console.log('✅ Got Supabase instance');
 
-        console.log('📡 Starting Supabase query...');
-        console.log('   - League IDs:', leagueIds);
+        console.log('📡 Starting Supabase query (no timeout)...');
 
-        // Add 5s timeout (reduced from 30s)
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => {
-                console.error('❌ Supabase query timeout after 5s');
-                reject(new Error('Timeout'));
-            }, 5000)
-        );
-
-        const query = supabase
+        // Just do the query directly - no Promise.race, no timeout
+        const { data, error } = await supabase
             .from('matches')
             .select('*')
             .in('league_id', leagueIds);
 
-        console.log('   - Query object:', query);
-        console.log('⏳ Waiting for query...');
-
-        const result = await Promise.race([query, timeoutPromise]);
-        console.log('✅ Query completed, result type:', typeof result);
-        console.log('   - Result keys:', result ? Object.keys(result) : 'null');
-
-        const { data, error } = result;
+        console.log('✅ Query completed!');
 
         if (error) {
             console.warn('⚠️ Supabase error, will use API fallback:', error.message);
@@ -221,7 +198,7 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
             elapsed: m.elapsed
         }));
     } catch (err) {
-        // Silent fallback to API - this is normal if Supabase is slow
+        console.error('❌ Exception in getUpcomingMatchesFromCache:', err);
         return [];
     }
 }
