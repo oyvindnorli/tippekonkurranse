@@ -96,8 +96,10 @@ async function saveLeaguePreferences() {
 
 // Load league preferences from Supabase (user preferences)
 async function loadSelectedLeagues(userId) {
+    console.log('🔍 loadSelectedLeagues called with userId:', userId);
     try {
         if (!userId) {
+            console.log('⚠️ No userId, returning defaults');
             return new Set([39, 2, 3, 48, 135]); // Default: Premier League, Champions League, Europa League, EFL Cup, Serie A
         }
 
@@ -108,9 +110,12 @@ async function loadSelectedLeagues(userId) {
         const url = `${SUPABASE_URL}/rest/v1/user_preferences?select=selected_leagues&user_id=eq.${userId}`;
 
         // Get user's access token for authenticated request
+        console.log('🔑 Getting access token...');
         const { data: { session } } = await window.supabase.auth.getSession();
         const accessToken = session?.access_token || SUPABASE_ANON_KEY;
+        console.log('🔑 Access token available:', !!accessToken);
 
+        console.log('📡 Fetching preferences from:', url);
         const response = await fetch(url, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
@@ -118,8 +123,9 @@ async function loadSelectedLeagues(userId) {
             }
         });
 
+        console.log('📡 Response status:', response.status);
         if (!response.ok) {
-            console.error('Failed to fetch preferences:', response.status);
+            console.error('❌ Failed to fetch preferences:', response.status);
             return new Set([39, 2, 3, 32, 48, 135]);
         }
 
