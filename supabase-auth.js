@@ -158,7 +158,7 @@ async function saveTipToFirestore(tip) {
             throw new Error('No access token available');
         }
 
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/tips`, {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/tips?on_conflict=user_id,match_id`, {
             method: 'POST',
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
