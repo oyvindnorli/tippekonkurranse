@@ -41,19 +41,50 @@ async function saveLeaguePreferences() {
             throw new Error('No access token available');
         }
 
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/user_preferences`, {
-            method: 'POST',
+        // Check if preferences already exist
+        const checkUrl = `${SUPABASE_URL}/rest/v1/user_preferences?select=id&user_id=eq.${currentUser.id}`;
+        const checkResponse = await fetch(checkUrl, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-duplicates'
-            },
-            body: JSON.stringify({
-                user_id: currentUser.id,
-                selected_leagues: Array.from(selectedLeagues)
-            })
+                'Authorization': `Bearer ${accessToken}`
+            }
         });
+
+        if (!checkResponse.ok) throw new Error(`HTTP ${checkResponse.status}`);
+
+        const existing = await checkResponse.json();
+
+        let response;
+        if (existing && existing.length > 0) {
+            // Update existing preferences
+            const updateUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${currentUser.id}`;
+            response = await fetch(updateUrl, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    selected_leagues: Array.from(selectedLeagues),
+                    updated_at: new Date().toISOString()
+                })
+            });
+        } else {
+            // Insert new preferences
+            response = await fetch(`${SUPABASE_URL}/rest/v1/user_preferences`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: currentUser.id,
+                    selected_leagues: Array.from(selectedLeagues)
+                })
+            });
+        }
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -114,18 +145,18 @@ async function loadSelectedLeagues(userId) {
                 const accessToken = session?.access_token;
 
                 if (accessToken) {
-                    // Save migrated preferences back to Supabase using fetch()
-                    await fetch(`${SUPABASE_URL}/rest/v1/user_preferences`, {
-                        method: 'POST',
+                    // Update preferences with migrated leagues (use PATCH since they already exist)
+                    const updateUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${userId}`;
+                    await fetch(updateUrl, {
+                        method: 'PATCH',
                         headers: {
                             'apikey': SUPABASE_ANON_KEY,
                             'Authorization': `Bearer ${accessToken}`,
-                            'Content-Type': 'application/json',
-                            'Prefer': 'resolution=merge-duplicates'
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            user_id: userId,
-                            selected_leagues: uniqueLeagues
+                            selected_leagues: uniqueLeagues,
+                            updated_at: new Date().toISOString()
                         })
                     });
                 }
@@ -163,19 +194,52 @@ async function saveSelectedLeagues() {
             throw new Error('No access token available');
         }
 
-        await fetch(`${SUPABASE_URL}/rest/v1/user_preferences`, {
-            method: 'POST',
+        // Check if preferences already exist
+        const checkUrl = `${SUPABASE_URL}/rest/v1/user_preferences?select=id&user_id=eq.${currentUser.id}`;
+        const checkResponse = await fetch(checkUrl, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'resolution=merge-duplicates'
-            },
-            body: JSON.stringify({
-                user_id: currentUser.id,
-                selected_leagues: leagueArray
-            })
+                'Authorization': `Bearer ${accessToken}`
+            }
         });
+
+        if (!checkResponse.ok) throw new Error(`HTTP ${checkResponse.status}`);
+
+        const existing = await checkResponse.json();
+
+        let response;
+        if (existing && existing.length > 0) {
+            // Update existing preferences
+            const updateUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${currentUser.id}`;
+            response = await fetch(updateUrl, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    selected_leagues: leagueArray,
+                    updated_at: new Date().toISOString()
+                })
+            });
+        } else {
+            // Insert new preferences
+            response = await fetch(`${SUPABASE_URL}/rest/v1/user_preferences`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: currentUser.id,
+                    selected_leagues: leagueArray
+                })
+            });
+        }
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         console.log('💾 Saved league preferences to Supabase:', leagueArray);
 
