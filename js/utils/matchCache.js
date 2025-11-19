@@ -117,18 +117,27 @@ export async function cleanupAllOutdatedMatches() {
  * @returns {Promise<Object>} Object with cached matches and missing IDs
  */
 export async function getCachedMatches(matchIds) {
-    const supabase = getSupabase();
-
     try {
-        const { data, error } = await supabase
-            .from('matches')
-            .select('*')
-            .in('id', matchIds);
+        // Use fetch() directly
+        const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
 
-        if (error) {
-            console.error('Error fetching matches from Supabase:', error);
+        const idsFilter = matchIds.map(id => `id.eq.${id}`).join(',');
+        const url = `${SUPABASE_URL}/rest/v1/matches?select=*&or=(${idsFilter})`;
+
+        const response = await fetch(url, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
+
+        if (!response.ok) {
+            console.error('Error fetching matches from Supabase:', response.status);
             return { cached: [], missing: matchIds };
         }
+
+        const data = await response.json();
 
         const cached = (data || [])
             .filter(m => m.odds) // Only return matches with odds

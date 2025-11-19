@@ -29,15 +29,26 @@ async function saveLeaguePreferences() {
             return;
         }
 
-        console.log('   Calling Supabase upsert...');
-        const result = await supabase
-            .from('user_preferences')
-            .upsert({
+        // Use fetch() directly
+        const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/user_preferences`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify({
                 user_id: currentUser.id,
                 selected_leagues: Array.from(selectedLeagues)
-            });
+            })
+        });
 
-        console.log('   Supabase upsert result:', result);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
         console.log('✅ League preferences saved:', Array.from(selectedLeagues));
     } catch (error) {
         console.warn('❌ Failed to save league preferences:', error);
@@ -126,12 +137,23 @@ async function saveSelectedLeagues() {
 
         const leagueArray = Array.from(selectedLeagues);
 
-        await supabase
-            .from('user_preferences')
-            .upsert({
+        // Use fetch() directly
+        const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
+
+        await fetch(`${SUPABASE_URL}/rest/v1/user_preferences`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify({
                 user_id: currentUser.id,
                 selected_leagues: leagueArray
-            });
+            })
+        });
 
         console.log('💾 Saved league preferences to Supabase:', leagueArray);
 
@@ -495,7 +517,7 @@ async function loadMatches() {
         errorMessage.style.display = 'none';
 
         // Import matchCache module
-        const { getUpcomingMatchesFromCache } = await import('./js/utils/matchCache.js?v=20251119g');
+        const { getUpcomingMatchesFromCache } = await import('./js/utils/matchCache.js?v=20251119i');
 
         // Fetch ALL matches from Supabase (no date filtering - get everything)
         const today = new Date();

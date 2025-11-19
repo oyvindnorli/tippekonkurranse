@@ -149,13 +149,22 @@ async function saveTipToFirestore(tip) {
             odds: tip.odds || null
         };
 
-        const { error } = await supabase
-            .from('tips')
-            .upsert(tipData, {
-                onConflict: 'user_id,match_id'
-            });
+        // Use fetch() directly for upsert
+        const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
 
-        if (error) throw error;
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/tips`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify(tipData)
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         console.log('✅ Tip saved to Supabase');
         return true;
@@ -172,12 +181,22 @@ async function getCurrentUserTips() {
     }
 
     try {
-        const { data, error } = await supabase
-            .from('tips')
-            .select('*')
-            .eq('user_id', currentUser.id);
+        // Use fetch() directly
+        const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
 
-        if (error) throw error;
+        const url = `${SUPABASE_URL}/rest/v1/tips?select=*&user_id=eq.${currentUser.id}`;
+
+        const response = await fetch(url, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
 
         // Convert to Firebase-like format for compatibility
         return data.map(tip => ({
@@ -200,19 +219,22 @@ async function getCurrentUserTips() {
 // Get all users with their tips for leaderboard
 async function getAllUsersWithTips() {
     try {
-        // Get all tips with user info
-        const { data, error } = await supabase
-            .from('tips')
-            .select(`
-                *,
-                users (
-                    id,
-                    display_name,
-                    email
-                )
-            `);
+        // Use fetch() directly with join
+        const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
 
-        if (error) throw error;
+        const url = `${SUPABASE_URL}/rest/v1/tips?select=*,users(id,display_name,email)`;
+
+        const response = await fetch(url, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
 
         // Group tips by user
         const userTipsMap = {};
