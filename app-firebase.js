@@ -42,7 +42,7 @@ async function saveLeaguePreferences() {
         }
 
         // Check if preferences already exist
-        const checkUrl = `${SUPABASE_URL}/rest/v1/user_preferences?select=id&user_id=eq.${currentUser.id}`;
+        const checkUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${currentUser.id}`;
         const checkResponse = await fetch(checkUrl, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
@@ -195,7 +195,7 @@ async function saveSelectedLeagues() {
         }
 
         // Check if preferences already exist
-        const checkUrl = `${SUPABASE_URL}/rest/v1/user_preferences?select=id&user_id=eq.${currentUser.id}`;
+        const checkUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${currentUser.id}`;
         const checkResponse = await fetch(checkUrl, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,

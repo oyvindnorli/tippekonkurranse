@@ -159,7 +159,7 @@ async function saveTipToFirestore(tip) {
         }
 
         // Check if tip already exists
-        const checkUrl = `${SUPABASE_URL}/rest/v1/tips?select=id&user_id=eq.${currentUser.id}&match_id=eq.${tip.matchId}`;
+        const checkUrl = `${SUPABASE_URL}/rest/v1/tips?user_id=eq.${currentUser.id}&match_id=eq.${tip.matchId}`;
         const checkResponse = await fetch(checkUrl, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
