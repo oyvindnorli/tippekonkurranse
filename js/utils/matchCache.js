@@ -153,17 +153,36 @@ export async function getCachedMatches(matchIds) {
  */
 export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds) {
     try {
-        // Add 30s timeout for slower connections
+        console.log('🔍 getUpcomingMatchesFromCache called with leagues:', leagueIds);
+
+        // Get Supabase instance
+        let supabase;
+        try {
+            supabase = getSupabase();
+            console.log('✅ Got Supabase instance');
+        } catch (error) {
+            console.error('❌ getSupabase() failed:', error.message);
+            return [];
+        }
+
+        console.log('📡 Starting Supabase query...');
+
+        // Add 5s timeout (reduced from 30s)
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), 30000)
+            setTimeout(() => {
+                console.error('❌ Supabase query timeout after 5s');
+                reject(new Error('Timeout'));
+            }, 5000)
         );
 
-        const queryPromise = window.supabase
+        const queryPromise = supabase
             .from('matches')
             .select('*')
             .in('league_id', leagueIds);
 
+        console.log('⏳ Waiting for query...');
         const result = await Promise.race([queryPromise, timeoutPromise]);
+        console.log('✅ Query completed');
         const { data, error } = result;
 
         if (error) {

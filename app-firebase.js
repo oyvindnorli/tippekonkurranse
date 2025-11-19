@@ -478,7 +478,7 @@ async function loadMatches() {
         errorMessage.style.display = 'none';
 
         // Import matchCache module
-        const { getUpcomingMatchesFromCache } = await import('./js/utils/matchCache.js?v=20251118c');
+        const { getUpcomingMatchesFromCache } = await import('./js/utils/matchCache.js?v=20251119d');
 
         // Fetch ALL matches from Supabase (no date filtering - get everything)
         const today = new Date();
