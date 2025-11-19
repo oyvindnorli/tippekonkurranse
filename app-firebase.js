@@ -878,7 +878,10 @@ function init() {
             // DISABLED: User doesn't have delete permissions, causes console errors
             // cleanupOldMatchesInBackground();
         } else {
-            // User is not signed in, show welcome section
+            // User is not signed in, reset flag so data loads on next login
+            hasLoadedInitialMatches = false;
+
+            // Show welcome section
             if (welcomeSection) {
                 welcomeSection.style.display = 'block';
             }
