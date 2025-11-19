@@ -601,6 +601,7 @@ function init() {
     let hasLoadedInitialMatches = false;
 
     supabase.auth.onAuthStateChange(async (event, session) => {
+        console.time('⏱️ Total auth to render time');
         const user = session?.user;
         // Hide loading spinner
         if (authLoading) authLoading.style.display = 'none';
@@ -626,7 +627,9 @@ function init() {
             hasLoadedInitialMatches = true;
 
             // User is signed in, load preferences first
+            console.time('⏱️ 1. Load preferences');
             selectedLeagues = await loadSelectedLeagues(user.id);
+            console.timeEnd('⏱️ 1. Load preferences');
             API_CONFIG.LEAGUES = Array.from(selectedLeagues);
 
             // Show main content, hide welcome
@@ -638,7 +641,10 @@ function init() {
             }
 
             // Load matches once
-            loadMatches();
+            console.time('⏱️ 2. Load matches');
+            await loadMatches();
+            console.timeEnd('⏱️ 2. Load matches');
+            console.timeEnd('⏱️ Total auth to render time');
 
             // NOTE: Realtime listener for preferences changes is disabled to avoid
             // WebSocket connection errors. Users can refresh the page to see changes
@@ -742,6 +748,7 @@ function init() {
 
 // Render matches list
 function renderMatches() {
+    console.time('⏱️ 3. Render matches to DOM');
     const matchesList = document.getElementById('matchesList');
     matchesList.innerHTML = '';
 
@@ -901,6 +908,7 @@ function renderMatches() {
             matchesList.appendChild(dateGroup);
         }
     });
+    console.timeEnd('⏱️ 3. Render matches to DOM');
 }
 
 // Set score based on odds button clicked
