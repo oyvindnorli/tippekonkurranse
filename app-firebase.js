@@ -111,8 +111,16 @@ async function loadSelectedLeagues(userId) {
 
         // Get user's access token for authenticated request
         console.log('🔑 Getting access token...');
-        const { data: { session } } = await window.supabase.auth.getSession();
-        const accessToken = session?.access_token || SUPABASE_ANON_KEY;
+        let accessToken = SUPABASE_ANON_KEY;
+        try {
+            const sessionData = await Promise.race([
+                window.supabase.auth.getSession(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+            ]);
+            accessToken = sessionData?.data?.session?.access_token || SUPABASE_ANON_KEY;
+        } catch (err) {
+            console.warn('⚠️ Could not get session, using anon key');
+        }
         console.log('🔑 Access token available:', !!accessToken);
 
         console.log('📡 Fetching preferences from:', url);
