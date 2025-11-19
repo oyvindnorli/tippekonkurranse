@@ -597,7 +597,7 @@ function init() {
     if (mainContent) mainContent.style.display = 'none';
 
     // Wait for auth state before loading matches
-    let preferencesUnsubscribe = null;
+    // NOTE: preferencesUnsubscribe removed - Realtime is disabled
     let hasLoadedInitialMatches = false;
 
     supabase.auth.onAuthStateChange(async (event, session) => {
@@ -606,14 +606,15 @@ function init() {
         if (authLoading) authLoading.style.display = 'none';
 
         // Clean up previous listener if exists
-        if (preferencesUnsubscribe) {
-            try {
-                await preferencesUnsubscribe();
-            } catch (error) {
-                // Ignore cleanup errors
-            }
-            preferencesUnsubscribe = null;
-        }
+        // NOTE: Realtime is currently disabled, so no cleanup needed
+        // if (preferencesUnsubscribe) {
+        //     try {
+        //         await preferencesUnsubscribe();
+        //     } catch (error) {
+        //         // Ignore cleanup errors
+        //     }
+        //     preferencesUnsubscribe = null;
+        // }
 
         if (user) {
             // Skip if we've already initialized for this user
@@ -639,7 +640,12 @@ function init() {
             // Load matches once
             loadMatches();
 
-            // Set up real-time listener for preferences changes
+            // NOTE: Realtime listener for preferences changes is disabled to avoid
+            // WebSocket connection errors. Users can refresh the page to see changes
+            // from other devices/tabs. This is not a critical feature.
+
+            // If you need cross-tab sync, uncomment this and ensure Realtime is enabled:
+            /*
             const channel = supabase
                 .channel(`preferences:${user.id}`)
                 .on('postgres_changes',
@@ -704,17 +710,15 @@ function init() {
 
             preferencesUnsubscribe = async () => {
                 try {
-                    // Unsubscribe gracefully
                     await channel.unsubscribe();
-                    // Small delay before removing channel to avoid race conditions
                     setTimeout(() => {
                         supabase.removeChannel(channel);
                     }, 100);
                 } catch (error) {
-                    // Ignore errors during cleanup
                     console.debug('Channel cleanup:', error.message);
                 }
             };
+            */
 
             // Clean up old matches from Firestore in background (don't await)
             // DISABLED: User doesn't have delete permissions, causes console errors

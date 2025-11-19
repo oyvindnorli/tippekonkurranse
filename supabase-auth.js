@@ -17,16 +17,6 @@ function initializeSupabase() {
                     autoRefreshToken: true,
                     detectSessionInUrl: true,
                     storage: window.localStorage
-                },
-                realtime: {
-                    params: {
-                        eventsPerSecond: 0
-                    }
-                },
-                global: {
-                    headers: {
-                        'X-Client-Info': 'tippekonkurranse'
-                    }
                 }
             }
         );
