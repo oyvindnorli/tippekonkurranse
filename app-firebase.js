@@ -607,7 +607,11 @@ function init() {
 
         // Clean up previous listener if exists
         if (preferencesUnsubscribe) {
-            preferencesUnsubscribe();
+            try {
+                await preferencesUnsubscribe();
+            } catch (error) {
+                // Ignore cleanup errors
+            }
             preferencesUnsubscribe = null;
         }
 
@@ -698,8 +702,18 @@ function init() {
                 )
                 .subscribe();
 
-            preferencesUnsubscribe = () => {
-                supabase.removeChannel(channel);
+            preferencesUnsubscribe = async () => {
+                try {
+                    // Unsubscribe gracefully
+                    await channel.unsubscribe();
+                    // Small delay before removing channel to avoid race conditions
+                    setTimeout(() => {
+                        supabase.removeChannel(channel);
+                    }, 100);
+                } catch (error) {
+                    // Ignore errors during cleanup
+                    console.debug('Channel cleanup:', error.message);
+                }
             };
 
             // Clean up old matches from Firestore in background (don't await)
