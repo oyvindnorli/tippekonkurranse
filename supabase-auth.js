@@ -5,7 +5,6 @@ let supabase, currentUser = null;
 
 // Initialize Supabase
 function initializeSupabase() {
-    console.time('⏱️ Total page load to auth');
     try {
         // Create Supabase client globally
         const { createClient } = window.supabase;
@@ -31,7 +30,6 @@ function initializeSupabase() {
         // Listen for auth state changes
         supabase.auth.onAuthStateChange((event, session) => {
             if (session?.user) {
-                console.timeEnd('⏱️ Total page load to auth');
                 currentUser = session.user;
                 window.currentUser = currentUser; // Update global
                 onUserLoggedIn(session.user);
@@ -45,7 +43,6 @@ function initializeSupabase() {
         // Check current session
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session?.user) {
-                console.timeEnd('⏱️ Total page load to auth');
                 currentUser = session.user;
                 window.currentUser = currentUser; // Update global
                 onUserLoggedIn(session.user);

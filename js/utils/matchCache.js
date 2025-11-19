@@ -162,19 +162,13 @@ export async function getCachedMatches(matchIds) {
  */
 export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds) {
     try {
-        console.log('🔍 getUpcomingMatchesFromCache called with leagues:', leagueIds);
-
         // Use fetch() directly instead of Supabase SDK
-        // This bypasses any SDK issues
         const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
 
         // Build query URL
         const leagueFilter = leagueIds.map(id => `league_id.eq.${id}`).join(',');
         const url = `${SUPABASE_URL}/rest/v1/matches?select=*&or=(${leagueFilter})`;
-
-        console.log('📡 Fetching with direct REST API...');
-        console.log('   URL:', url);
 
         const response = await fetch(url, {
             headers: {
@@ -183,10 +177,8 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
             }
         });
 
-        console.log('✅ Fetch completed! Status:', response.status);
-
         if (!response.ok) {
-            console.error('❌ HTTP error:', response.status, response.statusText);
+            console.error('Failed to fetch matches:', response.status);
             return [];
         }
 
@@ -211,7 +203,7 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
             elapsed: m.elapsed
         }));
     } catch (err) {
-        console.error('❌ Exception in getUpcomingMatchesFromCache:', err);
+        console.error('Error loading matches:', err);
         return [];
     }
 }
