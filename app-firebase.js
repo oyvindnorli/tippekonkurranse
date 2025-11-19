@@ -107,10 +107,14 @@ async function loadSelectedLeagues(userId) {
 
         const url = `${SUPABASE_URL}/rest/v1/user_preferences?select=selected_leagues&user_id=eq.${userId}`;
 
+        // Get user's access token for authenticated request
+        const { data: { session } } = await window.supabase.auth.getSession();
+        const accessToken = session?.access_token || SUPABASE_ANON_KEY;
+
         const response = await fetch(url, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                'Authorization': `Bearer ${accessToken}`
             }
         });
 
@@ -120,9 +124,11 @@ async function loadSelectedLeagues(userId) {
         }
 
         const results = await response.json();
+        console.log('📥 Loaded preferences from DB:', results);
         const data = results[0]; // Get first result
 
         if (data && data.selected_leagues) {
+            console.log('✅ Using saved preferences:', data.selected_leagues);
             const leagueArray = data.selected_leagues;
 
             // Only allow valid leagues from AVAILABLE_LEAGUES
