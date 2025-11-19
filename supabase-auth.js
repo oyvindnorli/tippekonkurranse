@@ -32,10 +32,12 @@ function initializeSupabase() {
             if (session?.user) {
                 currentUser = session.user;
                 window.currentUser = currentUser; // Update global
+                window.currentSession = session; // Store session globally
                 onUserLoggedIn(session.user);
             } else {
                 currentUser = null;
                 window.currentUser = null; // Update global
+                window.currentSession = null; // Clear session
                 onUserLoggedOut();
             }
         });
@@ -45,6 +47,7 @@ function initializeSupabase() {
             if (session?.user) {
                 currentUser = session.user;
                 window.currentUser = currentUser; // Update global
+                window.currentSession = session; // Store session globally
                 onUserLoggedIn(session.user);
             }
         });

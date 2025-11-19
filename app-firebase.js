@@ -33,9 +33,8 @@ async function saveLeaguePreferences() {
         const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
 
-        // Get user's access token for authenticated request
-        const { data: { session } } = await window.supabase.auth.getSession();
-        const accessToken = session?.access_token;
+        // Get user's access token from already-available session (stored by supabase-auth.js)
+        const accessToken = window.currentSession?.access_token;
 
         if (!accessToken) {
             throw new Error('No access token available');
@@ -109,20 +108,15 @@ async function loadSelectedLeagues(userId) {
 
         const url = `${SUPABASE_URL}/rest/v1/user_preferences?select=selected_leagues&user_id=eq.${userId}`;
 
-        // Get user's access token for authenticated request
-        console.log('🔑 Getting access token...');
-        let accessToken = SUPABASE_ANON_KEY;
-        try {
-            const sessionData = await Promise.race([
-                window.supabase.auth.getSession(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-            ]);
-            accessToken = sessionData?.data?.session?.access_token || SUPABASE_ANON_KEY;
-            console.log('✅ Got session successfully');
-        } catch (err) {
-            console.warn('⚠️ Could not get session, using anon key:', err.message);
+        // Get user's access token from already-available session (stored by supabase-auth.js)
+        console.log('🔑 Getting access token from window.currentSession...');
+        const accessToken = window.currentSession?.access_token || SUPABASE_ANON_KEY;
+
+        if (accessToken === SUPABASE_ANON_KEY) {
+            console.warn('⚠️ No session available, using anon key (preferences will use defaults)');
+        } else {
+            console.log('✅ Using authenticated session token');
         }
-        console.log('🔑 Access token available:', !!accessToken);
 
         console.log('📡 Fetching preferences from:', url);
 
