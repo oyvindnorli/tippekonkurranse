@@ -24,7 +24,7 @@ const AVAILABLE_LEAGUES = [39, 2, 3, 32, 48, 135]; // PL, CL, EL, WCQ Europe, EF
 async function saveLeaguePreferences() {
     try {
         console.log('   💾 saveLeaguePreferences starting...');
-        if (!currentUser) {
+        if (!window.currentUser) {
             console.log('   ⚠️ No user logged in, skipping save');
             return;
         }
@@ -42,7 +42,7 @@ async function saveLeaguePreferences() {
         }
 
         // Check if preferences already exist
-        const checkUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${currentUser.id}`;
+        const checkUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${window.currentUser.id}`;
         const checkResponse = await fetch(checkUrl, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
@@ -57,7 +57,7 @@ async function saveLeaguePreferences() {
         let response;
         if (existing && existing.length > 0) {
             // Update existing preferences
-            const updateUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${currentUser.id}`;
+            const updateUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${window.currentUser.id}`;
             response = await fetch(updateUrl, {
                 method: 'PATCH',
                 headers: {
@@ -80,7 +80,7 @@ async function saveLeaguePreferences() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    user_id: currentUser.id,
+                    user_id: window.currentUser.id,
                     selected_leagues: Array.from(selectedLeagues)
                 })
             });
@@ -175,7 +175,7 @@ async function loadSelectedLeagues(userId) {
 // Save league preferences to Supabase
 async function saveSelectedLeagues() {
     try {
-        if (!currentUser) {
+        if (!window.currentUser) {
             console.log('⚠️ No user logged in, cannot save preferences');
             return;
         }
@@ -195,7 +195,7 @@ async function saveSelectedLeagues() {
         }
 
         // Check if preferences already exist
-        const checkUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${currentUser.id}`;
+        const checkUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${window.currentUser.id}`;
         const checkResponse = await fetch(checkUrl, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
@@ -210,7 +210,7 @@ async function saveSelectedLeagues() {
         let response;
         if (existing && existing.length > 0) {
             // Update existing preferences
-            const updateUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${currentUser.id}`;
+            const updateUrl = `${SUPABASE_URL}/rest/v1/user_preferences?user_id=eq.${window.currentUser.id}`;
             response = await fetch(updateUrl, {
                 method: 'PATCH',
                 headers: {
@@ -233,7 +233,7 @@ async function saveSelectedLeagues() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    user_id: currentUser.id,
+                    user_id: window.currentUser.id,
                     selected_leagues: leagueArray
                 })
             });
