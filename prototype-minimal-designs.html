@@ -103,23 +103,52 @@
         .design1 .score-input {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             background: #f8fafc;
-            padding: 4px 8px;
+            padding: 4px 6px;
             border-radius: 6px;
         }
 
+        .design1 .score-group {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .design1 .btn {
+            background: #e2e8f0;
+            border: none;
+            border-radius: 3px;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+
+        .design1 .btn:hover {
+            background: #cbd5e1;
+            transform: scale(1.1);
+        }
+
         .design1 .score {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: #0f172a;
-            min-width: 24px;
+            min-width: 20px;
             text-align: center;
         }
 
         .design1 .separator {
             color: #cbd5e1;
             font-weight: 600;
+            font-size: 13px;
+            margin: 0 2px;
         }
 
         .design1 .odds {
@@ -186,23 +215,61 @@
         .design2 .score-section {
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 12px;
             margin-bottom: 12px;
         }
 
         .design2 .score-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .design2 .score-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             background: #f8fafc;
             border: 1.5px solid #e2e8f0;
             border-radius: 8px;
-            padding: 8px 16px;
-            min-width: 60px;
-            text-align: center;
+            padding: 6px 12px;
+        }
+
+        .design2 .btn {
+            background: #e2e8f0;
+            border: none;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+
+        .design2 .btn:hover {
+            background: #cbd5e1;
+            transform: scale(1.1);
         }
 
         .design2 .score {
             font-size: 20px;
             font-weight: 700;
             color: #0f172a;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        .design2 .team-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
         }
 
         .design2 .odds {
@@ -282,17 +349,44 @@
         .design3 .score-display {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             background: #f8fafc;
-            padding: 6px 12px;
+            padding: 4px 8px;
             border-radius: 6px;
         }
 
+        .design3 .score-group {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .design3 .btn {
+            background: #e2e8f0;
+            border: none;
+            border-radius: 3px;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+
+        .design3 .btn:hover {
+            background: #cbd5e1;
+            transform: scale(1.1);
+        }
+
         .design3 .score {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: #0f172a;
-            min-width: 20px;
+            min-width: 18px;
             text-align: center;
         }
 
@@ -300,6 +394,7 @@
             color: #cbd5e1;
             font-weight: 600;
             font-size: 12px;
+            margin: 0 2px;
         }
 
         .design3 .odds-mini {
@@ -369,21 +464,51 @@
         .design4 .score-compact {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             background: #f8fafc;
-            padding: 4px 10px;
+            padding: 3px 6px;
             border-radius: 5px;
         }
 
+        .design4 .score-group {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .design4 .btn {
+            background: #e2e8f0;
+            border: none;
+            border-radius: 3px;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+
+        .design4 .btn:hover {
+            background: #cbd5e1;
+            transform: scale(1.1);
+        }
+
         .design4 .score {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             color: #0f172a;
+            min-width: 16px;
+            text-align: center;
         }
 
         .design4 .separator {
             color: #cbd5e1;
             font-size: 11px;
+            margin: 0 1px;
         }
 
         .design4 .odds-row {
@@ -451,9 +576,17 @@
                             <span>Liverpool</span>
                         </div>
                         <div class="score-input">
-                            <span class="score">2</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">2</span>
+                                <button class="btn">+</button>
+                            </div>
                             <span class="separator">-</span>
-                            <span class="score">1</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">1</span>
+                                <button class="btn">+</button>
+                            </div>
                         </div>
                         <div class="odds">
                             <div class="odd-chip">H 2.10</div>
@@ -471,9 +604,17 @@
                             <span>Chelsea</span>
                         </div>
                         <div class="score-input">
-                            <span class="score">1</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">1</span>
+                                <button class="btn">+</button>
+                            </div>
                             <span class="separator">-</span>
-                            <span class="score">1</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">1</span>
+                                <button class="btn">+</button>
+                            </div>
                         </div>
                         <div class="odds">
                             <div class="odd-chip">H 2.50</div>
@@ -491,9 +632,17 @@
                             <span>Tottenham</span>
                         </div>
                         <div class="score-input">
-                            <span class="score">3</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">3</span>
+                                <button class="btn">+</button>
+                            </div>
                             <span class="separator">-</span>
-                            <span class="score">0</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">0</span>
+                                <button class="btn">+</button>
+                            </div>
                         </div>
                         <div class="odds">
                             <div class="odd-chip">H 1.50</div>
@@ -522,7 +671,20 @@
                     </div>
                     <div class="score-section">
                         <div class="score-box">
-                            <div class="score">2 - 1</div>
+                            <span class="team-label">Hjemme</span>
+                            <div class="score-controls">
+                                <button class="btn">-</button>
+                                <span class="score">2</span>
+                                <button class="btn">+</button>
+                            </div>
+                        </div>
+                        <div class="score-box">
+                            <span class="team-label">Borte</span>
+                            <div class="score-controls">
+                                <button class="btn">-</button>
+                                <span class="score">1</span>
+                                <button class="btn">+</button>
+                            </div>
                         </div>
                     </div>
                     <div class="odds">
@@ -549,7 +711,20 @@
                     </div>
                     <div class="score-section">
                         <div class="score-box">
-                            <div class="score">1 - 1</div>
+                            <span class="team-label">Hjemme</span>
+                            <div class="score-controls">
+                                <button class="btn">-</button>
+                                <span class="score">1</span>
+                                <button class="btn">+</button>
+                            </div>
+                        </div>
+                        <div class="score-box">
+                            <span class="team-label">Borte</span>
+                            <div class="score-controls">
+                                <button class="btn">-</button>
+                                <span class="score">1</span>
+                                <button class="btn">+</button>
+                            </div>
                         </div>
                     </div>
                     <div class="odds">
@@ -583,9 +758,17 @@
                     <div class="team-left">Manchester United</div>
                     <div class="center-section">
                         <div class="score-display">
-                            <span class="score">2</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">2</span>
+                                <button class="btn">+</button>
+                            </div>
                             <span class="separator">-</span>
-                            <span class="score">1</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">1</span>
+                                <button class="btn">+</button>
+                            </div>
                         </div>
                         <div class="odds-mini">
                             <div class="odd-dot">2.10</div>
@@ -600,9 +783,17 @@
                     <div class="team-left">Arsenal</div>
                     <div class="center-section">
                         <div class="score-display">
-                            <span class="score">1</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">1</span>
+                                <button class="btn">+</button>
+                            </div>
                             <span class="separator">-</span>
-                            <span class="score">1</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">1</span>
+                                <button class="btn">+</button>
+                            </div>
                         </div>
                         <div class="odds-mini">
                             <div class="odd-dot">2.50</div>
@@ -617,9 +808,17 @@
                     <div class="team-left">Manchester City</div>
                     <div class="center-section">
                         <div class="score-display">
-                            <span class="score">3</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">3</span>
+                                <button class="btn">+</button>
+                            </div>
                             <span class="separator">-</span>
-                            <span class="score">0</span>
+                            <div class="score-group">
+                                <button class="btn">-</button>
+                                <span class="score">0</span>
+                                <button class="btn">+</button>
+                            </div>
                         </div>
                         <div class="odds-mini">
                             <div class="odd-dot">1.50</div>
@@ -648,9 +847,17 @@
                         </div>
                         <div class="score-odds-group">
                             <div class="score-compact">
-                                <span class="score">2</span>
+                                <div class="score-group">
+                                    <button class="btn">-</button>
+                                    <span class="score">2</span>
+                                    <button class="btn">+</button>
+                                </div>
                                 <span class="separator">-</span>
-                                <span class="score">1</span>
+                                <div class="score-group">
+                                    <button class="btn">-</button>
+                                    <span class="score">1</span>
+                                    <button class="btn">+</button>
+                                </div>
                             </div>
                             <div class="odds-row">
                                 <div class="odd-compact">2.10</div>
@@ -668,9 +875,17 @@
                         </div>
                         <div class="score-odds-group">
                             <div class="score-compact">
-                                <span class="score">1</span>
+                                <div class="score-group">
+                                    <button class="btn">-</button>
+                                    <span class="score">1</span>
+                                    <button class="btn">+</button>
+                                </div>
                                 <span class="separator">-</span>
-                                <span class="score">1</span>
+                                <div class="score-group">
+                                    <button class="btn">-</button>
+                                    <span class="score">1</span>
+                                    <button class="btn">+</button>
+                                </div>
                             </div>
                             <div class="odds-row">
                                 <div class="odd-compact">2.50</div>
@@ -688,9 +903,17 @@
                         </div>
                         <div class="score-odds-group">
                             <div class="score-compact">
-                                <span class="score">3</span>
+                                <div class="score-group">
+                                    <button class="btn">-</button>
+                                    <span class="score">3</span>
+                                    <button class="btn">+</button>
+                                </div>
                                 <span class="separator">-</span>
-                                <span class="score">0</span>
+                                <div class="score-group">
+                                    <button class="btn">-</button>
+                                    <span class="score">0</span>
+                                    <button class="btn">+</button>
+                                </div>
                             </div>
                             <div class="odds-row">
                                 <div class="odd-compact">1.50</div>
