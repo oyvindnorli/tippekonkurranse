@@ -34,7 +34,7 @@ async function saveLeaguePreferences() {
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
 
         // Get user's access token for authenticated request
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await window.supabase.auth.getSession();
         const accessToken = session?.access_token;
 
         if (!accessToken) {
@@ -141,7 +141,7 @@ async function loadSelectedLeagues(userId) {
                 console.log('🔄 Migrating league preferences (35 → 32)');
 
                 // Get user's access token for authenticated request
-                const { data: { session } } = await supabase.auth.getSession();
+                const { data: { session } } = await window.supabase.auth.getSession();
                 const accessToken = session?.access_token;
 
                 if (accessToken) {
@@ -187,7 +187,7 @@ async function saveSelectedLeagues() {
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
 
         // Get user's access token for authenticated request
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await window.supabase.auth.getSession();
         const accessToken = session?.access_token;
 
         if (!accessToken) {
