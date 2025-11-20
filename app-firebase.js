@@ -1011,34 +1011,45 @@ function renderMatches() {
                 }
 
                 matchCard.innerHTML = `
-                    <!-- Design 1: Ultra-Minimal Line -->
-                    <div class="match-content">
-                        <div class="teams">
-                            <span>${match.homeTeam}</span>
-                            <span class="vs">vs</span>
-                            <span>${match.awayTeam}</span>
+                    <!-- Vertical Layout with Time Badge and Odds -->
+                    <div class="match-content-vertical">
+                        <div class="time-odds-badge">
+                            <div class="time-badge">${formatMatchTime(match.commence_time).time}</div>
+                            ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
+                                <div class="odds-mini">
+                                    <span class="odds-value-small">${formatOdds(match.odds.H)}</span>
+                                    <span class="odds-value-small">${formatOdds(match.odds.U)}</span>
+                                    <span class="odds-value-small">${formatOdds(match.odds.B)}</span>
+                                </div>
+                            ` : ''}
                         </div>
-                        <div class="score-input">
-                            <div class="score-group">
-                                <button class="btn" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <span class="score" id="home-score-${match.id}">${homeScore === '?' ? '?' : homeScore}</span>
-                                <button class="btn" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
+                        <div class="teams-vertical">
+                            <div class="team-row">
+                                <img src="${homeLogo}" class="team-logo" alt="${match.homeTeam}" onerror="this.style.display='none'">
+                                <span class="team-name">${match.homeTeam}</span>
                             </div>
-                            <span class="separator">-</span>
-                            <div class="score-group">
-                                <button class="btn" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <span class="score" id="away-score-${match.id}">${awayScore === '?' ? '?' : awayScore}</span>
-                                <button class="btn" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
+                            <div class="team-row">
+                                <img src="${awayLogo}" class="team-logo" alt="${match.awayTeam}" onerror="this.style.display='none'">
+                                <span class="team-name">${match.awayTeam}</span>
                             </div>
                         </div>
-                        ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
-                            <div class="odds">
-                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>H ${formatOdds(match.odds.H)}</div>
-                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>U ${formatOdds(match.odds.U)}</div>
-                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>B ${formatOdds(match.odds.B)}</div>
+                        <div class="score-controls-vertical">
+                            <div class="team-controls">
+                                <button class="btn-minimal" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
+                                <button class="btn-minimal score-btn" id="home-score-btn-${match.id}">${homeScore === '?' ? '?' : homeScore}</button>
+                                <button class="btn-minimal" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
                             </div>
-                        ` : '<div class="no-odds">Ingen odds</div>'}
+                            <div class="team-controls">
+                                <button class="btn-minimal" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
+                                <button class="btn-minimal score-btn" id="away-score-btn-${match.id}">${awayScore === '?' ? '?' : awayScore}</button>
+                                <button class="btn-minimal" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
+                            </div>
+                        </div>
                     </div>
+                    <span class="score-display" style="display: none;">
+                        <span id="home-score-${match.id}">${homeScore}</span>
+                        <span id="away-score-${match.id}">${awayScore}</span>
+                    </span>
                 `;
                 dateGroup.appendChild(matchCard);
             });
@@ -1084,14 +1095,18 @@ function setScoreFromOdds(matchId, type) {
 
 // Update score with +/- buttons
 function updateScore(matchId, type, isPlus) {
+    // Update both the button and hidden element
+    const scoreBtn = document.getElementById(`${type}-score-btn-${matchId}`);
     const scoreElement = document.getElementById(`${type}-score-${matchId}`);
 
-    if (!scoreElement) {
-        console.error(`Score element not found: ${type}-score-${matchId}`);
+    if (!scoreBtn && !scoreElement) {
+        console.error(`Score elements not found: ${type}-score-${matchId}`);
         return;
     }
 
-    let currentScore = scoreElement.textContent === '?' ? 0 : parseInt(scoreElement.textContent);
+    // Get current score from either button or hidden element
+    const currentElement = scoreBtn || scoreElement;
+    let currentScore = currentElement.textContent === '?' ? 0 : parseInt(currentElement.textContent);
 
     if (isPlus) {
         currentScore = Math.min(currentScore + 1, 20);
@@ -1099,27 +1114,37 @@ function updateScore(matchId, type, isPlus) {
         currentScore = Math.max(currentScore - 1, 0);
     }
 
-    scoreElement.textContent = currentScore;
+    // Update both button and hidden element
+    if (scoreBtn) scoreBtn.textContent = currentScore;
+    if (scoreElement) scoreElement.textContent = currentScore;
 
     // Auto-save after score change
+    const homeScoreBtn = document.getElementById(`home-score-btn-${matchId}`);
+    const awayScoreBtn = document.getElementById(`away-score-btn-${matchId}`);
     const homeScoreElement = document.getElementById(`home-score-${matchId}`);
     const awayScoreElement = document.getElementById(`away-score-${matchId}`);
 
-    if (!homeScoreElement || !awayScoreElement) {
+    // Get scores from buttons or hidden elements
+    const homeBtn = homeScoreBtn || homeScoreElement;
+    const awayBtn = awayScoreBtn || awayScoreElement;
+
+    if (!homeBtn || !awayBtn) {
         console.error('Score elements not found for match', matchId);
         return;
     }
 
     // If the other score is still '?', set it to 0 visually
-    if (homeScoreElement.textContent === '?') {
-        homeScoreElement.textContent = '0';
+    if (homeBtn.textContent === '?') {
+        if (homeScoreBtn) homeScoreBtn.textContent = '0';
+        if (homeScoreElement) homeScoreElement.textContent = '0';
     }
-    if (awayScoreElement.textContent === '?') {
-        awayScoreElement.textContent = '0';
+    if (awayBtn.textContent === '?') {
+        if (awayScoreBtn) awayScoreBtn.textContent = '0';
+        if (awayScoreElement) awayScoreElement.textContent = '0';
     }
 
-    const homeScore = parseInt(homeScoreElement.textContent);
-    const awayScore = parseInt(awayScoreElement.textContent);
+    const homeScore = parseInt(homeBtn.textContent);
+    const awayScore = parseInt(awayBtn.textContent);
 
     submitTip(matchId, homeScore, awayScore);
 }

@@ -786,6 +786,161 @@ header h1 {
 }
 
 /* ====================================
+   Vertical Layout with Time Badge and Odds
+   ==================================== */
+
+.match-content-vertical {
+    display: grid;
+    grid-template-columns: 70px 1fr auto;
+    gap: 16px;
+    align-items: center;
+}
+
+.time-odds-badge {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.time-badge {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.odds-mini {
+    display: flex;
+    gap: 6px;
+}
+
+.odds-value-small {
+    font-size: 10px;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.teams-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.team-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.team-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.team-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.score-controls-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.team-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-minimal {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: none;
+    background: #f3f4f6;
+    color: #374151;
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-minimal:hover {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+}
+
+.btn-minimal:active {
+    transform: translateY(0);
+}
+
+.btn-minimal:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-minimal.score-btn {
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    color: #1a1a1a;
+    font-weight: 700;
+    cursor: default;
+    pointer-events: none;
+}
+
+.score-display {
+    display: none;
+}
+
+/* Vertical layout mobile responsive */
+@media (max-width: 768px) {
+    .match-content-vertical {
+        grid-template-columns: 60px 1fr auto;
+        gap: 12px;
+    }
+
+    .time-badge {
+        width: 50px;
+        height: 50px;
+        font-size: 14px;
+    }
+
+    .team-logo {
+        width: 24px;
+        height: 24px;
+    }
+
+    .team-name {
+        font-size: 14px;
+    }
+
+    .btn-minimal {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+    }
+
+    .odds-value-small {
+        font-size: 9px;
+    }
+}
+
+/* ====================================
    OLD STYLES (kept for compatibility)
    ==================================== */
 
