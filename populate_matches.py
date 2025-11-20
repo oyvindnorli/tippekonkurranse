@@ -43,6 +43,15 @@ API_FOOTBALL_HEADERS = {
     'x-apisports-key': API_FOOTBALL_KEY
 }
 
+def format_odds(odds_value):
+    """Format odds with max 1 decimal, remove trailing zeros"""
+    # Round to 1 decimal
+    formatted = round(float(odds_value), 1)
+    # Remove trailing .0 by converting to int if it's a whole number
+    if formatted == int(formatted):
+        return int(formatted)
+    return formatted
+
 def check_env_vars():
     """Check if all required environment variables are set"""
     missing = []
@@ -108,9 +117,9 @@ def fetch_odds(fixture_id):
                     values = bet.get('values', [])
                     if len(values) >= 3:
                         odds = {
-                            'H': float(values[0]['odd']),
-                            'U': float(values[1]['odd']),
-                            'B': float(values[2]['odd'])
+                            'H': format_odds(values[0]['odd']),
+                            'U': format_odds(values[1]['odd']),
+                            'B': format_odds(values[2]['odd'])
                         }
                         print(f"      ✅ Odds from {bookmaker_name}: H{odds['H']} U{odds['U']} B{odds['B']}")
                         return odds

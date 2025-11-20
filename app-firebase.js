@@ -282,6 +282,14 @@ async function saveSelectedLeagues() {
 // Selected leagues for filtering (will be updated when user logs in)
 let selectedLeagues = new Set([39, 2, 3, 32, 48, 135]); // Default: Premier League, Champions League, Europa League, WCQ Europe, EFL Cup, Serie A
 
+// Format odds with max 1 decimal, remove trailing zeros
+function formatOdds(odds) {
+    const num = parseFloat(odds);
+    if (isNaN(num)) return odds;
+    // Round to 1 decimal, then remove trailing .0
+    return Number(num.toFixed(1)).toString();
+}
+
 // Load user tips from Firebase
 async function loadUserTips() {
     userTips = await getCurrentUserTips();
@@ -1025,9 +1033,9 @@ function renderMatches() {
                         </div>
                         ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
                             <div class="odds">
-                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>H ${match.odds.H.toFixed(2)}</div>
-                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>U ${match.odds.U.toFixed(2)}</div>
-                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>B ${match.odds.B.toFixed(2)}</div>
+                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>H ${formatOdds(match.odds.H)}</div>
+                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>U ${formatOdds(match.odds.U)}</div>
+                                <div class="odd-chip" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>B ${formatOdds(match.odds.B)}</div>
                             </div>
                         ` : '<div class="no-odds">Ingen odds</div>'}
                     </div>
