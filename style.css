@@ -799,7 +799,7 @@ header h1 {
 .match-content-horizontal {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 18px;
     padding: 0;
 }
 
@@ -947,7 +947,7 @@ header h1 {
     }
 
     .match-content-horizontal {
-        gap: 10px;
+        gap: 14px;
     }
 
     .odds-center {
