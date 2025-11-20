@@ -1017,9 +1017,9 @@ function renderMatches() {
                             <div class="time-badge">${formatMatchTime(match.commence_time)}</div>
                             ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
                                 <div class="odds-mini">
-                                    <span class="odds-value-small">${formatOdds(match.odds.H)}</span>
-                                    <span class="odds-value-small">${formatOdds(match.odds.U)}</span>
-                                    <span class="odds-value-small">${formatOdds(match.odds.B)}</span>
+                                    <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.H)}</span>
+                                    <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.U)}</span>
+                                    <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.B)}</span>
                                 </div>
                             ` : ''}
                         </div>

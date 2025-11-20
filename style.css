@@ -820,13 +820,24 @@ header h1 {
 
 .odds-mini {
     display: flex;
-    gap: 6px;
+    gap: 4px;
 }
 
 .odds-value-small {
-    font-size: 10px;
-    color: #667eea;
-    font-weight: 600;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.odds-value-small:hover {
+    background: #dbeafe;
+    color: #3b82f6;
+    transform: translateY(-1px);
 }
 
 .teams-vertical {
@@ -936,7 +947,8 @@ header h1 {
     }
 
     .odds-value-small {
-        font-size: 9px;
+        font-size: 10px;
+        padding: 2px 5px;
     }
 }
 
