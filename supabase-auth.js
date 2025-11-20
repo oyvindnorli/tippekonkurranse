@@ -480,3 +480,6 @@ async function loadFirebaseLeaderboard() {
 
 // Make signOut available globally for onclick handler in header
 window.signOut = signOut;
+
+// Initialize Supabase when script loads
+initializeSupabase();
