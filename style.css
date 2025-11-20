@@ -798,7 +798,7 @@ header h1 {
 
 .match-content-horizontal {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
     padding: 0;
 }
