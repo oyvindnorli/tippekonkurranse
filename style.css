@@ -807,6 +807,7 @@ header h1 {
     display: flex;
     flex-direction: row;
     gap: 5px;
+    flex-shrink: 0;
 }
 
 .time-odds-badge {
@@ -859,6 +860,8 @@ header h1 {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    flex: 1;
+    min-width: 0;
 }
 
 .team-row {
@@ -883,6 +886,7 @@ header h1 {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    flex-shrink: 0;
 }
 
 .team-controls {
