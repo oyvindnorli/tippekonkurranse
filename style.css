@@ -820,31 +820,24 @@ header h1 {
 
 .odds-mini {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
-    width: 100%;
+    gap: 4px;
 }
 
 .odds-value-small {
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    border: 1.5px solid #e2e8f0;
-    color: #1e293b;
+    background: #f1f5f9;
+    color: #475569;
     font-size: 13px;
     font-weight: 700;
-    padding: 6px 10px;
-    border-radius: 6px;
+    padding: 5px 8px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-    min-width: 50px;
+    transition: all 0.15s ease;
 }
 
 .odds-value-small:hover {
-    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-    border-color: #3b82f6;
-    color: #1e40af;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    background: #dbeafe;
+    color: #3b82f6;
+    transform: translateY(-1px);
 }
 
 .teams-vertical {
@@ -954,8 +947,8 @@ header h1 {
     }
 
     .odds-value-small {
-        font-size: 12px;
-        padding: 5px 8px;
+        font-size: 11px;
+        padding: 4px 6px;
     }
 }
 
