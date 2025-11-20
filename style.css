@@ -805,9 +805,8 @@ header h1 {
 
 .odds-center {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 60px;
+    flex-direction: row;
+    gap: 6px;
 }
 
 .time-odds-badge {
@@ -944,8 +943,7 @@ header h1 {
     }
 
     .odds-center {
-        min-width: 50px;
-        gap: 6px;
+        gap: 4px;
     }
 
     .time-badge {
