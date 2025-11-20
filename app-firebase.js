@@ -1014,7 +1014,7 @@ function renderMatches() {
                     <!-- Vertical Layout with Time Badge and Odds -->
                     <div class="match-content-vertical">
                         <div class="time-odds-badge">
-                            <div class="time-badge">${formatMatchTime(match.commence_time).time}</div>
+                            <div class="time-badge">${formatMatchTime(match.commence_time)}</div>
                             ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
                                 <div class="odds-mini">
                                     <span class="odds-value-small">${formatOdds(match.odds.H)}</span>
