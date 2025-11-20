@@ -1011,18 +1011,8 @@ function renderMatches() {
                 }
 
                 matchCard.innerHTML = `
-                    <!-- Vertical Layout with Time Badge and Odds -->
-                    <div class="match-content-vertical">
-                        <div class="time-odds-badge">
-                            <div class="time-badge">${formatMatchTime(match.commence_time)}</div>
-                            ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
-                                <div class="odds-mini">
-                                    <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.H)}</span>
-                                    <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.U)}</span>
-                                    <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.B)}</span>
-                                </div>
-                            ` : ''}
-                        </div>
+                    <!-- Simplified Layout: Teams - Odds - Score -->
+                    <div class="match-content-horizontal">
                         <div class="teams-vertical">
                             <div class="team-row">
                                 <img src="${homeLogo}" class="team-logo" alt="${match.homeTeam}" onerror="this.style.display='none'">
@@ -1033,6 +1023,13 @@ function renderMatches() {
                                 <span class="team-name">${match.awayTeam}</span>
                             </div>
                         </div>
+                        ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
+                            <div class="odds-center">
+                                <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.H)}</span>
+                                <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.U)}</span>
+                                <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.B)}</span>
+                            </div>
+                        ` : '<div class="odds-center"><span class="no-odds">-</span></div>'}
                         <div class="score-controls-vertical">
                             <div class="team-controls">
                                 <button class="btn-minimal" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>

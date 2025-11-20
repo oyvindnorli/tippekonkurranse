@@ -796,6 +796,20 @@ header h1 {
     align-items: center;
 }
 
+.match-content-horizontal {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0;
+}
+
+.odds-center {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 60px;
+}
+
 .time-odds-badge {
     display: flex;
     flex-direction: column;
@@ -923,6 +937,15 @@ header h1 {
     .match-content-vertical {
         grid-template-columns: 60px 1fr auto;
         gap: 12px;
+    }
+
+    .match-content-horizontal {
+        gap: 12px;
+    }
+
+    .odds-center {
+        min-width: 50px;
+        gap: 6px;
     }
 
     .time-badge {
