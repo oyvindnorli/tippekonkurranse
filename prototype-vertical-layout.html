@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Layout Prototypes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+        .prototype-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 40px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .prototype-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #4f46e5;
+        }
+
+        .date-header {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 30px 0 20px 0;
+            color: #1a1a1a;
+        }
+
+        .date-header:first-child {
+            margin-top: 0;
+        }
+
+        /* Design 1: Pure Minimal (like screenshot) */
+        .match-card-v1 {
+            display: grid;
+            grid-template-columns: 70px 1fr auto;
+            gap: 16px;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .match-card-v1:last-child {
+            border-bottom: none;
+        }
+
+        .time-badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .teams-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .team-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .team-logo {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .team-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .score-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .team-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-minimal {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: none;
+            background: #f3f4f6;
+            color: #374151;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-minimal:hover {
+            background: #e5e7eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-minimal:active {
+            transform: translateY(0);
+        }
+
+        /* Design 2: With Score Display */
+        .match-card-v2 {
+            display: grid;
+            grid-template-columns: 70px 1fr 120px;
+            gap: 16px;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .match-card-v2:last-child {
+            border-bottom: none;
+        }
+
+        .score-display {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .team-score-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-box {
+            min-width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .btn-score {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            border: none;
+            background: #f3f4f6;
+            color: #374151;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-score:hover {
+            background: #e5e7eb;
+        }
+
+        /* Design 3: With Odds Chips */
+        .match-card-v3 {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .match-card-v3:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .match-header-v3 {
+            display: grid;
+            grid-template-columns: 70px 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .odds-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .odd-chip {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .odd-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .odd-chip.selected {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+        }
+
+        /* Design 4: Compact with inline scores */
+        .match-card-v4 {
+            display: grid;
+            grid-template-columns: 60px 1fr auto;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            background: white;
+            margin-bottom: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+
+        .match-card-v4:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+
+        .time-badge-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .teams-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .team-row-compact {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .team-logo-small {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .team-name-compact {
+            font-size: 15px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .score-inline {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .score-value {
+            min-width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .btn-compact {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: none;
+            background: #f3f4f6;
+            color: #374151;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Design 5: Card with shadow */
+        .match-card-v5 {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .match-card-v5:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .match-content-v5 {
+            display: grid;
+            grid-template-columns: 70px 1fr;
+            gap: 20px;
+        }
+
+        .time-badge-v5 {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .match-details-v5 {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .team-with-score {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-radius: 8px;
+            background: #f9fafb;
+            transition: background 0.2s;
+        }
+
+        .team-with-score:hover {
+            background: #f3f4f6;
+        }
+
+        .team-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .league-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            background: #e0e7ff;
+            color: #4f46e5;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Vertical Layout Design Prototypes</h1>
+        <p style="color: #6b7280; margin-bottom: 40px;">5 forskjellige design-forslag hvor lagene står under hverandre</p>
+
+        <!-- Design 1: Pure Minimal -->
+        <div class="prototype-section">
+            <div class="prototype-title">Design 1: Pure Minimal (som screenshot)</div>
+            <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">Rent og minimalistisk. Kun knapper for å justere score.</p>
+
+            <div class="date-header">Lørdag, 22. november</div>
+
+            <div class="match-card-v1">
+                <div class="time-badge">16:00</div>
+                <div class="teams-vertical">
+                    <div class="team-row">
+                        <img src="https://media.api-sports.io/football/teams/40.png" class="team-logo" alt="Liverpool">
+                        <span class="team-name">Liverpool</span>
+                    </div>
+                    <div class="team-row">
+                        <img src="https://media.api-sports.io/football/teams/65.png" class="team-logo" alt="Nottingham">
+                        <span class="team-name">Nottingham Forest</span>
+                    </div>
+                </div>
+                <div class="score-controls">
+                    <div class="team-controls">
+                        <button class="btn-minimal">−</button>
+                        <button class="btn-minimal">?</button>
+                        <button class="btn-minimal">+</button>
+                    </div>
+                    <div class="team-controls">
+                        <button class="btn-minimal">−</button>
+                        <button class="btn-minimal">?</button>
+                        <button class="btn-minimal">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="match-card-v1">
+                <div class="time-badge">18:30</div>
+                <div class="teams-vertical">
+                    <div class="team-row">
+                        <img src="https://media.api-sports.io/football/teams/34.png" class="team-logo" alt="Newcastle">
+                        <span class="team-name">Newcastle</span>
+                    </div>
+                    <div class="team-row">
+                        <img src="https://media.api-sports.io/football/teams/50.png" class="team-logo" alt="Man City">
+                        <span class="team-name">Manchester City</span>
+                    </div>
+                </div>
+                <div class="score-controls">
+                    <div class="team-controls">
+                        <button class="btn-minimal">−</button>
+                        <button class="btn-minimal">?</button>
+                        <button class="btn-minimal">+</button>
+                    </div>
+                    <div class="team-controls">
+                        <button class="btn-minimal">−</button>
+                        <button class="btn-minimal">?</button>
+                        <button class="btn-minimal">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Design 2: With Score Display -->
+        <div class="prototype-section">
+            <div class="prototype-title">Design 2: Med score-visning</div>
+            <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">Viser score i midten mellom +/- knappene.</p>
+
+            <div class="date-header">Lørdag, 22. november</div>
+
+            <div class="match-card-v2">
+                <div class="time-badge">16:00</div>
+                <div class="teams-vertical">
+                    <div class="team-row">
+                        <img src="https://media.api-sports.io/football/teams/40.png" class="team-logo" alt="Liverpool">
+                        <span class="team-name">Liverpool</span>
+                    </div>
+                    <div class="team-row">
+                        <img src="https://media.api-sports.io/football/teams/65.png" class="team-logo" alt="Nottingham">
+                        <span class="team-name">Nottingham Forest</span>
+                    </div>
+                </div>
+                <div class="score-display">
+                    <div class="team-score-row">
+                        <button class="btn-score">−</button>
+                        <div class="score-box">2</div>
+                        <button class="btn-score">+</button>
+                    </div>
+                    <div class="team-score-row">
+                        <button class="btn-score">−</button>
+                        <div class="score-box">1</div>
+                        <button class="btn-score">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="match-card-v2">
+                <div class="time-badge">18:30</div>
+                <div class="teams-vertical">
+                    <div class="team-row">
+                        <img src="https://media.api-sports.io/football/teams/34.png" class="team-logo" alt="Newcastle">
+                        <span class="team-name">Newcastle</span>
+                    </div>
+                    <div class="team-row">
+                        <img src="https://media.api-sports.io/football/teams/50.png" class="team-logo" alt="Man City">
+                        <span class="team-name">Manchester City</span>
+                    </div>
+                </div>
+                <div class="score-display">
+                    <div class="team-score-row">
+                        <button class="btn-score">−</button>
+                        <div class="score-box">?</div>
+                        <button class="btn-score">+</button>
+                    </div>
+                    <div class="team-score-row">
+                        <button class="btn-score">−</button>
+                        <div class="score-box">?</div>
+                        <button class="btn-score">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Design 3: With Odds -->
+        <div class="prototype-section">
+            <div class="prototype-title">Design 3: Med odds-chips</div>
+            <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">Odds nederst, klikkbar for å sette quick-tips.</p>
+
+            <div class="date-header">Lørdag, 22. november</div>
+
+            <div class="match-card-v3">
+                <div class="match-header-v3">
+                    <div class="time-badge">16:00</div>
+                    <div class="teams-vertical">
+                        <div class="team-row">
+                            <img src="https://media.api-sports.io/football/teams/40.png" class="team-logo" alt="Liverpool">
+                            <span class="team-name">Liverpool</span>
+                        </div>
+                        <div class="team-row">
+                            <img src="https://media.api-sports.io/football/teams/65.png" class="team-logo" alt="Nottingham">
+                            <span class="team-name">Nottingham Forest</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="odds-row">
+                    <div class="odd-chip">H 1.6</div>
+                    <div class="odd-chip selected">U 4.2</div>
+                    <div class="odd-chip">B 5.5</div>
+                </div>
+            </div>
+
+            <div class="match-card-v3">
+                <div class="match-header-v3">
+                    <div class="time-badge">18:30</div>
+                    <div class="teams-vertical">
+                        <div class="team-row">
+                            <img src="https://media.api-sports.io/football/teams/34.png" class="team-logo" alt="Newcastle">
+                            <span class="team-name">Newcastle</span>
+                        </div>
+                        <div class="team-row">
+                            <img src="https://media.api-sports.io/football/teams/50.png" class="team-logo" alt="Man City">
+                            <span class="team-name">Manchester City</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="odds-row">
+                    <div class="odd-chip">H 3.8</div>
+                    <div class="odd-chip">U 3.9</div>
+                    <div class="odd-chip">B 1.8</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Design 4: Compact inline -->
+        <div class="prototype-section">
+            <div class="prototype-title">Design 4: Kompakt inline</div>
+            <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">Score vises inline med lagnavn. Mest kompakt.</p>
+
+            <div class="date-header">Lørdag, 22. november</div>
+
+            <div class="match-card-v4">
+                <div class="time-badge-small">16:00</div>
+                <div class="teams-compact">
+                    <div class="team-row-compact">
+                        <img src="https://media.api-sports.io/football/teams/40.png" class="team-logo-small" alt="Liverpool">
+                        <span class="team-name-compact">Liverpool</span>
+                        <div class="score-inline">
+                            <button class="btn-compact">−</button>
+                            <div class="score-value">2</div>
+                            <button class="btn-compact">+</button>
+                        </div>
+                    </div>
+                    <div class="team-row-compact">
+                        <img src="https://media.api-sports.io/football/teams/65.png" class="team-logo-small" alt="Nottingham">
+                        <span class="team-name-compact">Nottingham Forest</span>
+                        <div class="score-inline">
+                            <button class="btn-compact">−</button>
+                            <div class="score-value">1</div>
+                            <button class="btn-compact">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="match-card-v4">
+                <div class="time-badge-small">18:30</div>
+                <div class="teams-compact">
+                    <div class="team-row-compact">
+                        <img src="https://media.api-sports.io/football/teams/34.png" class="team-logo-small" alt="Newcastle">
+                        <span class="team-name-compact">Newcastle</span>
+                        <div class="score-inline">
+                            <button class="btn-compact">−</button>
+                            <div class="score-value">?</div>
+                            <button class="btn-compact">+</button>
+                        </div>
+                    </div>
+                    <div class="team-row-compact">
+                        <img src="https://media.api-sports.io/football/teams/50.png" class="team-logo-small" alt="Man City">
+                        <span class="team-name-compact">Manchester City</span>
+                        <div class="score-inline">
+                            <button class="btn-compact">−</button>
+                            <div class="score-value">?</div>
+                            <button class="btn-compact">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Design 5: Card with shadow and league badge -->
+        <div class="prototype-section">
+            <div class="prototype-title">Design 5: Premium card med skygge</div>
+            <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">Mer luftig med hover-effekt og liga-badge.</p>
+
+            <div class="date-header">Lørdag, 22. november</div>
+
+            <div class="match-card-v5">
+                <div class="league-badge">⚽ Premier League</div>
+                <div class="match-content-v5">
+                    <div class="time-badge-v5">16:00</div>
+                    <div class="match-details-v5">
+                        <div class="team-with-score">
+                            <div class="team-info">
+                                <img src="https://media.api-sports.io/football/teams/40.png" class="team-logo" alt="Liverpool">
+                                <span class="team-name">Liverpool</span>
+                            </div>
+                            <div class="score-inline">
+                                <button class="btn-compact">−</button>
+                                <div class="score-value">2</div>
+                                <button class="btn-compact">+</button>
+                            </div>
+                        </div>
+                        <div class="team-with-score">
+                            <div class="team-info">
+                                <img src="https://media.api-sports.io/football/teams/65.png" class="team-logo" alt="Nottingham">
+                                <span class="team-name">Nottingham Forest</span>
+                            </div>
+                            <div class="score-inline">
+                                <button class="btn-compact">−</button>
+                                <div class="score-value">1</div>
+                                <button class="btn-compact">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="match-card-v5">
+                <div class="league-badge">⚽ Premier League</div>
+                <div class="match-content-v5">
+                    <div class="time-badge-v5">18:30</div>
+                    <div class="match-details-v5">
+                        <div class="team-with-score">
+                            <div class="team-info">
+                                <img src="https://media.api-sports.io/football/teams/34.png" class="team-logo" alt="Newcastle">
+                                <span class="team-name">Newcastle</span>
+                            </div>
+                            <div class="score-inline">
+                                <button class="btn-compact">−</button>
+                                <div class="score-value">?</div>
+                                <button class="btn-compact">+</button>
+                            </div>
+                        </div>
+                        <div class="team-with-score">
+                            <div class="team-info">
+                                <img src="https://media.api-sports.io/football/teams/50.png" class="team-logo" alt="Man City">
+                                <span class="team-name">Manchester City</span>
+                            </div>
+                            <div class="score-inline">
+                                <button class="btn-compact">−</button>
+                                <div class="score-value">?</div>
+                                <button class="btn-compact">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: #6b7280; margin-top: 60px; padding: 20px;">
+            <p>Hvilket design liker du best? 🤔</p>
+        </div>
+    </div>
+</body>
+</html>
