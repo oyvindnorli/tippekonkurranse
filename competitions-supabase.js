@@ -12,17 +12,38 @@ let wizardState = {
     invitedEmails: []
 };
 
+// Wait for Supabase to be initialized
+async function waitForSupabase() {
+    let attempts = 0;
+    while (!window.supabase && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+    }
+    return window.supabase;
+}
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🏆 Competitions page loaded');
 
-    // Check auth state
-    if (!window.supabase) {
-        console.error('❌ Supabase not initialized');
+    // Wait for Supabase to be initialized
+    const supabase = await waitForSupabase();
+
+    if (!supabase) {
+        console.error('❌ Supabase not initialized after waiting');
+        const errorMessage = document.getElementById('errorMessage');
+        const loadingMessage = document.getElementById('loadingMessage');
+        if (loadingMessage) loadingMessage.style.display = 'none';
+        if (errorMessage) {
+            errorMessage.textContent = 'Kunne ikke initialisere. Last siden på nytt.';
+            errorMessage.style.display = 'block';
+        }
         return;
     }
 
-    const { data: { user } } = await window.supabase.auth.getUser();
+    console.log('✅ Supabase initialized');
+
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         console.log('❌ No user logged in, redirecting to index');
