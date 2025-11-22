@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konkurranseoppretting - Prototyper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #f8fafc;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 40px;
+            color: #0f172a;
+            text-align: center;
+        }
+
+        .prototype-section {
+            margin-bottom: 80px;
+        }
+
+        .prototype-header {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .prototype-header h2 {
+            font-size: 24px;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .prototype-header p {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            background: rgba(0,0,0,0.5);
+            padding: 40px 20px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            font-size: 24px;
+            color: #0f172a;
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            border: none;
+            color: #64748b;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #e2e8f0;
+        }
+
+        /* Step indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding: 0 20px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: -1;
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin: 0 auto 8px;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-circle {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .step.completed .step-circle {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .step.active .step-label {
+            color: #3b82f6;
+        }
+
+        /* Competition type selection */
+        .competition-type-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .type-card {
+            padding: 24px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .type-card:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+
+        .type-card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .type-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .type-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .type-description {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* Round/Tournament selection */
+        .selection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .selection-item {
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .selection-item:hover {
+            border-color: #cbd5e1;
+        }
+
+        .selection-item.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .selection-icon {
+            font-size: 24px;
+        }
+
+        .selection-content {
+            flex: 1;
+        }
+
+        .selection-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .selection-subtitle {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* Match preview */
+        .match-preview {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .match-preview-header {
+            font-size: 14px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .preview-match {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .preview-match:last-child {
+            margin-bottom: 0;
+        }
+
+        .preview-time {
+            color: #64748b;
+            font-size: 12px;
+            min-width: 50px;
+        }
+
+        .preview-teams {
+            flex: 1;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .match-count {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Form inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Invite section */
+        .invite-section {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+        }
+
+        .invite-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .invite-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .invite-input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .invite-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn-add-invite {
+            padding: 10px 16px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-add-invite:hover {
+            background: #2563eb;
+        }
+
+        .invited-list {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .invited-tag {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .remove-invite {
+            cursor: pointer;
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        /* Action buttons */
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Floating action button */
+        .fab-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(59,130,246,0.4);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 12px 32px rgba(59,130,246,0.5);
+        }
+
+        /* Competition card on index */
+        .competition-suggestion {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .suggestion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .suggestion-icon {
+            font-size: 32px;
+        }
+
+        .suggestion-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .suggestion-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .btn-create-from-matches {
+            background: white;
+            color: #667eea;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-create-from-matches:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .note {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fef3c7;
+            border-left: 4px solid #fbbf24;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #78350f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Konkurranseoppretting - Prototyper</h1>
+
+        <!-- Prototype 1: Wizard-basert opprettelse -->
+        <div class="prototype-section">
+            <div class="prototype-header">
+                <h2>Prototype 1: Wizard-basert opprettelse (Anbefalt)</h2>
+                <p>Trinnvis prosess som guider brukeren gjennom valg av type, kamper og detaljer</p>
+            </div>
+
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Opprett konkurranse</h3>
+                        <button class="close-btn">×</button>
+                    </div>
+
+                    <!-- Step 1: Choose type -->
+                    <div class="step-content">
+                        <div class="step-indicator">
+                            <div class="step active">
+                                <div class="step-circle">1</div>
+                                <div class="step-label">Type</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-circle">2</div>
+                                <div class="step-label">Kamper</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-circle">3</div>
+                                <div class="step-label">Detaljer</div>
+                            </div>
+                        </div>
+
+                        <div class="competition-type-grid">
+                            <div class="type-card selected">
+                                <div class="type-icon">⚡</div>
+                                <div class="type-title">Runde</div>
+                                <div class="type-description">Konkurranse for én spillerunde (f.eks. PL runde 13)</div>
+                            </div>
+                            <div class="type-card">
+                                <div class="type-icon">🏆</div>
+                                <div class="type-title">Turnering</div>
+                                <div class="type-description">Hele turneringer (f.eks. VM 2026, hele PL-sesongen)</div>
+                            </div>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button class="btn btn-secondary">Avbryt</button>
+                            <button class="btn btn-primary">Neste →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prototype 2: Step 2 - Round selection -->
+        <div class="prototype-section">
+            <div class="prototype-header">
+                <h2>Prototype 2: Steg 2 - Velg runde (for runde-basert)</h2>
+                <p>Bruker velger hvilken runde konkurransen skal gjelde for</p>
+            </div>
+
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Opprett konkurranse</h3>
+                        <button class="close-btn">×</button>
+                    </div>
+
+                    <div class="step-content">
+                        <div class="step-indicator">
+                            <div class="step completed">
+                                <div class="step-circle">✓</div>
+                                <div class="step-label">Type</div>
+                            </div>
+                            <div class="step active">
+                                <div class="step-circle">2</div>
+                                <div class="step-label">Kamper</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-circle">3</div>
+                                <div class="step-label">Detaljer</div>
+                            </div>
+                        </div>
+
+                        <div class="selection-list">
+                            <div class="selection-item selected">
+                                <div class="selection-icon">⚽</div>
+                                <div class="selection-content">
+                                    <div class="selection-title">Premier League - Runde 13</div>
+                                    <div class="selection-subtitle">23-24 Nov • 10 kamper</div>
+                                </div>
+                            </div>
+                            <div class="selection-item">
+                                <div class="selection-icon">⭐</div>
+                                <div class="selection-content">
+                                    <div class="selection-title">Champions League - Runde 5</div>
+                                    <div class="selection-subtitle">26-27 Nov • 18 kamper</div>
+                                </div>
+                            </div>
+                            <div class="selection-item">
+                                <div class="selection-icon">🌟</div>
+                                <div class="selection-content">
+                                    <div class="selection-title">Europa League - Runde 5</div>
+                                    <div class="selection-subtitle">28 Nov • 18 kamper</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="match-preview">
+                            <div class="match-preview-header">Forhåndsvisning (10 kamper)</div>
+                            <div class="preview-match">
+                                <div class="preview-time">Lør 15:00</div>
+                                <div class="preview-teams">Man United - Liverpool</div>
+                            </div>
+                            <div class="preview-match">
+                                <div class="preview-time">Lør 15:00</div>
+                                <div class="preview-teams">Man City - Tottenham</div>
+                            </div>
+                            <div class="preview-match">
+                                <div class="preview-time">Lør 17:30</div>
+                                <div class="preview-teams">Arsenal - Chelsea</div>
+                            </div>
+                            <div style="text-align: center; color: #64748b; padding: 8px; font-size: 13px;">
+                                +7 kamper til...
+                            </div>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button class="btn btn-secondary">← Tilbake</button>
+                            <button class="btn btn-primary">Neste →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prototype 3: Step 2 - Tournament selection -->
+        <div class="prototype-section">
+            <div class="prototype-header">
+                <h2>Prototype 3: Steg 2 - Velg turnering (for turnerings-basert)</h2>
+                <p>Bruker velger hvilken turnering konkurransen skal gjelde for</p>
+            </div>
+
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Opprett konkurranse</h3>
+                        <button class="close-btn">×</button>
+                    </div>
+
+                    <div class="step-content">
+                        <div class="step-indicator">
+                            <div class="step completed">
+                                <div class="step-circle">✓</div>
+                                <div class="step-label">Type</div>
+                            </div>
+                            <div class="step active">
+                                <div class="step-circle">2</div>
+                                <div class="step-label">Turnering</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-circle">3</div>
+                                <div class="step-label">Detaljer</div>
+                            </div>
+                        </div>
+
+                        <div class="selection-list">
+                            <div class="selection-item selected">
+                                <div class="selection-icon">🌍</div>
+                                <div class="selection-content">
+                                    <div class="selection-title">FIFA World Cup 2026</div>
+                                    <div class="selection-subtitle">11 Jun - 19 Jul 2026 • 104 kamper</div>
+                                </div>
+                            </div>
+                            <div class="selection-item">
+                                <div class="selection-icon">🇪🇺</div>
+                                <div class="selection-content">
+                                    <div class="selection-title">UEFA Euro 2028</div>
+                                    <div class="selection-subtitle">Jun - Jul 2028 • 51 kamper</div>
+                                </div>
+                            </div>
+                            <div class="selection-item">
+                                <div class="selection-icon">⚽</div>
+                                <div class="selection-content">
+                                    <div class="selection-title">Premier League 2024/25 (resterende)</div>
+                                    <div class="selection-subtitle">Nov 2024 - Mai 2025 • 260 kamper</div>
+                                </div>
+                            </div>
+                            <div class="selection-item">
+                                <div class="selection-icon">⭐</div>
+                                <div class="selection-content">
+                                    <div class="selection-title">Champions League 2024/25 (resterende)</div>
+                                    <div class="selection-subtitle">Nov 2024 - Mai 2025 • ~100 kamper</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="match-preview">
+                            <div class="match-preview-header">
+                                <span>VM 2026 - Hele turneringen</span>
+                                <span class="match-count">104 kamper</span>
+                            </div>
+                            <div style="padding: 12px; color: #475569; font-size: 14px;">
+                                <strong>Inkluderer:</strong><br>
+                                • Gruppespill (48 lag, 80 kamper)<br>
+                                • Sluttspill (16-delsfinaler til finale, 24 kamper)<br>
+                                • Periode: 11. juni - 19. juli 2026
+                            </div>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button class="btn btn-secondary">← Tilbake</button>
+                            <button class="btn btn-primary">Neste →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prototype 4: Step 3 - Details and invites -->
+        <div class="prototype-section">
+            <div class="prototype-header">
+                <h2>Prototype 4: Steg 3 - Detaljer og invitasjoner</h2>
+                <p>Gi navn, beskrivelse og inviter deltakere</p>
+            </div>
+
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Opprett konkurranse</h3>
+                        <button class="close-btn">×</button>
+                    </div>
+
+                    <div class="step-content">
+                        <div class="step-indicator">
+                            <div class="step completed">
+                                <div class="step-circle">✓</div>
+                                <div class="step-label">Type</div>
+                            </div>
+                            <div class="step completed">
+                                <div class="step-circle">✓</div>
+                                <div class="step-label">Kamper</div>
+                            </div>
+                            <div class="step active">
+                                <div class="step-circle">3</div>
+                                <div class="step-label">Detaljer</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Navn på konkurranse *</label>
+                            <input type="text" class="form-input" value="Premier League - Runde 13" placeholder="F.eks. Premier League helgen">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Beskrivelse (valgfritt)</label>
+                            <textarea class="form-input" placeholder="Beskrivelse av konkurransen..."></textarea>
+                        </div>
+
+                        <div class="invite-section">
+                            <div class="invite-header">
+                                <div class="invite-title">Inviter deltakere (valgfritt)</div>
+                            </div>
+                            <div class="invite-input-group">
+                                <input type="email" class="invite-input" placeholder="E-post eller brukernavn">
+                                <button class="btn-add-invite">+ Legg til</button>
+                            </div>
+                            <div class="invited-list">
+                                <div class="invited-tag">
+                                    <span>john@example.com</span>
+                                    <span class="remove-invite">×</span>
+                                </div>
+                                <div class="invited-tag">
+                                    <span>maria@example.com</span>
+                                    <span class="remove-invite">×</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button class="btn btn-secondary">← Tilbake</button>
+                            <button class="btn btn-success">🏆 Opprett konkurranse</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prototype 5: Contextual creation from index -->
+        <div class="prototype-section">
+            <div class="prototype-header">
+                <h2>Prototype 5: Kontekstuell opprettelse fra index-siden</h2>
+                <p>Smart forslag basert på kampene brukeren ser på index</p>
+            </div>
+
+            <div class="fab-container">
+                <div class="competition-suggestion">
+                    <div class="suggestion-header">
+                        <div>
+                            <div class="suggestion-icon">⚡</div>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="suggestion-title">Lag konkurranse av disse kampene?</div>
+                            <div class="suggestion-subtitle">10 kamper • Premier League runde 13 • 23-24 Nov</div>
+                        </div>
+                    </div>
+                    <button class="btn-create-from-matches">🏆 Opprett konkurranse</button>
+                </div>
+
+                <p style="color: #64748b; font-size: 14px; text-align: center; margin-bottom: 20px;">
+                    Eller bruk floating action button:
+                </p>
+
+                <div style="text-align: center; color: #64748b; font-size: 14px;">
+                    Se nederst til høyre på siden →
+                </div>
+            </div>
+        </div>
+
+        <!-- Prototype 6: Competitions overview page -->
+        <div class="prototype-section">
+            <div class="prototype-header">
+                <h2>Prototype 6: Konkurranseoversikt</h2>
+                <p>Oversikt over alle konkurranser (aktive, kommende, fullførte)</p>
+            </div>
+
+            <div class="fab-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h3 style="font-size: 24px; color: #0f172a;">🏆 Mine konkurranser</h3>
+                    <button class="btn btn-primary" style="padding: 12px 20px; width: auto;">+ Opprett konkurranse</button>
+                </div>
+
+                <div style="margin-bottom: 32px;">
+                    <h4 style="font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px;">🔴 Aktive konkurranser</h4>
+
+                    <div style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Premier League - Runde 13</div>
+                                <div style="font-size: 14px; color: #64748b;">10 kamper • 5 deltakere</div>
+                            </div>
+                            <div style="background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                                LIVE
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                            <div style="font-size: 14px; color: #64748b;">
+                                Du ligger på <strong style="color: #0f172a;">2. plass</strong> med <strong style="color: #0f172a;">18 poeng</strong>
+                            </div>
+                            <button style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                Se detaljer →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 32px;">
+                    <h4 style="font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px;">📅 Kommende konkurranser</h4>
+
+                    <div style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">🌍 FIFA World Cup 2026</div>
+                                <div style="font-size: 14px; color: #64748b;">104 kamper • 12 deltakere</div>
+                            </div>
+                            <div style="background: #fbbf24; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                                KOMMER
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                            <div style="font-size: 14px; color: #64748b;">
+                                Starter <strong style="color: #0f172a;">11. juni 2026</strong>
+                            </div>
+                            <button style="padding: 8px 16px; background: #f1f5f9; color: #64748b; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                Se detaljer →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="fab" title="Opprett konkurranse">+</button>
+
+        <div class="note">
+            <strong>💡 Oppsummering:</strong><br><br>
+            <strong>Wizard-løsningen (Prototype 1-4):</strong><br>
+            • Steg 1: Velg type (Runde eller Turnering)<br>
+            • Steg 2: Velg spesifikk runde/turnering med forhåndsvisning av kamper<br>
+            • Steg 3: Gi navn, beskrivelse og inviter deltakere<br><br>
+
+            <strong>Kontekstuell opprettelse (Prototype 5):</strong><br>
+            • Smart forslag på index-siden basert på kampene du ser<br>
+            • Floating action button for rask tilgang<br><br>
+
+            <strong>Konkurranseoversikt (Prototype 6):</strong><br>
+            • Oversikt over aktive, kommende og fullførte konkurranser<br>
+            • Knapp for å opprette nye konkurranser<br><br>
+
+            <strong>Fordeler med denne løsningen:</strong><br>
+            ✅ Støtter både runde-baserte (korte) og turnerings-baserte (lange) konkurranser<br>
+            ✅ Visuell forhåndsvisning av kamper før opprettelse<br>
+            ✅ Enkel å forstå og bruke<br>
+            ✅ Kan opprettes fra flere steder (index + konkurranser-siden)<br>
+            ✅ Tydelig skille mellom ulike typer konkurranser
+        </div>
+    </div>
+</body>
+</html>

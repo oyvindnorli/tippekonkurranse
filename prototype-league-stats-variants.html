@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liga Statistikk - Design Varianter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .variant-selector {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .variant-selector h1 {
+            margin-bottom: 15px;
+            color: #1a202c;
+        }
+
+        .variant-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .variant-btn {
+            padding: 10px 20px;
+            background: #e2e8f0;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #4a5568;
+            transition: all 0.2s;
+        }
+
+        .variant-btn:hover {
+            background: #cbd5e0;
+        }
+
+        .variant-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .variant-container {
+            display: none;
+        }
+
+        .variant-container.active {
+            display: block;
+        }
+
+        /* ==================== VARIANT 1: MINIMAL/CLEAN ==================== */
+        .variant-1 .league-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .variant-1 .league-item {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .variant-1 .league-row {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .variant-1 .league-icon-box {
+            font-size: 32px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f7fafc;
+            border-radius: 12px;
+        }
+
+        .variant-1 .league-info {
+            flex: 1;
+        }
+
+        .variant-1 .league-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .variant-1 .league-metrics {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .variant-1 .metric {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .variant-1 .metric-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .variant-1 .league-points {
+            font-size: 36px;
+            font-weight: 700;
+            color: #667eea;
+            text-align: right;
+        }
+
+        /* ==================== VARIANT 2: DASHBOARD/METRICS ==================== */
+        .variant-2 .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .variant-2 .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .variant-2 .metric-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .variant-2 .metric-icon {
+            font-size: 24px;
+        }
+
+        .variant-2 .metric-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .variant-2 .metric-main {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 12px;
+        }
+
+        .variant-2 .metric-details {
+            display: flex;
+            gap: 16px;
+        }
+
+        .variant-2 .detail-item {
+            flex: 1;
+            background: #f7fafc;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .variant-2 .detail-value {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .variant-2 .detail-label {
+            display: block;
+            font-size: 10px;
+            color: #718096;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* ==================== VARIANT 3: TABLE/COMPACT ==================== */
+        .variant-3 .stats-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .variant-3 table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .variant-3 thead {
+            background: #f7fafc;
+        }
+
+        .variant-3 th {
+            padding: 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .variant-3 th:last-child {
+            text-align: right;
+        }
+
+        .variant-3 td {
+            padding: 20px 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .variant-3 tr:hover {
+            background: #f7fafc;
+        }
+
+        .variant-3 .table-league {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .variant-3 .table-icon {
+            font-size: 24px;
+        }
+
+        .variant-3 .table-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .variant-3 .table-points {
+            text-align: right;
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        /* ==================== VARIANT 4: CARD BADGES ==================== */
+        .variant-4 .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .variant-4 .badge-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .variant-4 .badge-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .variant-4 .badge-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .variant-4 .badge-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+
+        .variant-4 .badge-points {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 12px;
+        }
+
+        .variant-4 .badge-stats {
+            display: flex;
+            justify-content: space-around;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .variant-4 .badge-stat {
+            text-align: center;
+        }
+
+        .variant-4 .badge-stat-value {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .variant-4 .badge-stat-label {
+            display: block;
+            font-size: 10px;
+            color: #718096;
+            margin-top: 2px;
+        }
+
+        /* ==================== VARIANT 5: HORIZONTAL BARS ==================== */
+        .variant-5 .bar-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .variant-5 .bar-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .variant-5 .bar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .variant-5 .bar-league {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .variant-5 .bar-icon {
+            font-size: 24px;
+        }
+
+        .variant-5 .bar-points {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .variant-5 .bar-visualization {
+            position: relative;
+            height: 40px;
+            background: #f7fafc;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .variant-5 .bar-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .variant-5 .bar-details {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #718096;
+        }
+
+        .variant-5 .bar-detail span {
+            font-weight: 600;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="variant-selector">
+            <h1>🎨 Velg Design-variant</h1>
+            <div class="variant-buttons">
+                <button class="variant-btn active" onclick="showVariant(1)">Variant 1: Minimal</button>
+                <button class="variant-btn" onclick="showVariant(2)">Variant 2: Dashboard</button>
+                <button class="variant-btn" onclick="showVariant(3)">Variant 3: Tabell</button>
+                <button class="variant-btn" onclick="showVariant(4)">Variant 4: Badges</button>
+                <button class="variant-btn" onclick="showVariant(5)">Variant 5: Bars</button>
+            </div>
+        </div>
+
+        <!-- VARIANT 1: MINIMAL/CLEAN -->
+        <div id="variant-1" class="variant-container variant-1 active">
+            <div class="league-list">
+                <div class="league-item">
+                    <div class="league-row">
+                        <div class="league-icon-box">⭐</div>
+                        <div class="league-info">
+                            <div class="league-name">Champions League</div>
+                            <div class="league-metrics">
+                                <div class="metric">Snitt: <span class="metric-value">0.44</span></div>
+                                <div class="metric">Eksakt: <span class="metric-value">0.0%</span></div>
+                                <div class="metric">Retning: <span class="metric-value">33.3%</span></div>
+                            </div>
+                        </div>
+                        <div class="league-points">4</div>
+                    </div>
+                </div>
+
+                <div class="league-item">
+                    <div class="league-row">
+                        <div class="league-icon-box">🌟</div>
+                        <div class="league-info">
+                            <div class="league-name">Europa League</div>
+                            <div class="league-metrics">
+                                <div class="metric">Snitt: <span class="metric-value">1.26</span></div>
+                                <div class="metric">Eksakt: <span class="metric-value">5.6%</span></div>
+                                <div class="metric">Retning: <span class="metric-value">61.1%</span></div>
+                            </div>
+                        </div>
+                        <div class="league-points">22.6</div>
+                    </div>
+                </div>
+
+                <div class="league-item">
+                    <div class="league-row">
+                        <div class="league-icon-box">🇪🇺</div>
+                        <div class="league-info">
+                            <div class="league-name">WC Kvalifisering Europa</div>
+                            <div class="league-metrics">
+                                <div class="metric">Snitt: <span class="metric-value">2.25</span></div>
+                                <div class="metric">Eksakt: <span class="metric-value">38.5%</span></div>
+                                <div class="metric">Retning: <span class="metric-value">84.6%</span></div>
+                            </div>
+                        </div>
+                        <div class="league-points">29.2</div>
+                    </div>
+                </div>
+
+                <div class="league-item">
+                    <div class="league-row">
+                        <div class="league-icon-box">⚽</div>
+                        <div class="league-info">
+                            <div class="league-name">Premier League</div>
+                            <div class="league-metrics">
+                                <div class="metric">Snitt: <span class="metric-value">2.72</span></div>
+                                <div class="metric">Eksakt: <span class="metric-value">20.0%</span></div>
+                                <div class="metric">Retning: <span class="metric-value">80.0%</span></div>
+                            </div>
+                        </div>
+                        <div class="league-points">27.2</div>
+                    </div>
+                </div>
+
+                <div class="league-item">
+                    <div class="league-row">
+                        <div class="league-icon-box">🇮🇹</div>
+                        <div class="league-info">
+                            <div class="league-name">Serie A</div>
+                            <div class="league-metrics">
+                                <div class="metric">Snitt: <span class="metric-value">0.62</span></div>
+                                <div class="metric">Eksakt: <span class="metric-value">0.0%</span></div>
+                                <div class="metric">Retning: <span class="metric-value">16.7%</span></div>
+                            </div>
+                        </div>
+                        <div class="league-points">3.7</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIANT 2: DASHBOARD/METRICS -->
+        <div id="variant-2" class="variant-container variant-2">
+            <div class="stats-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-icon">⭐</span>
+                        <span class="metric-title">Champions League</span>
+                    </div>
+                    <div class="metric-main">4 poeng</div>
+                    <div class="metric-details">
+                        <div class="detail-item">
+                            <span class="detail-value">0.44</span>
+                            <span class="detail-label">Snitt</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">0.0%</span>
+                            <span class="detail-label">Eksakt</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">33.3%</span>
+                            <span class="detail-label">Retning</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-icon">🌟</span>
+                        <span class="metric-title">Europa League</span>
+                    </div>
+                    <div class="metric-main">22.6 poeng</div>
+                    <div class="metric-details">
+                        <div class="detail-item">
+                            <span class="detail-value">1.26</span>
+                            <span class="detail-label">Snitt</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">5.6%</span>
+                            <span class="detail-label">Eksakt</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">61.1%</span>
+                            <span class="detail-label">Retning</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-icon">🇪🇺</span>
+                        <span class="metric-title">WC Kvalifisering Europa</span>
+                    </div>
+                    <div class="metric-main">29.2 poeng</div>
+                    <div class="metric-details">
+                        <div class="detail-item">
+                            <span class="detail-value">2.25</span>
+                            <span class="detail-label">Snitt</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">38.5%</span>
+                            <span class="detail-label">Eksakt</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">84.6%</span>
+                            <span class="detail-label">Retning</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-icon">⚽</span>
+                        <span class="metric-title">Premier League</span>
+                    </div>
+                    <div class="metric-main">27.2 poeng</div>
+                    <div class="metric-details">
+                        <div class="detail-item">
+                            <span class="detail-value">2.72</span>
+                            <span class="detail-label">Snitt</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">20.0%</span>
+                            <span class="detail-label">Eksakt</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">80.0%</span>
+                            <span class="detail-label">Retning</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-icon">🇮🇹</span>
+                        <span class="metric-title">Serie A</span>
+                    </div>
+                    <div class="metric-main">3.7 poeng</div>
+                    <div class="metric-details">
+                        <div class="detail-item">
+                            <span class="detail-value">0.62</span>
+                            <span class="detail-label">Snitt</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">0.0%</span>
+                            <span class="detail-label">Eksakt</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-value">16.7%</span>
+                            <span class="detail-label">Retning</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIANT 3: TABLE/COMPACT -->
+        <div id="variant-3" class="variant-container variant-3">
+            <div class="stats-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Liga</th>
+                            <th>Snitt</th>
+                            <th>Eksakt</th>
+                            <th>Retning</th>
+                            <th>Poeng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="table-league">
+                                    <span class="table-icon">⭐</span>
+                                    Champions League
+                                </div>
+                            </td>
+                            <td class="table-value">0.44</td>
+                            <td class="table-value">0.0%</td>
+                            <td class="table-value">33.3%</td>
+                            <td class="table-points">4</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="table-league">
+                                    <span class="table-icon">🌟</span>
+                                    Europa League
+                                </div>
+                            </td>
+                            <td class="table-value">1.26</td>
+                            <td class="table-value">5.6%</td>
+                            <td class="table-value">61.1%</td>
+                            <td class="table-points">22.6</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="table-league">
+                                    <span class="table-icon">🇪🇺</span>
+                                    WC Kvalifisering Europa
+                                </div>
+                            </td>
+                            <td class="table-value">2.25</td>
+                            <td class="table-value">38.5%</td>
+                            <td class="table-value">84.6%</td>
+                            <td class="table-points">29.2</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="table-league">
+                                    <span class="table-icon">⚽</span>
+                                    Premier League
+                                </div>
+                            </td>
+                            <td class="table-value">2.72</td>
+                            <td class="table-value">20.0%</td>
+                            <td class="table-value">80.0%</td>
+                            <td class="table-points">27.2</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="table-league">
+                                    <span class="table-icon">🇮🇹</span>
+                                    Serie A
+                                </div>
+                            </td>
+                            <td class="table-value">0.62</td>
+                            <td class="table-value">0.0%</td>
+                            <td class="table-value">16.7%</td>
+                            <td class="table-points">3.7</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VARIANT 4: CARD BADGES -->
+        <div id="variant-4" class="variant-container variant-4">
+            <div class="badge-grid">
+                <div class="badge-card">
+                    <div class="badge-icon">⭐</div>
+                    <div class="badge-name">Champions League</div>
+                    <div class="badge-points">4</div>
+                    <div class="badge-stats">
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">0.44</span>
+                            <span class="badge-stat-label">Snitt</span>
+                        </div>
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">0.0%</span>
+                            <span class="badge-stat-label">Eksakt</span>
+                        </div>
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">33.3%</span>
+                            <span class="badge-stat-label">Retning</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="badge-card">
+                    <div class="badge-icon">🌟</div>
+                    <div class="badge-name">Europa League</div>
+                    <div class="badge-points">22.6</div>
+                    <div class="badge-stats">
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">1.26</span>
+                            <span class="badge-stat-label">Snitt</span>
+                        </div>
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">5.6%</span>
+                            <span class="badge-stat-label">Eksakt</span>
+                        </div>
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">61.1%</span>
+                            <span class="badge-stat-label">Retning</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="badge-card">
+                    <div class="badge-icon">🇪🇺</div>
+                    <div class="badge-name">WC Kvalifisering Europa</div>
+                    <div class="badge-points">29.2</div>
+                    <div class="badge-stats">
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">2.25</span>
+                            <span class="badge-stat-label">Snitt</span>
+                        </div>
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">38.5%</span>
+                            <span class="badge-stat-label">Eksakt</span>
+                        </div>
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">84.6%</span>
+                            <span class="badge-stat-label">Retning</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="badge-card">
+                    <div class="badge-icon">⚽</div>
+                    <div class="badge-name">Premier League</div>
+                    <div class="badge-points">27.2</div>
+                    <div class="badge-stats">
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">2.72</span>
+                            <span class="badge-stat-label">Snitt</span>
+                        </div>
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">20.0%</span>
+                            <span class="badge-stat-label">Eksakt</span>
+                        </div>
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">80.0%</span>
+                            <span class="badge-stat-label">Retning</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="badge-card">
+                    <div class="badge-icon">🇮🇹</div>
+                    <div class="badge-name">Serie A</div>
+                    <div class="badge-points">3.7</div>
+                    <div class="badge-stats">
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">0.62</span>
+                            <span class="badge-stat-label">Snitt</span>
+                        </div>
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">0.0%</span>
+                            <span class="badge-stat-label">Eksakt</span>
+                        </div>
+                        <div class="badge-stat">
+                            <span class="badge-stat-value">16.7%</span>
+                            <span class="badge-stat-label">Retning</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIANT 5: HORIZONTAL BARS -->
+        <div id="variant-5" class="variant-container variant-5">
+            <div class="bar-list">
+                <div class="bar-item">
+                    <div class="bar-header">
+                        <div class="bar-league">
+                            <span class="bar-icon">⭐</span>
+                            Champions League
+                        </div>
+                        <div class="bar-points">4</div>
+                    </div>
+                    <div class="bar-visualization">
+                        <div class="bar-fill" style="width: 13.7%;">13.7% av totalt</div>
+                    </div>
+                    <div class="bar-details">
+                        <div class="bar-detail">Snitt: <span>0.44</span></div>
+                        <div class="bar-detail">Eksakt: <span>0.0%</span></div>
+                        <div class="bar-detail">Retning: <span>33.3%</span></div>
+                    </div>
+                </div>
+
+                <div class="bar-item">
+                    <div class="bar-header">
+                        <div class="bar-league">
+                            <span class="bar-icon">🌟</span>
+                            Europa League
+                        </div>
+                        <div class="bar-points">22.6</div>
+                    </div>
+                    <div class="bar-visualization">
+                        <div class="bar-fill" style="width: 26.0%;">26.0% av totalt</div>
+                    </div>
+                    <div class="bar-details">
+                        <div class="bar-detail">Snitt: <span>1.26</span></div>
+                        <div class="bar-detail">Eksakt: <span>5.6%</span></div>
+                        <div class="bar-detail">Retning: <span>61.1%</span></div>
+                    </div>
+                </div>
+
+                <div class="bar-item">
+                    <div class="bar-header">
+                        <div class="bar-league">
+                            <span class="bar-icon">🇪🇺</span>
+                            WC Kvalifisering Europa
+                        </div>
+                        <div class="bar-points">29.2</div>
+                    </div>
+                    <div class="bar-visualization">
+                        <div class="bar-fill" style="width: 33.6%;">33.6% av totalt</div>
+                    </div>
+                    <div class="bar-details">
+                        <div class="bar-detail">Snitt: <span>2.25</span></div>
+                        <div class="bar-detail">Eksakt: <span>38.5%</span></div>
+                        <div class="bar-detail">Retning: <span>84.6%</span></div>
+                    </div>
+                </div>
+
+                <div class="bar-item">
+                    <div class="bar-header">
+                        <div class="bar-league">
+                            <span class="bar-icon">⚽</span>
+                            Premier League
+                        </div>
+                        <div class="bar-points">27.2</div>
+                    </div>
+                    <div class="bar-visualization">
+                        <div class="bar-fill" style="width: 31.3%;">31.3% av totalt</div>
+                    </div>
+                    <div class="bar-details">
+                        <div class="bar-detail">Snitt: <span>2.72</span></div>
+                        <div class="bar-detail">Eksakt: <span>20.0%</span></div>
+                        <div class="bar-detail">Retning: <span>80.0%</span></div>
+                    </div>
+                </div>
+
+                <div class="bar-item">
+                    <div class="bar-header">
+                        <div class="bar-league">
+                            <span class="bar-icon">🇮🇹</span>
+                            Serie A
+                        </div>
+                        <div class="bar-points">3.7</div>
+                    </div>
+                    <div class="bar-visualization">
+                        <div class="bar-fill" style="width: 4.3%;">4.3% av totalt</div>
+                    </div>
+                    <div class="bar-details">
+                        <div class="bar-detail">Snitt: <span>0.62</span></div>
+                        <div class="bar-detail">Eksakt: <span>0.0%</span></div>
+                        <div class="bar-detail">Retning: <span>16.7%</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showVariant(num) {
+            // Hide all variants
+            document.querySelectorAll('.variant-container').forEach(v => {
+                v.classList.remove('active');
+            });
+
+            // Show selected variant
+            document.getElementById(`variant-${num}`).classList.add('active');
+
+            // Update buttons
+            document.querySelectorAll('.variant-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

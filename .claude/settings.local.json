@@ -19,7 +19,9 @@
       "Bash(npm test)",
       "Bash(dir \"C:\\Prosjekter\\tippekonkurranse\\screenshots\" /O-D /B)",
       "Bash(git revert:*)",
-      "Bash(dir \"C:\\Users\\aa167\\Documents\\Prosjekter\\Tippekonkurranse\\screenshots\" /O-D /B)"
+      "Bash(dir \"C:\\Users\\aa167\\Documents\\Prosjekter\\Tippekonkurranse\\screenshots\" /O-D /B)",
+      "Bash(node:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

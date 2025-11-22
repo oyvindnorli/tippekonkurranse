@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live & Resultater - Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #1a202c;
+            margin-bottom: 15px;
+        }
+
+        /* Filter tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            background: #e2e8f0;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #4a5568;
+            transition: all 0.2s;
+        }
+
+        .filter-tab:hover {
+            background: #cbd5e0;
+        }
+
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .filter-tab .count {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        /* Match cards */
+        .matches-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .match-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .match-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Live indicator stripe */
+        .match-card.live::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #ef4444;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Competition indicator stripe */
+        .match-card.in-competition::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #10b981;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .league-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.live {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .badge.finished {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .badge.competition {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .match-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .teams {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .team-logo {
+            width: 28px;
+            height: 28px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .team-name {
+            font-weight: 500;
+            color: #1f2937;
+            font-size: 15px;
+            flex: 1;
+        }
+
+        .score {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .score.live {
+            color: #ef4444;
+        }
+
+        .match-time {
+            font-size: 13px;
+            color: #9ca3af;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .match-time.live {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        /* User tip section */
+        .user-tip {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tip-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .tip-prediction {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .tip-score {
+            font-size: 16px;
+            font-weight: 600;
+            color: #4b5563;
+            padding: 4px 10px;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+
+        .tip-points {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .tip-points.correct {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .tip-points.wrong {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Empty state */
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* Competition link */
+        .competition-link {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #059669;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .competition-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with filters -->
+        <div class="header">
+            <h1>⚽ Live & Resultater</h1>
+            <div class="filter-tabs">
+                <div class="filter-tab active">
+                    Alle <span class="count">8</span>
+                </div>
+                <div class="filter-tab">
+                    🔴 Live <span class="count">3</span>
+                </div>
+                <div class="filter-tab">
+                    ✅ Fullført <span class="count">5</span>
+                </div>
+                <div class="filter-tab">
+                    🏆 Mine konkurranser <span class="count">4</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matches -->
+        <div class="matches-container">
+            <!-- Live match in competition -->
+            <div class="match-card live in-competition">
+                <div class="match-header">
+                    <span class="league-name">⚽ Premier League</span>
+                    <div class="status-badges">
+                        <span class="badge live">Live</span>
+                        <span class="badge competition">Konkurranse</span>
+                    </div>
+                </div>
+                <div class="match-content">
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-logo">🦁</div>
+                            <span class="team-name">Chelsea</span>
+                            <span class="score live">2</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-logo">⚪</div>
+                            <span class="team-name">Manchester United</span>
+                            <span class="score live">1</span>
+                        </div>
+                    </div>
+                    <div class="match-time live">67'</div>
+                </div>
+                <div class="user-tip">
+                    <div>
+                        <span class="tip-label">Ditt tips:</span>
+                        <span class="tip-prediction">
+                            <span class="tip-score">2-1</span>
+                            <span class="tip-points correct">+3p</span>
+                        </span>
+                    </div>
+                    <a class="competition-link">
+                        Vis konkurranse →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Live match NOT in competition -->
+            <div class="match-card live">
+                <div class="match-header">
+                    <span class="league-name">🇮🇹 Serie A</span>
+                    <div class="status-badges">
+                        <span class="badge live">Live</span>
+                    </div>
+                </div>
+                <div class="match-content">
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-logo">⚫</div>
+                            <span class="team-name">Juventus</span>
+                            <span class="score live">0</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-logo">🔵</div>
+                            <span class="team-name">Inter</span>
+                            <span class="score live">0</span>
+                        </div>
+                    </div>
+                    <div class="match-time live">24'</div>
+                </div>
+            </div>
+
+            <!-- Live match with halftime -->
+            <div class="match-card live in-competition">
+                <div class="match-header">
+                    <span class="league-name">⭐ Champions League</span>
+                    <div class="status-badges">
+                        <span class="badge live">Pause</span>
+                        <span class="badge competition">Konkurranse</span>
+                    </div>
+                </div>
+                <div class="match-content">
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-logo">🔴</div>
+                            <span class="team-name">Bayern München</span>
+                            <span class="score live">3</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-logo">⚪</div>
+                            <span class="team-name">Real Madrid</span>
+                            <span class="score live">2</span>
+                        </div>
+                    </div>
+                    <div class="match-time live">HT</div>
+                </div>
+                <div class="user-tip">
+                    <div>
+                        <span class="tip-label">Ditt tips:</span>
+                        <span class="tip-prediction">
+                            <span class="tip-score">2-2</span>
+                            <span class="tip-points wrong">0p</span>
+                        </span>
+                    </div>
+                    <a class="competition-link">
+                        Vis konkurranse →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Finished match in competition -->
+            <div class="match-card in-competition">
+                <div class="match-header">
+                    <span class="league-name">⚽ Premier League</span>
+                    <div class="status-badges">
+                        <span class="badge finished">Fullført</span>
+                        <span class="badge competition">Konkurranse</span>
+                    </div>
+                </div>
+                <div class="match-content">
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-logo">🔴</div>
+                            <span class="team-name">Arsenal</span>
+                            <span class="score">4</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-logo">⚪</div>
+                            <span class="team-name">Tottenham</span>
+                            <span class="score">1</span>
+                        </div>
+                    </div>
+                    <div class="match-time">I går 18:30</div>
+                </div>
+                <div class="user-tip">
+                    <div>
+                        <span class="tip-label">Ditt tips:</span>
+                        <span class="tip-prediction">
+                            <span class="tip-score">3-1</span>
+                            <span class="tip-points correct">+1p</span>
+                        </span>
+                    </div>
+                    <a class="competition-link">
+                        Vis konkurranse →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Finished match NOT in competition -->
+            <div class="match-card">
+                <div class="match-header">
+                    <span class="league-name">🇪🇺 WC Kvalifisering Europa</span>
+                    <div class="status-badges">
+                        <span class="badge finished">Fullført</span>
+                    </div>
+                </div>
+                <div class="match-content">
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-logo">🇳🇴</div>
+                            <span class="team-name">Norge</span>
+                            <span class="score">3</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-logo">🇪🇪</div>
+                            <span class="team-name">Estland</span>
+                            <span class="score">0</span>
+                        </div>
+                    </div>
+                    <div class="match-time">I dag 20:45</div>
+                </div>
+            </div>
+
+            <!-- More finished matches -->
+            <div class="match-card">
+                <div class="match-header">
+                    <span class="league-name">🌟 Europa League</span>
+                    <div class="status-badges">
+                        <span class="badge finished">Fullført</span>
+                    </div>
+                </div>
+                <div class="match-content">
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-logo">🔴</div>
+                            <span class="team-name">Manchester United</span>
+                            <span class="score">2</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-logo">🟡</div>
+                            <span class="team-name">Bodø/Glimt</span>
+                            <span class="score">3</span>
+                        </div>
+                    </div>
+                    <div class="match-time">I går 21:00</div>
+                </div>
+            </div>
+
+            <div class="match-card in-competition">
+                <div class="match-header">
+                    <span class="league-name">⭐ Champions League</span>
+                    <div class="status-badges">
+                        <span class="badge finished">Fullført</span>
+                        <span class="badge competition">Konkurranse</span>
+                    </div>
+                </div>
+                <div class="match-content">
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-logo">🔵</div>
+                            <span class="team-name">Barcelona</span>
+                            <span class="score">5</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-logo">🔴</div>
+                            <span class="team-name">PSG</span>
+                            <span class="score">2</span>
+                        </div>
+                    </div>
+                    <div class="match-time">I går 21:00</div>
+                </div>
+                <div class="user-tip">
+                    <div>
+                        <span class="tip-label">Ditt tips:</span>
+                        <span class="tip-prediction">
+                            <span class="tip-score">5-2</span>
+                            <span class="tip-points correct">+4p</span>
+                        </span>
+                    </div>
+                    <a class="competition-link">
+                        Vis konkurranse →
+                    </a>
+                </div>
+            </div>
+
+            <div class="match-card">
+                <div class="match-header">
+                    <span class="league-name">🇮🇹 Serie A</span>
+                    <div class="status-badges">
+                        <span class="badge finished">Fullført</span>
+                    </div>
+                </div>
+                <div class="match-content">
+                    <div class="teams">
+                        <div class="team">
+                            <div class="team-logo">🔴</div>
+                            <span class="team-name">AC Milan</span>
+                            <span class="score">1</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-logo">🔵</div>
+                            <span class="team-name">Napoli</span>
+                            <span class="score">1</span>
+                        </div>
+                    </div>
+                    <div class="match-time">I går 19:45</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state example (hidden by default) -->
+        <!--
+        <div class="empty-state">
+            <div class="empty-state-icon">⚽</div>
+            <div class="empty-state-text">Ingen pågående kamper</div>
+        </div>
+        -->
+    </div>
+
+    <script>
+        // Simple filter demo
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const text = tab.textContent.trim();
+                const matches = document.querySelectorAll('.match-card');
+
+                matches.forEach(match => {
+                    if (text.includes('Live')) {
+                        match.style.display = match.classList.contains('live') ? 'block' : 'none';
+                    } else if (text.includes('Fullført')) {
+                        match.style.display = !match.classList.contains('live') ? 'block' : 'none';
+                    } else if (text.includes('Mine konkurranser')) {
+                        match.style.display = match.classList.contains('in-competition') ? 'block' : 'none';
+                    } else {
+                        match.style.display = 'block';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

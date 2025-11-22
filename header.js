@@ -75,10 +75,6 @@ export function initHeader(activePage = 'index') {
                     <span class="nav-icon-premium">🏠</span>
                     Tipp
                 </a>
-                <a href="live.html" class="nav-btn-premium ${activePage === 'live' ? 'active' : ''}">
-                    <span class="nav-icon-premium">🔴</span>
-                    Live
-                </a>
                 <a href="competitions.html" class="nav-btn-premium ${activePage === 'competitions' ? 'active' : ''}">
                     <span class="nav-icon-premium">🏆</span>
                     Konkurranser
