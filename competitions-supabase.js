@@ -697,7 +697,7 @@ window.createCompetition = async function(event) {
             .insert({
                 competition_id: competition.id,
                 user_id: user.id,
-                user_name: user.email.split('@')[0] // Simple name extraction
+                user_name: user.user_metadata?.display_name || user.email.split('@')[0]
             });
 
         if (participantError) {
