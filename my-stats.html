@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Min Statistikk - Tippekonkurranse</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="style.css?v=20251107e">
+    <link rel="stylesheet" href="style.css?v=20251122b">
 </head>
 <body>
     <div class="container">
@@ -22,7 +22,7 @@
             <div class="stats-container">
                 <!-- Overall Stats Summary -->
                 <section class="stats-summary">
-                    <h2>📊 Min Statistikk</h2>
+                    <h2>Min Statistikk</h2>
                     <div class="stats-cards">
                         <div class="stat-card">
                             <div class="stat-label">Totale poeng</div>
@@ -38,7 +38,7 @@
                             <div class="stat-percentage" id="exactPercentage">-</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-label">Riktig retning</div>
+                            <div class="stat-label">Riktig utfall</div>
                             <div class="stat-value" id="correctDirection">-</div>
                             <div class="stat-percentage" id="directionPercentage">-</div>
                         </div>
@@ -49,25 +49,25 @@
                 <section class="detailed-stats">
                     <div class="stats-grid">
                         <div class="stats-box">
-                            <h3>🎯 Nøyaktighet</h3>
+                            <h3>Noyaktighet</h3>
                             <div class="stats-row">
                                 <span>Gjennomsnittlig poeng per kamp:</span>
                                 <strong id="avgPoints">-</strong>
                             </div>
                             <div class="stats-row">
-                                <span>Beste serie (riktig på rad):</span>
+                                <span>Beste serie (riktig pa rad):</span>
                                 <strong id="bestStreak">-</strong>
                             </div>
                             <div class="stats-row">
-                                <span>Nåværende serie:</span>
+                                <span>Navarende serie:</span>
                                 <strong id="currentStreak">-</strong>
                             </div>
                         </div>
 
                         <div class="stats-box">
-                            <h3>💰 Basert på odds</h3>
+                            <h3>Basert pa odds</h3>
                             <div class="stats-row">
-                                <span>Total verdi (basert på odds):</span>
+                                <span>Total verdi (basert pa odds):</span>
                                 <strong id="oddsValue">-</strong>
                             </div>
                             <div class="stats-row">
@@ -77,7 +77,7 @@
                         </div>
 
                         <div class="stats-box">
-                            <h3>⚽ Per liga</h3>
+                            <h3>Per liga</h3>
                             <div id="leagueStats">
                                 <div class="loading-message">Laster...</div>
                             </div>
@@ -87,11 +87,11 @@
 
                 <!-- Match History -->
                 <section class="match-history">
-                    <h3>📋 Kamphistorikk</h3>
+                    <h3>Kamphistorikk</h3>
                     <div class="filter-buttons">
                         <button class="filter-btn active" onclick="filterHistory('all')">Alle</button>
                         <button class="filter-btn" onclick="filterHistory('correct')">Riktig resultat</button>
-                        <button class="filter-btn" onclick="filterHistory('direction')">Riktig retning</button>
+                        <button class="filter-btn" onclick="filterHistory('direction')">Riktig utfall</button>
                         <button class="filter-btn" onclick="filterHistory('wrong')">Feil</button>
                     </div>
                     <div id="matchHistoryList" class="match-history-list">
@@ -104,28 +104,25 @@
         <!-- Auth Required Message -->
         <div id="authRequired" class="auth-required" style="display: none;">
             <div class="auth-required-content">
-                <h2>🔒 Logg inn for å se statistikk</h2>
-                <p>Du må være innlogget for å se din personlige statistikk.</p>
+                <h2>Logg inn for a se statistikk</h2>
+                <p>Du ma vare innlogget for a se din personlige statistikk.</p>
                 <button onclick="window.location.href='index.html'" class="btn-primary">
-                    Gå til pålogging
+                    Ga til palogging
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- App Scripts -->
-    <script src="firebase-config.js"></script>
-    <script src="firebase-auth.js"></script>
+    <script src="supabase-auth.js?v=20251122a"></script>
     <script src="api-config.js"></script>
     <script type="module">
         import { initHeader } from './header.js';
         initHeader('my-stats');
     </script>
-    <script type="module" src="my-stats.js"></script>
+    <script type="module" src="my-stats-supabase.js?v=20251122a"></script>
 </body>
 </html>
