@@ -76,10 +76,10 @@ async function loadCompetitionDetails(competitionId, userId) {
 
         console.log('✅ Loaded competition:', competition);
 
-        // Get participants with user info from users table
+        // Get participants
         const { data: participants, error: participantsError } = await window.supabase
             .from('competition_participants')
-            .select('*, users(display_name, email)')
+            .select('*')
             .eq('competition_id', competitionId);
 
         if (participantsError) {
@@ -87,16 +87,32 @@ async function loadCompetitionDetails(competitionId, userId) {
             throw new Error('Kunne ikke laste deltakere');
         }
 
-        // Map participants to include display_name from users table
-        const mappedParticipants = participants.map(p => {
-            console.log('👤 Participant data:', p);
-            console.log('👤 Users join result:', p.users);
-            return {
-                ...p,
-                // Prefer users.display_name, fall back to stored user_name, then email
-                display_name: p.users?.display_name || p.user_name || p.users?.email?.split('@')[0] || 'Ukjent'
-            };
+        // Get user IDs to fetch display names
+        const userIds = participants.map(p => p.user_id);
+
+        // Fetch display names from users table
+        const { data: usersData, error: usersError } = await window.supabase
+            .from('users')
+            .select('id, display_name, email')
+            .in('id', userIds);
+
+        if (usersError) {
+            console.error('❌ Error loading users:', usersError);
+        }
+
+        // Create lookup for user display names
+        const usersMap = {};
+        (usersData || []).forEach(user => {
+            usersMap[user.id] = user.display_name || user.email?.split('@')[0] || 'Ukjent';
         });
+
+        console.log('👥 Users map:', usersMap);
+
+        // Map participants with display names
+        const mappedParticipants = participants.map(p => ({
+            ...p,
+            display_name: usersMap[p.user_id] || p.user_name || 'Ukjent'
+        }));
 
         console.log('✅ Mapped participants:', mappedParticipants);
 
