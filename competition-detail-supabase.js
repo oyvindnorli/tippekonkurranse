@@ -235,6 +235,8 @@ window.deleteCompetition = async function() {
         const urlParams = new URLSearchParams(window.location.search);
         const competitionId = urlParams.get('id');
 
+        console.log('🗑️ Attempting to delete competition:', competitionId);
+
         const { data: { user } } = await window.supabase.auth.getUser();
 
         if (!user) {
@@ -242,30 +244,59 @@ window.deleteCompetition = async function() {
             return;
         }
 
-        // First delete all participants
-        const { error: participantsError } = await window.supabase
-            .from('competition_participants')
-            .delete()
-            .eq('competition_id', competitionId);
+        console.log('👤 User ID:', user.id);
 
-        if (participantsError) {
-            console.error('❌ Error deleting participants:', participantsError);
-        }
-
-        // Then delete the competition
-        const { error: competitionError } = await window.supabase
+        // First verify the user is the creator
+        const { data: competition, error: fetchError } = await window.supabase
             .from('competitions')
-            .delete()
+            .select('creator_id')
             .eq('id', competitionId)
-            .eq('creator_id', user.id); // Only allow creator to delete
+            .single();
 
-        if (competitionError) {
-            console.error('❌ Error deleting competition:', competitionError);
-            alert('Kunne ikke slette konkurransen');
+        if (fetchError) {
+            console.error('❌ Error fetching competition:', fetchError);
+            alert('Kunne ikke finne konkurransen');
             return;
         }
 
-        console.log('✅ Competition deleted');
+        console.log('📋 Competition creator_id:', competition.creator_id);
+
+        if (competition.creator_id !== user.id) {
+            alert('Du kan bare slette konkurranser du har opprettet');
+            return;
+        }
+
+        // Delete participants first
+        const { error: participantsError, count: participantsCount } = await window.supabase
+            .from('competition_participants')
+            .delete()
+            .eq('competition_id', competitionId)
+            .select();
+
+        console.log('👥 Deleted participants, error:', participantsError);
+
+        // Then delete the competition
+        const { data: deletedData, error: competitionError } = await window.supabase
+            .from('competitions')
+            .delete()
+            .eq('id', competitionId)
+            .select();
+
+        console.log('🗑️ Delete result:', { deletedData, competitionError });
+
+        if (competitionError) {
+            console.error('❌ Error deleting competition:', competitionError);
+            alert('Kunne ikke slette konkurransen: ' + competitionError.message);
+            return;
+        }
+
+        if (!deletedData || deletedData.length === 0) {
+            console.error('❌ No rows deleted - RLS policy may be blocking');
+            alert('Kunne ikke slette konkurransen. Sjekk at du har rettigheter.');
+            return;
+        }
+
+        console.log('✅ Competition deleted successfully');
         alert('Konkurransen er slettet');
 
         // Redirect to competitions list
@@ -273,7 +304,7 @@ window.deleteCompetition = async function() {
 
     } catch (error) {
         console.error('❌ Error in deleteCompetition:', error);
-        alert('Noe gikk galt. Prøv igjen.');
+        alert('Noe gikk galt: ' + error.message);
     }
 };
 
