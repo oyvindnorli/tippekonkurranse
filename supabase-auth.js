@@ -87,7 +87,16 @@ async function signUp(email, password, displayName) {
 
         // User record is automatically created by database trigger
         console.log('✅ User registered:', displayName);
-        return { success: true };
+
+        // Check if email confirmation is required
+        // If user.identities is empty, email confirmation is pending
+        const requiresEmailConfirmation = !data.session && data.user?.identities?.length === 0;
+
+        return {
+            success: true,
+            requiresEmailConfirmation,
+            user: data.user
+        };
     } catch (error) {
         console.error('❌ Sign up error:', error);
         return { success: false, error: error.message };

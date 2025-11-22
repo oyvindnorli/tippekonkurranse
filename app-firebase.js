@@ -365,7 +365,22 @@ async function handleSignUp() {
             alert('Registrering feilet: ' + result.error);
         } else {
             console.log('🎉 Registration successful!');
-            alert('Registrering vellykket! Du blir nå logget inn...');
+
+            // Check if email confirmation is required
+            if (result.requiresEmailConfirmation) {
+                alert('Registrering vellykket! Sjekk e-posten din for å bekrefte kontoen.');
+            } else {
+                // Auto sign in after registration
+                console.log('🔐 Auto signing in...');
+                const signInResult = await signIn(email, password);
+                if (signInResult.success) {
+                    alert('Registrering vellykket! Du er nå logget inn.');
+                    closeAuthModal();
+                } else {
+                    alert('Registrering vellykket! Logg inn med din nye konto.');
+                    showAuthModal('signin');
+                }
+            }
         }
     } catch (error) {
         console.error('❌ Unexpected error in handleSignUp:', error);
