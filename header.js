@@ -4,6 +4,26 @@
  */
 
 /**
+ * Check if user appears to be logged in (from localStorage)
+ * This is a quick check to show UI immediately, actual auth state is verified by Supabase
+ */
+function hasStoredSession() {
+    try {
+        // Supabase stores session in localStorage
+        const storageKey = 'sb-ntbhjbstmbnfiaywfkkz-auth-token';
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+            const data = JSON.parse(stored);
+            // Check if session exists and hasn't obviously expired
+            return data && data.access_token;
+        }
+    } catch (e) {
+        // Ignore errors
+    }
+    return false;
+}
+
+/**
  * Initialize and render the header
  * @param {string} activePage - The current active page ('index', 'competitions', 'preferences')
  */
@@ -14,6 +34,11 @@ export function initHeader(activePage = 'index') {
         return;
     }
 
+    // Check if user appears to be logged in to show nav immediately
+    const isLoggedIn = hasStoredSession();
+    const displayStyle = isLoggedIn ? 'flex' : 'none';
+    const btnDisplayStyle = isLoggedIn ? 'block' : 'none';
+
     headerContainer.innerHTML = `
         <header class="header-premium">
             <!-- Top Bar with Brand and Logout -->
@@ -22,11 +47,11 @@ export function initHeader(activePage = 'index') {
                     <span class="brand-icon">⚽</span>
                     <h1 class="brand-title">Tippekonkurranse</h1>
                 </div>
-                <button id="signOutBtn" onclick="signOut()" class="btn-logout-premium" style="display: none;">Logg ut</button>
+                <button id="signOutBtn" onclick="signOut()" class="btn-logout-premium" style="display: ${btnDisplayStyle};">Logg ut</button>
             </div>
 
             <!-- User Stats Bar -->
-            <div class="user-stats-bar" id="userStatsBar" style="display: none;">
+            <div class="user-stats-bar" id="userStatsBar" style="display: ${displayStyle};">
                 <div class="user-info-premium">
                     <span class="user-label-premium">Bruker:</span>
                     <span class="user-name-premium" id="currentUsername"></span>
@@ -45,7 +70,7 @@ export function initHeader(activePage = 'index') {
             </div>
 
             <!-- Navigation -->
-            <nav class="nav-premium" id="mainNavButtons" style="display: none;">
+            <nav class="nav-premium" id="mainNavButtons" style="display: ${displayStyle};">
                 <a href="index.html" class="nav-btn-premium ${activePage === 'index' ? 'active' : ''}">
                     <span class="nav-icon-premium">🏠</span>
                     Tipp

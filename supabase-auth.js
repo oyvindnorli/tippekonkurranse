@@ -318,6 +318,16 @@ async function getAllUsersWithTips() {
     }
 }
 
+// Wait for header elements to exist (header.js is a module and loads after this script)
+async function waitForHeaderElements(maxAttempts = 50) {
+    let attempts = 0;
+    while (!document.getElementById('mainNavButtons') && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        attempts++;
+    }
+    return document.getElementById('mainNavButtons') !== null;
+}
+
 // Called when user logs in
 async function onUserLoggedIn(user) {
     // Logged in
@@ -327,6 +337,9 @@ async function onUserLoggedIn(user) {
     if (authModal) {
         authModal.style.display = 'none';
     }
+
+    // Wait for header elements to be rendered (header.js is a module, loads after regular scripts)
+    await waitForHeaderElements();
 
     // Update UI - fetch displayName from database
     const currentUsername = document.getElementById('currentUsername');
