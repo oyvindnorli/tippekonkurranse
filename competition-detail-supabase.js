@@ -2,6 +2,15 @@
  * Competition Detail Page - Supabase version
  */
 
+// Constants
+const MATCH_STATUS = {
+    FINISHED: ['FT', 'AET', 'PEN'],
+    LIVE: ['1H', '2H', 'HT', 'ET', 'P', 'LIVE']
+};
+
+const DEFAULT_ODDS = { H: 2.0, U: 3.0, B: 2.0 };
+const EXACT_SCORE_BONUS = 3;
+
 // Wait for Supabase to be initialized
 async function waitForSupabase() {
     let attempts = 0;
@@ -14,41 +23,114 @@ async function waitForSupabase() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🏆 Competition detail page loaded');
-
-    // Wait for Supabase
     const supabase = await waitForSupabase();
 
     if (!supabase) {
-        console.error('❌ Supabase not initialized');
         showError('Kunne ikke initialisere. Last siden på nytt.');
         return;
     }
 
-    // Get competition ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const competitionId = urlParams.get('id');
 
     if (!competitionId) {
-        console.error('❌ No competition ID in URL');
         showError('Ingen konkurranse-ID funnet');
         return;
     }
 
-    console.log('📋 Loading competition:', competitionId);
-
-    // Check if user is logged in
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        console.log('❌ No user logged in, redirecting');
         window.location.href = 'index.html';
         return;
     }
 
-    // Load competition details
     await loadCompetitionDetails(competitionId, user.id);
 });
+
+// ============================================
+// Helper Functions
+// ============================================
+
+/**
+ * Get display name for a participant
+ */
+function getDisplayName(participant) {
+    return participant.display_name || participant.user_name || 'Ukjent';
+}
+
+/**
+ * Check if match is finished
+ */
+function isMatchFinished(statusShort) {
+    return MATCH_STATUS.FINISHED.includes(statusShort);
+}
+
+/**
+ * Check if match is live
+ */
+function isMatchLive(statusShort) {
+    return MATCH_STATUS.LIVE.includes(statusShort);
+}
+
+/**
+ * Create tips lookup map
+ */
+function createTipsMap(tips) {
+    const map = {};
+    tips.forEach(tip => {
+        map[`${tip.match_id}_${tip.user_id}`] = tip;
+    });
+    return map;
+}
+
+/**
+ * Get outcome from score (H = Home, U = Draw, B = Away)
+ */
+function getOutcome(homeScore, awayScore) {
+    if (homeScore > awayScore) return 'H';
+    if (homeScore < awayScore) return 'B';
+    return 'U';
+}
+
+/**
+ * Format date for display
+ */
+function formatDate(date) {
+    return date.toLocaleDateString('no-NO', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/**
+ * Show error message
+ */
+function showError(message) {
+    const loadingMessage = document.getElementById('loadingMessage');
+    const errorMessage = document.getElementById('errorMessage');
+
+    if (loadingMessage) loadingMessage.style.display = 'none';
+    if (errorMessage) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+    }
+}
+
+/**
+ * Parse odds ensuring they are numbers
+ */
+function parseOdds(odds) {
+    if (!odds || typeof odds !== 'object') {
+        return DEFAULT_ODDS;
+    }
+    return {
+        H: parseFloat(odds.H) || DEFAULT_ODDS.H,
+        U: parseFloat(odds.U) || DEFAULT_ODDS.U,
+        B: parseFloat(odds.B) || DEFAULT_ODDS.B
+    };
+}
+
+// ============================================
+// Data Loading
+// ============================================
 
 /**
  * Load competition details
@@ -70,11 +152,8 @@ async function loadCompetitionDetails(competitionId, userId) {
             .single();
 
         if (competitionError) {
-            console.error('❌ Error loading competition:', competitionError);
             throw new Error('Kunne ikke laste konkurranse');
         }
-
-        console.log('✅ Loaded competition:', competition);
 
         // Get participants
         const { data: participants, error: participantsError } = await window.supabase
@@ -83,42 +162,27 @@ async function loadCompetitionDetails(competitionId, userId) {
             .eq('competition_id', competitionId);
 
         if (participantsError) {
-            console.error('❌ Error loading participants:', participantsError);
             throw new Error('Kunne ikke laste deltakere');
         }
 
-        // Get user IDs to fetch display names
-        const userIds = participants.map(p => p.user_id);
-
         // Fetch display names from users table
-        console.log('🔍 Fetching users for IDs:', userIds);
-        const { data: usersData, error: usersError } = await window.supabase
+        const userIds = participants.map(p => p.user_id);
+        const { data: usersData } = await window.supabase
             .from('users')
             .select('id, display_name, email')
             .in('id', userIds);
 
-        console.log('📥 Users query result:', { usersData, usersError });
-
-        if (usersError) {
-            console.error('❌ Error loading users:', usersError);
-        }
-
         // Create lookup for user display names
         const usersMap = {};
         (usersData || []).forEach(user => {
-            console.log('👤 User from DB:', user);
             usersMap[user.id] = user.display_name || user.email?.split('@')[0] || 'Ukjent';
         });
-
-        console.log('👥 Users map:', usersMap);
 
         // Map participants with display names
         const mappedParticipants = participants.map(p => ({
             ...p,
             display_name: usersMap[p.user_id] || p.user_name || 'Ukjent'
         }));
-
-        console.log('✅ Mapped participants:', mappedParticipants);
 
         // Display competition
         displayCompetition(competition, mappedParticipants, userId);
@@ -127,20 +191,184 @@ async function loadCompetitionDetails(competitionId, userId) {
         detailsSection.style.display = 'block';
 
     } catch (error) {
-        console.error('❌ Error in loadCompetitionDetails:', error);
+        console.error('Error loading competition:', error);
         loadingMessage.style.display = 'none';
         showError(error.message || 'Kunne ikke laste konkurranse');
     }
 }
 
 /**
+ * Load and display competition matches
+ */
+async function loadCompetitionMatches(competition, participants, currentUserId) {
+    const matchesTable = document.getElementById('matchesWithTipsTable');
+
+    matchesTable.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #64748b;">
+            <p>Laster kamper...</p>
+        </div>
+    `;
+
+    try {
+        const matchIds = competition.match_ids;
+
+        // Fetch fixtures from API
+        const startDate = new Date(competition.start_date);
+        const endDate = new Date(competition.end_date);
+        const fromDate = startDate.toISOString().split('T')[0];
+        const toDate = endDate.toISOString().split('T')[0];
+        const leagueId = competition.league_ids?.[0] || 39;
+        const season = new Date().getFullYear();
+
+        const url = `/api/football?endpoint=fixtures&league=${leagueId}&season=${season}&from=${fromDate}&to=${toDate}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error('Kunne ikke hente kamper fra API');
+        }
+
+        const data = await response.json();
+        const matches = (data.response || []).filter(fixture =>
+            matchIds.includes(fixture.fixture.id)
+        );
+
+        // Fetch tips and match odds in parallel
+        const participantIds = participants.map(p => p.user_id);
+        const [tipsResult, matchesResult] = await Promise.all([
+            window.supabase
+                .from('tips')
+                .select('*')
+                .in('user_id', participantIds)
+                .in('match_id', matchIds),
+            window.supabase
+                .from('matches')
+                .select('id, odds')
+                .in('id', matchIds)
+        ]);
+
+        const allTips = tipsResult.data || [];
+        const matchesWithOdds = matchesResult.data || [];
+
+        // Create odds lookup from matches table
+        const matchOddsLookup = {};
+        matchesWithOdds.forEach(m => {
+            if (m.odds) {
+                matchOddsLookup[m.id] = m.odds;
+            }
+        });
+
+        // Enrich tips with match odds if tip.odds is missing
+        const enrichedTips = allTips.map(tip => {
+            if (!tip.odds || Object.keys(tip.odds).length === 0) {
+                return { ...tip, odds: matchOddsLookup[tip.match_id] || null };
+            }
+            return tip;
+        });
+
+        // Calculate scores and display
+        const { scoresByUser, potentialScoresByUser, hasLiveMatches } = calculateAllScores(matches, enrichedTips, participants);
+
+        displayLeaderboard(participants, currentUserId, scoresByUser, hasLiveMatches, potentialScoresByUser);
+        displayMatches(matches, enrichedTips, participants, currentUserId);
+
+    } catch (error) {
+        console.error('Error loading matches:', error);
+        matchesTable.innerHTML = `
+            <div style="padding: 20px; text-align: center; color: #ef4444;">
+                <p>Kunne ikke laste kamper: ${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// ============================================
+// Score Calculation
+// ============================================
+
+/**
+ * Calculate points for a tip using odds-based scoring
+ */
+function calculatePointsWithOdds(tip, actualHome, actualAway) {
+    const odds = parseOdds(tip.odds);
+
+    const tipHome = Number(tip.home_score);
+    const tipAway = Number(tip.away_score);
+    const actHome = Number(actualHome);
+    const actAway = Number(actualAway);
+
+    const tipOutcome = getOutcome(tipHome, tipAway);
+    const actualOutcome = getOutcome(actHome, actAway);
+
+    let points = 0;
+
+    // Correct outcome = odds value
+    if (tipOutcome === actualOutcome) {
+        points += odds[actualOutcome];
+    }
+
+    // Exact score bonus
+    if (tipHome === actHome && tipAway === actAway) {
+        points += EXACT_SCORE_BONUS;
+    }
+
+    return Math.round(points * 10) / 10;
+}
+
+/**
+ * Calculate scores for all participants
+ */
+function calculateAllScores(matches, tips, participants) {
+    const scoresByUser = {};
+    const potentialScoresByUser = {};
+    let hasLiveMatches = false;
+
+    // Initialize scores
+    participants.forEach(p => {
+        scoresByUser[p.user_id] = 0;
+        potentialScoresByUser[p.user_id] = 0;
+    });
+
+    const tipsMap = createTipsMap(tips);
+
+    matches.forEach(match => {
+        const { fixture, goals } = match;
+        const matchId = fixture.id;
+        const isFinished = isMatchFinished(fixture.status.short);
+        const isLive = isMatchLive(fixture.status.short);
+
+        if (isLive) hasLiveMatches = true;
+
+        const hasResult = goals.home !== null && goals.away !== null;
+
+        if (hasResult && (isFinished || isLive)) {
+            participants.forEach(participant => {
+                const tip = tipsMap[`${matchId}_${participant.user_id}`];
+                if (tip) {
+                    const points = calculatePointsWithOdds(tip, goals.home, goals.away);
+                    if (isFinished) {
+                        scoresByUser[participant.user_id] += points;
+                    } else {
+                        potentialScoresByUser[participant.user_id] += points;
+                    }
+                }
+            });
+        }
+    });
+
+    return { scoresByUser, potentialScoresByUser, hasLiveMatches };
+}
+
+// ============================================
+// Display Functions
+// ============================================
+
+/**
  * Display competition details
  */
 function displayCompetition(competition, participants, userId) {
-    // Set name
     document.getElementById('competitionName').textContent = competition.name;
 
-    // Set description (if exists)
+    // Description
     const descElement = document.getElementById('competitionDescription');
     if (competition.description) {
         descElement.textContent = competition.description;
@@ -149,7 +377,7 @@ function displayCompetition(competition, participants, userId) {
         descElement.style.display = 'none';
     }
 
-    // Set status
+    // Status
     const now = new Date();
     const startDate = new Date(competition.start_date);
     const endDate = new Date(competition.end_date);
@@ -166,47 +394,25 @@ function displayCompetition(competition, participants, userId) {
         statusBadge.className = 'competition-status-badge status-active';
     }
 
-    // Set creator (would need to fetch user data)
-    document.getElementById('creatorName').textContent = 'Admin'; // Simplified for now
-
-    // Set period
-    const periodText = `${formatDate(startDate)} - ${formatDate(endDate)}`;
-    document.getElementById('competitionPeriod').textContent = periodText;
-
-    // Set match count
-    const matchCount = competition.match_ids ? competition.match_ids.length : 0;
-    document.getElementById('matchCount').textContent = `${matchCount} kamper`;
-
-    // Set participant count
+    // Info
+    document.getElementById('creatorName').textContent = 'Admin';
+    document.getElementById('competitionPeriod').textContent = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+    document.getElementById('matchCount').textContent = `${competition.match_ids?.length || 0} kamper`;
     document.getElementById('participantCount').textContent = `${participants.length} deltakere`;
 
-    // Show/hide join button
+    // Buttons
     const isParticipant = participants.some(p => p.user_id === userId);
-    const joinBtn = document.getElementById('joinBtn');
-    if (!isParticipant && now < endDate) {
-        joinBtn.style.display = 'inline-block';
-    } else {
-        joinBtn.style.display = 'none';
-    }
+    document.getElementById('joinBtn').style.display = (!isParticipant && now < endDate) ? 'inline-block' : 'none';
+    document.getElementById('deleteBtn').style.display = (competition.creator_id === userId) ? 'inline-block' : 'none';
 
-    // Show/hide delete button (only for creator)
-    const isCreator = competition.creator_id === userId;
-    const deleteBtn = document.getElementById('deleteBtn');
-    if (isCreator) {
-        deleteBtn.style.display = 'inline-block';
-    } else {
-        deleteBtn.style.display = 'none';
-    }
+    // Initial leaderboard
+    displayLeaderboard(participants, userId, {});
 
-    // Display initial leaderboard (will be updated with scores after matches load)
-    displayLeaderboard(participants, userId, []);
-
-    // Load and display matches (this also updates the leaderboard with scores)
-    if (competition.match_ids && competition.match_ids.length > 0) {
+    // Load matches
+    if (competition.match_ids?.length > 0) {
         loadCompetitionMatches(competition, participants, userId);
     } else {
-        const matchesTable = document.getElementById('matchesWithTipsTable');
-        matchesTable.innerHTML = `
+        document.getElementById('matchesWithTipsTable').innerHTML = `
             <div style="padding: 40px; text-align: center; color: #64748b;">
                 <p style="font-size: 16px;">Ingen kamper i denne konkurransen</p>
             </div>
@@ -216,24 +422,16 @@ function displayCompetition(competition, participants, userId) {
 
 /**
  * Display leaderboard with scores
- * @param {Array} participants - Participants list
- * @param {string} currentUserId - Current user ID
- * @param {Object} scoresByUser - Object mapping user_id to total points
- * @param {boolean} hasLiveMatches - Whether there are live matches
- * @param {Object} potentialScoresByUser - Object mapping user_id to potential points from live matches
  */
 function displayLeaderboard(participants, currentUserId, scoresByUser = {}, hasLiveMatches = false, potentialScoresByUser = {}) {
     const leaderboardList = document.getElementById('leaderboardList');
-
-    // Update leaderboard header with LIVE indicator
     const leaderboardHeader = document.querySelector('.competition-leaderboard h3');
+
+    // Update header
     if (leaderboardHeader) {
-        const hasScores = Object.keys(scoresByUser).length > 0;
-        if (hasLiveMatches) {
-            leaderboardHeader.innerHTML = '🏆 Tabell <span class="live-indicator">LIVE</span>';
-        } else if (hasScores) {
-            leaderboardHeader.innerHTML = '🏆 Tabell';
-        }
+        leaderboardHeader.innerHTML = hasLiveMatches
+            ? '🏆 Tabell <span class="live-indicator">LIVE</span>'
+            : '🏆 Tabell';
     }
 
     if (participants.length === 0) {
@@ -241,162 +439,32 @@ function displayLeaderboard(participants, currentUserId, scoresByUser = {}, hasL
         return;
     }
 
-    // Calculate scores for each participant
-    const participantsWithScores = participants.map(participant => ({
-        ...participant,
-        score: scoresByUser[participant.user_id] || 0,
-        potentialScore: potentialScoresByUser[participant.user_id] || 0,
-        name: participant.display_name || participant.user_name || 'Ukjent'
+    // Build participant scores
+    const participantsWithScores = participants.map(p => ({
+        ...p,
+        score: scoresByUser[p.user_id] || 0,
+        potentialScore: potentialScoresByUser[p.user_id] || 0,
+        name: getDisplayName(p)
     }));
 
-    // Sort by score (highest first), then by potential score
-    participantsWithScores.sort((a, b) => {
-        const totalA = a.score + a.potentialScore;
-        const totalB = b.score + b.potentialScore;
-        return totalB - totalA;
-    });
+    // Sort by total score
+    participantsWithScores.sort((a, b) => (b.score + b.potentialScore) - (a.score + a.potentialScore));
 
-    // Render leaderboard
-    leaderboardList.innerHTML = participantsWithScores.map((participant, index) => {
-        const isCurrentUser = participant.user_id === currentUserId;
+    // Render
+    leaderboardList.innerHTML = participantsWithScores.map((p, index) => {
+        const isCurrentUser = p.user_id === currentUserId;
         const position = index + 1;
         const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : '';
-        const hasPotential = participant.potentialScore > 0;
-
-        // Format score display
-        let scoreDisplay = `${participant.score}`;
-        if (hasPotential) {
-            scoreDisplay += ` <span class="potential-score">(+${participant.potentialScore})</span>`;
-        }
+        const potentialDisplay = p.potentialScore > 0 ? ` <span class="potential-score">(+${p.potentialScore})</span>` : '';
 
         return `
             <div class="leaderboard-row ${isCurrentUser ? 'current-user' : ''}">
                 <div class="leaderboard-position">${medal || position}</div>
-                <div class="leaderboard-name">${participant.name}${isCurrentUser ? ' (deg)' : ''}</div>
-                <div class="leaderboard-score">${scoreDisplay} poeng</div>
+                <div class="leaderboard-name">${p.name}${isCurrentUser ? ' (deg)' : ''}</div>
+                <div class="leaderboard-score">${p.score}${potentialDisplay} poeng</div>
             </div>
         `;
     }).join('');
-}
-
-/**
- * Load and display competition matches
- */
-async function loadCompetitionMatches(competition, participants, currentUserId) {
-    const matchesTable = document.getElementById('matchesWithTipsTable');
-
-    // Show loading state
-    matchesTable.innerHTML = `
-        <div style="padding: 20px; text-align: center; color: #64748b;">
-            <p>Laster kamper...</p>
-        </div>
-    `;
-
-    try {
-        // Fetch match data from API
-        const matchIds = competition.match_ids;
-        console.log('📥 Loading matches:', matchIds);
-
-        // Fetch fixtures from API (batch by getting date range)
-        const startDate = new Date(competition.start_date);
-        const endDate = new Date(competition.end_date);
-        const fromDate = startDate.toISOString().split('T')[0];
-        const toDate = endDate.toISOString().split('T')[0];
-
-        // Get league ID from competition
-        const leagueId = competition.league_ids?.[0] || 39;
-        const season = new Date().getFullYear();
-
-        const url = `/api/football?endpoint=fixtures&league=${leagueId}&season=${season}&from=${fromDate}&to=${toDate}`;
-        console.log('📥 Fetching fixtures:', url);
-
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('Kunne ikke hente kamper fra API');
-        }
-
-        const data = await response.json();
-        console.log('📥 API response:', data);
-
-        // Filter to only matches in this competition
-        const matches = (data.response || []).filter(fixture =>
-            matchIds.includes(fixture.fixture.id)
-        );
-
-        console.log('✅ Filtered matches:', matches.length);
-
-        // Fetch tips for all participants in this competition
-        const participantIds = participants.map(p => p.user_id);
-        const { data: allTips, error: tipsError } = await window.supabase
-            .from('tips')
-            .select('*')
-            .in('user_id', participantIds)
-            .in('match_id', matchIds);
-
-        if (tipsError) {
-            console.error('❌ Error loading tips:', tipsError);
-        }
-
-        console.log('📥 Loaded tips:', allTips?.length || 0);
-
-        // Fetch match odds from matches table (fallback for tips without odds)
-        console.log('🔍 Fetching odds for match IDs:', matchIds);
-        const { data: matchesWithOdds, error: matchesError } = await window.supabase
-            .from('matches')
-            .select('id, odds')
-            .in('id', matchIds);
-
-        console.log('📥 Matches query result:', { matchesWithOdds, matchesError });
-
-        if (matchesError) {
-            console.error('❌ Error loading match odds:', matchesError);
-        }
-
-        // Create odds lookup from matches table
-        const matchOddsLookup = {};
-        (matchesWithOdds || []).forEach(m => {
-            console.log(`  Match ${m.id} odds:`, m.odds);
-            if (m.odds) {
-                matchOddsLookup[m.id] = m.odds;
-            }
-        });
-        console.log('📥 Match odds lookup:', matchOddsLookup);
-
-        // Also log tips to see their odds
-        console.log('📥 Tips with their odds:');
-        (allTips || []).forEach(tip => {
-            console.log(`  Tip for match ${tip.match_id} by ${tip.user_id}: odds =`, tip.odds);
-        });
-
-        // Enrich tips with match odds if tip.odds is missing
-        const enrichedTips = (allTips || []).map(tip => {
-            if (!tip.odds || Object.keys(tip.odds).length === 0) {
-                return {
-                    ...tip,
-                    odds: matchOddsLookup[tip.match_id] || null
-                };
-            }
-            return tip;
-        });
-
-        // Calculate scores for leaderboard
-        const { scoresByUser, potentialScoresByUser, hasLiveMatches } = calculateAllScores(matches, enrichedTips, participants);
-        console.log('📊 Scores calculated:', scoresByUser, 'potential:', potentialScoresByUser, 'hasLive:', hasLiveMatches);
-
-        // Update leaderboard with actual scores and potential scores
-        displayLeaderboard(participants, currentUserId, scoresByUser, hasLiveMatches, potentialScoresByUser);
-
-        // Display matches with enriched tips (includes odds)
-        displayMatches(matches, enrichedTips, participants, currentUserId);
-
-    } catch (error) {
-        console.error('❌ Error loading matches:', error);
-        matchesTable.innerHTML = `
-            <div style="padding: 20px; text-align: center; color: #ef4444;">
-                <p>Kunne ikke laste kamper: ${error.message}</p>
-            </div>
-        `;
-    }
 }
 
 /**
@@ -414,37 +482,23 @@ function displayMatches(matches, tips, participants, currentUserId) {
         return;
     }
 
-    // Sort matches by date
+    // Sort by date
     matches.sort((a, b) => new Date(a.fixture.date) - new Date(b.fixture.date));
 
-    // Create tips lookup by match_id and user_id
-    const tipsMap = {};
-    tips.forEach(tip => {
-        const key = `${tip.match_id}_${tip.user_id}`;
-        tipsMap[key] = tip;
-    });
-
-    // Build HTML
+    const tipsMap = createTipsMap(tips);
     let html = '<div class="matches-list">';
 
     matches.forEach(match => {
-        const fixture = match.fixture;
-        const teams = match.teams;
-        const goals = match.goals;
+        const { fixture, teams, goals } = match;
         const matchId = fixture.id;
-
-        // Format date/time
         const matchDate = new Date(fixture.date);
         const dateStr = matchDate.toLocaleDateString('no-NO', { weekday: 'short', day: 'numeric', month: 'short' });
         const timeStr = matchDate.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
 
-        // Check match status
-        const isFinished = fixture.status.short === 'FT' || fixture.status.short === 'AET' || fixture.status.short === 'PEN';
-        const isLive = ['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].includes(fixture.status.short);
+        const isFinished = isMatchFinished(fixture.status.short);
+        const isLive = isMatchLive(fixture.status.short);
         const hasStarted = isFinished || isLive || new Date() > matchDate;
-
-        // Result
-        const resultStr = isFinished || isLive ? `${goals.home ?? '-'} - ${goals.away ?? '-'}` : 'vs';
+        const resultStr = (isFinished || isLive) ? `${goals.home ?? '-'} - ${goals.away ?? '-'}` : 'vs';
 
         html += `
             <div class="competition-match-card">
@@ -466,18 +520,15 @@ function displayMatches(matches, tips, participants, currentUserId) {
                 </div>
         `;
 
-        // Show tips from participants (only if match has started)
         if (hasStarted) {
-            html += '<div class="match-tips">';
-            html += '<div class="tips-header">Tips fra deltakere:</div>';
-            html += '<div class="tips-grid">';
+            html += '<div class="match-tips"><div class="tips-header">Tips fra deltakere:</div><div class="tips-grid">';
 
             participants.forEach(participant => {
                 const tip = tipsMap[`${matchId}_${participant.user_id}`];
                 const isCurrentUser = participant.user_id === currentUserId;
+                const userName = getDisplayName(participant);
 
                 if (tip) {
-                    // Calculate points if match is finished or live
                     let points = 0;
                     let pointsClass = '';
                     let showPoints = false;
@@ -488,20 +539,18 @@ function displayMatches(matches, tips, participants, currentUserId) {
                         showPoints = true;
                     }
 
-                    const tipUserName = participant.display_name || participant.user_name || 'Ukjent';
                     const pointsLabel = isLive ? `(${points}p)` : `${points}p`;
                     html += `
                         <div class="tip-item ${isCurrentUser ? 'current-user-tip' : ''} ${pointsClass}">
-                            <span class="tip-user">${tipUserName}</span>
+                            <span class="tip-user">${userName}</span>
                             <span class="tip-score">${tip.home_score} - ${tip.away_score}</span>
                             ${showPoints ? `<span class="tip-points ${isLive ? 'potential' : ''}">${pointsLabel}</span>` : ''}
                         </div>
                     `;
                 } else {
-                    const tipUserName = participant.display_name || participant.user_name || 'Ukjent';
                     html += `
                         <div class="tip-item no-tip ${isCurrentUser ? 'current-user-tip' : ''}">
-                            <span class="tip-user">${tipUserName}</span>
+                            <span class="tip-user">${userName}</span>
                             <span class="tip-score">-</span>
                         </div>
                     `;
@@ -510,11 +559,7 @@ function displayMatches(matches, tips, participants, currentUserId) {
 
             html += '</div></div>';
         } else {
-            html += `
-                <div class="match-tips-hidden">
-                    <p>Tips vises når kampen starter</p>
-                </div>
-            `;
+            html += `<div class="match-tips-hidden"><p>Tips vises når kampen starter</p></div>`;
         }
 
         html += '</div>';
@@ -524,163 +569,9 @@ function displayMatches(matches, tips, participants, currentUserId) {
     matchesTable.innerHTML = html;
 }
 
-/**
- * Calculate scores for all participants (with odds-based scoring)
- */
-function calculateAllScores(matches, tips, participants) {
-    const scoresByUser = {};
-    const potentialScoresByUser = {};
-    let hasLiveMatches = false;
-
-    // Initialize scores for all participants
-    participants.forEach(p => {
-        scoresByUser[p.user_id] = 0;
-        potentialScoresByUser[p.user_id] = 0;
-    });
-
-    // Create tips lookup
-    const tipsMap = {};
-    tips.forEach(tip => {
-        const key = `${tip.match_id}_${tip.user_id}`;
-        tipsMap[key] = tip;
-    });
-
-    // Calculate points for each match
-    matches.forEach(match => {
-        const fixture = match.fixture;
-        const goals = match.goals;
-        const matchId = fixture.id;
-
-        // Check match status
-        const isFinished = ['FT', 'AET', 'PEN'].includes(fixture.status.short);
-        const isLive = ['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].includes(fixture.status.short);
-
-        if (isLive) {
-            hasLiveMatches = true;
-        }
-
-        // Calculate points for finished matches
-        if (isFinished && goals.home !== null && goals.away !== null) {
-            participants.forEach(participant => {
-                const tip = tipsMap[`${matchId}_${participant.user_id}`];
-                if (tip) {
-                    const points = calculatePointsWithOdds(tip, goals.home, goals.away);
-                    scoresByUser[participant.user_id] += points;
-                }
-            });
-        }
-
-        // Calculate potential points for live matches
-        if (isLive && goals.home !== null && goals.away !== null) {
-            participants.forEach(participant => {
-                const tip = tipsMap[`${matchId}_${participant.user_id}`];
-                if (tip) {
-                    const points = calculatePointsWithOdds(tip, goals.home, goals.away);
-                    potentialScoresByUser[participant.user_id] += points;
-                }
-            });
-        }
-    });
-
-    return { scoresByUser, potentialScoresByUser, hasLiveMatches };
-}
-
-/**
- * Calculate points for a tip (simple version for display)
- */
-function calculatePoints(tipHome, tipAway, actualHome, actualAway, tipOdds) {
-    return calculatePointsWithOdds({
-        home_score: tipHome,
-        away_score: tipAway,
-        odds: tipOdds
-    }, actualHome, actualAway);
-}
-
-/**
- * Calculate points for a tip using odds-based scoring
- * - Correct outcome (H/U/B): points = odds value
- * - Exact score bonus: +3 points
- */
-function calculatePointsWithOdds(tip, actualHome, actualAway) {
-    // Default odds if not set or empty
-    const defaultOdds = { H: 2.0, U: 3.0, B: 2.0 };
-
-    // Parse odds - ensure they are numbers
-    let odds = defaultOdds;
-    if (tip.odds && typeof tip.odds === 'object') {
-        odds = {
-            H: parseFloat(tip.odds.H) || defaultOdds.H,
-            U: parseFloat(tip.odds.U) || defaultOdds.U,
-            B: parseFloat(tip.odds.B) || defaultOdds.B
-        };
-    }
-
-    // Determine outcomes (convert to numbers to handle string scores)
-    const tipHome = Number(tip.home_score);
-    const tipAway = Number(tip.away_score);
-    const actHome = Number(actualHome);
-    const actAway = Number(actualAway);
-
-    const tipOutcome = getOutcome(tipHome, tipAway);
-    const actualOutcome = getOutcome(actHome, actAway);
-
-    console.log('📊 Points calc:', {
-        tip: `${tipHome}-${tipAway}`,
-        actual: `${actHome}-${actAway}`,
-        tipOutcome,
-        actualOutcome,
-        odds,
-        rawOdds: tip.odds
-    });
-
-    let points = 0;
-
-    // Correct outcome = odds value
-    if (tipOutcome === actualOutcome) {
-        const oddsValue = odds[actualOutcome];
-        points += oddsValue;
-        console.log(`✅ Correct outcome (${actualOutcome}): +${oddsValue} points`);
-    }
-
-    // Exact score bonus = +3 points
-    if (tipHome === actHome && tipAway === actAway) {
-        points += 3;
-        console.log('🎯 Exact score: +3 points');
-    }
-
-    console.log(`📊 Total points: ${points}`);
-    return Math.round(points * 10) / 10; // Round to 1 decimal
-}
-
-/**
- * Get outcome from score (H = Home, U = Draw, B = Away)
- */
-function getOutcome(homeScore, awayScore) {
-    if (homeScore > awayScore) return 'H';
-    if (homeScore < awayScore) return 'B';
-    return 'U';
-}
-
-/**
- * Format date
- */
-function formatDate(date) {
-    return date.toLocaleDateString('no-NO', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-/**
- * Show error
- */
-function showError(message) {
-    const loadingMessage = document.getElementById('loadingMessage');
-    const errorMessage = document.getElementById('errorMessage');
-
-    if (loadingMessage) loadingMessage.style.display = 'none';
-    if (errorMessage) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = 'block';
-    }
-}
+// ============================================
+// Global Actions
+// ============================================
 
 /**
  * Delete competition (only for creator)
@@ -693,9 +584,6 @@ window.deleteCompetition = async function() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const competitionId = urlParams.get('id');
-
-        console.log('🗑️ Attempting to delete competition:', competitionId);
-
         const { data: { user } } = await window.supabase.auth.getUser();
 
         if (!user) {
@@ -703,66 +591,40 @@ window.deleteCompetition = async function() {
             return;
         }
 
-        console.log('👤 User ID:', user.id);
-
-        // First verify the user is the creator
+        // Verify creator
         const { data: competition, error: fetchError } = await window.supabase
             .from('competitions')
             .select('creator_id')
             .eq('id', competitionId)
             .single();
 
-        if (fetchError) {
-            console.error('❌ Error fetching competition:', fetchError);
-            alert('Kunne ikke finne konkurransen');
-            return;
-        }
-
-        console.log('📋 Competition creator_id:', competition.creator_id);
-
-        if (competition.creator_id !== user.id) {
+        if (fetchError || competition.creator_id !== user.id) {
             alert('Du kan bare slette konkurranser du har opprettet');
             return;
         }
 
-        // Delete participants first
-        const { error: participantsError, count: participantsCount } = await window.supabase
+        // Delete participants first, then competition
+        await window.supabase
             .from('competition_participants')
             .delete()
-            .eq('competition_id', competitionId)
-            .select();
+            .eq('competition_id', competitionId);
 
-        console.log('👥 Deleted participants, error:', participantsError);
-
-        // Then delete the competition
-        const { data: deletedData, error: competitionError } = await window.supabase
+        const { data: deletedData, error: deleteError } = await window.supabase
             .from('competitions')
             .delete()
             .eq('id', competitionId)
             .select();
 
-        console.log('🗑️ Delete result:', { deletedData, competitionError });
-
-        if (competitionError) {
-            console.error('❌ Error deleting competition:', competitionError);
-            alert('Kunne ikke slette konkurransen: ' + competitionError.message);
-            return;
-        }
-
-        if (!deletedData || deletedData.length === 0) {
-            console.error('❌ No rows deleted - RLS policy may be blocking');
+        if (deleteError || !deletedData?.length) {
             alert('Kunne ikke slette konkurransen. Sjekk at du har rettigheter.');
             return;
         }
 
-        console.log('✅ Competition deleted successfully');
         alert('Konkurransen er slettet');
-
-        // Redirect to competitions list
         window.location.href = 'competitions.html';
 
     } catch (error) {
-        console.error('❌ Error in deleteCompetition:', error);
+        console.error('Error deleting competition:', error);
         alert('Noe gikk galt: ' + error.message);
     }
 };
@@ -774,10 +636,7 @@ window.shareCompetition = function() {
     const url = window.location.href;
 
     if (navigator.share) {
-        navigator.share({
-            title: 'Bli med i tippekonkurranse!',
-            url: url
-        });
+        navigator.share({ title: 'Bli med i tippekonkurranse!', url });
     } else if (navigator.clipboard) {
         navigator.clipboard.writeText(url);
         alert('Link kopiert til utklippstavlen!');
@@ -790,12 +649,9 @@ window.shareCompetition = function() {
  * Join competition
  */
 window.joinCompetition = async function() {
-    console.log('🎯 Joining competition...');
-
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const competitionId = urlParams.get('id');
-
         const { data: { user } } = await window.supabase.auth.getUser();
 
         if (!user) {
@@ -803,7 +659,6 @@ window.joinCompetition = async function() {
             return;
         }
 
-        // Add user as participant
         const { error } = await window.supabase
             .from('competition_participants')
             .insert({
@@ -813,19 +668,15 @@ window.joinCompetition = async function() {
             });
 
         if (error) {
-            console.error('❌ Error joining competition:', error);
             alert('Kunne ikke bli med i konkurransen');
             return;
         }
 
-        console.log('✅ Joined competition successfully');
-        alert('Du er nå med i konkurransen! 🎉');
-
-        // Reload page to update
+        alert('Du er nå med i konkurransen!');
         window.location.reload();
 
     } catch (error) {
-        console.error('❌ Error in joinCompetition:', error);
+        console.error('Error joining competition:', error);
         alert('Noe gikk galt. Prøv igjen.');
     }
 };
