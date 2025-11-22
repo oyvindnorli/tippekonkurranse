@@ -41,13 +41,14 @@ async function loadMatches() {
     try {
         console.log('📡 Fetching matches...');
 
-        // Get date range - entire season to today (for finished matches) + 7 days ahead (for upcoming/live)
+        // Get date range - last 7 days + 7 days ahead (for live, recent finished, and upcoming)
         const today = new Date();
-        const seasonStart = new Date('2024-08-01'); // Start of 2024/2025 season
+        const weekAgo = new Date();
+        weekAgo.setDate(today.getDate() - 7);
         const weekAhead = new Date();
         weekAhead.setDate(today.getDate() + 7);
 
-        const fromDate = seasonStart.toISOString().split('T')[0];
+        const fromDate = weekAgo.toISOString().split('T')[0];
         const toDate = weekAhead.toISOString().split('T')[0];
 
         // Fetch fixtures for all leagues
