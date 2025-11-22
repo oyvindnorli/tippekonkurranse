@@ -168,22 +168,25 @@ function displayCompetition(competition, participants, userId) {
     }
 
     // Display leaderboard
-    displayLeaderboard(participants);
+    displayLeaderboard(participants, userId);
 
-    // For now, show a message about matches
-    const matchesTable = document.getElementById('matchesWithTipsTable');
-    matchesTable.innerHTML = `
-        <div style="padding: 40px; text-align: center; color: #64748b;">
-            <p style="font-size: 16px; margin-bottom: 8px;">⚽ Kampoversikt kommer snart</p>
-            <p style="font-size: 14px;">Denne funksjonen er under utvikling</p>
-        </div>
-    `;
+    // Load and display matches
+    if (competition.match_ids && competition.match_ids.length > 0) {
+        loadCompetitionMatches(competition, participants, userId);
+    } else {
+        const matchesTable = document.getElementById('matchesWithTipsTable');
+        matchesTable.innerHTML = `
+            <div style="padding: 40px; text-align: center; color: #64748b;">
+                <p style="font-size: 16px;">Ingen kamper i denne konkurransen</p>
+            </div>
+        `;
+    }
 }
 
 /**
  * Display leaderboard
  */
-function displayLeaderboard(participants) {
+function displayLeaderboard(participants, currentUserId) {
     const leaderboardList = document.getElementById('leaderboardList');
 
     if (participants.length === 0) {
@@ -192,14 +195,229 @@ function displayLeaderboard(participants) {
     }
 
     // For now, just show participants without scores
-    // In production, this would calculate scores from tips
-    leaderboardList.innerHTML = participants.map((participant, index) => `
-        <div class="leaderboard-row">
-            <div class="leaderboard-position">${index + 1}</div>
-            <div class="leaderboard-name">${participant.user_name}</div>
-            <div class="leaderboard-score">0 poeng</div>
+    // Scores will be calculated when we have match results
+    leaderboardList.innerHTML = participants.map((participant, index) => {
+        const isCurrentUser = participant.user_id === currentUserId;
+        return `
+            <div class="leaderboard-row ${isCurrentUser ? 'current-user' : ''}">
+                <div class="leaderboard-position">${index + 1}</div>
+                <div class="leaderboard-name">${participant.user_name}${isCurrentUser ? ' (deg)' : ''}</div>
+                <div class="leaderboard-score">0 poeng</div>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Load and display competition matches
+ */
+async function loadCompetitionMatches(competition, participants, currentUserId) {
+    const matchesTable = document.getElementById('matchesWithTipsTable');
+
+    // Show loading state
+    matchesTable.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #64748b;">
+            <p>Laster kamper...</p>
         </div>
-    `).join('');
+    `;
+
+    try {
+        // Fetch match data from API
+        const matchIds = competition.match_ids;
+        console.log('📥 Loading matches:', matchIds);
+
+        // Fetch fixtures from API (batch by getting date range)
+        const startDate = new Date(competition.start_date);
+        const endDate = new Date(competition.end_date);
+        const fromDate = startDate.toISOString().split('T')[0];
+        const toDate = endDate.toISOString().split('T')[0];
+
+        // Get league ID from competition
+        const leagueId = competition.league_ids?.[0] || 39;
+        const season = new Date().getFullYear();
+
+        const url = `/api/football?endpoint=fixtures&league=${leagueId}&season=${season}&from=${fromDate}&to=${toDate}`;
+        console.log('📥 Fetching fixtures:', url);
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Kunne ikke hente kamper fra API');
+        }
+
+        const data = await response.json();
+        console.log('📥 API response:', data);
+
+        // Filter to only matches in this competition
+        const matches = (data.response || []).filter(fixture =>
+            matchIds.includes(fixture.fixture.id)
+        );
+
+        console.log('✅ Filtered matches:', matches.length);
+
+        // Fetch tips for all participants in this competition
+        const participantIds = participants.map(p => p.user_id);
+        const { data: allTips, error: tipsError } = await window.supabase
+            .from('tips')
+            .select('*')
+            .in('user_id', participantIds)
+            .in('match_id', matchIds);
+
+        if (tipsError) {
+            console.error('❌ Error loading tips:', tipsError);
+        }
+
+        console.log('📥 Loaded tips:', allTips?.length || 0);
+
+        // Display matches
+        displayMatches(matches, allTips || [], participants, currentUserId);
+
+    } catch (error) {
+        console.error('❌ Error loading matches:', error);
+        matchesTable.innerHTML = `
+            <div style="padding: 20px; text-align: center; color: #ef4444;">
+                <p>Kunne ikke laste kamper: ${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+/**
+ * Display matches with tips
+ */
+function displayMatches(matches, tips, participants, currentUserId) {
+    const matchesTable = document.getElementById('matchesWithTipsTable');
+
+    if (matches.length === 0) {
+        matchesTable.innerHTML = `
+            <div style="padding: 20px; text-align: center; color: #64748b;">
+                <p>Ingen kamper funnet</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Sort matches by date
+    matches.sort((a, b) => new Date(a.fixture.date) - new Date(b.fixture.date));
+
+    // Create tips lookup by match_id and user_id
+    const tipsMap = {};
+    tips.forEach(tip => {
+        const key = `${tip.match_id}_${tip.user_id}`;
+        tipsMap[key] = tip;
+    });
+
+    // Build HTML
+    let html = '<div class="matches-list">';
+
+    matches.forEach(match => {
+        const fixture = match.fixture;
+        const teams = match.teams;
+        const goals = match.goals;
+        const matchId = fixture.id;
+
+        // Format date/time
+        const matchDate = new Date(fixture.date);
+        const dateStr = matchDate.toLocaleDateString('no-NO', { weekday: 'short', day: 'numeric', month: 'short' });
+        const timeStr = matchDate.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' });
+
+        // Check match status
+        const isFinished = fixture.status.short === 'FT' || fixture.status.short === 'AET' || fixture.status.short === 'PEN';
+        const isLive = ['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].includes(fixture.status.short);
+        const hasStarted = isFinished || isLive || new Date() > matchDate;
+
+        // Result
+        const resultStr = isFinished || isLive ? `${goals.home ?? '-'} - ${goals.away ?? '-'}` : 'vs';
+
+        html += `
+            <div class="competition-match-card">
+                <div class="match-header">
+                    <span class="match-date">${dateStr} ${timeStr}</span>
+                    ${isLive ? '<span class="live-badge">LIVE</span>' : ''}
+                    ${isFinished ? '<span class="finished-badge">Ferdig</span>' : ''}
+                </div>
+                <div class="match-teams">
+                    <div class="team home">
+                        <img src="${teams.home.logo}" alt="${teams.home.name}" class="team-logo-small">
+                        <span class="team-name">${teams.home.name}</span>
+                    </div>
+                    <div class="match-result ${isFinished ? 'final' : ''}">${resultStr}</div>
+                    <div class="team away">
+                        <span class="team-name">${teams.away.name}</span>
+                        <img src="${teams.away.logo}" alt="${teams.away.name}" class="team-logo-small">
+                    </div>
+                </div>
+        `;
+
+        // Show tips from participants (only if match has started)
+        if (hasStarted) {
+            html += '<div class="match-tips">';
+            html += '<div class="tips-header">Tips fra deltakere:</div>';
+            html += '<div class="tips-grid">';
+
+            participants.forEach(participant => {
+                const tip = tipsMap[`${matchId}_${participant.user_id}`];
+                const isCurrentUser = participant.user_id === currentUserId;
+
+                if (tip) {
+                    // Calculate points if match is finished
+                    let points = 0;
+                    let pointsClass = '';
+                    if (isFinished && goals.home !== null && goals.away !== null) {
+                        points = calculatePoints(tip.home_score, tip.away_score, goals.home, goals.away);
+                        pointsClass = points > 0 ? 'has-points' : 'no-points';
+                    }
+
+                    html += `
+                        <div class="tip-item ${isCurrentUser ? 'current-user-tip' : ''} ${pointsClass}">
+                            <span class="tip-user">${participant.user_name}</span>
+                            <span class="tip-score">${tip.home_score} - ${tip.away_score}</span>
+                            ${isFinished ? `<span class="tip-points">${points}p</span>` : ''}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="tip-item no-tip ${isCurrentUser ? 'current-user-tip' : ''}">
+                            <span class="tip-user">${participant.user_name}</span>
+                            <span class="tip-score">-</span>
+                        </div>
+                    `;
+                }
+            });
+
+            html += '</div></div>';
+        } else {
+            html += `
+                <div class="match-tips-hidden">
+                    <p>Tips vises når kampen starter</p>
+                </div>
+            `;
+        }
+
+        html += '</div>';
+    });
+
+    html += '</div>';
+    matchesTable.innerHTML = html;
+}
+
+/**
+ * Calculate points for a tip
+ */
+function calculatePoints(tipHome, tipAway, actualHome, actualAway) {
+    // Exact score = 3 points
+    if (tipHome === actualHome && tipAway === actualAway) {
+        return 3;
+    }
+
+    // Correct outcome = 1 point
+    const tipOutcome = tipHome > tipAway ? 'H' : tipHome < tipAway ? 'A' : 'D';
+    const actualOutcome = actualHome > actualAway ? 'H' : actualHome < actualAway ? 'A' : 'D';
+
+    if (tipOutcome === actualOutcome) {
+        return 1;
+    }
+
+    return 0;
 }
 
 /**

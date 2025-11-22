@@ -3041,6 +3041,178 @@ header h1 {
     text-align: center;
 }
 
+/* Competition Match List with Tips */
+.matches-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.competition-match-card .match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.competition-match-card .match-date {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.live-badge {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    animation: livePulse 2s ease-in-out infinite;
+}
+
+.finished-badge {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.competition-match-card .match-teams {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.competition-match-card .team {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.competition-match-card .team.home {
+    justify-content: flex-start;
+}
+
+.competition-match-card .team.away {
+    justify-content: flex-end;
+}
+
+.competition-match-card .match-result {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    min-width: 80px;
+    text-align: center;
+}
+
+.competition-match-card .match-result.final {
+    color: #10b981;
+}
+
+/* Tips Section */
+.match-tips {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+}
+
+.tips-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+}
+
+.tip-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.tip-item.current-user-tip {
+    background: #ecfeff;
+    border-color: #22d3ee;
+}
+
+.tip-item.has-points {
+    background: #f0fdf4;
+    border-color: #22c55e;
+}
+
+.tip-item.no-points {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.tip-item.no-tip {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+    opacity: 0.7;
+}
+
+.tip-user {
+    font-weight: 600;
+    color: #374151;
+    font-size: 11px;
+}
+
+.tip-score {
+    font-weight: 800;
+    color: #0f172a;
+    font-size: 14px;
+}
+
+.tip-item .tip-points {
+    font-size: 11px;
+    font-weight: 700;
+    color: #10b981;
+    background: #d1fae5;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.tip-item.no-points .tip-points {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.match-tips-hidden {
+    text-align: center;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.match-tips-hidden p {
+    font-size: 12px;
+    color: #64748b;
+    font-style: italic;
+}
+
 @media (max-width: 768px) {
     .match-card {
         padding: 12px;
