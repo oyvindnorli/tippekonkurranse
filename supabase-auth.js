@@ -5,9 +5,21 @@ let supabase, currentUser = null;
 
 // Initialize Supabase
 function initializeSupabase() {
+    // Check if already initialized
+    if (supabase && supabase.auth) {
+        console.log('✅ Supabase already initialized');
+        return;
+    }
+
     try {
+        // Store the original Supabase module before we overwrite window.supabase
+        const supabaseModule = window.supabase;
+        if (!supabaseModule || !supabaseModule.createClient) {
+            throw new Error('Supabase SDK not loaded');
+        }
+
         // Create Supabase client globally
-        const { createClient } = window.supabase;
+        const { createClient } = supabaseModule;
         supabase = createClient(
             'https://ntbhjbstmbnfiaywfkkz.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E',
