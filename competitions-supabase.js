@@ -670,11 +670,11 @@ window.createCompetition = async function(event) {
         }
 
         // Create competition in Supabase
+        // Note: description column doesn't exist in schema yet, so we don't include it
         const { data: competition, error: createError } = await window.supabase
             .from('competitions')
             .insert({
                 name: name,
-                description: description || null,
                 creator_id: user.id,
                 league_ids: leagueIds,
                 start_date: startDate.toISOString(),
