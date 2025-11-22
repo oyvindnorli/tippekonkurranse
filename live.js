@@ -41,15 +41,13 @@ async function loadMatches() {
     try {
         console.log('📡 Fetching matches...');
 
-        // Get date range - last 7 days + 7 days ahead (for live, recent finished, and upcoming)
+        // Get date range - last 7 days to today (for live and recent results only)
         const today = new Date();
         const weekAgo = new Date();
         weekAgo.setDate(today.getDate() - 7);
-        const weekAhead = new Date();
-        weekAhead.setDate(today.getDate() + 7);
 
         const fromDate = weekAgo.toISOString().split('T')[0];
-        const toDate = weekAhead.toISOString().split('T')[0];
+        const toDate = today.toISOString().split('T')[0];
 
         // Fetch fixtures for all leagues
         const allFixtures = [];
@@ -74,39 +72,22 @@ async function loadMatches() {
             allMatches = allFixtures
                 .filter(match => {
                     const status = match.fixture.status.short;
-                    // Include live matches, finished matches, and upcoming matches
+                    // Include only live matches and finished matches (no upcoming)
                     const isLiveMatch = ['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].includes(status);
                     const isFinished = status === 'FT';
-                    const isUpcoming = status === 'NS'; // Not Started
-                    return isLiveMatch || isFinished || isUpcoming;
+                    return isLiveMatch || isFinished;
                 })
                 .sort((a, b) => {
                     // Sort: Live first, then finished (newest first)
                     const aLive = isLive(a);
                     const bLive = isLive(b);
-                    const aFinished = isFinished(a);
-                    const bFinished = isFinished(b);
 
                     // Live matches first
                     if (aLive && !bLive) return -1;
                     if (!aLive && bLive) return 1;
 
-                    // Both live: sort by date (most recent first)
-                    if (aLive && bLive) {
-                        return new Date(b.fixture.date) - new Date(a.fixture.date);
-                    }
-
-                    // Finished matches: newest first (descending)
-                    if (aFinished && bFinished) {
-                        return new Date(b.fixture.date) - new Date(a.fixture.date);
-                    }
-
-                    // Finished before upcoming
-                    if (aFinished && !bFinished) return -1;
-                    if (!aFinished && bFinished) return 1;
-
-                    // Upcoming: sort by date (soonest first)
-                    return new Date(a.fixture.date) - new Date(b.fixture.date);
+                    // Both same status: sort by date (newest first)
+                    return new Date(b.fixture.date) - new Date(a.fixture.date);
                 });
 
             console.log(`✅ Loaded ${allMatches.length} matches`);
