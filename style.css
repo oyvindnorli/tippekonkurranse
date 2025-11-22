@@ -3227,6 +3227,20 @@ header h1 {
     vertical-align: middle;
 }
 
+/* Potential score display in leaderboard */
+.potential-score {
+    color: #f59e0b;
+    font-weight: 600;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* Potential points on individual tips */
+.tip-points.potential {
+    color: #f59e0b;
+    font-style: italic;
+}
+
 @media (max-width: 768px) {
     .match-card {
         padding: 12px;

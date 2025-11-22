@@ -220,8 +220,9 @@ function displayCompetition(competition, participants, userId) {
  * @param {string} currentUserId - Current user ID
  * @param {Object} scoresByUser - Object mapping user_id to total points
  * @param {boolean} hasLiveMatches - Whether there are live matches
+ * @param {Object} potentialScoresByUser - Object mapping user_id to potential points from live matches
  */
-function displayLeaderboard(participants, currentUserId, scoresByUser = {}, hasLiveMatches = false) {
+function displayLeaderboard(participants, currentUserId, scoresByUser = {}, hasLiveMatches = false, potentialScoresByUser = {}) {
     const leaderboardList = document.getElementById('leaderboardList');
 
     // Update leaderboard header with LIVE indicator
@@ -244,23 +245,35 @@ function displayLeaderboard(participants, currentUserId, scoresByUser = {}, hasL
     const participantsWithScores = participants.map(participant => ({
         ...participant,
         score: scoresByUser[participant.user_id] || 0,
+        potentialScore: potentialScoresByUser[participant.user_id] || 0,
         name: participant.display_name || participant.user_name || 'Ukjent'
     }));
 
-    // Sort by score (highest first)
-    participantsWithScores.sort((a, b) => b.score - a.score);
+    // Sort by score (highest first), then by potential score
+    participantsWithScores.sort((a, b) => {
+        const totalA = a.score + a.potentialScore;
+        const totalB = b.score + b.potentialScore;
+        return totalB - totalA;
+    });
 
     // Render leaderboard
     leaderboardList.innerHTML = participantsWithScores.map((participant, index) => {
         const isCurrentUser = participant.user_id === currentUserId;
         const position = index + 1;
         const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : '';
+        const hasPotential = participant.potentialScore > 0;
+
+        // Format score display
+        let scoreDisplay = `${participant.score}`;
+        if (hasPotential) {
+            scoreDisplay += ` <span class="potential-score">(+${participant.potentialScore})</span>`;
+        }
 
         return `
             <div class="leaderboard-row ${isCurrentUser ? 'current-user' : ''}">
                 <div class="leaderboard-position">${medal || position}</div>
                 <div class="leaderboard-name">${participant.name}${isCurrentUser ? ' (deg)' : ''}</div>
-                <div class="leaderboard-score">${participant.score} poeng</div>
+                <div class="leaderboard-score">${scoreDisplay} poeng</div>
             </div>
         `;
     }).join('');
@@ -326,15 +339,55 @@ async function loadCompetitionMatches(competition, participants, currentUserId) 
 
         console.log('📥 Loaded tips:', allTips?.length || 0);
 
+        // Fetch match odds from matches table (fallback for tips without odds)
+        console.log('🔍 Fetching odds for match IDs:', matchIds);
+        const { data: matchesWithOdds, error: matchesError } = await window.supabase
+            .from('matches')
+            .select('id, odds')
+            .in('id', matchIds);
+
+        console.log('📥 Matches query result:', { matchesWithOdds, matchesError });
+
+        if (matchesError) {
+            console.error('❌ Error loading match odds:', matchesError);
+        }
+
+        // Create odds lookup from matches table
+        const matchOddsLookup = {};
+        (matchesWithOdds || []).forEach(m => {
+            console.log(`  Match ${m.id} odds:`, m.odds);
+            if (m.odds) {
+                matchOddsLookup[m.id] = m.odds;
+            }
+        });
+        console.log('📥 Match odds lookup:', matchOddsLookup);
+
+        // Also log tips to see their odds
+        console.log('📥 Tips with their odds:');
+        (allTips || []).forEach(tip => {
+            console.log(`  Tip for match ${tip.match_id} by ${tip.user_id}: odds =`, tip.odds);
+        });
+
+        // Enrich tips with match odds if tip.odds is missing
+        const enrichedTips = (allTips || []).map(tip => {
+            if (!tip.odds || Object.keys(tip.odds).length === 0) {
+                return {
+                    ...tip,
+                    odds: matchOddsLookup[tip.match_id] || null
+                };
+            }
+            return tip;
+        });
+
         // Calculate scores for leaderboard
-        const { scoresByUser, hasLiveMatches } = calculateAllScores(matches, allTips || [], participants);
-        console.log('📊 Scores calculated:', scoresByUser, 'hasLive:', hasLiveMatches);
+        const { scoresByUser, potentialScoresByUser, hasLiveMatches } = calculateAllScores(matches, enrichedTips, participants);
+        console.log('📊 Scores calculated:', scoresByUser, 'potential:', potentialScoresByUser, 'hasLive:', hasLiveMatches);
 
-        // Update leaderboard with actual scores
-        displayLeaderboard(participants, currentUserId, scoresByUser, hasLiveMatches);
+        // Update leaderboard with actual scores and potential scores
+        displayLeaderboard(participants, currentUserId, scoresByUser, hasLiveMatches, potentialScoresByUser);
 
-        // Display matches
-        displayMatches(matches, allTips || [], participants, currentUserId);
+        // Display matches with enriched tips (includes odds)
+        displayMatches(matches, enrichedTips, participants, currentUserId);
 
     } catch (error) {
         console.error('❌ Error loading matches:', error);
@@ -424,20 +477,24 @@ function displayMatches(matches, tips, participants, currentUserId) {
                 const isCurrentUser = participant.user_id === currentUserId;
 
                 if (tip) {
-                    // Calculate points if match is finished
+                    // Calculate points if match is finished or live
                     let points = 0;
                     let pointsClass = '';
-                    if (isFinished && goals.home !== null && goals.away !== null) {
-                        points = calculatePoints(tip.home_score, tip.away_score, goals.home, goals.away);
+                    let showPoints = false;
+
+                    if ((isFinished || isLive) && goals.home !== null && goals.away !== null) {
+                        points = calculatePointsWithOdds(tip, goals.home, goals.away);
                         pointsClass = points > 0 ? 'has-points' : 'no-points';
+                        showPoints = true;
                     }
 
                     const tipUserName = participant.display_name || participant.user_name || 'Ukjent';
+                    const pointsLabel = isLive ? `(${points}p)` : `${points}p`;
                     html += `
                         <div class="tip-item ${isCurrentUser ? 'current-user-tip' : ''} ${pointsClass}">
                             <span class="tip-user">${tipUserName}</span>
                             <span class="tip-score">${tip.home_score} - ${tip.away_score}</span>
-                            ${isFinished ? `<span class="tip-points">${points}p</span>` : ''}
+                            ${showPoints ? `<span class="tip-points ${isLive ? 'potential' : ''}">${pointsLabel}</span>` : ''}
                         </div>
                     `;
                 } else {
@@ -468,15 +525,17 @@ function displayMatches(matches, tips, participants, currentUserId) {
 }
 
 /**
- * Calculate scores for all participants
+ * Calculate scores for all participants (with odds-based scoring)
  */
 function calculateAllScores(matches, tips, participants) {
     const scoresByUser = {};
+    const potentialScoresByUser = {};
     let hasLiveMatches = false;
 
     // Initialize scores for all participants
     participants.forEach(p => {
         scoresByUser[p.user_id] = 0;
+        potentialScoresByUser[p.user_id] = 0;
     });
 
     // Create tips lookup
@@ -500,39 +559,106 @@ function calculateAllScores(matches, tips, participants) {
             hasLiveMatches = true;
         }
 
-        // Only calculate points for finished matches
+        // Calculate points for finished matches
         if (isFinished && goals.home !== null && goals.away !== null) {
             participants.forEach(participant => {
                 const tip = tipsMap[`${matchId}_${participant.user_id}`];
                 if (tip) {
-                    const points = calculatePoints(tip.home_score, tip.away_score, goals.home, goals.away);
+                    const points = calculatePointsWithOdds(tip, goals.home, goals.away);
                     scoresByUser[participant.user_id] += points;
+                }
+            });
+        }
+
+        // Calculate potential points for live matches
+        if (isLive && goals.home !== null && goals.away !== null) {
+            participants.forEach(participant => {
+                const tip = tipsMap[`${matchId}_${participant.user_id}`];
+                if (tip) {
+                    const points = calculatePointsWithOdds(tip, goals.home, goals.away);
+                    potentialScoresByUser[participant.user_id] += points;
                 }
             });
         }
     });
 
-    return { scoresByUser, hasLiveMatches };
+    return { scoresByUser, potentialScoresByUser, hasLiveMatches };
 }
 
 /**
- * Calculate points for a tip
+ * Calculate points for a tip (simple version for display)
  */
-function calculatePoints(tipHome, tipAway, actualHome, actualAway) {
-    // Exact score = 3 points
-    if (tipHome === actualHome && tipAway === actualAway) {
-        return 3;
+function calculatePoints(tipHome, tipAway, actualHome, actualAway, tipOdds) {
+    return calculatePointsWithOdds({
+        home_score: tipHome,
+        away_score: tipAway,
+        odds: tipOdds
+    }, actualHome, actualAway);
+}
+
+/**
+ * Calculate points for a tip using odds-based scoring
+ * - Correct outcome (H/U/B): points = odds value
+ * - Exact score bonus: +3 points
+ */
+function calculatePointsWithOdds(tip, actualHome, actualAway) {
+    // Default odds if not set or empty
+    const defaultOdds = { H: 2.0, U: 3.0, B: 2.0 };
+
+    // Parse odds - ensure they are numbers
+    let odds = defaultOdds;
+    if (tip.odds && typeof tip.odds === 'object') {
+        odds = {
+            H: parseFloat(tip.odds.H) || defaultOdds.H,
+            U: parseFloat(tip.odds.U) || defaultOdds.U,
+            B: parseFloat(tip.odds.B) || defaultOdds.B
+        };
     }
 
-    // Correct outcome = 1 point
-    const tipOutcome = tipHome > tipAway ? 'H' : tipHome < tipAway ? 'A' : 'D';
-    const actualOutcome = actualHome > actualAway ? 'H' : actualHome < actualAway ? 'A' : 'D';
+    // Determine outcomes (convert to numbers to handle string scores)
+    const tipHome = Number(tip.home_score);
+    const tipAway = Number(tip.away_score);
+    const actHome = Number(actualHome);
+    const actAway = Number(actualAway);
 
+    const tipOutcome = getOutcome(tipHome, tipAway);
+    const actualOutcome = getOutcome(actHome, actAway);
+
+    console.log('📊 Points calc:', {
+        tip: `${tipHome}-${tipAway}`,
+        actual: `${actHome}-${actAway}`,
+        tipOutcome,
+        actualOutcome,
+        odds,
+        rawOdds: tip.odds
+    });
+
+    let points = 0;
+
+    // Correct outcome = odds value
     if (tipOutcome === actualOutcome) {
-        return 1;
+        const oddsValue = odds[actualOutcome];
+        points += oddsValue;
+        console.log(`✅ Correct outcome (${actualOutcome}): +${oddsValue} points`);
     }
 
-    return 0;
+    // Exact score bonus = +3 points
+    if (tipHome === actHome && tipAway === actAway) {
+        points += 3;
+        console.log('🎯 Exact score: +3 points');
+    }
+
+    console.log(`📊 Total points: ${points}`);
+    return Math.round(points * 10) / 10; // Round to 1 decimal
+}
+
+/**
+ * Get outcome from score (H = Home, U = Draw, B = Away)
+ */
+function getOutcome(homeScore, awayScore) {
+    if (homeScore > awayScore) return 'H';
+    if (homeScore < awayScore) return 'B';
+    return 'U';
 }
 
 /**
