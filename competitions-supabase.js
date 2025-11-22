@@ -341,42 +341,96 @@ function updateStepIndicators() {
 
 /**
  * Load available rounds (Step 2 for round type)
+ * Fetches actual rounds from API-Football
  */
 async function loadAvailableRounds() {
-    console.log('📥 Loading available rounds...');
+    console.log('📥 Loading available rounds from API...');
 
     const roundsList = document.getElementById('roundsList');
     roundsList.innerHTML = '<div class="loading-message">Laster runder...</div>';
 
     try {
-        // For now, show hardcoded rounds for PL, CL, EL
-        // In production, this would fetch from API
-        const rounds = [
-            {
-                id: 'pl-13',
-                league: 39,
-                round: 'Regular Season - 13',
-                name: 'Premier League - Runde 13',
-                subtitle: '23-24 Nov • ~10 kamper',
-                icon: '⚽'
-            },
-            {
-                id: 'cl-5',
-                league: 2,
-                round: 'League Stage - 5',
-                name: 'Champions League - Runde 5',
-                subtitle: '26-27 Nov • ~18 kamper',
-                icon: '⭐'
-            },
-            {
-                id: 'el-5',
-                league: 3,
-                round: 'League Stage - 5',
-                name: 'Europa League - Runde 5',
-                subtitle: '28 Nov • ~18 kamper',
-                icon: '🌟'
-            }
+        // Define leagues to fetch rounds for
+        const leagueConfigs = [
+            { id: 39, name: 'Premier League', icon: '⚽', season: new Date().getFullYear() },
+            { id: 2, name: 'Champions League', icon: '⭐', season: new Date().getFullYear() },
+            { id: 3, name: 'Europa League', icon: '🌟', season: new Date().getFullYear() }
         ];
+
+        const rounds = [];
+        const now = new Date();
+
+        // Fetch next 14 days of fixtures for each league
+        const fromDate = now.toISOString().split('T')[0];
+        const toDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+        for (const league of leagueConfigs) {
+            try {
+                const url = `/api/football?endpoint=fixtures&league=${league.id}&season=${league.season}&from=${fromDate}&to=${toDate}`;
+                console.log(`📥 Fetching fixtures for ${league.name}...`);
+
+                const response = await fetch(url);
+                if (!response.ok) continue;
+
+                const data = await response.json();
+
+                if (data.response && data.response.length > 0) {
+                    // Group fixtures by round
+                    const fixturesByRound = {};
+
+                    data.response.forEach(fixture => {
+                        const roundName = fixture.league.round;
+                        if (!fixturesByRound[roundName]) {
+                            fixturesByRound[roundName] = [];
+                        }
+                        fixturesByRound[roundName].push(fixture);
+                    });
+
+                    // Create round entries
+                    Object.entries(fixturesByRound).forEach(([roundName, fixtures]) => {
+                        // Calculate date range for this round
+                        const dates = fixtures.map(f => new Date(f.fixture.date));
+                        const startDate = new Date(Math.min(...dates));
+                        const endDate = new Date(Math.max(...dates));
+
+                        // Format dates for display
+                        const startStr = startDate.toLocaleDateString('no-NO', { day: 'numeric', month: 'short' });
+                        const endStr = endDate.toLocaleDateString('no-NO', { day: 'numeric', month: 'short' });
+                        const dateRange = startDate.toDateString() === endDate.toDateString()
+                            ? startStr
+                            : `${startStr} - ${endStr}`;
+
+                        // Extract round number
+                        const roundMatch = roundName.match(/(\d+)/);
+                        const roundNum = roundMatch ? roundMatch[1] : '';
+
+                        rounds.push({
+                            id: `${league.id}-${roundName.replace(/\s+/g, '-').toLowerCase()}`,
+                            league: league.id,
+                            leagueName: league.name,
+                            round: roundName,
+                            name: `${league.name} - Runde ${roundNum}`,
+                            subtitle: `${dateRange} • ${fixtures.length} kamper`,
+                            icon: league.icon,
+                            startDate: startDate,
+                            endDate: endDate,
+                            matchIds: fixtures.map(f => f.fixture.id),
+                            matchCount: fixtures.length
+                        });
+                    });
+                }
+            } catch (err) {
+                console.error(`❌ Error fetching ${league.name}:`, err);
+            }
+        }
+
+        // Sort rounds by start date
+        rounds.sort((a, b) => a.startDate - b.startDate);
+
+        if (rounds.length === 0) {
+            roundsList.innerHTML = '<div class="error-message">Ingen kommende runder funnet</div>';
+            return;
+        }
 
         roundsList.innerHTML = rounds.map(round => `
             <div class="selection-item" onclick="selectRound('${round.id}')" id="round-${round.id}">
@@ -425,11 +479,20 @@ window.selectRound = function(roundId) {
 function showMatchPreview(round) {
     const preview = document.getElementById('matchPreview');
     preview.style.display = 'block';
+
+    // Format date range
+    const startStr = round.startDate.toLocaleDateString('no-NO', { weekday: 'short', day: 'numeric', month: 'short' });
+    const endStr = round.endDate.toLocaleDateString('no-NO', { weekday: 'short', day: 'numeric', month: 'short' });
+    const dateRange = round.startDate.toDateString() === round.endDate.toDateString()
+        ? startStr
+        : `${startStr} - ${endStr}`;
+
     preview.innerHTML = `
-        <div class="match-preview-header">Forhåndsvisning</div>
-        <p style="color: #64748b; font-size: 14px; padding: 12px;">
-            ${round.subtitle}
-        </p>
+        <div class="match-preview-header">📅 ${round.name}</div>
+        <div style="padding: 12px; color: #64748b; font-size: 13px;">
+            <p style="margin: 0 0 8px 0;"><strong>Periode:</strong> ${dateRange}</p>
+            <p style="margin: 0;"><strong>Antall kamper:</strong> ${round.matchCount}</p>
+        </div>
     `;
 }
 
@@ -589,17 +652,21 @@ window.createCompetition = async function(event) {
         // Determine league IDs and dates based on selection
         let leagueIds = [];
         let startDate, endDate;
+        let matchIds = [];
 
         if (wizardState.competitionType === 'round' && wizardState.selectedRound) {
             leagueIds = [wizardState.selectedRound.league];
-            // For now, use approximate dates (would be fetched from API in production)
-            startDate = new Date();
-            endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 1 week
+            // Use actual dates from the selected round
+            startDate = wizardState.selectedRound.startDate;
+            endDate = wizardState.selectedRound.endDate;
+            matchIds = wizardState.selectedRound.matchIds || [];
+            console.log(`📅 Using round dates: ${startDate.toISOString()} - ${endDate.toISOString()}`);
         } else if (wizardState.competitionType === 'tournament' && wizardState.selectedTournament) {
             leagueIds = [wizardState.selectedTournament.league];
-            // Tournament dates would come from API
-            startDate = new Date();
-            endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+            // Use actual dates from the selected tournament
+            startDate = wizardState.selectedTournament.startDate || new Date();
+            endDate = wizardState.selectedTournament.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+            matchIds = wizardState.selectedTournament.matchIds || [];
         }
 
         // Create competition in Supabase
@@ -607,11 +674,12 @@ window.createCompetition = async function(event) {
             .from('competitions')
             .insert({
                 name: name,
+                description: description || null,
                 creator_id: user.id,
                 league_ids: leagueIds,
                 start_date: startDate.toISOString(),
                 end_date: endDate.toISOString(),
-                match_ids: [] // Would be populated with actual match IDs
+                match_ids: matchIds
             })
             .select()
             .single();

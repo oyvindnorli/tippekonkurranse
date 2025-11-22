@@ -158,6 +158,15 @@ function displayCompetition(competition, participants, userId) {
         joinBtn.style.display = 'none';
     }
 
+    // Show/hide delete button (only for creator)
+    const isCreator = competition.creator_id === userId;
+    const deleteBtn = document.getElementById('deleteBtn');
+    if (isCreator) {
+        deleteBtn.style.display = 'inline-block';
+    } else {
+        deleteBtn.style.display = 'none';
+    }
+
     // Display leaderboard
     displayLeaderboard(participants);
 
@@ -213,6 +222,79 @@ function showError(message) {
         errorMessage.style.display = 'block';
     }
 }
+
+/**
+ * Delete competition (only for creator)
+ */
+window.deleteCompetition = async function() {
+    if (!confirm('Er du sikker på at du vil slette denne konkurransen? Dette kan ikke angres.')) {
+        return;
+    }
+
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const competitionId = urlParams.get('id');
+
+        const { data: { user } } = await window.supabase.auth.getUser();
+
+        if (!user) {
+            alert('Du må være innlogget');
+            return;
+        }
+
+        // First delete all participants
+        const { error: participantsError } = await window.supabase
+            .from('competition_participants')
+            .delete()
+            .eq('competition_id', competitionId);
+
+        if (participantsError) {
+            console.error('❌ Error deleting participants:', participantsError);
+        }
+
+        // Then delete the competition
+        const { error: competitionError } = await window.supabase
+            .from('competitions')
+            .delete()
+            .eq('id', competitionId)
+            .eq('creator_id', user.id); // Only allow creator to delete
+
+        if (competitionError) {
+            console.error('❌ Error deleting competition:', competitionError);
+            alert('Kunne ikke slette konkurransen');
+            return;
+        }
+
+        console.log('✅ Competition deleted');
+        alert('Konkurransen er slettet');
+
+        // Redirect to competitions list
+        window.location.href = 'competitions.html';
+
+    } catch (error) {
+        console.error('❌ Error in deleteCompetition:', error);
+        alert('Noe gikk galt. Prøv igjen.');
+    }
+};
+
+/**
+ * Share competition
+ */
+window.shareCompetition = function() {
+    const url = window.location.href;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Bli med i tippekonkurranse!',
+            url: url
+        });
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(url);
+        alert('Link kopiert til utklippstavlen!');
+    } else {
+        prompt('Kopier denne linken:', url);
+    }
+};
 
 /**
  * Join competition
