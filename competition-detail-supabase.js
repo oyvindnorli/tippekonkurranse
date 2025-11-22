@@ -76,10 +76,10 @@ async function loadCompetitionDetails(competitionId, userId) {
 
         console.log('✅ Loaded competition:', competition);
 
-        // Get participants
+        // Get participants with user info from users table
         const { data: participants, error: participantsError } = await window.supabase
             .from('competition_participants')
-            .select('*')
+            .select('*, users(display_name, email)')
             .eq('competition_id', competitionId);
 
         if (participantsError) {
@@ -87,10 +87,17 @@ async function loadCompetitionDetails(competitionId, userId) {
             throw new Error('Kunne ikke laste deltakere');
         }
 
-        console.log('✅ Loaded participants:', participants);
+        // Map participants to include display_name from users table
+        const mappedParticipants = participants.map(p => ({
+            ...p,
+            // Prefer users.display_name, fall back to stored user_name, then email
+            display_name: p.users?.display_name || p.user_name || p.users?.email?.split('@')[0] || 'Ukjent'
+        }));
+
+        console.log('✅ Loaded participants:', mappedParticipants);
 
         // Display competition
-        displayCompetition(competition, participants, userId);
+        displayCompetition(competition, mappedParticipants, userId);
 
         loadingMessage.style.display = 'none';
         detailsSection.style.display = 'block';
@@ -198,10 +205,11 @@ function displayLeaderboard(participants, currentUserId) {
     // Scores will be calculated when we have match results
     leaderboardList.innerHTML = participants.map((participant, index) => {
         const isCurrentUser = participant.user_id === currentUserId;
+        const name = participant.display_name || participant.user_name || 'Ukjent';
         return `
             <div class="leaderboard-row ${isCurrentUser ? 'current-user' : ''}">
                 <div class="leaderboard-position">${index + 1}</div>
-                <div class="leaderboard-name">${participant.user_name}${isCurrentUser ? ' (deg)' : ''}</div>
+                <div class="leaderboard-name">${name}${isCurrentUser ? ' (deg)' : ''}</div>
                 <div class="leaderboard-score">0 poeng</div>
             </div>
         `;
@@ -367,17 +375,19 @@ function displayMatches(matches, tips, participants, currentUserId) {
                         pointsClass = points > 0 ? 'has-points' : 'no-points';
                     }
 
+                    const tipUserName = participant.display_name || participant.user_name || 'Ukjent';
                     html += `
                         <div class="tip-item ${isCurrentUser ? 'current-user-tip' : ''} ${pointsClass}">
-                            <span class="tip-user">${participant.user_name}</span>
+                            <span class="tip-user">${tipUserName}</span>
                             <span class="tip-score">${tip.home_score} - ${tip.away_score}</span>
                             ${isFinished ? `<span class="tip-points">${points}p</span>` : ''}
                         </div>
                     `;
                 } else {
+                    const tipUserName = participant.display_name || participant.user_name || 'Ukjent';
                     html += `
                         <div class="tip-item no-tip ${isCurrentUser ? 'current-user-tip' : ''}">
-                            <span class="tip-user">${participant.user_name}</span>
+                            <span class="tip-user">${tipUserName}</span>
                             <span class="tip-score">-</span>
                         </div>
                     `;
