@@ -88,13 +88,17 @@ async function loadCompetitionDetails(competitionId, userId) {
         }
 
         // Map participants to include display_name from users table
-        const mappedParticipants = participants.map(p => ({
-            ...p,
-            // Prefer users.display_name, fall back to stored user_name, then email
-            display_name: p.users?.display_name || p.user_name || p.users?.email?.split('@')[0] || 'Ukjent'
-        }));
+        const mappedParticipants = participants.map(p => {
+            console.log('👤 Participant data:', p);
+            console.log('👤 Users join result:', p.users);
+            return {
+                ...p,
+                // Prefer users.display_name, fall back to stored user_name, then email
+                display_name: p.users?.display_name || p.user_name || p.users?.email?.split('@')[0] || 'Ukjent'
+            };
+        });
 
-        console.log('✅ Loaded participants:', mappedParticipants);
+        console.log('✅ Mapped participants:', mappedParticipants);
 
         // Display competition
         displayCompetition(competition, mappedParticipants, userId);
@@ -174,10 +178,10 @@ function displayCompetition(competition, participants, userId) {
         deleteBtn.style.display = 'none';
     }
 
-    // Display leaderboard
-    displayLeaderboard(participants, userId);
+    // Display initial leaderboard (will be updated with scores after matches load)
+    displayLeaderboard(participants, userId, []);
 
-    // Load and display matches
+    // Load and display matches (this also updates the leaderboard with scores)
     if (competition.match_ids && competition.match_ids.length > 0) {
         loadCompetitionMatches(competition, participants, userId);
     } else {
@@ -191,26 +195,52 @@ function displayCompetition(competition, participants, userId) {
 }
 
 /**
- * Display leaderboard
+ * Display leaderboard with scores
+ * @param {Array} participants - Participants list
+ * @param {string} currentUserId - Current user ID
+ * @param {Object} scoresByUser - Object mapping user_id to total points
+ * @param {boolean} hasLiveMatches - Whether there are live matches
  */
-function displayLeaderboard(participants, currentUserId) {
+function displayLeaderboard(participants, currentUserId, scoresByUser = {}, hasLiveMatches = false) {
     const leaderboardList = document.getElementById('leaderboardList');
+
+    // Update leaderboard header with LIVE indicator
+    const leaderboardHeader = document.querySelector('.competition-leaderboard h3');
+    if (leaderboardHeader) {
+        const hasScores = Object.keys(scoresByUser).length > 0;
+        if (hasLiveMatches) {
+            leaderboardHeader.innerHTML = '🏆 Tabell <span class="live-indicator">LIVE</span>';
+        } else if (hasScores) {
+            leaderboardHeader.innerHTML = '🏆 Tabell';
+        }
+    }
 
     if (participants.length === 0) {
         leaderboardList.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">Ingen deltakere ennå</p>';
         return;
     }
 
-    // For now, just show participants without scores
-    // Scores will be calculated when we have match results
-    leaderboardList.innerHTML = participants.map((participant, index) => {
+    // Calculate scores for each participant
+    const participantsWithScores = participants.map(participant => ({
+        ...participant,
+        score: scoresByUser[participant.user_id] || 0,
+        name: participant.display_name || participant.user_name || 'Ukjent'
+    }));
+
+    // Sort by score (highest first)
+    participantsWithScores.sort((a, b) => b.score - a.score);
+
+    // Render leaderboard
+    leaderboardList.innerHTML = participantsWithScores.map((participant, index) => {
         const isCurrentUser = participant.user_id === currentUserId;
-        const name = participant.display_name || participant.user_name || 'Ukjent';
+        const position = index + 1;
+        const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : '';
+
         return `
             <div class="leaderboard-row ${isCurrentUser ? 'current-user' : ''}">
-                <div class="leaderboard-position">${index + 1}</div>
-                <div class="leaderboard-name">${name}${isCurrentUser ? ' (deg)' : ''}</div>
-                <div class="leaderboard-score">0 poeng</div>
+                <div class="leaderboard-position">${medal || position}</div>
+                <div class="leaderboard-name">${participant.name}${isCurrentUser ? ' (deg)' : ''}</div>
+                <div class="leaderboard-score">${participant.score} poeng</div>
             </div>
         `;
     }).join('');
@@ -275,6 +305,13 @@ async function loadCompetitionMatches(competition, participants, currentUserId) 
         }
 
         console.log('📥 Loaded tips:', allTips?.length || 0);
+
+        // Calculate scores for leaderboard
+        const { scoresByUser, hasLiveMatches } = calculateAllScores(matches, allTips || [], participants);
+        console.log('📊 Scores calculated:', scoresByUser, 'hasLive:', hasLiveMatches);
+
+        // Update leaderboard with actual scores
+        displayLeaderboard(participants, currentUserId, scoresByUser, hasLiveMatches);
 
         // Display matches
         displayMatches(matches, allTips || [], participants, currentUserId);
@@ -408,6 +445,54 @@ function displayMatches(matches, tips, participants, currentUserId) {
 
     html += '</div>';
     matchesTable.innerHTML = html;
+}
+
+/**
+ * Calculate scores for all participants
+ */
+function calculateAllScores(matches, tips, participants) {
+    const scoresByUser = {};
+    let hasLiveMatches = false;
+
+    // Initialize scores for all participants
+    participants.forEach(p => {
+        scoresByUser[p.user_id] = 0;
+    });
+
+    // Create tips lookup
+    const tipsMap = {};
+    tips.forEach(tip => {
+        const key = `${tip.match_id}_${tip.user_id}`;
+        tipsMap[key] = tip;
+    });
+
+    // Calculate points for each match
+    matches.forEach(match => {
+        const fixture = match.fixture;
+        const goals = match.goals;
+        const matchId = fixture.id;
+
+        // Check match status
+        const isFinished = ['FT', 'AET', 'PEN'].includes(fixture.status.short);
+        const isLive = ['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].includes(fixture.status.short);
+
+        if (isLive) {
+            hasLiveMatches = true;
+        }
+
+        // Only calculate points for finished matches
+        if (isFinished && goals.home !== null && goals.away !== null) {
+            participants.forEach(participant => {
+                const tip = tipsMap[`${matchId}_${participant.user_id}`];
+                if (tip) {
+                    const points = calculatePoints(tip.home_score, tip.away_score, goals.home, goals.away);
+                    scoresByUser[participant.user_id] += points;
+                }
+            });
+        }
+    });
+
+    return { scoresByUser, hasLiveMatches };
 }
 
 /**
