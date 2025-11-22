@@ -91,10 +91,13 @@ async function loadCompetitionDetails(competitionId, userId) {
         const userIds = participants.map(p => p.user_id);
 
         // Fetch display names from users table
+        console.log('🔍 Fetching users for IDs:', userIds);
         const { data: usersData, error: usersError } = await window.supabase
             .from('users')
             .select('id, display_name, email')
             .in('id', userIds);
+
+        console.log('📥 Users query result:', { usersData, usersError });
 
         if (usersError) {
             console.error('❌ Error loading users:', usersError);
@@ -103,6 +106,7 @@ async function loadCompetitionDetails(competitionId, userId) {
         // Create lookup for user display names
         const usersMap = {};
         (usersData || []).forEach(user => {
+            console.log('👤 User from DB:', user);
             usersMap[user.id] = user.display_name || user.email?.split('@')[0] || 'Ukjent';
         });
 
