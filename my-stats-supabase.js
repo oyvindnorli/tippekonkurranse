@@ -7,6 +7,18 @@
 const DEFAULT_ODDS = { H: 2.0, U: 3.0, B: 2.0 };
 const EXACT_SCORE_BONUS = 3;
 
+const LEAGUE_NAMES = {
+    39: 'Premier League',
+    140: 'La Liga',
+    78: 'Bundesliga',
+    135: 'Serie A',
+    61: 'Ligue 1',
+    2: 'Champions League',
+    3: 'Europa League',
+    848: 'Conference League',
+    32: 'VM Kval. Europa'
+};
+
 // Global state
 let currentUserId = null;
 let userTips = [];
@@ -163,7 +175,7 @@ async function loadAllStats() {
 
         // Display everything
         displayRankingAndStats();
-        displayLeaderboard();
+        displayLeagueStats();
         displayMatchHistory();
 
     } catch (error) {
@@ -339,32 +351,76 @@ function updateComparison(userStats, avgStats) {
     document.getElementById('exactAvgBar').style.width = `${avgStats.exactRate}%`;
 }
 
-function displayLeaderboard() {
-    const leaderboardList = document.getElementById('leaderboardList');
-    if (!leaderboardList) return;
+function displayLeagueStats() {
+    const leagueStatsList = document.getElementById('leagueStatsList');
+    if (!leagueStatsList) return;
 
-    if (allUsersStats.length === 0) {
-        leaderboardList.innerHTML = '<p class="empty-message">Ingen data ennå</p>';
+    // Calculate stats per league for current user
+    const leagueStats = {};
+
+    userTips.forEach(tip => {
+        const match = allMatches.find(m => m.id === tip.match_id);
+        if (!match || match.home_score === null || match.away_score === null) return;
+
+        const leagueId = match.league_id;
+        if (!leagueId) return;
+
+        if (!leagueStats[leagueId]) {
+            leagueStats[leagueId] = {
+                name: LEAGUE_NAMES[leagueId] || match.league_name || `Liga ${leagueId}`,
+                totalMatches: 0,
+                totalPoints: 0,
+                exactMatches: 0,
+                correctOutcome: 0
+            };
+        }
+
+        const points = calculatePoints(tip, match);
+        leagueStats[leagueId].totalMatches++;
+        leagueStats[leagueId].totalPoints += points;
+
+        const tipHome = Number(tip.home_score);
+        const tipAway = Number(tip.away_score);
+        const actHome = Number(match.home_score);
+        const actAway = Number(match.away_score);
+
+        const isExact = tipHome === actHome && tipAway === actAway;
+        const tipOutcome = getOutcome(tipHome, tipAway);
+        const actualOutcome = getOutcome(actHome, actAway);
+
+        if (isExact) {
+            leagueStats[leagueId].exactMatches++;
+            leagueStats[leagueId].correctOutcome++;
+        } else if (tipOutcome === actualOutcome) {
+            leagueStats[leagueId].correctOutcome++;
+        }
+    });
+
+    const leagues = Object.values(leagueStats)
+        .map(l => ({
+            ...l,
+            avgPoints: l.totalMatches > 0 ? l.totalPoints / l.totalMatches : 0,
+            outcomeRate: l.totalMatches > 0 ? (l.correctOutcome / l.totalMatches) * 100 : 0,
+            exactRate: l.totalMatches > 0 ? (l.exactMatches / l.totalMatches) * 100 : 0
+        }))
+        .sort((a, b) => b.totalPoints - a.totalPoints);
+
+    if (leagues.length === 0) {
+        leagueStatsList.innerHTML = '<p class="empty-message">Ingen ligastatistikk ennå</p>';
         return;
     }
 
-    const top5 = allUsersStats.slice(0, 5);
-
-    leaderboardList.innerHTML = top5.map((user, index) => {
-        const isCurrentUser = user.id === currentUserId;
-        const medalClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
-
-        return `
-            <div class="leaderboard-item ${isCurrentUser ? 'current-user' : ''} ${medalClass}">
-                <div class="leaderboard-rank">${index + 1}</div>
-                <div class="leaderboard-name">${user.name}${isCurrentUser ? ' (deg)' : ''}</div>
-                <div class="leaderboard-stats">
-                    <span class="leaderboard-points">${Math.round(user.totalPoints * 10) / 10} p</span>
-                    <span class="leaderboard-rate">${user.outcomeRate.toFixed(0)}%</span>
-                </div>
+    leagueStatsList.innerHTML = leagues.map(league => `
+        <div class="league-stat-item">
+            <div class="league-stat-name">${league.name}</div>
+            <div class="league-stat-details">
+                <span class="league-stat-points">${Math.round(league.totalPoints * 10) / 10} p</span>
+                <span class="league-stat-matches">${league.totalMatches} kamper</span>
+                <span class="league-stat-rate">${league.outcomeRate.toFixed(0)}% utfall</span>
+                <span class="league-stat-exact">${league.exactRate.toFixed(0)}% eksakt</span>
             </div>
-        `;
-    }).join('');
+        </div>
+    `).join('');
 }
 
 // ============================================
