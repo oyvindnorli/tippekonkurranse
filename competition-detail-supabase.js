@@ -482,8 +482,31 @@ function displayMatches(matches, tips, participants, currentUserId) {
         return;
     }
 
-    // Sort by date
-    matches.sort((a, b) => new Date(a.fixture.date) - new Date(b.fixture.date));
+    // Sort: Live first, then upcoming (soonest first), then finished (newest first)
+    matches.sort((a, b) => {
+        const aLive = isMatchLive(a.fixture.status.short);
+        const bLive = isMatchLive(b.fixture.status.short);
+        const aFinished = isMatchFinished(a.fixture.status.short);
+        const bFinished = isMatchFinished(b.fixture.status.short);
+
+        // Live matches first
+        if (aLive && !bLive) return -1;
+        if (!aLive && bLive) return 1;
+
+        // Then upcoming (not started, not finished)
+        const aUpcoming = !aLive && !aFinished;
+        const bUpcoming = !bLive && !bFinished;
+        if (aUpcoming && !bUpcoming) return -1;
+        if (!aUpcoming && bUpcoming) return 1;
+
+        // Among upcoming: soonest first
+        if (aUpcoming && bUpcoming) {
+            return new Date(a.fixture.date) - new Date(b.fixture.date);
+        }
+
+        // Among finished: newest first
+        return new Date(b.fixture.date) - new Date(a.fixture.date);
+    });
 
     const tipsMap = createTipsMap(tips);
     let html = '<div class="matches-list">';
@@ -500,11 +523,25 @@ function displayMatches(matches, tips, participants, currentUserId) {
         const hasStarted = isFinished || isLive || new Date() > matchDate;
         const resultStr = (isFinished || isLive) ? `${goals.home ?? '-'} - ${goals.away ?? '-'}` : 'vs';
 
+        // Live match minute display
+        let liveMinuteDisplay = '';
+        if (isLive) {
+            const elapsed = fixture.status.elapsed;
+            const statusShort = fixture.status.short;
+            if (statusShort === 'HT') {
+                liveMinuteDisplay = 'Pause';
+            } else if (elapsed) {
+                liveMinuteDisplay = `${elapsed}'`;
+            } else {
+                liveMinuteDisplay = 'LIVE';
+            }
+        }
+
         html += `
-            <div class="competition-match-card">
+            <div class="competition-match-card ${isLive ? 'live-match' : ''}">
                 <div class="match-header">
                     <span class="match-date">${dateStr} ${timeStr}</span>
-                    ${isLive ? '<span class="live-badge">LIVE</span>' : ''}
+                    ${isLive ? `<span class="live-badge">${liveMinuteDisplay}</span>` : ''}
                     ${isFinished ? '<span class="finished-badge">Ferdig</span>' : ''}
                 </div>
                 <div class="match-teams">
