@@ -173,6 +173,17 @@ header h1 {
     padding: 14px 16px;
 }
 
+.user-info-bar {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.user-name-display {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+}
+
 .header-brand {
     display: flex;
     align-items: center;

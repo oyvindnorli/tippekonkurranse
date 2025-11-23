@@ -50,6 +50,11 @@ export function initHeader(activePage = 'index') {
                 <button id="signOutBtn" onclick="signOut()" class="btn-logout-premium" style="display: ${btnDisplayStyle};">Logg ut</button>
             </div>
 
+            <!-- Logged in user -->
+            <div class="user-info-bar" id="userInfoBar" style="display: ${displayStyle};">
+                <span class="user-name-display" id="currentUsername"></span>
+            </div>
+
             <!-- Navigation -->
             <nav class="nav-premium" id="mainNavButtons" style="display: ${displayStyle};">
                 <a href="index.html" class="nav-btn-premium ${activePage === 'index' ? 'active' : ''}">
@@ -77,10 +82,14 @@ export function updateHeaderStats(totalPoints, totalTips) {
 }
 
 /**
- * Update username in header (deprecated - kept for compatibility)
+ * Update username in header
+ * @param {string} username - Username to display
  */
 export function updateHeaderUsername(username) {
-    // Username display removed from header
+    const usernameElement = document.getElementById('currentUsername');
+    if (usernameElement) {
+        usernameElement.textContent = `Innlogget som ${username}`;
+    }
 }
 
 /**
@@ -89,10 +98,14 @@ export function updateHeaderUsername(username) {
  */
 export function updateHeaderAuthState(isLoggedIn) {
     const signOutBtn = document.getElementById('signOutBtn');
+    const userInfoBar = document.getElementById('userInfoBar');
     const navButtons = document.getElementById('mainNavButtons');
 
     if (signOutBtn) {
         signOutBtn.style.display = isLoggedIn ? 'block' : 'none';
+    }
+    if (userInfoBar) {
+        userInfoBar.style.display = isLoggedIn ? 'block' : 'none';
     }
     if (navButtons) {
         navButtons.style.display = isLoggedIn ? 'flex' : 'none';
