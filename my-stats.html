@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Min Statistikk - Tippekonkurranse</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="style.css?v=20251122b">
+    <link rel="stylesheet" href="style.css?v=20251123a">
 </head>
 <body>
     <div class="container">
@@ -13,92 +13,126 @@
         <div id="headerContainer"></div>
 
         <!-- Loading State -->
-        <div id="loadingState" style="display: flex; justify-content: center; align-items: center; min-height: 400px; flex-direction: column;">
-            <div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f4f6; border-top: 4px solid #4f46e5; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-            <p style="margin-top: 15px; color: #718096;">Laster statistikk...</p>
+        <div id="loadingState" class="stats-loading">
+            <div class="loading-spinner"></div>
+            <p>Laster statistikk...</p>
         </div>
 
         <main id="mainContent" style="display: none;">
-            <div class="stats-container">
-                <!-- Overall Stats Summary -->
-                <section class="stats-summary">
-                    <h2>Min Statistikk</h2>
-                    <div class="stats-cards">
-                        <div class="stat-card">
-                            <div class="stat-label">Totale poeng</div>
-                            <div class="stat-value" id="totalPoints">-</div>
+            <!-- Ranking Hero Section -->
+            <section class="stats-hero">
+                <div class="rank-card">
+                    <div class="rank-position">
+                        <span class="rank-hash">#</span>
+                        <span class="rank-number" id="userRank">-</span>
+                    </div>
+                    <div class="rank-info">
+                        <span class="rank-label">Din plassering</span>
+                        <span class="rank-total" id="totalPlayers">av - spillere</span>
+                    </div>
+                </div>
+                <div class="points-display">
+                    <span class="points-value" id="totalPoints">0</span>
+                    <span class="points-label">totale poeng</span>
+                </div>
+            </section>
+
+            <!-- Hit Rate Stats -->
+            <section class="stats-hitrates">
+                <div class="hitrate-card">
+                    <div class="hitrate-circle" id="outcomeCircle">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="hitrate-bg" cx="50" cy="50" r="45"/>
+                            <circle class="hitrate-progress outcome" cx="50" cy="50" r="45" id="outcomeProgress"/>
+                        </svg>
+                        <span class="hitrate-value" id="outcomeRate">0%</span>
+                    </div>
+                    <div class="hitrate-label">Utfall treffrate</div>
+                    <div class="hitrate-detail" id="outcomeDetail">0 av 0 riktig utfall</div>
+                </div>
+                <div class="hitrate-card">
+                    <div class="hitrate-circle" id="exactCircle">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="hitrate-bg" cx="50" cy="50" r="45"/>
+                            <circle class="hitrate-progress exact" cx="50" cy="50" r="45" id="exactProgress"/>
+                        </svg>
+                        <span class="hitrate-value" id="exactRate">0%</span>
+                    </div>
+                    <div class="hitrate-label">Eksakt treffrate</div>
+                    <div class="hitrate-detail" id="exactDetail">0 av 0 riktig resultat</div>
+                </div>
+            </section>
+
+            <!-- Comparison Section -->
+            <section class="stats-comparison">
+                <h3>Sammenligning med andre</h3>
+                <div class="comparison-bars">
+                    <div class="comparison-item">
+                        <div class="comparison-label">
+                            <span>Poeng per kamp</span>
+                            <span class="comparison-values">
+                                <span class="your-value" id="avgPointsYou">0.0</span>
+                                <span class="vs">vs</span>
+                                <span class="avg-value" id="avgPointsAvg">0.0 snitt</span>
+                            </span>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Kamper tippet</div>
-                            <div class="stat-value" id="totalMatches">-</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Riktig resultat</div>
-                            <div class="stat-value" id="exactMatches">-</div>
-                            <div class="stat-percentage" id="exactPercentage">-</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Riktig utfall</div>
-                            <div class="stat-value" id="correctDirection">-</div>
-                            <div class="stat-percentage" id="directionPercentage">-</div>
+                        <div class="comparison-bar-container">
+                            <div class="comparison-bar your-bar" id="avgPointsBar" style="width: 0%"></div>
+                            <div class="comparison-bar avg-bar" id="avgPointsAvgBar" style="width: 0%"></div>
                         </div>
                     </div>
-                </section>
-
-                <!-- Detailed Stats -->
-                <section class="detailed-stats">
-                    <div class="stats-grid">
-                        <div class="stats-box">
-                            <h3>Noyaktighet</h3>
-                            <div class="stats-row">
-                                <span>Gjennomsnittlig poeng per kamp:</span>
-                                <strong id="avgPoints">-</strong>
-                            </div>
-                            <div class="stats-row">
-                                <span>Beste serie (riktig pa rad):</span>
-                                <strong id="bestStreak">-</strong>
-                            </div>
-                            <div class="stats-row">
-                                <span>Navarende serie:</span>
-                                <strong id="currentStreak">-</strong>
-                            </div>
+                    <div class="comparison-item">
+                        <div class="comparison-label">
+                            <span>Utfall treffrate</span>
+                            <span class="comparison-values">
+                                <span class="your-value" id="outcomeYou">0%</span>
+                                <span class="vs">vs</span>
+                                <span class="avg-value" id="outcomeAvg">0% snitt</span>
+                            </span>
                         </div>
-
-                        <div class="stats-box">
-                            <h3>Basert pa odds</h3>
-                            <div class="stats-row">
-                                <span>Total verdi (basert pa odds):</span>
-                                <strong id="oddsValue">-</strong>
-                            </div>
-                            <div class="stats-row">
-                                <span>Gjennomsnittlig odds tippet:</span>
-                                <strong id="avgOdds">-</strong>
-                            </div>
-                        </div>
-
-                        <div class="stats-box">
-                            <h3>Per liga</h3>
-                            <div id="leagueStats">
-                                <div class="loading-message">Laster...</div>
-                            </div>
+                        <div class="comparison-bar-container">
+                            <div class="comparison-bar your-bar" id="outcomeBar" style="width: 0%"></div>
+                            <div class="comparison-bar avg-bar" id="outcomeAvgBar" style="width: 0%"></div>
                         </div>
                     </div>
-                </section>
+                    <div class="comparison-item">
+                        <div class="comparison-label">
+                            <span>Eksakt treffrate</span>
+                            <span class="comparison-values">
+                                <span class="your-value" id="exactYou">0%</span>
+                                <span class="vs">vs</span>
+                                <span class="avg-value" id="exactAvg">0% snitt</span>
+                            </span>
+                        </div>
+                        <div class="comparison-bar-container">
+                            <div class="comparison-bar your-bar" id="exactBar" style="width: 0%"></div>
+                            <div class="comparison-bar avg-bar" id="exactAvgBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                <!-- Match History -->
-                <section class="match-history">
-                    <h3>Kamphistorikk</h3>
-                    <div class="filter-buttons">
-                        <button class="filter-btn active" onclick="filterHistory('all')">Alle</button>
-                        <button class="filter-btn" onclick="filterHistory('correct')">Riktig resultat</button>
-                        <button class="filter-btn" onclick="filterHistory('direction')">Riktig utfall</button>
-                        <button class="filter-btn" onclick="filterHistory('wrong')">Feil</button>
-                    </div>
-                    <div id="matchHistoryList" class="match-history-list">
-                        <div class="loading-message">Laster kamphistorikk...</div>
-                    </div>
-                </section>
-            </div>
+            <!-- Top 5 Leaderboard -->
+            <section class="stats-leaderboard">
+                <h3>Topp 5</h3>
+                <div class="leaderboard-list" id="leaderboardList">
+                    <div class="loading-message">Laster...</div>
+                </div>
+            </section>
+
+            <!-- Match History -->
+            <section class="stats-history">
+                <h3>Siste kamper</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterHistory('all')">Alle</button>
+                    <button class="filter-btn" onclick="filterHistory('correct')">Eksakt</button>
+                    <button class="filter-btn" onclick="filterHistory('direction')">Utfall</button>
+                    <button class="filter-btn" onclick="filterHistory('wrong')">Feil</button>
+                </div>
+                <div id="matchHistoryList" class="match-history-list">
+                    <div class="loading-message">Laster...</div>
+                </div>
+            </section>
         </main>
 
         <!-- Auth Required Message -->
@@ -123,6 +157,6 @@
         import { initHeader } from './header.js';
         initHeader('my-stats');
     </script>
-    <script type="module" src="my-stats-supabase.js?v=20251122a"></script>
+    <script type="module" src="my-stats-supabase.js?v=20251123a"></script>
 </body>
 </html>

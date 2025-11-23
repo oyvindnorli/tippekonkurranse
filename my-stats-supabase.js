@@ -1,26 +1,17 @@
 /**
  * My Stats Page - Supabase version
+ * Design 4: Leaderboard-fokus med ranking og sammenligning
  */
 
 // Constants
 const DEFAULT_ODDS = { H: 2.0, U: 3.0, B: 2.0 };
 const EXACT_SCORE_BONUS = 3;
 
-const LEAGUE_NAMES = {
-    39: 'Premier League',
-    140: 'La Liga',
-    78: 'Bundesliga',
-    135: 'Serie A',
-    61: 'Ligue 1',
-    2: 'Champions League',
-    3: 'Europa League',
-    848: 'Conference League',
-    32: 'VM Kvalifisering Europa'
-};
-
 // Global state
+let currentUserId = null;
 let userTips = [];
-let matches = [];
+let allMatches = [];
+let allUsersStats = [];
 let filteredHistory = 'all';
 
 // Wait for Supabase to be initialized
@@ -47,8 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     hideLoading();
 
     if (user) {
+        currentUserId = user.id;
         showMainContent();
-        await loadUserStats(user.id);
+        await loadAllStats();
     } else {
         showAuthRequired();
     }
@@ -89,7 +81,7 @@ function parseOdds(odds) {
 }
 
 function calculatePoints(tip, match) {
-    if (!match.home_score === null || match.away_score === null) return 0;
+    if (match.home_score === null || match.away_score === null) return 0;
 
     const odds = parseOdds(tip.odds || match.odds);
     const tipHome = Number(tip.home_score);
@@ -117,31 +109,27 @@ function calculatePoints(tip, match) {
 // Data Loading
 // ============================================
 
-async function loadUserStats(userId) {
+async function loadAllStats() {
     try {
-        // Load user tips
-        const { data: tipsData, error: tipsError } = await window.supabase
+        // Load all tips from all users
+        const { data: allTips, error: tipsError } = await window.supabase
             .from('tips')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
+            .select('*');
 
         if (tipsError) {
             console.error('Error loading tips:', tipsError);
             return;
         }
 
-        userTips = tipsData || [];
-
-        // Get unique match IDs from tips
-        const matchIds = [...new Set(userTips.map(t => t.match_id))];
+        // Get unique match IDs
+        const matchIds = [...new Set(allTips.map(t => t.match_id))];
 
         if (matchIds.length === 0) {
             displayEmptyStats();
             return;
         }
 
-        // Load matches with results
+        // Load all matches
         const { data: matchesData, error: matchesError } = await window.supabase
             .from('matches')
             .select('*')
@@ -151,10 +139,31 @@ async function loadUserStats(userId) {
             console.error('Error loading matches:', matchesError);
         }
 
-        matches = matchesData || [];
+        allMatches = matchesData || [];
 
-        // Calculate and display statistics
-        calculateAndDisplayStats();
+        // Load all users
+        const { data: usersData, error: usersError } = await window.supabase
+            .from('users')
+            .select('id, display_name, email');
+
+        if (usersError) {
+            console.error('Error loading users:', usersError);
+        }
+
+        const usersMap = {};
+        (usersData || []).forEach(u => {
+            usersMap[u.id] = u.display_name || u.email?.split('@')[0] || 'Ukjent';
+        });
+
+        // Calculate stats for all users
+        allUsersStats = calculateAllUsersStats(allTips, usersMap);
+
+        // Get current user's tips
+        userTips = allTips.filter(t => t.user_id === currentUserId);
+
+        // Display everything
+        displayRankingAndStats();
+        displayLeaderboard();
         displayMatchHistory();
 
     } catch (error) {
@@ -162,60 +171,27 @@ async function loadUserStats(userId) {
     }
 }
 
-// ============================================
-// Statistics Calculation
-// ============================================
+function calculateAllUsersStats(allTips, usersMap) {
+    const userStats = {};
 
-function displayEmptyStats() {
-    document.getElementById('totalPoints').textContent = '0';
-    document.getElementById('totalMatches').textContent = '0';
-    document.getElementById('exactMatches').textContent = '0';
-    document.getElementById('correctDirection').textContent = '0';
-    document.getElementById('exactPercentage').textContent = '0%';
-    document.getElementById('directionPercentage').textContent = '0%';
-    document.getElementById('avgPoints').textContent = '0.0';
-    document.getElementById('bestStreak').textContent = '0';
-    document.getElementById('currentStreak').textContent = '0';
-    document.getElementById('oddsValue').textContent = '0';
-    document.getElementById('avgOdds').textContent = '-';
+    allTips.forEach(tip => {
+        const match = allMatches.find(m => m.id === tip.match_id);
+        if (!match || match.home_score === null || match.away_score === null) return;
 
-    const leagueStatsContainer = document.getElementById('leagueStats');
-    if (leagueStatsContainer) {
-        leagueStatsContainer.innerHTML = '<div class="stats-row"><span>Ingen ferdige kamper enna</span></div>';
-    }
+        if (!userStats[tip.user_id]) {
+            userStats[tip.user_id] = {
+                id: tip.user_id,
+                name: usersMap[tip.user_id] || 'Ukjent',
+                totalPoints: 0,
+                totalMatches: 0,
+                exactMatches: 0,
+                correctOutcome: 0
+            };
+        }
 
-    const historyContainer = document.getElementById('matchHistoryList');
-    if (historyContainer) {
-        historyContainer.innerHTML = '<p style="text-align: center; color: #64748b; padding: 40px 20px;">Ingen tips registrert enna</p>';
-    }
-}
-
-function calculateAndDisplayStats() {
-    // Filter tips that have match results
-    const finishedTips = userTips.filter(tip => {
-        const match = matches.find(m => m.id === tip.match_id);
-        return match && match.home_score !== null && match.away_score !== null;
-    });
-
-    if (finishedTips.length === 0) {
-        displayEmptyStats();
-        return;
-    }
-
-    let totalPoints = 0;
-    let exactMatches = 0;
-    let correctDirection = 0;
-    let bestStreak = 0;
-    let currentStreak = 0;
-    let tempStreak = 0;
-    let totalOddsValue = 0;
-    let oddsCount = 0;
-
-    const tipsWithResults = finishedTips.map(tip => {
-        const match = matches.find(m => m.id === tip.match_id);
         const points = calculatePoints(tip, match);
-
-        totalPoints += points;
+        userStats[tip.user_id].totalPoints += points;
+        userStats[tip.user_id].totalMatches++;
 
         const tipHome = Number(tip.home_score);
         const tipAway = Number(tip.away_score);
@@ -224,122 +200,171 @@ function calculateAndDisplayStats() {
 
         const isExact = tipHome === actHome && tipAway === actAway;
         const tipOutcome = getOutcome(tipHome, tipAway);
-        const resultOutcome = getOutcome(actHome, actAway);
-        const isCorrectDirection = tipOutcome === resultOutcome && !isExact;
+        const actualOutcome = getOutcome(actHome, actAway);
 
         if (isExact) {
-            exactMatches++;
-            tempStreak++;
-            currentStreak = tempStreak;
-            if (tempStreak > bestStreak) bestStreak = tempStreak;
-        } else if (isCorrectDirection) {
-            correctDirection++;
-            tempStreak = 0;
-        } else {
-            tempStreak = 0;
+            userStats[tip.user_id].exactMatches++;
+            userStats[tip.user_id].correctOutcome++;
+        } else if (tipOutcome === actualOutcome) {
+            userStats[tip.user_id].correctOutcome++;
         }
-
-        // Calculate odds value
-        const odds = parseOdds(tip.odds || match.odds);
-        if (points > 0) {
-            const outcome = getOutcome(tipHome, tipAway);
-            const oddValue = odds[outcome] || 0;
-            if (oddValue > 0) {
-                totalOddsValue += oddValue;
-                oddsCount++;
-            }
-        }
-
-        return { tip, match, points };
     });
 
-    // Update summary stats
-    document.getElementById('totalPoints').textContent = Math.round(totalPoints * 10) / 10;
-    document.getElementById('totalMatches').textContent = finishedTips.length;
-    document.getElementById('exactMatches').textContent = exactMatches;
-    document.getElementById('correctDirection').textContent = correctDirection;
-    document.getElementById('exactPercentage').textContent =
-        `${((exactMatches / finishedTips.length) * 100).toFixed(1)}%`;
-    document.getElementById('directionPercentage').textContent =
-        `${(((correctDirection + exactMatches) / finishedTips.length) * 100).toFixed(1)}%`;
-
-    // Update detailed stats
-    document.getElementById('avgPoints').textContent =
-        (totalPoints / finishedTips.length).toFixed(2);
-    document.getElementById('bestStreak').textContent = bestStreak;
-    document.getElementById('currentStreak').textContent = currentStreak;
-    document.getElementById('oddsValue').textContent =
-        totalOddsValue > 0 ? totalOddsValue.toFixed(1) : '0';
-    document.getElementById('avgOdds').textContent =
-        oddsCount > 0 ? (totalOddsValue / oddsCount).toFixed(2) : '-';
-
-    // Display per-league stats
-    displayLeagueStats(tipsWithResults);
+    // Calculate rates and sort by points
+    return Object.values(userStats)
+        .map(u => ({
+            ...u,
+            avgPoints: u.totalMatches > 0 ? u.totalPoints / u.totalMatches : 0,
+            exactRate: u.totalMatches > 0 ? (u.exactMatches / u.totalMatches) * 100 : 0,
+            outcomeRate: u.totalMatches > 0 ? (u.correctOutcome / u.totalMatches) * 100 : 0
+        }))
+        .sort((a, b) => b.totalPoints - a.totalPoints);
 }
 
-function displayLeagueStats(tipsWithResults) {
-    const leagueStats = {};
+// ============================================
+// Display Functions
+// ============================================
 
-    tipsWithResults.forEach(({ tip, match, points }) => {
-        const leagueId = match.league_id;
-        if (!leagueId) return;
+function displayEmptyStats() {
+    document.getElementById('userRank').textContent = '-';
+    document.getElementById('totalPlayers').textContent = 'av 0 spillere';
+    document.getElementById('totalPoints').textContent = '0';
+    document.getElementById('outcomeRate').textContent = '0%';
+    document.getElementById('exactRate').textContent = '0%';
+    document.getElementById('outcomeDetail').textContent = '0 av 0 riktig utfall';
+    document.getElementById('exactDetail').textContent = '0 av 0 riktig resultat';
 
-        if (!leagueStats[leagueId]) {
-            leagueStats[leagueId] = {
-                name: LEAGUE_NAMES[leagueId] || `Liga ${leagueId}`,
-                total: 0,
-                points: 0,
-                exact: 0,
-                direction: 0
-            };
-        }
+    const leaderboard = document.getElementById('leaderboardList');
+    if (leaderboard) {
+        leaderboard.innerHTML = '<p class="empty-message">Ingen data ennå</p>';
+    }
 
-        leagueStats[leagueId].total++;
-        leagueStats[leagueId].points += points;
+    const historyList = document.getElementById('matchHistoryList');
+    if (historyList) {
+        historyList.innerHTML = '<p class="empty-message">Ingen tips registrert ennå</p>';
+    }
+}
 
-        const tipHome = Number(tip.home_score);
-        const tipAway = Number(tip.away_score);
-        const actHome = Number(match.home_score);
-        const actAway = Number(match.away_score);
+function displayRankingAndStats() {
+    const currentUserStats = allUsersStats.find(u => u.id === currentUserId);
 
-        const isExact = tipHome === actHome && tipAway === actAway;
-        if (isExact) {
-            leagueStats[leagueId].exact++;
-        } else {
-            const tipOutcome = getOutcome(tipHome, tipAway);
-            const resultOutcome = getOutcome(actHome, actAway);
-            if (tipOutcome === resultOutcome) {
-                leagueStats[leagueId].direction++;
-            }
-        }
-    });
-
-    const leagueStatsContainer = document.getElementById('leagueStats');
-    if (!leagueStatsContainer) return;
-
-    leagueStatsContainer.innerHTML = '';
-
-    const leagueStatsArray = Object.values(leagueStats);
-
-    if (leagueStatsArray.length === 0) {
-        leagueStatsContainer.innerHTML = '<div class="stats-row"><span>Ingen data tilgjengelig</span></div>';
+    if (!currentUserStats || currentUserStats.totalMatches === 0) {
+        displayEmptyStats();
         return;
     }
 
-    leagueStatsArray.forEach(league => {
-        const avgPoints = (league.points / league.total).toFixed(2);
-        const exactRate = ((league.exact / league.total) * 100).toFixed(1);
-        const directionRate = ((league.direction / league.total) * 100).toFixed(1);
-        const totalPoints = Math.round(league.points * 10) / 10;
+    // Find user's rank
+    const userRank = allUsersStats.findIndex(u => u.id === currentUserId) + 1;
+    const totalPlayers = allUsersStats.length;
 
-        const leagueDiv = document.createElement('div');
-        leagueDiv.className = 'stats-row';
-        leagueDiv.innerHTML = `
-            <span>${league.name}:</span>
-            <strong>${totalPoints} poeng (${avgPoints} snitt) - ${exactRate}% eksakt - ${directionRate}% utfall</strong>
+    // Update ranking display
+    document.getElementById('userRank').textContent = userRank;
+    document.getElementById('totalPlayers').textContent = `av ${totalPlayers} spillere`;
+    document.getElementById('totalPoints').textContent = Math.round(currentUserStats.totalPoints * 10) / 10;
+
+    // Update hit rate circles
+    const outcomeRate = currentUserStats.outcomeRate;
+    const exactRate = currentUserStats.exactRate;
+
+    document.getElementById('outcomeRate').textContent = `${outcomeRate.toFixed(1)}%`;
+    document.getElementById('exactRate').textContent = `${exactRate.toFixed(1)}%`;
+    document.getElementById('outcomeDetail').textContent =
+        `${currentUserStats.correctOutcome} av ${currentUserStats.totalMatches} riktig utfall`;
+    document.getElementById('exactDetail').textContent =
+        `${currentUserStats.exactMatches} av ${currentUserStats.totalMatches} riktig resultat`;
+
+    // Animate the circles
+    updateCircleProgress('outcomeProgress', outcomeRate);
+    updateCircleProgress('exactProgress', exactRate);
+
+    // Calculate averages for comparison
+    const avgStats = calculateAverageStats();
+
+    // Update comparison section
+    updateComparison(currentUserStats, avgStats);
+}
+
+function updateCircleProgress(elementId, percentage) {
+    const circle = document.getElementById(elementId);
+    if (!circle) return;
+
+    const circumference = 2 * Math.PI * 45; // r = 45
+    const offset = circumference - (percentage / 100) * circumference;
+
+    circle.style.strokeDasharray = circumference;
+    circle.style.strokeDashoffset = circumference;
+
+    // Animate after a short delay
+    setTimeout(() => {
+        circle.style.strokeDashoffset = offset;
+    }, 100);
+}
+
+function calculateAverageStats() {
+    if (allUsersStats.length === 0) {
+        return { avgPoints: 0, outcomeRate: 0, exactRate: 0 };
+    }
+
+    const totals = allUsersStats.reduce((acc, u) => ({
+        avgPoints: acc.avgPoints + u.avgPoints,
+        outcomeRate: acc.outcomeRate + u.outcomeRate,
+        exactRate: acc.exactRate + u.exactRate
+    }), { avgPoints: 0, outcomeRate: 0, exactRate: 0 });
+
+    return {
+        avgPoints: totals.avgPoints / allUsersStats.length,
+        outcomeRate: totals.outcomeRate / allUsersStats.length,
+        exactRate: totals.exactRate / allUsersStats.length
+    };
+}
+
+function updateComparison(userStats, avgStats) {
+    // Points per match
+    const maxAvgPoints = Math.max(userStats.avgPoints, avgStats.avgPoints, 3);
+    document.getElementById('avgPointsYou').textContent = userStats.avgPoints.toFixed(2);
+    document.getElementById('avgPointsAvg').textContent = `${avgStats.avgPoints.toFixed(2)} snitt`;
+    document.getElementById('avgPointsBar').style.width = `${(userStats.avgPoints / maxAvgPoints) * 100}%`;
+    document.getElementById('avgPointsAvgBar').style.width = `${(avgStats.avgPoints / maxAvgPoints) * 100}%`;
+
+    // Outcome rate
+    document.getElementById('outcomeYou').textContent = `${userStats.outcomeRate.toFixed(1)}%`;
+    document.getElementById('outcomeAvg').textContent = `${avgStats.outcomeRate.toFixed(1)}% snitt`;
+    document.getElementById('outcomeBar').style.width = `${userStats.outcomeRate}%`;
+    document.getElementById('outcomeAvgBar').style.width = `${avgStats.outcomeRate}%`;
+
+    // Exact rate
+    document.getElementById('exactYou').textContent = `${userStats.exactRate.toFixed(1)}%`;
+    document.getElementById('exactAvg').textContent = `${avgStats.exactRate.toFixed(1)}% snitt`;
+    document.getElementById('exactBar').style.width = `${userStats.exactRate}%`;
+    document.getElementById('exactAvgBar').style.width = `${avgStats.exactRate}%`;
+}
+
+function displayLeaderboard() {
+    const leaderboardList = document.getElementById('leaderboardList');
+    if (!leaderboardList) return;
+
+    if (allUsersStats.length === 0) {
+        leaderboardList.innerHTML = '<p class="empty-message">Ingen data ennå</p>';
+        return;
+    }
+
+    const top5 = allUsersStats.slice(0, 5);
+
+    leaderboardList.innerHTML = top5.map((user, index) => {
+        const isCurrentUser = user.id === currentUserId;
+        const medalClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+
+        return `
+            <div class="leaderboard-item ${isCurrentUser ? 'current-user' : ''} ${medalClass}">
+                <div class="leaderboard-rank">${index + 1}</div>
+                <div class="leaderboard-name">${user.name}${isCurrentUser ? ' (deg)' : ''}</div>
+                <div class="leaderboard-stats">
+                    <span class="leaderboard-points">${Math.round(user.totalPoints * 10) / 10} p</span>
+                    <span class="leaderboard-rate">${user.outcomeRate.toFixed(0)}%</span>
+                </div>
+            </div>
         `;
-        leagueStatsContainer.appendChild(leagueDiv);
-    });
+    }).join('');
 }
 
 // ============================================
@@ -348,27 +373,27 @@ function displayLeagueStats(tipsWithResults) {
 
 function displayMatchHistory() {
     const historyContainer = document.getElementById('matchHistoryList');
-    historyContainer.innerHTML = '';
+    if (!historyContainer) return;
 
     // Filter tips that have results
     const finishedTips = userTips.filter(tip => {
-        const match = matches.find(m => m.id === tip.match_id);
+        const match = allMatches.find(m => m.id === tip.match_id);
         return match && match.home_score !== null && match.away_score !== null;
     }).map(tip => {
-        const match = matches.find(m => m.id === tip.match_id);
+        const match = allMatches.find(m => m.id === tip.match_id);
         const points = calculatePoints(tip, match);
         return { tip, match, points };
     });
 
     if (finishedTips.length === 0) {
-        historyContainer.innerHTML = '<p style="text-align: center; color: #64748b; padding: 40px 20px;">Ingen ferdige kamper enna. Statistikk vil vises nar kampene er ferdige!</p>';
+        historyContainer.innerHTML = '<p class="empty-message">Ingen ferdige kamper ennå</p>';
         return;
     }
 
     // Sort by match date (newest first)
     finishedTips.sort((a, b) => {
-        const dateA = new Date(a.match.match_date || a.tip.created_at);
-        const dateB = new Date(b.match.match_date || b.tip.created_at);
+        const dateA = new Date(a.match.match_date || a.match.commence_time || a.tip.created_at);
+        const dateB = new Date(b.match.match_date || b.match.commence_time || b.tip.created_at);
         return dateB - dateA;
     });
 
@@ -395,16 +420,18 @@ function displayMatchHistory() {
     }
 
     if (filteredTips.length === 0) {
-        historyContainer.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">Ingen kamper a vise</p>';
+        historyContainer.innerHTML = '<p class="empty-message">Ingen kamper å vise</p>';
         return;
     }
 
-    filteredTips.forEach(({ tip, match, points }) => {
-        const matchDate = new Date(match.match_date || tip.created_at);
+    // Show only last 10
+    const recentTips = filteredTips.slice(0, 10);
+
+    historyContainer.innerHTML = recentTips.map(({ tip, match, points }) => {
+        const matchDate = new Date(match.match_date || match.commence_time || tip.created_at);
         const dateStr = matchDate.toLocaleDateString('nb-NO', {
             day: 'numeric',
-            month: 'short',
-            year: 'numeric'
+            month: 'short'
         });
 
         const tipHome = Number(tip.home_score);
@@ -412,28 +439,22 @@ function displayMatchHistory() {
         const actHome = Number(match.home_score);
         const actAway = Number(match.away_score);
         const isExact = tipHome === actHome && tipAway === actAway;
-        const pointsClass = isExact ? 'points-exact' : points > 0 ? 'points-direction' : 'points-wrong';
-        const pointsText = points > 0 ? `${points} poeng` : '0 poeng';
+        const pointsClass = isExact ? 'exact' : points > 0 ? 'outcome' : 'wrong';
 
-        const historyItem = document.createElement('div');
-        historyItem.className = 'history-item';
-        historyItem.innerHTML = `
-            <div class="history-date">${dateStr}</div>
-            <div class="history-match">
+        return `
+            <div class="history-item ${pointsClass}">
+                <div class="history-date">${dateStr}</div>
                 <div class="history-teams">
-                    <strong>${match.home_team || tip.home_team}</strong> - <strong>${match.away_team || tip.away_team}</strong>
+                    ${match.home_team || tip.home_team} - ${match.away_team || tip.away_team}
                 </div>
                 <div class="history-scores">
-                    <span class="history-label">Ditt tips:</span>
-                    <span class="history-score">${tipHome}-${tipAway}</span>
-                    <span class="history-label">Resultat:</span>
-                    <span class="history-score">${actHome}-${actAway}</span>
+                    <span class="tip-score">${tipHome}-${tipAway}</span>
+                    <span class="result-score">${actHome}-${actAway}</span>
                 </div>
+                <div class="history-points">${points > 0 ? `+${points}` : '0'}</div>
             </div>
-            <div class="history-points ${pointsClass}">${pointsText}</div>
         `;
-        historyContainer.appendChild(historyItem);
-    });
+    }).join('');
 }
 
 // Filter history - exposed to window for onclick
