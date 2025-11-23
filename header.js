@@ -50,25 +50,6 @@ export function initHeader(activePage = 'index') {
                 <button id="signOutBtn" onclick="signOut()" class="btn-logout-premium" style="display: ${btnDisplayStyle};">Logg ut</button>
             </div>
 
-            <!-- User Stats Bar -->
-            <div class="user-stats-bar" id="userStatsBar" style="display: ${displayStyle};">
-                <div class="user-info-premium">
-                    <span class="user-label-premium">Bruker:</span>
-                    <span class="user-name-premium" id="currentUsername"></span>
-                </div>
-                <div class="stats-premium">
-                    <div class="stat-item-premium">
-                        <span class="stat-value-premium" id="totalPointsDisplay">0</span>
-                        <span class="stat-label-premium">Poeng</span>
-                    </div>
-                    <div class="stat-divider-premium"></div>
-                    <div class="stat-item-premium">
-                        <span class="stat-value-premium" id="totalTipsDisplay">0</span>
-                        <span class="stat-label-premium">Tips</span>
-                    </div>
-                </div>
-            </div>
-
             <!-- Navigation -->
             <nav class="nav-premium" id="mainNavButtons" style="display: ${displayStyle};">
                 <a href="index.html" class="nav-btn-premium ${activePage === 'index' ? 'active' : ''}">
@@ -89,31 +70,17 @@ export function initHeader(activePage = 'index') {
 }
 
 /**
- * Update user stats in header
- * @param {number} totalPoints - Total points
- * @param {number} totalTips - Total tips count
+ * Update user stats in header (deprecated - kept for compatibility)
  */
 export function updateHeaderStats(totalPoints, totalTips) {
-    const totalPointsDisplay = document.getElementById('totalPointsDisplay');
-    const totalTipsDisplay = document.getElementById('totalTipsDisplay');
-
-    if (totalPointsDisplay) {
-        totalPointsDisplay.textContent = Math.round(totalPoints);
-    }
-    if (totalTipsDisplay) {
-        totalTipsDisplay.textContent = totalTips;
-    }
+    // Stats bar removed from header
 }
 
 /**
- * Update username in header
- * @param {string} username - Username to display
+ * Update username in header (deprecated - kept for compatibility)
  */
 export function updateHeaderUsername(username) {
-    const usernameElement = document.getElementById('currentUsername');
-    if (usernameElement) {
-        usernameElement.textContent = username;
-    }
+    // Username display removed from header
 }
 
 /**
@@ -122,14 +89,10 @@ export function updateHeaderUsername(username) {
  */
 export function updateHeaderAuthState(isLoggedIn) {
     const signOutBtn = document.getElementById('signOutBtn');
-    const userStatsBar = document.getElementById('userStatsBar');
     const navButtons = document.getElementById('mainNavButtons');
 
     if (signOutBtn) {
         signOutBtn.style.display = isLoggedIn ? 'block' : 'none';
-    }
-    if (userStatsBar) {
-        userStatsBar.style.display = isLoggedIn ? 'flex' : 'none';
     }
     if (navButtons) {
         navButtons.style.display = isLoggedIn ? 'flex' : 'none';
