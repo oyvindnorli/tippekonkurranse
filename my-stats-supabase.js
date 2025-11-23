@@ -504,8 +504,8 @@ function displayMatchHistory() {
                     ${match.home_team || tip.home_team} - ${match.away_team || tip.away_team}
                 </div>
                 <div class="history-scores">
-                    <span class="tip-score">${tipHome}-${tipAway}</span>
-                    <span class="result-score">${actHome}-${actAway}</span>
+                    <span class="score-group"><span class="score-label">Tipp:</span> <span class="tip-score">${tipHome}-${tipAway}</span></span>
+                    <span class="score-group"><span class="score-label">Res:</span> <span class="result-score">${actHome}-${actAway}</span></span>
                 </div>
                 <div class="history-points">${points > 0 ? `+${points}` : '0'}</div>
             </div>
