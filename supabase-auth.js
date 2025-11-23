@@ -356,7 +356,8 @@ async function onUserLoggedIn(user) {
 
     if (currentUsername) {
         // Use displayName from user metadata (set during signup)
-        currentUsername.textContent = user.user_metadata?.display_name || user.email.split('@')[0];
+        const displayName = user.user_metadata?.display_name || user.email.split('@')[0];
+        currentUsername.textContent = `Innlogget som ${displayName}`;
 
         // Show username display
         if (usernameDisplay) {
