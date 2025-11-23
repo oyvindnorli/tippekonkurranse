@@ -41,18 +41,16 @@ export function initHeader(activePage = 'index') {
 
     headerContainer.innerHTML = `
         <header class="header-premium">
-            <!-- Top Bar with Brand and Logout -->
+            <!-- Top Bar with Brand, User and Logout -->
             <div class="header-top-bar">
                 <div class="header-brand">
                     <span class="brand-icon">⚽</span>
                     <h1 class="brand-title">Tippekonkurranse</h1>
                 </div>
-                <button id="signOutBtn" onclick="signOut()" class="btn-logout-premium" style="display: ${btnDisplayStyle};">Logg ut</button>
-            </div>
-
-            <!-- Logged in user -->
-            <div class="user-info-bar" id="userInfoBar" style="display: ${displayStyle};">
-                <span class="user-name-display" id="currentUsername"></span>
+                <div class="header-right">
+                    <span class="user-name-display" id="currentUsername" style="display: ${btnDisplayStyle};"></span>
+                    <button id="signOutBtn" onclick="signOut()" class="btn-logout-premium" style="display: ${btnDisplayStyle};">Logg ut</button>
+                </div>
             </div>
 
             <!-- Navigation -->
@@ -98,14 +96,14 @@ export function updateHeaderUsername(username) {
  */
 export function updateHeaderAuthState(isLoggedIn) {
     const signOutBtn = document.getElementById('signOutBtn');
-    const userInfoBar = document.getElementById('userInfoBar');
+    const usernameElement = document.getElementById('currentUsername');
     const navButtons = document.getElementById('mainNavButtons');
 
     if (signOutBtn) {
         signOutBtn.style.display = isLoggedIn ? 'block' : 'none';
     }
-    if (userInfoBar) {
-        userInfoBar.style.display = isLoggedIn ? 'block' : 'none';
+    if (usernameElement) {
+        usernameElement.style.display = isLoggedIn ? 'block' : 'none';
     }
     if (navButtons) {
         navButtons.style.display = isLoggedIn ? 'flex' : 'none';
