@@ -2,6 +2,9 @@
  * Competitions with Supabase - Wizard-based creation
  */
 
+// Admin users who can create competitions
+const ADMIN_EMAILS = ['oyvind40@hotmail.com'];
+
 // Wizard state
 let wizardState = {
     currentStep: 1,
@@ -56,10 +59,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Load competitions
     loadCompetitions(user.id);
 
-    // Show create button (all users can create for now)
+    // Show create button only for admin users
     const createBtn = document.getElementById('createCompetitionBtn');
     if (createBtn) {
-        createBtn.style.display = 'inline-block';
+        const isAdmin = ADMIN_EMAILS.includes(user.email);
+        createBtn.style.display = isAdmin ? 'inline-block' : 'none';
+        if (!isAdmin) {
+            console.log('ℹ️ User is not admin, hiding create competition button');
+        }
     }
 });
 
@@ -647,6 +654,14 @@ window.createCompetition = async function(event) {
 
         if (!user) {
             throw new Error('Not logged in');
+        }
+
+        // Check if user is admin
+        if (!ADMIN_EMAILS.includes(user.email)) {
+            wizardError.textContent = 'Du har ikke tilgang til å opprette konkurranser';
+            wizardError.style.display = 'block';
+            console.log('❌ User is not admin, cannot create competition');
+            return;
         }
 
         // Determine league IDs and dates based on selection
