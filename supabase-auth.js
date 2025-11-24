@@ -89,8 +89,11 @@ async function signUp(email, password, displayName) {
         console.log('✅ User registered:', displayName);
 
         // Check if email confirmation is required
-        // If user.identities is empty, email confirmation is pending
-        const requiresEmailConfirmation = !data.session && data.user?.identities?.length === 0;
+        // When email confirmation is enabled in Supabase:
+        // - data.session will be null (no session until confirmed)
+        // - data.user will exist (user is created)
+        // - data.user.email_confirmed_at will be null
+        const requiresEmailConfirmation = !data.session && !!data.user;
 
         return {
             success: true,
@@ -330,11 +333,12 @@ async function getAllUsersWithTips() {
 // Wait for header elements to exist (header.js is a module and loads after this script)
 async function waitForHeaderElements(maxAttempts = 50) {
     let attempts = 0;
-    while (!document.getElementById('mainNavButtons') && attempts < maxAttempts) {
+    // Wait for both mainNavButtons and currentUsername to exist
+    while ((!document.getElementById('mainNavButtons') || !document.getElementById('currentUsername')) && attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 50));
         attempts++;
     }
-    return document.getElementById('mainNavButtons') !== null;
+    return document.getElementById('currentUsername') !== null;
 }
 
 // Called when user logs in

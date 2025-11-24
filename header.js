@@ -6,8 +6,9 @@
 /**
  * Check if user appears to be logged in (from localStorage)
  * This is a quick check to show UI immediately, actual auth state is verified by Supabase
+ * @returns {object|null} - Returns user data if logged in, null otherwise
  */
-function hasStoredSession() {
+function getStoredSession() {
     try {
         // Supabase stores session in localStorage
         const storageKey = 'sb-ntbhjbstmbnfiaywfkkz-auth-token';
@@ -15,12 +16,17 @@ function hasStoredSession() {
         if (stored) {
             const data = JSON.parse(stored);
             // Check if session exists and hasn't obviously expired
-            return data && data.access_token;
+            if (data && data.access_token && data.user) {
+                return {
+                    isLoggedIn: true,
+                    displayName: data.user.user_metadata?.display_name || data.user.email?.split('@')[0] || ''
+                };
+            }
         }
     } catch (e) {
         // Ignore errors
     }
-    return false;
+    return null;
 }
 
 /**
@@ -35,9 +41,11 @@ export function initHeader(activePage = 'index') {
     }
 
     // Check if user appears to be logged in to show nav immediately
-    const isLoggedIn = hasStoredSession();
+    const session = getStoredSession();
+    const isLoggedIn = session !== null;
     const displayStyle = isLoggedIn ? 'flex' : 'none';
     const btnDisplayStyle = isLoggedIn ? 'block' : 'none';
+    const usernameText = isLoggedIn && session.displayName ? `Innlogget som ${session.displayName}` : '';
 
     headerContainer.innerHTML = `
         <header class="header-premium">
@@ -48,7 +56,7 @@ export function initHeader(activePage = 'index') {
                     <h1 class="brand-title">Tippekonkurranse</h1>
                 </div>
                 <div class="header-right">
-                    <span class="user-name-display" id="currentUsername" style="display: ${btnDisplayStyle};"></span>
+                    <span class="user-name-display" id="currentUsername" style="display: ${btnDisplayStyle};">${usernameText}</span>
                     <button id="signOutBtn" onclick="signOut()" class="btn-logout-premium" style="display: ${btnDisplayStyle};">Logg ut</button>
                 </div>
             </div>
