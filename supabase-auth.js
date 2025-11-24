@@ -343,7 +343,7 @@ async function waitForHeaderElements(maxAttempts = 50) {
 
 // Called when user logs in
 async function onUserLoggedIn(user) {
-    // Logged in
+    console.log('🔐 onUserLoggedIn called for:', user.email);
 
     // Hide auth modal (only exists on index.html)
     const authModal = document.getElementById('authModal');
@@ -352,16 +352,20 @@ async function onUserLoggedIn(user) {
     }
 
     // Wait for header elements to be rendered (header.js is a module, loads after regular scripts)
-    await waitForHeaderElements();
+    const headerReady = await waitForHeaderElements();
+    console.log('🔐 Header elements ready:', headerReady);
 
     // Update UI - fetch displayName from database
     const currentUsername = document.getElementById('currentUsername');
     const usernameDisplay = document.getElementById('usernameDisplay');
+    console.log('🔐 currentUsername element found:', !!currentUsername);
 
     if (currentUsername) {
         // Use displayName from user metadata (set during signup)
         const displayName = user.user_metadata?.display_name || user.email.split('@')[0];
+        console.log('🔐 Setting displayName to:', displayName);
         currentUsername.textContent = `Innlogget som ${displayName}`;
+        currentUsername.style.display = 'block';
 
         // Show username display
         if (usernameDisplay) {
