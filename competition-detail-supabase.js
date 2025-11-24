@@ -455,13 +455,16 @@ function displayLeaderboard(participants, currentUserId, scoresByUser = {}, hasL
         const isCurrentUser = p.user_id === currentUserId;
         const position = index + 1;
         const medal = position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : '';
-        const potentialDisplay = p.potentialScore > 0 ? ` <span class="potential-score">(+${p.potentialScore})</span>` : '';
+        // Format scores to avoid floating point issues (e.g., 6.800000000000001 -> 6.8)
+        const formattedScore = Number(p.score.toFixed(1));
+        const formattedPotential = Number(p.potentialScore.toFixed(1));
+        const potentialDisplay = formattedPotential > 0 ? ` <span class="potential-score">(+${formattedPotential})</span>` : '';
 
         return `
             <div class="leaderboard-row ${isCurrentUser ? 'current-user' : ''}">
                 <div class="leaderboard-position">${medal || position}</div>
                 <div class="leaderboard-name">${p.name}${isCurrentUser ? ' (deg)' : ''}</div>
-                <div class="leaderboard-score">${p.score}${potentialDisplay} poeng</div>
+                <div class="leaderboard-score">${formattedScore}${potentialDisplay} poeng</div>
             </div>
         `;
     }).join('');

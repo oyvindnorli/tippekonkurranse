@@ -13,18 +13,11 @@ function getStoredSession() {
         // Supabase stores session in localStorage
         const storageKey = 'sb-ntbhjbstmbnfiaywfkkz-auth-token';
         const stored = localStorage.getItem(storageKey);
-        console.log('🔍 Header: localStorage raw:', stored ? 'found' : 'not found');
         if (stored) {
             const data = JSON.parse(stored);
-            console.log('🔍 Header: parsed data keys:', Object.keys(data));
-            console.log('🔍 Header: user exists?', !!data.user);
-            if (data.user) {
-                console.log('🔍 Header: user_metadata:', data.user.user_metadata);
-            }
             // Check if session exists and hasn't obviously expired
             if (data && data.access_token && data.user) {
                 const displayName = data.user.user_metadata?.display_name || data.user.email?.split('@')[0] || '';
-                console.log('🔍 Header: displayName =', displayName);
                 return {
                     isLoggedIn: true,
                     displayName: displayName
@@ -32,7 +25,7 @@ function getStoredSession() {
             }
         }
     } catch (e) {
-        console.error('🔍 Header: error reading session:', e);
+        // Ignore errors
     }
     return null;
 }
