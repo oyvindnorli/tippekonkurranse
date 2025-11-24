@@ -3218,6 +3218,53 @@ header h1 {
     font-style: italic;
 }
 
+/* Odds preview for upcoming matches */
+.match-odds-preview {
+    background: #f0f9ff;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+    text-align: center;
+}
+
+.match-odds-preview .odds-label {
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.match-odds-preview .odds-values {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.match-odds-preview .odds-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    color: #0ea5e9;
+}
+
+.match-odds-preview .odds-type {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.match-odds-preview .odds-info {
+    font-size: 11px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
 /* Live indicator for leaderboard */
 .live-indicator {
     display: inline-block;

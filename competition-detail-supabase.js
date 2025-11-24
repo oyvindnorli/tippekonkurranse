@@ -269,7 +269,7 @@ async function loadCompetitionMatches(competition, participants, currentUserId) 
         const { scoresByUser, potentialScoresByUser, hasLiveMatches } = calculateAllScores(matches, enrichedTips, participants);
 
         displayLeaderboard(participants, currentUserId, scoresByUser, hasLiveMatches, potentialScoresByUser);
-        displayMatches(matches, enrichedTips, participants, currentUserId);
+        displayMatches(matches, enrichedTips, participants, currentUserId, matchOddsLookup);
 
     } catch (error) {
         console.error('Error loading matches:', error);
@@ -473,7 +473,7 @@ function displayLeaderboard(participants, currentUserId, scoresByUser = {}, hasL
 /**
  * Display matches with tips
  */
-function displayMatches(matches, tips, participants, currentUserId) {
+function displayMatches(matches, tips, participants, currentUserId, matchOddsLookup = {}) {
     const matchesTable = document.getElementById('matchesWithTipsTable');
 
     if (matches.length === 0) {
@@ -599,7 +599,24 @@ function displayMatches(matches, tips, participants, currentUserId) {
 
             html += '</div></div>';
         } else {
-            html += `<div class="match-tips-hidden"><p>Tips vises når kampen starter</p></div>`;
+            // Show odds for upcoming matches
+            const matchOdds = matchOddsLookup[matchId];
+            if (matchOdds) {
+                const odds = parseOdds(matchOdds);
+                html += `
+                    <div class="match-odds-preview">
+                        <div class="odds-label">Odds:</div>
+                        <div class="odds-values">
+                            <span class="odds-item"><span class="odds-type">H</span> ${odds.H.toFixed(2)}</span>
+                            <span class="odds-item"><span class="odds-type">U</span> ${odds.U.toFixed(2)}</span>
+                            <span class="odds-item"><span class="odds-type">B</span> ${odds.B.toFixed(2)}</span>
+                        </div>
+                        <div class="odds-info">Tips vises når kampen starter</div>
+                    </div>
+                `;
+            } else {
+                html += `<div class="match-tips-hidden"><p>Tips vises når kampen starter</p></div>`;
+            }
         }
 
         html += '</div>';
