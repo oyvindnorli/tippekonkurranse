@@ -607,9 +607,9 @@ function displayMatches(matches, tips, participants, currentUserId, matchOddsLoo
                     <div class="match-odds-preview">
                         <div class="odds-label">Odds:</div>
                         <div class="odds-values">
-                            <span class="odds-item"><span class="odds-type">H</span> ${odds.H.toFixed(2)}</span>
-                            <span class="odds-item"><span class="odds-type">U</span> ${odds.U.toFixed(2)}</span>
-                            <span class="odds-item"><span class="odds-type">B</span> ${odds.B.toFixed(2)}</span>
+                            <span class="odds-item"><span class="odds-type">H</span> ${odds.H.toFixed(1)}</span>
+                            <span class="odds-item"><span class="odds-type">U</span> ${odds.U.toFixed(1)}</span>
+                            <span class="odds-item"><span class="odds-type">B</span> ${odds.B.toFixed(1)}</span>
                         </div>
                         <div class="odds-info">Tips vises når kampen starter</div>
                     </div>
