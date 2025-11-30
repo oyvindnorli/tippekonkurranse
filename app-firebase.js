@@ -318,6 +318,15 @@ function closeAuthModal() {
     document.getElementById('authModal').style.display = 'none';
 }
 
+async function handleGoogleSignIn() {
+    console.log('🔵 Google sign in initiated');
+    const result = await signInWithGoogle();
+    if (!result.success) {
+        alert('Google innlogging feilet: ' + result.error);
+    }
+    // If successful, user will be redirected to Google
+}
+
 async function handleSignIn() {
     const email = document.getElementById('signinEmail').value;
     const password = document.getElementById('signinPassword').value;
@@ -1489,6 +1498,7 @@ async function deselectAllLeaguesFilter() {
 // (needed because this file is loaded as a module)
 window.showAuthModal = showAuthModal;
 window.closeAuthModal = closeAuthModal;
+window.handleGoogleSignIn = handleGoogleSignIn;
 window.handleSignIn = handleSignIn;
 window.handleSignUp = handleSignUp;
 window.handleResetPassword = handleResetPassword;

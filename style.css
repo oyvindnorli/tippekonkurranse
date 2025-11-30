@@ -1807,6 +1807,57 @@ header h1 {
     box-shadow: 0 6px 16px rgba(34, 211, 238, 0.4);
 }
 
+/* Google Sign In button */
+.btn-google-signin {
+    width: 100%;
+    padding: 12px;
+    background: white;
+    color: #1f2937;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.btn-google-signin:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-google-signin svg {
+    flex-shrink: 0;
+}
+
+/* Auth form divider */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.auth-divider span {
+    padding: 0 12px;
+}
+
 .auth-switch {
     text-align: center;
     margin-top: 12px;

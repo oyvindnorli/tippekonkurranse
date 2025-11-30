@@ -106,6 +106,26 @@ async function signUp(email, password, displayName) {
     }
 }
 
+// Sign in with Google OAuth
+async function signInWithGoogle() {
+    try {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+
+        if (error) throw error;
+
+        console.log('✅ Redirecting to Google sign in...');
+        return { success: true };
+    } catch (error) {
+        console.error('❌ Google sign in error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
 // Sign in with email and password
 async function signIn(email, password) {
     try {
