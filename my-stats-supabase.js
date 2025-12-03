@@ -206,14 +206,6 @@ function calculateAllUsersStats(allTips, usersMap) {
         userStats[tip.user_id].totalPoints += points;
         userStats[tip.user_id].totalMatches++;
 
-        // Calculate outcome points (without exact bonus)
-        const odds = parseOdds(tip.odds || match.odds);
-        const tipOutcome = getOutcome(Number(tip.home_score), Number(tip.away_score));
-        const actualOutcome = getOutcome(Number(match.home_score), Number(match.away_score));
-        if (tipOutcome === actualOutcome) {
-            userStats[tip.user_id].outcomePoints += odds[actualOutcome];
-        }
-
         const tipHome = Number(tip.home_score);
         const tipAway = Number(tip.away_score);
         const actHome = Number(match.home_score);
@@ -222,6 +214,12 @@ function calculateAllUsersStats(allTips, usersMap) {
         const isExact = tipHome === actHome && tipAway === actAway;
         const tipOutcome = getOutcome(tipHome, tipAway);
         const actualOutcome = getOutcome(actHome, actAway);
+
+        // Calculate outcome points (without exact bonus)
+        if (tipOutcome === actualOutcome) {
+            const odds = parseOdds(tip.odds || match.odds);
+            userStats[tip.user_id].outcomePoints += odds[actualOutcome];
+        }
 
         if (isExact) {
             userStats[tip.user_id].exactMatches++;
