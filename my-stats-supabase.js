@@ -195,6 +195,7 @@ function calculateAllUsersStats(allTips, usersMap) {
                 id: tip.user_id,
                 name: usersMap[tip.user_id] || 'Ukjent',
                 totalPoints: 0,
+                outcomePoints: 0,
                 totalMatches: 0,
                 exactMatches: 0,
                 correctOutcome: 0
@@ -204,6 +205,14 @@ function calculateAllUsersStats(allTips, usersMap) {
         const points = calculatePoints(tip, match);
         userStats[tip.user_id].totalPoints += points;
         userStats[tip.user_id].totalMatches++;
+
+        // Calculate outcome points (without exact bonus)
+        const odds = parseOdds(tip.odds || match.odds);
+        const tipOutcome = getOutcome(Number(tip.home_score), Number(tip.away_score));
+        const actualOutcome = getOutcome(Number(match.home_score), Number(match.away_score));
+        if (tipOutcome === actualOutcome) {
+            userStats[tip.user_id].outcomePoints += odds[actualOutcome];
+        }
 
         const tipHome = Number(tip.home_score);
         const tipAway = Number(tip.away_score);
@@ -227,6 +236,7 @@ function calculateAllUsersStats(allTips, usersMap) {
         .map(u => ({
             ...u,
             avgPoints: u.totalMatches > 0 ? u.totalPoints / u.totalMatches : 0,
+            avgOutcomePoints: u.totalMatches > 0 ? u.outcomePoints / u.totalMatches : 0,
             exactRate: u.totalMatches > 0 ? (u.exactMatches / u.totalMatches) * 100 : 0,
             outcomeRate: u.totalMatches > 0 ? (u.correctOutcome / u.totalMatches) * 100 : 0
         }))
@@ -314,29 +324,38 @@ function updateCircleProgress(elementId, percentage) {
 
 function calculateAverageStats() {
     if (allUsersStats.length === 0) {
-        return { avgPoints: 0, outcomeRate: 0, exactRate: 0 };
+        return { avgPoints: 0, avgOutcomePoints: 0, outcomeRate: 0, exactRate: 0 };
     }
 
     const totals = allUsersStats.reduce((acc, u) => ({
         avgPoints: acc.avgPoints + u.avgPoints,
+        avgOutcomePoints: acc.avgOutcomePoints + u.avgOutcomePoints,
         outcomeRate: acc.outcomeRate + u.outcomeRate,
         exactRate: acc.exactRate + u.exactRate
-    }), { avgPoints: 0, outcomeRate: 0, exactRate: 0 });
+    }), { avgPoints: 0, avgOutcomePoints: 0, outcomeRate: 0, exactRate: 0 });
 
     return {
         avgPoints: totals.avgPoints / allUsersStats.length,
+        avgOutcomePoints: totals.avgOutcomePoints / allUsersStats.length,
         outcomeRate: totals.outcomeRate / allUsersStats.length,
         exactRate: totals.exactRate / allUsersStats.length
     };
 }
 
 function updateComparison(userStats, avgStats) {
-    // Points per match
+    // Points per match (total)
     const maxAvgPoints = Math.max(userStats.avgPoints, avgStats.avgPoints, 3);
     document.getElementById('avgPointsYou').textContent = userStats.avgPoints.toFixed(2);
     document.getElementById('avgPointsAvg').textContent = `${avgStats.avgPoints.toFixed(2)} snitt`;
     document.getElementById('avgPointsBar').style.width = `${(userStats.avgPoints / maxAvgPoints) * 100}%`;
     document.getElementById('avgPointsAvgBar').style.width = `${(avgStats.avgPoints / maxAvgPoints) * 100}%`;
+
+    // Points per match (outcome only)
+    const maxAvgOutcomePoints = Math.max(userStats.avgOutcomePoints, avgStats.avgOutcomePoints, 3);
+    document.getElementById('avgOutcomePointsYou').textContent = userStats.avgOutcomePoints.toFixed(2);
+    document.getElementById('avgOutcomePointsAvg').textContent = `${avgStats.avgOutcomePoints.toFixed(2)} snitt`;
+    document.getElementById('avgOutcomePointsBar').style.width = `${(userStats.avgOutcomePoints / maxAvgOutcomePoints) * 100}%`;
+    document.getElementById('avgOutcomePointsAvgBar').style.width = `${(avgStats.avgOutcomePoints / maxAvgOutcomePoints) * 100}%`;
 
     // Outcome rate
     document.getElementById('outcomeYou').textContent = `${userStats.outcomeRate.toFixed(1)}%`;
