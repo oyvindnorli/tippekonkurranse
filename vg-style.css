@@ -1,0 +1,292 @@
+/* ==================================
+   VG Profeten Inspired Design
+   ================================== */
+
+/* Match Card - Clean and minimal */
+.match-card {
+    padding: 16px 0;
+    border-bottom: 1px solid #e8e8e8;
+    background: white;
+    transition: background 0.15s ease;
+}
+
+.match-card:hover {
+    background: #fafafa;
+}
+
+.match-card.has-tip {
+    background: linear-gradient(90deg, #f0fff4 0%, #ffffff 100%);
+    border-left: 3px solid #10b981;
+    padding-left: 13px;
+}
+
+/* VG Layout - Horizontal with teams, odds, and score */
+.match-vg-layout {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Teams Section */
+.match-teams {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.team-vg {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.team-logo-vg {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.team-name-vg {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Odds Section - Compact badges */
+.match-odds-vg {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.odds-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 8px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 42px;
+}
+
+.odds-badge:hover {
+    background: #e8f4fd;
+    transform: translateY(-1px);
+}
+
+.odds-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.odds-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+/* Score Section - VG Style buttons */
+.match-score-vg {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.score-input-vg {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-vg {
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid #d4b896;
+    background: #f5f0e8;
+    color: #5a4a3a;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.btn-vg:hover:not(:disabled) {
+    background: #ebe5da;
+    border-color: #c4a882;
+    transform: scale(1.05);
+}
+
+.btn-vg:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.btn-vg:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.score-display-vg {
+    min-width: 32px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    background: white;
+    border: 1.5px solid #e8e8e8;
+    border-radius: 6px;
+}
+
+/* Time Header - Compact with badge */
+.time-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0 8px 0;
+    margin-top: 8px;
+}
+
+.time-badge-vg {
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    padding: 4px 10px;
+    background: #f5f5f5;
+    border-radius: 6px;
+}
+
+.league-badge-vg {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    opacity: 0.7;
+}
+
+/* Date Header - Clean section divider */
+.date-header {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1a1a;
+    padding: 20px 0 12px 0;
+    border-top: 2px solid #e8e8e8;
+    margin-top: 16px;
+}
+
+.date-group:first-child .date-header {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+/* Responsive - Mobile optimization */
+@media (max-width: 600px) {
+    .match-vg-layout {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .match-teams {
+        order: 1;
+    }
+
+    .match-odds-vg {
+        order: 2;
+        justify-content: flex-start;
+    }
+
+    .match-score-vg {
+        order: 3;
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .score-input-vg {
+        flex: 1;
+    }
+
+    .btn-vg {
+        flex: 1;
+        max-width: 44px;
+    }
+
+    .score-display-vg {
+        flex: 1;
+        min-width: 44px;
+    }
+
+    .team-name-vg {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .match-card {
+        padding: 14px 0;
+    }
+
+    .team-logo-vg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .team-name-vg {
+        font-size: 15px;
+    }
+
+    .odds-badge {
+        min-width: 38px;
+        padding: 5px 6px;
+    }
+
+    .odds-value {
+        font-size: 12px;
+    }
+}
+
+/* Container adjustments for cleaner look */
+.matches-section {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.matches-section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 20px;
+}
+
+/* Overall container */
+.container {
+    background: #fafafa;
+    min-height: 100vh;
+}
+
+#matchesList {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}

@@ -997,13 +997,12 @@ function renderMatches() {
 
             // Get league info from first match in this time group
             const firstMatch = upcomingMatches[0];
-            const leagueLogo = firstMatch.leagueLogo ? `<img src="${firstMatch.leagueLogo}" alt="${firstMatch.leagueName || 'Liga'}" class="league-logo-small" onerror="this.style.display='none'">` : '';
-            const leagueName = firstMatch.leagueName ? `<span class="league-name">${firstMatch.leagueName}</span>` : '';
+            const leagueLogo = firstMatch.leagueLogo ? `<img src="${firstMatch.leagueLogo}" alt="${firstMatch.leagueName || 'Liga'}" class="league-badge-vg" onerror="this.style.display='none'">` : '';
 
-            // Get round info
-            const roundInfo = firstMatch.round ? `<span class="round-info">${firstMatch.round}</span>` : '';
-
-            timeHeader.innerHTML = cleanTime ? `<strong>${cleanTime}</strong> ${leagueLogo} ${leagueName} ${roundInfo}` : `${leagueLogo} ${leagueName} ${roundInfo}`;
+            timeHeader.innerHTML = `
+                <div class="time-badge-vg">${cleanTime}</div>
+                ${leagueLogo}
+            `;
             dateGroup.appendChild(timeHeader);
 
             // Render all upcoming matches for this time
@@ -1035,39 +1034,48 @@ function renderMatches() {
                 }
 
                 matchCard.innerHTML = `
-                    <!-- Simplified Layout: Teams - Odds - Score -->
-                    <div class="match-content-horizontal">
-                        <div class="teams-vertical">
-                            <div class="team-row">
-                                <img src="${homeLogo}" class="team-logo" alt="${match.homeTeam}" onerror="this.style.display='none'">
-                                <span class="team-name">${match.homeTeam}</span>
+                    <!-- VG Profeten Style Layout -->
+                    <div class="match-vg-layout">
+                        <div class="match-teams">
+                            <div class="team-vg">
+                                <img src="${homeLogo}" class="team-logo-vg" alt="${match.homeTeam}" onerror="this.style.display='none'">
+                                <span class="team-name-vg">${match.homeTeam}</span>
                             </div>
-                            <div class="team-row">
-                                <img src="${awayLogo}" class="team-logo" alt="${match.awayTeam}" onerror="this.style.display='none'">
-                                <span class="team-name">${match.awayTeam}</span>
+                            <div class="team-vg">
+                                <img src="${awayLogo}" class="team-logo-vg" alt="${match.awayTeam}" onerror="this.style.display='none'">
+                                <span class="team-name-vg">${match.awayTeam}</span>
                             </div>
                         </div>
                         ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
-                            <div class="odds-center">
-                                <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.H)}</span>
-                                <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.U)}</span>
-                                <span class="odds-value-small" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>${formatOdds(match.odds.B)}</span>
+                            <div class="match-odds-vg">
+                                <div class="odds-badge" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                    <div class="odds-label">H</div>
+                                    <div class="odds-value">${formatOdds(match.odds.H)}</div>
+                                </div>
+                                <div class="odds-badge" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                    <div class="odds-label">U</div>
+                                    <div class="odds-value">${formatOdds(match.odds.U)}</div>
+                                </div>
+                                <div class="odds-badge" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                    <div class="odds-label">B</div>
+                                    <div class="odds-value">${formatOdds(match.odds.B)}</div>
+                                </div>
                             </div>
-                        ` : '<div class="odds-center"><span class="no-odds">-</span></div>'}
-                        <div class="score-controls-vertical">
-                            <div class="team-controls">
-                                <button class="btn-minimal" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <button class="btn-minimal score-btn" id="home-score-btn-${match.id}">${homeScore === '?' ? '?' : homeScore}</button>
-                                <button class="btn-minimal" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
+                        ` : '<div class="match-odds-vg"><span class="no-odds">-</span></div>'}
+                        <div class="match-score-vg">
+                            <div class="score-input-vg">
+                                <button class="btn-vg btn-minus" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
+                                <span class="score-display-vg" id="home-score-btn-${match.id}">${homeScore === '?' ? '?' : homeScore}</span>
+                                <button class="btn-vg btn-plus" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
                             </div>
-                            <div class="team-controls">
-                                <button class="btn-minimal" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <button class="btn-minimal score-btn" id="away-score-btn-${match.id}">${awayScore === '?' ? '?' : awayScore}</button>
-                                <button class="btn-minimal" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
+                            <div class="score-input-vg">
+                                <button class="btn-vg btn-minus" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
+                                <span class="score-display-vg" id="away-score-btn-${match.id}">${awayScore === '?' ? '?' : awayScore}</span>
+                                <button class="btn-vg btn-plus" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
                             </div>
                         </div>
                     </div>
-                    <span class="score-display" style="display: none;">
+                    <span style="display: none;">
                         <span id="home-score-${match.id}">${homeScore}</span>
                         <span id="away-score-${match.id}">${awayScore}</span>
                     </span>
