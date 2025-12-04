@@ -425,30 +425,7 @@ header h1 {
     border-bottom: 1px solid #e5e7eb;
 }
 
-.league-filter-btn {
-    background: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.league-filter-btn:hover {
-    background: #2563eb;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.league-filter-btn:active {
-    transform: scale(0.98);
-}
+/* REMOVED - Now using unified-design.css for league-filter-btn */
 
 /* League Filter Container */
 .league-filter-container {
@@ -475,22 +452,7 @@ header h1 {
     gap: 8px;
 }
 
-.filter-action-btn {
-    font-size: 12px;
-    padding: 4px 12px;
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: #374151;
-    font-weight: 500;
-}
-
-.filter-action-btn:hover {
-    background: #f3f4f6;
-    border-color: #9ca3af;
-}
+/* REMOVED - Now using unified-design.css for filter-action-btn */
 
 .league-filter-list {
     display: grid;
@@ -2274,21 +2236,7 @@ header h1 {
     margin: 0;
 }
 
-.btn-create-competition {
-    padding: 10px 20px;
-    background: #22d3ee;
-    color: #ffffff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
-
-.btn-create-competition:hover {
-    background: #06b6d4;
-}
+/* REMOVED - Now using unified-design.css for btn-create-competition */
 
 .competitions-list {
     padding: 20px;
@@ -3667,37 +3615,7 @@ header h1 {
     flex-wrap: wrap;
 }
 
-.btn-large {
-    padding: 16px 40px;
-    font-size: 16px;
-    font-weight: 600;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
-}
-
-.btn-primary.btn-large {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.btn-primary.btn-large:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-}
-
-.btn-secondary.btn-large {
-    background: white;
-    color: #3b82f6;
-    border: 2px solid #3b82f6;
-}
-
-.btn-secondary.btn-large:hover {
-    background: #f0f9ff;
-    transform: translateY(-2px);
-}
+/* REMOVED - Now using unified-design.css for btn-large variants */
 
 @media (max-width: 768px) {
     header {
@@ -3907,34 +3825,7 @@ header h1 {
     flex-wrap: wrap;
 }
 
-.btn-primary,
-.btn-secondary {
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-    font-size: 13px;
-}
-
-.btn-primary {
-    background: #22d3ee;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #06b6d4;
-}
-
-.btn-secondary {
-    background: #f3f4f6;
-    color: #1f2937;
-}
-
-.btn-secondary:hover {
-    background: #e5e7eb;
-}
+/* REMOVED - Now using unified-design.css for btn-primary and btn-secondary */
 
 .save-message {
     margin-top: 15px;
@@ -3998,10 +3889,7 @@ header h1 {
         flex-direction: column;
     }
 
-    .btn-primary,
-    .btn-secondary {
-        width: 100%;
-    }
+    /* btn-primary and btn-secondary responsive styles now in unified-design.css */
 }
 /* ============================================
    TIPS COMPARISON TABLE
@@ -4374,27 +4262,7 @@ header h1 {
     flex-wrap: wrap;
 }
 
-.filter-btn {
-    padding: 8px 16px;
-    background: #f1f5f9;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #64748b;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.filter-btn:hover {
-    background: #e2e8f0;
-}
-
-.filter-btn.active {
-    background: #22d3ee;
-    border-color: #22d3ee;
-    color: white;
-}
+/* REMOVED - Now using unified-design.css for filter-btn */
 
 .match-history-list {
     display: flex;
