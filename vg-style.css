@@ -280,9 +280,8 @@
     margin-bottom: 20px;
 }
 
-/* Overall container */
+/* Overall container - removed background to keep stadium background from style.css */
 .container {
-    background: #fafafa;
     min-height: 100vh;
 }
 
