@@ -1034,47 +1034,47 @@ function renderMatches() {
                 }
 
                 matchCard.innerHTML = `
-                    <!-- VG Profeten Style Layout -->
-                    <div class="match-vg-layout">
-                        <div class="match-teams">
-                            <div class="team-vg">
-                                <img src="${homeLogo}" class="team-logo-vg" alt="${match.homeTeam}" onerror="this.style.display='none'">
-                                <span class="team-name-vg">${match.homeTeam}</span>
+                    <!-- Variant 2: Colored Badges Layout -->
+                    <div class="match-main-v2">
+                        <div class="match-teams-v2">
+                            <div class="team-v2">
+                                <img src="${homeLogo}" class="team-logo-v2" alt="${match.homeTeam}" onerror="this.style.display='none'">
+                                <span class="team-name-v2">${match.homeTeam}</span>
                             </div>
-                            <div class="team-vg">
-                                <img src="${awayLogo}" class="team-logo-vg" alt="${match.awayTeam}" onerror="this.style.display='none'">
-                                <span class="team-name-vg">${match.awayTeam}</span>
+                            <div class="team-v2">
+                                <img src="${awayLogo}" class="team-logo-v2" alt="${match.awayTeam}" onerror="this.style.display='none'">
+                                <span class="team-name-v2">${match.awayTeam}</span>
                             </div>
                         </div>
-                        ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
-                            <div class="match-odds-vg">
-                                <div class="odds-badge" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                                    <div class="odds-label">H</div>
-                                    <div class="odds-value">${formatOdds(match.odds.H)}</div>
-                                </div>
-                                <div class="odds-badge" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                                    <div class="odds-label">U</div>
-                                    <div class="odds-value">${formatOdds(match.odds.U)}</div>
-                                </div>
-                                <div class="odds-badge" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                                    <div class="odds-label">B</div>
-                                    <div class="odds-value">${formatOdds(match.odds.B)}</div>
-                                </div>
+                        <div class="match-scores-v2">
+                            <div class="score-row-v2">
+                                <button class="btn-v2" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
+                                <div class="score-display-v2" id="home-score-btn-${match.id}">${homeScore === '?' ? '?' : homeScore}</div>
+                                <button class="btn-v2" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
                             </div>
-                        ` : '<div class="match-odds-vg"><span class="no-odds">-</span></div>'}
-                        <div class="match-score-vg">
-                            <div class="score-input-vg">
-                                <button class="btn-vg btn-minus" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <span class="score-display-vg" id="home-score-btn-${match.id}">${homeScore === '?' ? '?' : homeScore}</span>
-                                <button class="btn-vg btn-plus" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
-                            </div>
-                            <div class="score-input-vg">
-                                <button class="btn-vg btn-minus" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <span class="score-display-vg" id="away-score-btn-${match.id}">${awayScore === '?' ? '?' : awayScore}</span>
-                                <button class="btn-vg btn-plus" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
+                            <div class="score-row-v2">
+                                <button class="btn-v2" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
+                                <div class="score-display-v2" id="away-score-btn-${match.id}">${awayScore === '?' ? '?' : awayScore}</div>
+                                <button class="btn-v2" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
                             </div>
                         </div>
                     </div>
+                    ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
+                        <div class="odds-line-v2">
+                            <div class="odds-badge-v2" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                <span class="odds-label-v2">H</span>
+                                <span class="odds-value-v2">${formatOdds(match.odds.H)}</span>
+                            </div>
+                            <div class="odds-badge-v2" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                <span class="odds-label-v2">U</span>
+                                <span class="odds-value-v2">${formatOdds(match.odds.U)}</span>
+                            </div>
+                            <div class="odds-badge-v2" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                <span class="odds-label-v2">B</span>
+                                <span class="odds-value-v2">${formatOdds(match.odds.B)}</span>
+                            </div>
+                        </div>
+                    ` : ''}
                     <span style="display: none;">
                         <span id="home-score-${match.id}">${homeScore}</span>
                         <span id="away-score-${match.id}">${awayScore}</span>
