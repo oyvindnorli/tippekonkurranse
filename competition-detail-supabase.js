@@ -165,8 +165,8 @@ async function loadCompetitionDetails(competitionId, userId) {
             throw new Error('Kunne ikke laste deltakere');
         }
 
-        // Fetch display names from users table
-        const userIds = participants.map(p => p.user_id);
+        // Fetch display names from users table (including creator)
+        const userIds = [...participants.map(p => p.user_id), competition.creator_id];
         const { data: usersData } = await window.supabase
             .from('users')
             .select('id, display_name, email')
@@ -184,8 +184,11 @@ async function loadCompetitionDetails(competitionId, userId) {
             display_name: usersMap[p.user_id] || p.user_name || 'Ukjent'
         }));
 
+        // Get creator name
+        const creatorName = usersMap[competition.creator_id] || 'Ukjent';
+
         // Display competition
-        displayCompetition(competition, mappedParticipants, userId);
+        displayCompetition(competition, mappedParticipants, userId, creatorName);
 
         loadingMessage.style.display = 'none';
         detailsSection.style.display = 'block';
@@ -365,7 +368,7 @@ function calculateAllScores(matches, tips, participants) {
 /**
  * Display competition details
  */
-function displayCompetition(competition, participants, userId) {
+function displayCompetition(competition, participants, userId, creatorName) {
     document.getElementById('competitionName').textContent = competition.name;
 
     // Description
@@ -395,7 +398,7 @@ function displayCompetition(competition, participants, userId) {
     }
 
     // Info
-    document.getElementById('creatorName').textContent = 'Admin';
+    document.getElementById('creatorName').textContent = creatorName || 'Ukjent';
     document.getElementById('competitionPeriod').textContent = `${formatDate(startDate)} - ${formatDate(endDate)}`;
     document.getElementById('matchCount').textContent = `${competition.match_ids?.length || 0} kamper`;
     document.getElementById('participantCount').textContent = `${participants.length} deltakere`;
