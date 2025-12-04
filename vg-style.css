@@ -193,33 +193,39 @@
 /* Responsive - Mobile optimization */
 @media (max-width: 600px) {
     .match-main-v2 {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        gap: 8px;
     }
 
     .match-teams-v2 {
-        width: 100%;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .team-name-v2 {
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .match-scores-v2 {
-        width: 100%;
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 12px;
+        gap: 4px;
     }
 
     .score-row-v2 {
-        flex: 1;
+        gap: 3px;
     }
 
     .btn-v2 {
-        flex: 1;
-        max-width: none;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
     }
 
     .score-display-v2 {
-        flex: 0 0 40px;
+        width: 28px;
+        height: 32px;
+        font-size: 15px;
     }
 
     .odds-line-v2 {
@@ -239,20 +245,24 @@
     }
 
     .team-logo-v2 {
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
     }
 
     .team-name-v2 {
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .btn-v2 {
-        font-size: 16px;
+        width: 30px;
+        height: 30px;
+        font-size: 15px;
     }
 
     .score-display-v2 {
-        font-size: 16px;
+        width: 26px;
+        height: 30px;
+        font-size: 14px;
     }
 }
 
