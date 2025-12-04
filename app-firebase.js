@@ -768,6 +768,12 @@ window.loadFirebaseData = loadFirebaseData;
 
 // Initialize the app
 function init() {
+    // Sync API_CONFIG.LEAGUES with centralized leagues.config.js
+    if (typeof API_CONFIG !== 'undefined' && typeof AVAILABLE_LEAGUES !== 'undefined') {
+        API_CONFIG.LEAGUES = AVAILABLE_LEAGUES;
+        console.log('✅ Synced API_CONFIG.LEAGUES with leagues.config.js:', API_CONFIG.LEAGUES);
+    }
+
     // Initialize Supabase first
     initializeSupabase();
 

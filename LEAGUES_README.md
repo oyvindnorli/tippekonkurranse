@@ -81,7 +81,17 @@ const LEAGUES = [
 ];
 ```
 
-### 5. Lagre filen
+### 5. Oppdater også `api-config.js` (backup compatibility)
+
+Åpne `api-config.js` og legg til det samme ID-et i LEAGUES array:
+
+```javascript
+LEAGUES: [39, 2, 3, 32, 48, 135, 78], // ← Legg til 78 for Bundesliga
+```
+
+*Merk: Dette steget er nødvendig for nå pga. bakoverkompatibilitet. I fremtiden vil dette kunne automatiseres.*
+
+### 6. Lagre filene
 
 **Det er alt!** 🎉
 
