@@ -1,10 +1,11 @@
 // Import utility modules
-import { LEAGUE_NAMES, getLeagueName } from './js/utils/leagueConfig.js';
+import { getLeagueName, getLeagueNameWithEmoji } from './leagues.config.js';
 import { calculatePoints, getOutcome, formatMatchTime, sortMatchesByDate, filterUpcomingMatches } from './js/utils/matchUtils.js';
 import { formatDateRange, getDateLabel, groupMatchesByDate, toISODate, getStartOfDay, getEndOfDay } from './js/utils/dateUtils.js';
 import { STORAGE_KEYS, TIMEOUTS, ERROR_MESSAGES } from './js/constants/appConstants.js';
 import { ErrorHandler, retryOperation } from './js/utils/errorHandler.js';
 import { updateHeaderStats } from './header.js';
+import { getLeagueIds } from './leagues.config.js';
 
 // Match data - will be loaded from API or mock data
 let matches = [];
@@ -17,8 +18,8 @@ let userTips = [];
 // Date navigation
 let selectedDate = null; // null = show all dates, otherwise show only this date
 
-// All available leagues that can be enabled
-const AVAILABLE_LEAGUES = [39, 2, 3, 32, 48, 135]; // PL, CL, EL, WCQ Europe, EFL Cup, Serie A
+// All available leagues that can be enabled - Now loaded from centralized leagues.config.js
+const AVAILABLE_LEAGUES = getLeagueIds();
 
 // Save league preferences to Supabase
 async function saveLeaguePreferences() {
@@ -1389,7 +1390,7 @@ function populateLeagueFilter() {
     // Show all available leagues (not just selected ones)
     // This allows users to enable/disable leagues they want to see
     AVAILABLE_LEAGUES.forEach(leagueId => {
-        const leagueName = getLeagueName(leagueId);
+        const leagueName = getLeagueNameWithEmoji(leagueId);
         const isSelected = selectedLeagues.has(leagueId);
 
         const checkbox = document.createElement('div');

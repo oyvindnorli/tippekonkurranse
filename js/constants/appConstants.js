@@ -3,18 +3,11 @@
  * Sentral fil for alle magic numbers og strings i applikasjonen
  */
 
-// League IDs
-export const LEAGUE_IDS = {
-    PREMIER_LEAGUE: 39,
-    CHAMPIONS_LEAGUE: 2,
-    EUROPA_LEAGUE: 3,
-    WC_QUALIFICATION_EUROPE: 32,
-    LA_LIGA: 140,
-    BUNDESLIGA: 78,
-    SERIE_A: 135,
-    LIGUE_1: 61,
-    ELITESERIEN: 103
-};
+// Import centralized league IDs
+import { LEAGUE_IDS as IMPORTED_LEAGUE_IDS } from '../../leagues.config.js';
+
+// League IDs - Now imported from centralized leagues.config.js
+export const LEAGUE_IDS = IMPORTED_LEAGUE_IDS;
 
 // Poeng-systemet
 export const POINTS = {
