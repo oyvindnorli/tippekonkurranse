@@ -41,7 +41,10 @@ function convertSupabaseMatch(match) {
         awayLogo: match.away_logo,
         commence_time: match.commence_time,
         league: match.league_id,
+        leagueId: match.league_id,  // Add leagueId for compatibility
         leagueName: match.league_name,
+        leagueLogo: match.league_logo,
+        round: match.round,  // Add round information
         season: match.season,
         status: match.status,
         result: match.home_score !== null && match.away_score !== null

@@ -943,8 +943,16 @@ function groupMatchesByLeagueAndRound(matches) {
     const grouped = {};
 
     matches.forEach(match => {
-        const leagueName = getLeagueNameWithEmoji(match.leagueId);
-        const round = match.round || 'Ukjent runde';
+        // Debug logging
+        if (!match.leagueId) {
+            console.warn('Match missing leagueId:', match);
+        }
+        if (!match.round) {
+            console.warn('Match missing round:', match);
+        }
+
+        const leagueName = match.leagueId ? getLeagueNameWithEmoji(match.leagueId) : 'Liga undefined';
+        const round = match.round || match.league?.round || 'Ukjent runde';
         const key = `${leagueName}|||${round}`; // Use ||| as separator
 
         if (!grouped[key]) {
