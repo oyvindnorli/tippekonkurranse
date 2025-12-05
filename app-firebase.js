@@ -681,7 +681,7 @@ async function loadMatches() {
 
         if (!matchesFromSupabase || matchesFromSupabase.length === 0) {
             console.warn('⚠️ No matches found in Supabase');
-            errorMessage.textContent = 'Ingen kamper funnet. Venter på at GitHub Actions skal oppdatere...';
+            errorMessage.textContent = 'Ingen kamper funnet for de valgte ligaene. Prøv å velge andre ligaer eller vent på at nye kamper blir planlagt.';
             errorMessage.style.display = 'block';
             loadingMessage.style.display = 'none';
             return;
