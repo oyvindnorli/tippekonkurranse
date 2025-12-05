@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oppdater Round-info - Tippekonkurranse</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="unified-design.css">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        .description {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        button {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #0284c7;
+        }
+        button:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        #log {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+        }
+        .success {
+            color: #059669;
+        }
+        .error {
+            color: #dc2626;
+        }
+        .info {
+            color: #0284c7;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header injected by header.js -->
+    <div id="headerContainer"></div>
+
+    <div class="container">
+        <h1>🔄 Oppdater Round-informasjon</h1>
+        <p class="description">
+            Dette scriptet henter alle kamper fra Supabase, slår opp round-info fra API-Football,
+            og oppdaterer kampene med riktig round og league_logo.
+        </p>
+
+        <button id="updateBtn" onclick="updateRounds()">Start oppdatering</button>
+
+        <div id="log"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-auth.js"></script>
+    <script src="api-config.js"></script>
+    <script type="module">
+        import { initHeader } from './header.js';
+        initHeader('admin');
+    </script>
+
+    <script>
+        let logEl;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            logEl = document.getElementById('log');
+        });
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('no-NO');
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logEl.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        async function updateRounds() {
+            const btn = document.getElementById('updateBtn');
+            btn.disabled = true;
+            logEl.innerHTML = '';
+
+            try {
+                log('🚀 Starter oppdatering...', 'info');
+
+                // Wait for Supabase to be initialized
+                let attempts = 0;
+                while (!window.supabase && attempts < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+
+                if (!window.supabase) {
+                    throw new Error('Supabase ikke initialisert');
+                }
+
+                log('✅ Supabase tilkoblet', 'success');
+
+                // 1. Fetch all matches from Supabase
+                log('📥 Henter kamper fra Supabase...', 'info');
+                const { data: matches, error: fetchError } = await window.supabase
+                    .from('matches')
+                    .select('*')
+                    .order('commence_time', { ascending: true });
+
+                if (fetchError) {
+                    throw new Error(`Kunne ikke hente kamper: ${fetchError.message}`);
+                }
+
+                log(`✅ Hentet ${matches.length} kamper`, 'success');
+
+                // 2. Group matches by league_id to minimize API calls
+                const matchesByLeague = {};
+                matches.forEach(match => {
+                    if (!matchesByLeague[match.league_id]) {
+                        matchesByLeague[match.league_id] = [];
+                    }
+                    matchesByLeague[match.league_id].push(match);
+                });
+
+                log(`📊 Fordelt på ${Object.keys(matchesByLeague).length} ligaer`, 'info');
+
+                let totalUpdated = 0;
+                let totalFailed = 0;
+
+                // 3. For each league, fetch fixtures from API
+                for (const [leagueId, leagueMatches] of Object.entries(matchesByLeague)) {
+                    log(`\n🔍 Behandler liga ${leagueId} (${leagueMatches.length} kamper)...`, 'info');
+
+                    // Get date range for this league's matches
+                    const dates = leagueMatches.map(m => new Date(m.commence_time));
+                    const minDate = new Date(Math.min(...dates));
+                    const maxDate = new Date(Math.max(...dates));
+
+                    const fromDate = minDate.toISOString().split('T')[0];
+                    const toDate = maxDate.toISOString().split('T')[0];
+
+                    // Fetch fixtures from API
+                    const season = new Date().getFullYear();
+                    const url = `/api/football?endpoint=fixtures&league=${leagueId}&season=${season}&from=${fromDate}&to=${toDate}`;
+
+                    log(`   📡 Henter fra API: ${fromDate} til ${toDate}`, 'info');
+
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            log(`   ⚠️ API-kall feilet for liga ${leagueId}`, 'error');
+                            continue;
+                        }
+
+                        const apiData = await response.json();
+
+                        if (!apiData.response || apiData.response.length === 0) {
+                            log(`   ℹ️ Ingen data fra API for liga ${leagueId}`, 'info');
+                            continue;
+                        }
+
+                        // Create lookup map: fixture_id -> round info
+                        const roundLookup = {};
+                        apiData.response.forEach(fixture => {
+                            roundLookup[fixture.fixture.id] = {
+                                round: fixture.league.round,
+                                league_logo: fixture.league.logo,
+                                league_name: fixture.league.name
+                            };
+                        });
+
+                        log(`   ✅ Hentet ${apiData.response.length} kamper fra API`, 'success');
+
+                        // 4. Update each match in Supabase
+                        for (const match of leagueMatches) {
+                            const roundInfo = roundLookup[match.id];
+
+                            if (!roundInfo) {
+                                log(`   ⚠️ Fant ikke round-info for kamp ${match.id}`, 'error');
+                                totalFailed++;
+                                continue;
+                            }
+
+                            // Update match in Supabase
+                            const { error: updateError } = await window.supabase
+                                .from('matches')
+                                .update({
+                                    round: roundInfo.round,
+                                    league_logo: roundInfo.league_logo,
+                                    league_name: roundInfo.league_name,
+                                    updated_at: new Date().toISOString()
+                                })
+                                .eq('id', match.id);
+
+                            if (updateError) {
+                                log(`   ❌ Feil ved oppdatering av kamp ${match.id}: ${updateError.message}`, 'error');
+                                totalFailed++;
+                            } else {
+                                totalUpdated++;
+                                if (totalUpdated % 10 === 0) {
+                                    log(`   ✅ Oppdatert ${totalUpdated} kamper...`, 'success');
+                                }
+                            }
+                        }
+
+                    } catch (apiError) {
+                        log(`   ❌ API-feil for liga ${leagueId}: ${apiError.message}`, 'error');
+                    }
+                }
+
+                log(`\n🎉 FERDIG!`, 'success');
+                log(`✅ Oppdaterte kamper: ${totalUpdated}`, 'success');
+                if (totalFailed > 0) {
+                    log(`❌ Feilede kamper: ${totalFailed}`, 'error');
+                }
+                log(`\n💡 Last index.html på nytt for å se endringene!`, 'info');
+
+            } catch (error) {
+                log(`❌ FEIL: ${error.message}`, 'error');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Forslag - Tippekonkurranse</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+        }
+
+        .variants {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .variant {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .variant h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+            border-bottom: 2px solid #22d3ee;
+            padding-bottom: 8px;
+        }
+
+        .variant-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* Variant 1: VG Profeten Style (Compact) */
+        .layout-1 .match-card {
+            padding: 14px 0;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .layout-1 .match-content {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .layout-1 .teams {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .layout-1 .team {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .layout-1 .logo {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .layout-1 .team-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .layout-1 .odds {
+            display: flex;
+            gap: 4px;
+        }
+
+        .layout-1 .odds-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4px 6px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .layout-1 .odds-label {
+            font-size: 9px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .layout-1 .odds-value {
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .layout-1 .scores {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .layout-1 .score-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .layout-1 .btn {
+            width: 32px;
+            height: 32px;
+            border: 1.5px solid #d4b896;
+            background: #f5f0e8;
+            color: #5a4a3a;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .layout-1 .score-display {
+            width: 28px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        /* Variant 2: Card Style (More Spacing) */
+        .layout-2 .match-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .layout-2 .match-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .layout-2 .teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .layout-2 .team {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .layout-2 .vs {
+            color: #999;
+            font-weight: 700;
+            padding: 0 12px;
+        }
+
+        .layout-2 .logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e0e0e0;
+        }
+
+        .layout-2 .team-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .layout-2 .match-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .layout-2 .odds {
+            display: flex;
+            gap: 8px;
+        }
+
+        .layout-2 .odds-item {
+            padding: 6px 10px;
+            background: #f8f8f8;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .layout-2 .odds-label {
+            font-size: 10px;
+            color: #666;
+            display: block;
+        }
+
+        .layout-2 .odds-value {
+            font-size: 13px;
+            font-weight: 700;
+            display: block;
+        }
+
+        .layout-2 .scores {
+            display: flex;
+            gap: 12px;
+        }
+
+        .layout-2 .score-group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .layout-2 .btn {
+            width: 36px;
+            height: 36px;
+            border: 1.5px solid #d4b896;
+            background: #f5f0e8;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .layout-2 .score-display {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* Variant 3: Minimal Line (Like Your Current) */
+        .layout-3 .match-card {
+            padding: 16px 0;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .layout-3 .match-content {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .layout-3 .teams {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .layout-3 .team {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .layout-3 .logo {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e0e0e0;
+        }
+
+        .layout-3 .team-name {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .layout-3 .odds {
+            display: flex;
+            gap: 6px;
+        }
+
+        .layout-3 .odds-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px 8px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            min-width: 42px;
+        }
+
+        .layout-3 .odds-label {
+            font-size: 10px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .layout-3 .odds-value {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .layout-3 .scores {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .layout-3 .score-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .layout-3 .btn {
+            width: 36px;
+            height: 36px;
+            border: 1.5px solid #d4b896;
+            background: #f5f0e8;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .layout-3 .score-display {
+            width: 32px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .time-header {
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            padding: 8px 0;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .variants {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Layout-forslag for Tippekonkurranse</h1>
+
+        <div class="variants">
+            <!-- Variant 1 -->
+            <div class="variant">
+                <h2>Variant 1: VG Profeten Compact</h2>
+                <p class="variant-description">
+                    ✅ Mest kompakt<br>
+                    ✅ Logoer i vertikal linje<br>
+                    ✅ Små odds-badges<br>
+                    ⚠️ Mindre plass til lagnavn
+                </p>
+
+                <div class="layout-1">
+                    <div class="time-header">21:00</div>
+                    <div class="match-card">
+                        <div class="match-content">
+                            <div class="teams">
+                                <div class="team">
+                                    <div class="logo"></div>
+                                    <span class="team-name">Manchester United</span>
+                                </div>
+                                <div class="team">
+                                    <div class="logo"></div>
+                                    <span class="team-name">West Ham</span>
+                                </div>
+                            </div>
+                            <div class="odds">
+                                <div class="odds-item">
+                                    <span class="odds-label">H</span>
+                                    <span class="odds-value">1.4</span>
+                                </div>
+                                <div class="odds-item">
+                                    <span class="odds-label">U</span>
+                                    <span class="odds-value">4.8</span>
+                                </div>
+                                <div class="odds-item">
+                                    <span class="odds-label">B</span>
+                                    <span class="odds-value">6.8</span>
+                                </div>
+                            </div>
+                            <div class="scores">
+                                <div class="score-row">
+                                    <button class="btn">−</button>
+                                    <div class="score-display">1</div>
+                                    <button class="btn">+</button>
+                                </div>
+                                <div class="score-row">
+                                    <button class="btn">−</button>
+                                    <div class="score-display">0</div>
+                                    <button class="btn">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variant 2 -->
+            <div class="variant">
+                <h2>Variant 2: Card Style</h2>
+                <p class="variant-description">
+                    ✅ Tydelige kort per kamp<br>
+                    ✅ Mer luft og oversikt<br>
+                    ✅ Lagene side ved side<br>
+                    ⚠️ Tar mer plass
+                </p>
+
+                <div class="layout-2">
+                    <div class="time-header">21:00</div>
+                    <div class="match-card">
+                        <div class="teams">
+                            <div class="team">
+                                <div class="logo"></div>
+                                <span class="team-name">Manchester United</span>
+                            </div>
+                            <span class="vs">vs</span>
+                            <div class="team">
+                                <div class="logo"></div>
+                                <span class="team-name">West Ham</span>
+                            </div>
+                        </div>
+                        <div class="match-footer">
+                            <div class="odds">
+                                <div class="odds-item">
+                                    <span class="odds-label">H</span>
+                                    <span class="odds-value">1.4</span>
+                                </div>
+                                <div class="odds-item">
+                                    <span class="odds-label">U</span>
+                                    <span class="odds-value">4.8</span>
+                                </div>
+                                <div class="odds-item">
+                                    <span class="odds-label">B</span>
+                                    <span class="odds-value">6.8</span>
+                                </div>
+                            </div>
+                            <div class="scores">
+                                <div class="score-group">
+                                    <button class="btn">−</button>
+                                    <div class="score-display">1</div>
+                                    <button class="btn">+</button>
+                                </div>
+                                <div class="score-group">
+                                    <button class="btn">−</button>
+                                    <div class="score-display">0</div>
+                                    <button class="btn">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variant 3 -->
+            <div class="variant">
+                <h2>Variant 3: Minimal Line (Nåværende)</h2>
+                <p class="variant-description">
+                    ✅ Balanse mellom kompakt og lesbar<br>
+                    ✅ Logoer vertikalt<br>
+                    ✅ Odds synlige<br>
+                    ✅ God mobilstøtte
+                </p>
+
+                <div class="layout-3">
+                    <div class="time-header">21:00</div>
+                    <div class="match-card">
+                        <div class="match-content">
+                            <div class="teams">
+                                <div class="team">
+                                    <div class="logo"></div>
+                                    <span class="team-name">Manchester United</span>
+                                </div>
+                                <div class="team">
+                                    <div class="logo"></div>
+                                    <span class="team-name">West Ham</span>
+                                </div>
+                            </div>
+                            <div class="odds">
+                                <div class="odds-item">
+                                    <span class="odds-label">H</span>
+                                    <span class="odds-value">1.4</span>
+                                </div>
+                                <div class="odds-item">
+                                    <span class="odds-label">U</span>
+                                    <span class="odds-value">4.8</span>
+                                </div>
+                                <div class="odds-item">
+                                    <span class="odds-label">B</span>
+                                    <span class="odds-value">6.8</span>
+                                </div>
+                            </div>
+                            <div class="scores">
+                                <div class="score-row">
+                                    <button class="btn">−</button>
+                                    <div class="score-display">1</div>
+                                    <button class="btn">+</button>
+                                </div>
+                                <div class="score-row">
+                                    <button class="btn">−</button>
+                                    <div class="score-display">0</div>
+                                    <button class="btn">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p style="text-align: center; color: #666; font-size: 14px;">
+            Åpne denne filen på både desktop og mobil for å se hvordan de ser ut på forskjellige skjermstørrelser
+        </p>
+    </div>
+</body>
+</html>

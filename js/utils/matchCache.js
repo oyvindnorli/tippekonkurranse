@@ -197,7 +197,10 @@ export async function getUpcomingMatchesFromCache(startDate, endDate, leagueIds)
             awayLogo: m.away_logo,
             commence_time: m.commence_time,
             league: m.league_id,
+            leagueId: m.league_id,  // Added for compatibility
             leagueName: m.league_name,
+            leagueLogo: m.league_logo,  // Added
+            round: m.round,  // Added - for grouping
             season: m.season,
             status: m.status,
             result: m.home_score !== null && m.away_score !== null ? { home: m.home_score, away: m.away_score } : null,
@@ -288,6 +291,8 @@ export async function saveMatchesToCache(matches) {
                             commence_time: match.commence_time,
                             league_id: match.league,
                             league_name: match.leagueName || null,
+                            league_logo: match.leagueLogo || null,
+                            round: match.round || null,
                             season: match.season || new Date().getFullYear(),
                             status: match.status || 'NS',
                             home_score: match.result?.home || null,

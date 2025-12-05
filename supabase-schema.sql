@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS matches (
   away_team TEXT NOT NULL,
   league_id INTEGER NOT NULL,
   league_name TEXT,
+  league_logo TEXT,
+  round TEXT,
   season INTEGER NOT NULL,
   commence_time TIMESTAMPTZ NOT NULL,
   status TEXT NOT NULL,
