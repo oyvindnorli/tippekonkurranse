@@ -936,6 +936,31 @@ function init() {
 
 // groupMatchesByDate() is now imported from dateUtils.js
 
+/**
+ * Group matches by league and round
+ */
+function groupMatchesByLeagueAndRound(matches) {
+    const grouped = {};
+
+    matches.forEach(match => {
+        const leagueName = getLeagueNameWithEmoji(match.leagueId);
+        const round = match.round || 'Ukjent runde';
+        const key = `${leagueName}|||${round}`; // Use ||| as separator
+
+        if (!grouped[key]) {
+            grouped[key] = {
+                leagueName: leagueName,
+                round: round,
+                leagueId: match.leagueId,
+                matches: []
+            };
+        }
+        grouped[key].matches.push(match);
+    });
+
+    return Object.values(grouped);
+}
+
 // Render matches list
 function renderMatches() {
     const matchesList = document.getElementById('matchesList');
@@ -943,10 +968,9 @@ function renderMatches() {
 
     // Filter out matches from previous days using utility function
     const upcomingMatches = filterUpcomingMatches(matches);
-    const groupedMatches = groupMatchesByDate(upcomingMatches);
 
     // Show message if no matches
-    if (Object.keys(groupedMatches).length === 0) {
+    if (upcomingMatches.length === 0) {
         const noMatchesDiv = document.createElement('div');
         noMatchesDiv.className = 'info-message';
         noMatchesDiv.innerHTML = `
@@ -958,7 +982,24 @@ function renderMatches() {
         return;
     }
 
-    Object.entries(groupedMatches).forEach(([dateLabel, dateMatches]) => {
+    // Group by league and round
+    const leagueRoundGroups = groupMatchesByLeagueAndRound(upcomingMatches);
+
+    // Render each league/round group
+    leagueRoundGroups.forEach(group => {
+        const leagueRoundSection = document.createElement('div');
+        leagueRoundSection.className = 'league-round-section';
+
+        // Create league/round header
+        const leagueRoundHeader = document.createElement('div');
+        leagueRoundHeader.className = 'league-round-header';
+        leagueRoundHeader.textContent = `${group.leagueName} - ${group.round}`;
+        leagueRoundSection.appendChild(leagueRoundHeader);
+
+        // Group matches by date within this league/round
+        const groupedByDate = groupMatchesByDate(group.matches);
+
+        Object.entries(groupedByDate).forEach(([dateLabel, dateMatches]) => {
         const dateGroup = document.createElement('div');
         dateGroup.className = 'date-group';
 
@@ -1093,7 +1134,13 @@ function renderMatches() {
 
         // Only append the date group if it has matches (more than just the date header)
         if (dateGroup.children.length > 1) {
-            matchesList.appendChild(dateGroup);
+            leagueRoundSection.appendChild(dateGroup);
+        }
+    });
+
+        // Append league/round section to the matches list
+        if (leagueRoundSection.children.length > 1) {
+            matchesList.appendChild(leagueRoundSection);
         }
     });
 }
