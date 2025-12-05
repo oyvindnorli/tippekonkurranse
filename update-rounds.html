@@ -161,13 +161,10 @@
                 for (const [leagueId, leagueMatches] of Object.entries(matchesByLeague)) {
                     log(`\n🔍 Behandler liga ${leagueId} (${leagueMatches.length} kamper)...`, 'info');
 
-                    // Get date range for this league's matches
-                    const dates = leagueMatches.map(m => new Date(m.commence_time));
-                    const minDate = new Date(Math.min(...dates));
-                    const maxDate = new Date(Math.max(...dates));
-
-                    const fromDate = minDate.toISOString().split('T')[0];
-                    const toDate = maxDate.toISOString().split('T')[0];
+                    // Use current date and next 60 days (API-Football only returns future fixtures)
+                    const now = new Date();
+                    const fromDate = now.toISOString().split('T')[0];
+                    const toDate = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
                     // Fetch fixtures from API
                     const season = new Date().getFullYear();
