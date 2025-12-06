@@ -166,10 +166,14 @@
                     const fromDate = now.toISOString().split('T')[0];
                     const toDate = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-                    // Fetch fixtures from API
-                    // Use 2024 as season (2024/25 season)
-                    const season = 2024;
+                    // Determine season based on current month
+                    // Football season runs Aug-May, so if we're in Jan-Jul, use previous year
+                    const currentMonth = now.getMonth(); // 0-11
+                    const currentYear = now.getFullYear();
+                    const season = currentMonth >= 7 ? currentYear : currentYear - 1; // Aug=7, so Aug-Dec use current year
+
                     const url = `/api/football?endpoint=fixtures&league=${leagueId}&season=${season}&from=${fromDate}&to=${toDate}`;
+                    log(`   🔍 Bruker season=${season} for ${fromDate} - ${toDate}`, 'info');
 
                     log(`   📡 Henter fra API: ${fromDate} til ${toDate}`, 'info');
 
