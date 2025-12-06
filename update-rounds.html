@@ -167,7 +167,8 @@
                     const toDate = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
                     // Fetch fixtures from API
-                    const season = new Date().getFullYear();
+                    // Use 2024 as season (2024/25 season)
+                    const season = 2024;
                     const url = `/api/football?endpoint=fixtures&league=${leagueId}&season=${season}&from=${fromDate}&to=${toDate}`;
 
                     log(`   📡 Henter fra API: ${fromDate} til ${toDate}`, 'info');
