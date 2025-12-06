@@ -940,7 +940,7 @@ function init() {
  * Format round name to shorter version
  * "Regular Season - 15" -> "Runde 15"
  * "League Stage - 6" -> "Runde 6"
- * "Quarter-finals" -> "Quarter-finals"
+ * "Quarter-finals" -> "Kvartfinale"
  */
 function formatRoundName(roundString) {
     if (!roundString) return 'Ukjent runde';
@@ -951,7 +951,22 @@ function formatRoundName(roundString) {
         return `Runde ${match[1]}`;
     }
 
-    // Return as-is for knockout stages (Quarter-finals, Semi-finals, etc)
+    // Translate knockout stages to Norwegian
+    const translations = {
+        'Final': 'Finale',
+        'Semi-finals': 'Semifinale',
+        'Quarter-finals': 'Kvartfinale',
+        'Round of 16': '16-delsfinale',
+        '8th Finals': '8-delsfinale',
+        '3rd Place Final': 'Bronsefinale'
+    };
+
+    // Check if we have a translation
+    if (translations[roundString]) {
+        return translations[roundString];
+    }
+
+    // Return as-is if no translation found
     return roundString;
 }
 
