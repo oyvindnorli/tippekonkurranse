@@ -937,22 +937,34 @@ function init() {
 // groupMatchesByDate() is now imported from dateUtils.js
 
 /**
+ * Format round name to shorter version
+ * "Regular Season - 15" -> "Runde 15"
+ * "League Stage - 6" -> "Runde 6"
+ * "Quarter-finals" -> "Quarter-finals"
+ */
+function formatRoundName(roundString) {
+    if (!roundString) return 'Ukjent runde';
+
+    // Extract number from "Regular Season - 15" or "League Stage - 6"
+    const match = roundString.match(/(\d+)$/);
+    if (match) {
+        return `Runde ${match[1]}`;
+    }
+
+    // Return as-is for knockout stages (Quarter-finals, Semi-finals, etc)
+    return roundString;
+}
+
+/**
  * Group matches by league and round
  */
 function groupMatchesByLeagueAndRound(matches) {
     const grouped = {};
 
     matches.forEach(match => {
-        // Debug logging
-        if (!match.leagueId) {
-            console.warn('Match missing leagueId:', match);
-        }
-        if (!match.round) {
-            console.warn('Match missing round:', match);
-        }
-
         const leagueName = match.leagueId ? getLeagueNameWithEmoji(match.leagueId) : 'Liga undefined';
-        const round = match.round || match.league?.round || 'Ukjent runde';
+        const roundRaw = match.round || match.league?.round || 'Ukjent runde';
+        const round = formatRoundName(roundRaw);
         const key = `${leagueName}|||${round}`; // Use ||| as separator
 
         if (!grouped[key]) {
