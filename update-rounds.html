@@ -188,15 +188,26 @@
 
                         // Create lookup map: fixture_id -> round info
                         const roundLookup = {};
+                        let roundsFound = 0;
                         apiData.response.forEach(fixture => {
-                            roundLookup[fixture.fixture.id] = {
+                            const roundInfo = {
                                 round: fixture.league.round,
                                 league_logo: fixture.league.logo,
                                 league_name: fixture.league.name
                             };
+                            if (roundInfo.round) roundsFound++;
+                            roundLookup[fixture.fixture.id] = roundInfo;
                         });
 
-                        log(`   ✅ Hentet ${apiData.response.length} kamper fra API`, 'success');
+                        log(`   ✅ Hentet ${apiData.response.length} kamper fra API (${roundsFound} med round-info)`, 'success');
+
+                        // Debug: Log first match with round info
+                        const firstWithRound = apiData.response.find(f => f.league.round);
+                        if (firstWithRound) {
+                            console.log('First match with round:', firstWithRound.fixture.id, firstWithRound.league.round);
+                        } else {
+                            console.warn('No matches have round info in API response!');
+                        }
 
                         // 4. Update each match in Supabase
                         for (const match of leagueMatches) {
@@ -208,15 +219,28 @@
                                 continue;
                             }
 
+                            if (!roundInfo.round) {
+                                log(`   ⚠️ Kamp ${match.id} har round=null i API`, 'error');
+                                totalFailed++;
+                                continue;
+                            }
+
                             // Update match in Supabase
+                            const updateData = {
+                                round: roundInfo.round,
+                                league_logo: roundInfo.league_logo,
+                                league_name: roundInfo.league_name,
+                                updated_at: new Date().toISOString()
+                            };
+
+                            // Debug: Log first update
+                            if (totalUpdated === 0) {
+                                console.log('First update data:', match.id, updateData);
+                            }
+
                             const { error: updateError } = await window.supabase
                                 .from('matches')
-                                .update({
-                                    round: roundInfo.round,
-                                    league_logo: roundInfo.league_logo,
-                                    league_name: roundInfo.league_name,
-                                    updated_at: new Date().toISOString()
-                                })
+                                .update(updateData)
                                 .eq('id', match.id);
 
                             if (updateError) {
