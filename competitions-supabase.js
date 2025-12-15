@@ -395,6 +395,17 @@ async function loadAvailableRounds() {
 
                     // Create round entries
                     Object.entries(fixturesByRound).forEach(([roundName, fixtures]) => {
+                        // Only include rounds where NO matches have started yet
+                        const hasStartedMatch = fixtures.some(f => {
+                            const matchTime = new Date(f.fixture.date);
+                            return matchTime <= now || f.fixture.status.short !== 'NS';
+                        });
+
+                        if (hasStartedMatch) {
+                            console.log(`⏭️ Skipping ${roundName} - some matches already started`);
+                            return; // Skip this round
+                        }
+
                         // Calculate date range for this round
                         const dates = fixtures.map(f => new Date(f.fixture.date));
                         const startDate = new Date(Math.min(...dates));
