@@ -66,6 +66,16 @@ function initializeSupabase() {
 
         // Check current session
         supabase.auth.getSession().then(({ data: { session } }) => {
+            // Check if this is a password recovery redirect
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const type = hashParams.get('type');
+
+            if (type === 'recovery') {
+                console.log('🔑 Password recovery detected from URL hash');
+                showUpdatePasswordForm();
+                return;
+            }
+
             if (session?.user) {
                 currentUser = session.user;
                 window.currentUser = currentUser; // Update global
@@ -426,9 +436,13 @@ async function waitForHeaderElements(maxAttempts = 50) {
 
 // Called when user logs in
 async function onUserLoggedIn(user) {
-    // Hide auth modal (only exists on index.html)
+    // Check if this is a password recovery flow - don't hide modal
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const isRecovery = hashParams.get('type') === 'recovery';
+
+    // Hide auth modal (only exists on index.html) unless in recovery mode
     const authModal = document.getElementById('authModal');
-    if (authModal) {
+    if (authModal && !isRecovery) {
         authModal.style.display = 'none';
     }
 

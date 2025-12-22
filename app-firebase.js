@@ -457,9 +457,10 @@ async function handleUpdatePassword() {
 
     const result = await updateUserPassword(newPassword);
     if (result.success) {
-        alert('Passordet ditt er oppdatert! Du kan nå logge inn med det nye passordet.');
+        alert('Passordet ditt er oppdatert! Du er nå logget inn.');
         closeAuthModal();
-        // Reload page to ensure clean state
+        // Remove hash from URL and reload to clean state
+        window.location.hash = '';
         window.location.reload();
     } else {
         alert('Kunne ikke oppdatere passord: ' + result.error);
