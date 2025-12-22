@@ -3,6 +3,7 @@
 
 // Use var instead of let to avoid "already declared" errors if script loads twice
 var supabase, currentUser = null;
+var isPasswordRecoveryMode = false; // Track if we're in password recovery mode
 
 // Initialize Supabase
 function initializeSupabase() {
@@ -47,6 +48,7 @@ function initializeSupabase() {
             // Handle password recovery
             if (event === 'PASSWORD_RECOVERY') {
                 console.log('🔑 Password recovery detected - showing update password form');
+                isPasswordRecoveryMode = true; // Set global flag
                 showUpdatePasswordForm();
                 return;
             }
@@ -72,6 +74,7 @@ function initializeSupabase() {
 
             if (type === 'recovery') {
                 console.log('🔑 Password recovery detected from URL hash');
+                isPasswordRecoveryMode = true; // Set global flag
                 showUpdatePasswordForm();
                 return;
             }
@@ -457,20 +460,14 @@ async function waitForHeaderElements(maxAttempts = 50) {
 // Called when user logs in
 async function onUserLoggedIn(user) {
     console.log('👤 onUserLoggedIn called');
-
-    // Check if this is a password recovery flow - don't hide modal
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const isRecovery = hashParams.get('type') === 'recovery';
-
-    console.log('🔍 Hash params:', window.location.hash);
-    console.log('🔍 isRecovery:', isRecovery);
+    console.log('🔍 isPasswordRecoveryMode:', isPasswordRecoveryMode);
 
     // Hide auth modal (only exists on index.html) unless in recovery mode
     const authModal = document.getElementById('authModal');
-    if (authModal && !isRecovery) {
+    if (authModal && !isPasswordRecoveryMode) {
         console.log('❌ Hiding modal (not recovery mode)');
         authModal.style.display = 'none';
-    } else if (authModal && isRecovery) {
+    } else if (authModal && isPasswordRecoveryMode) {
         console.log('✅ Keeping modal visible (recovery mode)');
     }
 
@@ -641,9 +638,14 @@ async function loadFirebaseLeaderboard() {
     });
 }
 
-// Make functions available globally
+// Make functions and variables available globally
 window.signOut = signOut;
 window.initializeSupabase = initializeSupabase;
+// Export recovery mode flag
+Object.defineProperty(window, 'isPasswordRecoveryMode', {
+    get: function() { return isPasswordRecoveryMode; },
+    set: function(value) { isPasswordRecoveryMode = value; }
+});
 
 // Initialize Supabase when script loads
 initializeSupabase();

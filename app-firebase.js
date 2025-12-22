@@ -457,6 +457,12 @@ async function handleUpdatePassword() {
 
     const result = await updateUserPassword(newPassword);
     if (result.success) {
+        // Clear recovery mode flag
+        if (typeof isPasswordRecoveryMode !== 'undefined') {
+            isPasswordRecoveryMode = false;
+        }
+        window.isPasswordRecoveryMode = false;
+
         alert('Passordet ditt er oppdatert! Du er nå logget inn.');
         closeAuthModal();
         // Remove hash from URL and reload to clean state
@@ -849,10 +855,8 @@ function init() {
 
         if (user) {
             // Check if this is password recovery - don't show main content
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const isRecovery = hashParams.get('type') === 'recovery';
-
-            if (isRecovery) {
+            // Use global flag from supabase-auth.js (set when PASSWORD_RECOVERY event fires)
+            if (window.isPasswordRecoveryMode || (typeof isPasswordRecoveryMode !== 'undefined' && isPasswordRecoveryMode)) {
                 console.log('🔑 Password recovery mode - skipping normal login flow');
                 return; // Don't load matches or show main content
             }
