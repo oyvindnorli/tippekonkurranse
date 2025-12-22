@@ -200,19 +200,33 @@ async function resetPassword(email) {
 
 // Show update password form (called when user clicks reset link from email)
 function showUpdatePasswordForm() {
+    console.log('📝 showUpdatePasswordForm() called');
     const authModal = document.getElementById('authModal');
-    if (!authModal) return;
+    if (!authModal) {
+        console.error('❌ authModal not found!');
+        return;
+    }
+    console.log('✅ authModal found, current display:', authModal.style.display);
 
     // Hide all other forms
-    document.getElementById('signinForm').style.display = 'none';
-    document.getElementById('signupForm').style.display = 'none';
-    document.getElementById('resetForm').style.display = 'none';
+    const signinForm = document.getElementById('signinForm');
+    const signupForm = document.getElementById('signupForm');
+    const resetForm = document.getElementById('resetForm');
+
+    if (signinForm) signinForm.style.display = 'none';
+    if (signupForm) signupForm.style.display = 'none';
+    if (resetForm) resetForm.style.display = 'none';
 
     // Show or create update password form
     let updateForm = document.getElementById('updatePasswordForm');
     if (!updateForm) {
+        console.log('📝 Creating new updatePasswordForm');
         // Create the form if it doesn't exist
         const modalContent = authModal.querySelector('.modal-content');
+        if (!modalContent) {
+            console.error('❌ modal-content not found!');
+            return;
+        }
         updateForm = document.createElement('div');
         updateForm.id = 'updatePasswordForm';
         updateForm.innerHTML = `
@@ -225,10 +239,16 @@ function showUpdatePasswordForm() {
             </div>
         `;
         modalContent.appendChild(updateForm);
+        console.log('✅ updatePasswordForm created and appended');
+    } else {
+        console.log('✅ updatePasswordForm already exists');
     }
 
     updateForm.style.display = 'block';
     authModal.style.display = 'block';
+    console.log('✅ Modal and form set to display: block');
+    console.log('📊 Final state - authModal.style.display:', authModal.style.display);
+    console.log('📊 Final state - updateForm.style.display:', updateForm.style.display);
 }
 
 // Update user password (called after password reset link is clicked)
@@ -436,14 +456,22 @@ async function waitForHeaderElements(maxAttempts = 50) {
 
 // Called when user logs in
 async function onUserLoggedIn(user) {
+    console.log('👤 onUserLoggedIn called');
+
     // Check if this is a password recovery flow - don't hide modal
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const isRecovery = hashParams.get('type') === 'recovery';
 
+    console.log('🔍 Hash params:', window.location.hash);
+    console.log('🔍 isRecovery:', isRecovery);
+
     // Hide auth modal (only exists on index.html) unless in recovery mode
     const authModal = document.getElementById('authModal');
     if (authModal && !isRecovery) {
+        console.log('❌ Hiding modal (not recovery mode)');
         authModal.style.display = 'none';
+    } else if (authModal && isRecovery) {
+        console.log('✅ Keeping modal visible (recovery mode)');
     }
 
     // Wait for header elements to be rendered (header.js is a module, loads after regular scripts)

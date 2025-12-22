@@ -848,6 +848,15 @@ function init() {
         // }
 
         if (user) {
+            // Check if this is password recovery - don't show main content
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const isRecovery = hashParams.get('type') === 'recovery';
+
+            if (isRecovery) {
+                console.log('🔑 Password recovery mode - skipping normal login flow');
+                return; // Don't load matches or show main content
+            }
+
             // Skip if we've already initialized for this user
             if (hasLoadedInitialMatches) {
                 return;
