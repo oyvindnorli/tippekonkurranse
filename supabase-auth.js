@@ -641,11 +641,14 @@ async function loadFirebaseLeaderboard() {
 // Make functions and variables available globally
 window.signOut = signOut;
 window.initializeSupabase = initializeSupabase;
-// Export recovery mode flag
-Object.defineProperty(window, 'isPasswordRecoveryMode', {
-    get: function() { return isPasswordRecoveryMode; },
-    set: function(value) { isPasswordRecoveryMode = value; }
-});
+// Export recovery mode flag (only if not already defined)
+if (!window.hasOwnProperty('isPasswordRecoveryMode')) {
+    Object.defineProperty(window, 'isPasswordRecoveryMode', {
+        get: function() { return isPasswordRecoveryMode; },
+        set: function(value) { isPasswordRecoveryMode = value; },
+        configurable: true // Allow redefinition if needed
+    });
+}
 
 // Initialize Supabase when script loads
 initializeSupabase();
