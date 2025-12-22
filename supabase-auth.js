@@ -1,7 +1,8 @@
 // Supabase Authentication and Database Service
 // Replaces Firebase with Supabase
 
-let supabase, currentUser = null;
+// Use var instead of let to avoid "already declared" errors if script loads twice
+var supabase, currentUser = null;
 
 // Initialize Supabase
 function initializeSupabase() {
@@ -539,8 +540,9 @@ async function loadFirebaseLeaderboard() {
     });
 }
 
-// Make signOut available globally for onclick handler in header
+// Make functions available globally
 window.signOut = signOut;
+window.initializeSupabase = initializeSupabase;
 
 // Initialize Supabase when script loads
 initializeSupabase();
