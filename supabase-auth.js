@@ -42,6 +42,15 @@ function initializeSupabase() {
 
         // Listen for auth state changes
         supabase.auth.onAuthStateChange((event, session) => {
+            console.log('🔐 Auth event:', event);
+
+            // Handle password recovery
+            if (event === 'PASSWORD_RECOVERY') {
+                console.log('🔑 Password recovery detected - showing update password form');
+                showUpdatePasswordForm();
+                return;
+            }
+
             if (session?.user) {
                 currentUser = session.user;
                 window.currentUser = currentUser; // Update global
@@ -175,6 +184,56 @@ async function resetPassword(email) {
         return { success: true };
     } catch (error) {
         console.error('❌ Password reset error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Show update password form (called when user clicks reset link from email)
+function showUpdatePasswordForm() {
+    const authModal = document.getElementById('authModal');
+    if (!authModal) return;
+
+    // Hide all other forms
+    document.getElementById('signinForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('resetForm').style.display = 'none';
+
+    // Show or create update password form
+    let updateForm = document.getElementById('updatePasswordForm');
+    if (!updateForm) {
+        // Create the form if it doesn't exist
+        const modalContent = authModal.querySelector('.modal-content');
+        updateForm = document.createElement('div');
+        updateForm.id = 'updatePasswordForm';
+        updateForm.innerHTML = `
+            <h2>Sett nytt passord</h2>
+            <div class="auth-form">
+                <p style="color: #718096; margin-bottom: 15px; font-size: 14px;">Skriv inn ditt nye passord nedenfor.</p>
+                <input type="password" id="newPassword" placeholder="Nytt passord (min 6 tegn)" required minlength="6">
+                <input type="password" id="confirmPassword" placeholder="Bekreft nytt passord" required minlength="6">
+                <button onclick="handleUpdatePassword()">Oppdater passord</button>
+            </div>
+        `;
+        modalContent.appendChild(updateForm);
+    }
+
+    updateForm.style.display = 'block';
+    authModal.style.display = 'block';
+}
+
+// Update user password (called after password reset link is clicked)
+async function updateUserPassword(newPassword) {
+    try {
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+
+        if (error) throw error;
+
+        console.log('✅ Password updated successfully');
+        return { success: true };
+    } catch (error) {
+        console.error('❌ Password update error:', error);
         return { success: false, error: error.message };
     }
 }

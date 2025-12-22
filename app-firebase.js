@@ -429,6 +429,43 @@ async function handleResetPassword() {
     }
 }
 
+async function handleUpdatePassword() {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (!newPassword || !confirmPassword) {
+        alert('Vennligst fyll ut begge feltene');
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        alert('Passord må være minst 6 tegn');
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        alert('Passordene må være like');
+        return;
+    }
+
+    // Check if updateUserPassword function exists
+    if (typeof updateUserPassword === 'undefined') {
+        console.error('updateUserPassword function not found!');
+        alert('Teknisk feil: Kunne ikke laste oppdateringsfunksjonen. Prøv å refresh siden.');
+        return;
+    }
+
+    const result = await updateUserPassword(newPassword);
+    if (result.success) {
+        alert('Passordet ditt er oppdatert! Du kan nå logge inn med det nye passordet.');
+        closeAuthModal();
+        // Reload page to ensure clean state
+        window.location.reload();
+    } else {
+        alert('Kunne ikke oppdatere passord: ' + result.error);
+    }
+}
+
 // Mock leaderboard data - REMOVED
 const mockPlayers = [
     {
@@ -1599,6 +1636,7 @@ window.handleGoogleSignIn = handleGoogleSignIn;
 window.handleSignIn = handleSignIn;
 window.handleSignUp = handleSignUp;
 window.handleResetPassword = handleResetPassword;
+window.handleUpdatePassword = handleUpdatePassword;
 window.changeDay = changeDay;
 window.showDatePicker = showDatePicker;
 window.closeDatePicker = closeDatePicker;
