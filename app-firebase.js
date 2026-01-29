@@ -1028,7 +1028,9 @@ function groupMatchesByLeagueAndRound(matches) {
     const grouped = {};
 
     matches.forEach(match => {
-        const leagueName = match.leagueId ? getLeagueNameWithEmoji(match.leagueId) : 'Liga undefined';
+        // Support both leagueId and league (API returns league, cache returns leagueId)
+        const leagueId = match.leagueId || match.league || match.league_id;
+        const leagueName = leagueId ? getLeagueNameWithEmoji(leagueId) : 'Liga undefined';
         const roundRaw = match.round || match.league?.round || 'Ukjent runde';
         const round = formatRoundName(roundRaw);
         const key = `${leagueName}|||${round}`; // Use ||| as separator
@@ -1037,7 +1039,7 @@ function groupMatchesByLeagueAndRound(matches) {
             grouped[key] = {
                 leagueName: leagueName,
                 round: round,
-                leagueId: match.leagueId,
+                leagueId: leagueId,
                 matches: []
             };
         }
