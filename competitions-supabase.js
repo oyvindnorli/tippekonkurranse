@@ -359,9 +359,9 @@ async function loadAvailableRounds() {
     try {
         // Define leagues to fetch rounds for
         const leagueConfigs = [
-            { id: 39, name: 'Premier League', icon: '⚽', season: new Date().getFullYear() },
-            { id: 2, name: 'Champions League', icon: '⭐', season: new Date().getFullYear() },
-            { id: 3, name: 'Europa League', icon: '🌟', season: new Date().getFullYear() }
+            { id: 39, name: 'Premier League', icon: '⚽', season: 2025 },
+            { id: 2, name: 'Champions League', icon: '⭐', season: 2025 },
+            { id: 3, name: 'Europa League', icon: '🌟', season: 2025 }
         ];
 
         const rounds = [];

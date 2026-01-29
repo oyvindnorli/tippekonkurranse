@@ -293,7 +293,7 @@ export async function saveMatchesToCache(matches) {
                             league_name: match.leagueName || null,
                             league_logo: match.leagueLogo || null,
                             round: match.round || null,
-                            season: match.season || new Date().getFullYear(),
+                            season: match.season || 2025,
                             status: match.status || 'NS',
                             home_score: match.result?.home || null,
                             away_score: match.result?.away || null,

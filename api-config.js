@@ -11,7 +11,7 @@ const API_CONFIG = {
     // League IDs - Synchronized with leagues.config.js
     // DO NOT edit here - edit leagues.config.js instead!
     LEAGUES: [39, 2, 3, 32, 48, 135], // PL, CL, EL, WCQ Europe, EFL Cup, Serie A
-    SEASON: new Date().getFullYear(), // Current season
+    SEASON: 2025, // Football season 2025/26 (API-Football uses start year)
     MAX_MATCHES: 100, // Maximum number of matches to show (increased to show all in 7-day period)
 
     // Cache settings (30 minutes - you have Pro plan with 7500 requests/day)

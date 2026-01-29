@@ -221,7 +221,7 @@ async function loadCompetitionMatches(competition, participants, currentUserId) 
         const fromDate = startDate.toISOString().split('T')[0];
         const toDate = endDate.toISOString().split('T')[0];
         const leagueId = competition.league_ids?.[0] || 39;
-        const season = new Date().getFullYear();
+        const season = 2025; // Football season 2025/26
 
         const url = `/api/football?endpoint=fixtures&league=${leagueId}&season=${season}&from=${fromDate}&to=${toDate}`;
         const response = await fetch(url);
