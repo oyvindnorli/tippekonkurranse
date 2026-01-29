@@ -288,9 +288,14 @@ class FootballApiService {
                     // Filter to only show next round for each league
                     const nextRoundMatches = this.filterToNextRound(cachedMatches);
 
-                    // Return cached matches immediately for fast loading
-                    // Note: Results will be updated by loadMatches() which calls fetchScores() separately
-                    return nextRoundMatches;
+                    // Only use cache if we have upcoming matches, otherwise fetch from API
+                    if (nextRoundMatches.length > 0) {
+                        // Return cached matches immediately for fast loading
+                        // Note: Results will be updated by loadMatches() which calls fetchScores() separately
+                        return nextRoundMatches;
+                    } else {
+                        console.log('⚠️ Cache has matches but none are upcoming, fetching from API...');
+                    }
                 } else {
                     // Cache miss - will fetch from API below
                 }
