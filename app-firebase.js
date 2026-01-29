@@ -720,11 +720,29 @@ async function loadMatches() {
             ? API_CONFIG.LEAGUES
             : [39, 2, 3, 32, 48, 135]; // Default leagues
 
-        // Fetch from Supabase only
-        const matchesFromSupabase = await getUpcomingMatchesFromCache(today, futureDate, leagueIds);
+        // Fetch from Supabase first
+        let matchesFromSupabase = await getUpcomingMatchesFromCache(today, futureDate, leagueIds);
+
+        // Check if matches have complete data (including round info)
+        const hasCompleteData = matchesFromSupabase && matchesFromSupabase.length > 0 &&
+            matchesFromSupabase.every(m => m.round);
+
+        if (!hasCompleteData && matchesFromSupabase && matchesFromSupabase.length > 0) {
+            console.log('⚠️ Cache has matches but missing round info, fetching from API...');
+            // Fall back to API if cache data is incomplete
+            try {
+                const freshMatches = await window.footballApi.getUpcomingFixtures(true); // skipCache=true
+                if (freshMatches && freshMatches.length > 0) {
+                    matchesFromSupabase = freshMatches;
+                    console.log(`✅ Fetched ${freshMatches.length} matches from API with complete data`);
+                }
+            } catch (apiError) {
+                console.warn('⚠️ API fallback failed, using incomplete cache data:', apiError);
+            }
+        }
 
         if (!matchesFromSupabase || matchesFromSupabase.length === 0) {
-            console.warn('⚠️ No matches found in Supabase');
+            console.warn('⚠️ No matches found');
             errorMessage.textContent = 'Ingen kamper funnet for de valgte ligaene. Prøv å velge andre ligaer eller vent på at nye kamper blir planlagt.';
             errorMessage.style.display = 'block';
             loadingMessage.style.display = 'none';
