@@ -154,70 +154,88 @@ header h1 {
 }
 
 /* ========================================
-   HEADER DESIGN 1: DARK PREMIUM
+   HEADER DESIGN: MODERN GLASSMORPHISM
 ======================================== */
 .header-premium {
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 4px 30px rgba(0, 0, 0, 0.3),
+        0 1px 0 rgba(255, 255, 255, 0.05) inset;
     display: block;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .header-top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
+    padding: 14px 20px;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
 }
 
 .user-name-display {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    font-weight: 500;
 }
 
 .header-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .brand-icon {
-    font-size: 28px;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    font-size: 32px;
+    filter: drop-shadow(0 2px 8px rgba(14, 165, 233, 0.4));
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 2px 8px rgba(14, 165, 233, 0.4)); }
+    50% { filter: drop-shadow(0 2px 16px rgba(14, 165, 233, 0.6)); }
 }
 
 .brand-title {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 800;
-    color: white;
+    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     letter-spacing: -0.5px;
     margin: 0;
 }
 
 .btn-logout-premium {
-    background: transparent;
-    color: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 6px 14px;
-    border-radius: 6px;
+    background: rgba(239, 68, 68, 0.1);
+    color: rgba(252, 165, 165, 0.9);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 8px 16px;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-logout-premium:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.9);
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .user-stats-bar {
@@ -280,8 +298,9 @@ header h1 {
 
 .nav-premium {
     display: flex;
-    gap: 0;
-    padding: 0;
+    gap: 4px;
+    padding: 8px 12px 12px 12px;
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .nav-btn-premium {
@@ -290,23 +309,51 @@ header h1 {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 14px 12px;
-    background: #0f172a;
-    color: #64748b;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
-    border: none;
-    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-btn-premium:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    transform: translateY(-2px);
 }
 
 .nav-btn-premium.active {
-    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
     color: white;
+    box-shadow:
+        0 4px 15px rgba(14, 165, 233, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.nav-btn-premium.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
 }
 
 .nav-icon-premium {
     font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.nav-btn-premium:hover .nav-icon-premium {
+    transform: scale(1.1);
 }
 
 /* Mobile responsive */
