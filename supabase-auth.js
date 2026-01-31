@@ -527,7 +527,14 @@ function onUserLoggedOut() {
         return;
     }
 
-    // Update UI on index.html
+    // Update UI on index.html - hide header elements
+    // Note: Header uses 'currentUsername', legacy code used 'usernameDisplay'
+    const currentUsername = document.getElementById('currentUsername');
+    if (currentUsername) {
+        currentUsername.style.display = 'none';
+        currentUsername.textContent = '';
+    }
+
     const usernameDisplay = document.getElementById('usernameDisplay');
     if (usernameDisplay) {
         usernameDisplay.style.display = 'none';

@@ -15,6 +15,21 @@ let leagueFilteredMatches = []; // Matches after league filter, before date filt
 // User's tips - loaded from Firebase
 let userTips = [];
 
+// Debounce utility for tip saving - waits 300ms after last click before saving
+const tipDebounceTimers = {};
+function debouncedSubmitTip(matchId, homeScore, awayScore) {
+    // Clear any existing timer for this match
+    if (tipDebounceTimers[matchId]) {
+        clearTimeout(tipDebounceTimers[matchId]);
+    }
+
+    // Set new timer - only saves after 300ms of no clicks
+    tipDebounceTimers[matchId] = setTimeout(() => {
+        submitTip(matchId, homeScore, awayScore);
+        delete tipDebounceTimers[matchId];
+    }, 300);
+}
+
 // Date navigation
 let selectedDate = null; // null = show all dates, otherwise show only this date
 
@@ -1335,7 +1350,8 @@ function updateScore(matchId, type, isPlus) {
     const homeScore = parseInt(homeBtn.textContent);
     const awayScore = parseInt(awayBtn.textContent);
 
-    submitTip(matchId, homeScore, awayScore);
+    // Use debounced version to avoid excessive API calls when clicking rapidly
+    debouncedSubmitTip(matchId, homeScore, awayScore);
 }
 
 // Submit a tip
