@@ -4163,7 +4163,7 @@ header h1 {
     border-radius: 12px;
     padding: 20px;
     text-align: center;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
@@ -4209,6 +4209,12 @@ header h1 {
     border: 1.5px solid #e5e7eb;
     border-radius: 12px;
     padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stats-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .stats-box h3 {
@@ -4246,6 +4252,12 @@ header h1 {
     border: 1.5px solid #e5e7eb;
     border-radius: 12px;
     padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.match-history:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .match-history h3 {

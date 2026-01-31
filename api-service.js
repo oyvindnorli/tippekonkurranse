@@ -241,9 +241,8 @@ class FootballApiService {
      * @returns {Array} - Upcoming fixtures
      */
     async fetchNextRoundFixtures() {
-        const allFixtures = [];
-
-        for (const leagueId of API_CONFIG.LEAGUES) {
+        // Fetch all leagues in parallel for faster loading
+        const fetchPromises = API_CONFIG.LEAGUES.map(async (leagueId) => {
             try {
                 // Special handling for WC Qualification Europe - always use 2024
                 const season = leagueId === 32 ? 2024 : API_CONFIG.SEASON;
@@ -252,18 +251,22 @@ class FootballApiService {
 
                 if (!response.ok) {
                     console.warn(`Failed to fetch fixtures for league ${leagueId}`);
-                    continue;
+                    return [];
                 }
 
                 const data = await response.json();
                 if (data.response && Array.isArray(data.response)) {
-                    const transformed = transformers.transformFixturesData(data.response, 20, this.teamLogosCache);
-                    allFixtures.push(...transformed);
+                    return transformers.transformFixturesData(data.response, 20, this.teamLogosCache);
                 }
+                return [];
             } catch (error) {
                 console.warn(`Error fetching fixtures for league ${leagueId}:`, error);
+                return [];
             }
-        }
+        });
+
+        const results = await Promise.all(fetchPromises);
+        const allFixtures = results.flat();
 
         // Filter to next round only
         return this.filterToNextRound(allFixtures);
@@ -338,26 +341,27 @@ class FootballApiService {
             leagueDateMap.get(leagueId).add(dateStr);
         });
 
-        // Calculate total API calls needed
-        let totalCalls = 0;
-        leagueDateMap.forEach((dates) => totalCalls += dates.size);
-
-        // Fetch odds for each league and date combination (only for dates with fixtures)
-        console.log(`📡 Fetching odds in bulk for ${totalCalls} league/date combinations...`);
-        let oddsCallCount = 0;
-        let foundAnyOdds = false;
-
+        // Build list of all league/date combinations
+        const oddsRequests = [];
         for (const [leagueId, dates] of leagueDateMap.entries()) {
             for (const dateStr of dates) {
-                oddsCallCount++;
-                const leagueOdds = await this.fetchOddsForLeague(leagueId, dateStr);
-                Object.assign(allOddsMap, leagueOdds);
+                oddsRequests.push({ leagueId, dateStr });
+            }
+        }
 
-                if (Object.keys(leagueOdds).length > 0) {
-                    foundAnyOdds = true;
-                }
+        // Fetch odds in parallel (max 3 concurrent to avoid rate limiting)
+        console.log(`📡 Fetching odds for ${oddsRequests.length} league/date combinations...`);
 
-                // Small delay to avoid rate limiting
+        const batchSize = 3;
+        for (let i = 0; i < oddsRequests.length; i += batchSize) {
+            const batch = oddsRequests.slice(i, i + batchSize);
+            const batchResults = await Promise.all(
+                batch.map(({ leagueId, dateStr }) => this.fetchOddsForLeague(leagueId, dateStr))
+            );
+            batchResults.forEach(leagueOdds => Object.assign(allOddsMap, leagueOdds));
+
+            // Small delay between batches to avoid rate limiting
+            if (i + batchSize < oddsRequests.length) {
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
         }
