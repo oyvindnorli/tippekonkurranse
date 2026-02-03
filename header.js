@@ -50,31 +50,27 @@ export function initHeader(activePage = 'index') {
 
     headerContainer.innerHTML = `
         <header class="header-premium">
-            <!-- Top Bar with Brand, User and Logout -->
+            <!-- Top Bar with Brand and Points -->
             <div class="header-top-bar">
                 <div class="header-brand">
-                    <span class="brand-icon">⚽</span>
-                    <h1 class="brand-title">Tippekonkurranse</h1>
+                    <h1 class="brand-title">Tippe</h1>
                 </div>
-                <div class="header-right">
-                    <span class="user-name-display" id="currentUsername" style="display: ${btnDisplayStyle};">${usernameText}</span>
-                    <button id="signOutBtn" onclick="signOut()" class="btn-logout-premium" style="display: ${btnDisplayStyle};">Logg ut</button>
+                <div class="header-right" id="headerRightContent" style="display: ${btnDisplayStyle};">
+                    <span class="points-badge" id="headerPointsBadge">0 poeng</span>
+                    <button onclick="signOut()" class="btn-logout-neon" title="Logg ut">Logg ut</button>
                 </div>
             </div>
 
             <!-- Navigation -->
             <nav class="nav-premium" id="mainNavButtons" style="display: ${displayStyle};">
                 <a href="index.html" class="nav-btn-premium ${activePage === 'index' ? 'active' : ''}">
-                    <span class="nav-icon-premium">🏠</span>
                     Tipp
                 </a>
                 <a href="competitions.html" class="nav-btn-premium ${activePage === 'competitions' ? 'active' : ''}">
-                    <span class="nav-icon-premium">🏆</span>
                     Konkurranser
                 </a>
                 <a href="my-stats.html" class="nav-btn-premium ${activePage === 'my-stats' ? 'active' : ''}">
-                    <span class="nav-icon-premium">📊</span>
-                    Min Statistikk
+                    Statistikk
                 </a>
             </nav>
         </header>
@@ -82,10 +78,13 @@ export function initHeader(activePage = 'index') {
 }
 
 /**
- * Update user stats in header (deprecated - kept for compatibility)
+ * Update user stats in header
  */
 export function updateHeaderStats(totalPoints, totalTips) {
-    // Stats bar removed from header
+    const pointsBadge = document.getElementById('headerPointsBadge');
+    if (pointsBadge) {
+        pointsBadge.textContent = `${totalPoints} poeng`;
+    }
 }
 
 /**
@@ -104,15 +103,11 @@ export function updateHeaderUsername(username) {
  * @param {boolean} isLoggedIn - Whether user is logged in
  */
 export function updateHeaderAuthState(isLoggedIn) {
-    const signOutBtn = document.getElementById('signOutBtn');
-    const usernameElement = document.getElementById('currentUsername');
+    const headerRight = document.getElementById('headerRightContent');
     const navButtons = document.getElementById('mainNavButtons');
 
-    if (signOutBtn) {
-        signOutBtn.style.display = isLoggedIn ? 'block' : 'none';
-    }
-    if (usernameElement) {
-        usernameElement.style.display = isLoggedIn ? 'block' : 'none';
+    if (headerRight) {
+        headerRight.style.display = isLoggedIn ? 'flex' : 'none';
     }
     if (navButtons) {
         navButtons.style.display = isLoggedIn ? 'flex' : 'none';

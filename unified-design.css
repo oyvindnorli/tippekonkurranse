@@ -8,54 +8,55 @@
 /* Primary button - Main action buttons */
 .btn-primary {
     padding: 10px 20px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    color: #000;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    transition: all 0.15s;
+    box-shadow: none;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    transform: none;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    filter: brightness(1.1);
 }
 
 .btn-primary:active {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
 /* Large primary button for hero sections */
 .btn-primary.btn-large {
     padding: 14px 32px;
     font-size: 16px;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: none;
 }
 
 /* Secondary button - Alternative actions */
 .btn-secondary {
     padding: 10px 20px;
-    background: white;
-    color: #3b82f6;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s;
 }
 
 .btn-secondary:hover {
-    background: #f0f9ff;
-    border-color: #3b82f6;
-    transform: translateY(-1px);
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.2);
+    transform: none;
 }
 
 .btn-secondary:active {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
 /* Large secondary button */
@@ -86,15 +87,17 @@
 /* CARDS - Container styling */
 
 .card {
-    background: white;
-    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.2s ease;
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: none;
+    transition: all 0.15s;
 }
 
 .card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    background: rgba(255,255,255,0.05);
+    box-shadow: none;
 }
 
 .card-header {
@@ -103,18 +106,18 @@
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 2px solid #f3f4f6;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .card-title {
     font-size: 18px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: white;
     margin: 0;
 }
 
 .card-content {
-    color: #4b5563;
+    color: rgba(255,255,255,0.6);
     line-height: 1.6;
 }
 
@@ -128,51 +131,50 @@
 
 .filter-btn {
     padding: 8px 16px;
-    background: white;
-    color: #6b7280;
-    border: 2px solid #e5e7eb;
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 8px;
     font-weight: 600;
     font-size: 13px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s;
 }
 
 .filter-btn:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.12);
+    color: white;
 }
 
 .filter-btn.active {
-    background: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
+    background: rgba(0, 255, 136, 0.15);
+    color: #00ff88;
+    border-color: rgba(0, 255, 136, 0.3);
 }
 
 /* League filter button - Main filter trigger */
 .league-filter-btn {
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
+    padding: 10px 20px;
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 10px;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow:
-        0 4px 15px rgba(14, 165, 233, 0.3),
-        0 1px 0 rgba(255, 255, 255, 0.2) inset;
+    transition: all 0.15s;
+    box-shadow: none;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .league-filter-btn:hover {
-    transform: translateY(-2px);
-    box-shadow:
-        0 8px 25px rgba(14, 165, 233, 0.4),
-        0 1px 0 rgba(255, 255, 255, 0.2) inset;
+    background: rgba(0, 255, 136, 0.2);
+    border-color: rgba(0, 255, 136, 0.5);
+    transform: none;
+    box-shadow: none;
 }
 
 .league-filter-btn:active {
@@ -182,48 +184,51 @@
 /* Filter action buttons (Velg alle, Fjern alle) */
 .filter-action-btn {
     padding: 6px 12px;
-    background: white;
-    color: #3b82f6;
-    border: 1px solid #e5e7eb;
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 6px;
     font-weight: 600;
     font-size: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s;
 }
 
 .filter-action-btn:hover {
-    background: #f0f9ff;
-    border-color: #3b82f6;
+    background: rgba(0, 255, 136, 0.1);
+    border-color: rgba(0, 255, 136, 0.3);
+    color: #00ff88;
 }
 
 /* CREATE/ACTION BUTTONS - Specific to certain pages */
 
 .btn-create-competition {
     padding: 10px 20px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    color: #000;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    transition: all 0.15s;
+    box-shadow: none;
 }
 
 .btn-create-competition:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    transform: none;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    filter: brightness(1.1);
 }
 
 /* STATS CARDS - For statistics pages */
 
 .stats-card {
-    background: white;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: none;
 }
 
 .stats-card-header {
@@ -236,7 +241,7 @@
 .stats-card-title {
     font-size: 16px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: white;
     margin: 0;
 }
 
@@ -252,7 +257,7 @@
 .section-title {
     font-size: 22px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: white;
     margin: 0;
 }
 
@@ -268,23 +273,23 @@
 }
 
 .badge-primary {
-    background: #e0f2fe;
-    color: #0369a1;
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
 }
 
 .badge-success {
-    background: #dcfce7;
-    color: #15803d;
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
 }
 
 .badge-warning {
-    background: #fef3c7;
-    color: #a16207;
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
 }
 
 .badge-danger {
-    background: #fee2e2;
-    color: #b91c1c;
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
 }
 
 /* RESPONSIVE */

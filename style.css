@@ -6,11 +6,9 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    background:
-        linear-gradient(to bottom, rgba(248, 250, 251, 0.75), rgba(248, 250, 251, 0.8)),
-        url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=1920&h=1080&fit=crop') center/cover fixed;
+    background: #0a0a0f;
     min-height: 100vh;
-    color: #1a1d29;
+    color: white;
 }
 
 .container {
@@ -19,9 +17,9 @@ body {
 }
 
 main {
-    max-width: 800px;
+    max-width: 500px;
     margin: 0 auto;
-    padding: 0 15px;
+    padding: 20px;
 }
 
 /* Header - Ultra Compact Modern Design */
@@ -154,42 +152,64 @@ header h1 {
 }
 
 /* ========================================
-   HEADER DESIGN: MODERN GLASSMORPHISM
+   HEADER DESIGN: NEON ACCENT (5B)
 ======================================== */
 .header-premium {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: #0a0a0f;
     padding: 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow:
-        0 4px 30px rgba(0, 0, 0, 0.3),
-        0 1px 0 rgba(255, 255, 255, 0.05) inset;
     display: block;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .header-top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 20px;
-    max-width: 800px;
+    padding: 16px 20px;
+    max-width: 500px;
     margin: 0 auto;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 }
 
 .user-name-display {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 13px;
+    display: none;
+}
+
+/* Points pill - Neon green style */
+.points-badge {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+}
+
+/* Logout button - subtle */
+.btn-logout-neon {
+    padding: 6px 12px;
+    background: transparent;
+    color: rgba(255,255,255,0.4);
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
     font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-logout-neon:hover {
+    color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.05);
 }
 
 .header-brand {
@@ -199,25 +219,20 @@ header h1 {
 }
 
 .brand-icon {
-    font-size: 32px;
-    filter: drop-shadow(0 2px 8px rgba(14, 165, 233, 0.4));
-    animation: pulse-glow 3s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-    0%, 100% { filter: drop-shadow(0 2px 8px rgba(14, 165, 233, 0.4)); }
-    50% { filter: drop-shadow(0 2px 16px rgba(14, 165, 233, 0.6)); }
+    display: none;
 }
 
 .brand-title {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 800;
-    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: white;
     letter-spacing: -0.5px;
     margin: 0;
+}
+
+.brand-title::after {
+    content: '.';
+    color: #00ff88;
 }
 
 .btn-logout-premium {
@@ -241,13 +256,7 @@ header h1 {
 }
 
 .user-stats-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: none;
 }
 
 .user-info-premium {
@@ -300,11 +309,9 @@ header h1 {
 
 .nav-premium {
     display: flex;
-    gap: 4px;
-    padding: 8px 12px 12px 12px;
-    background: rgba(0, 0, 0, 0.2);
-    max-width: 800px;
+    max-width: 500px;
     margin: 0 auto;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .nav-btn-premium {
@@ -313,42 +320,44 @@ header h1 {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    color: #94a3b8;
+    padding: 14px;
+    background: transparent;
+    color: rgba(255,255,255,0.4);
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
-    border: 1px solid transparent;
-    border-radius: 12px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    border-radius: 0;
+    transition: all 0.2s;
     position: relative;
-    overflow: hidden;
 }
 
 .nav-btn-premium:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.1);
-    color: #e2e8f0;
-    transform: translateY(-2px);
+    color: rgba(255,255,255,0.7);
+    background: transparent;
+    transform: none;
 }
 
 .nav-btn-premium.active {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-    color: white;
-    box-shadow:
-        0 4px 15px rgba(14, 165, 233, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-    border-color: rgba(255, 255, 255, 0.2);
+    background: transparent;
+    color: #00ff88;
+    box-shadow: none;
+    border-color: transparent;
+}
+
+.nav-btn-premium.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    background: #00ff88;
+    border-radius: 2px;
 }
 
 .nav-btn-premium.active::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    display: none;
 }
 
 .nav-icon-premium {
@@ -449,40 +458,35 @@ header h1 {
 
 /* Matches section */
 .matches-section {
-    background: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    background: transparent;
+    border-radius: 0;
+    overflow: visible;
+    box-shadow: none;
+    border: none;
 }
 
 .matches-section h2 {
-    color: #1a1d29;
-    padding: 18px 20px;
-    background: #f9fafb;
-    font-size: 17px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid #e5e7eb;
+    display: none;
 }
 
 /* Filter Buttons */
 .filter-buttons {
     display: flex;
     justify-content: center;
-    padding: 16px 20px;
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 0 0 16px 0;
+    background: transparent;
+    border-bottom: none;
 }
 
 /* REMOVED - Now using unified-design.css for league-filter-btn */
 
 /* League Filter Container */
 .league-filter-container {
-    background: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 16px 20px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
 }
 
 .league-filter-header {
@@ -495,7 +499,7 @@ header h1 {
 .league-filter-header span {
     font-size: 14px;
     font-weight: 600;
-    color: #374151;
+    color: rgba(255,255,255,0.5);
 }
 
 .league-filter-actions {
@@ -512,15 +516,16 @@ header h1 {
 }
 
 .league-filter-item {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    padding: 8px 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px 14px;
     transition: all 0.2s ease;
 }
 
 .league-filter-item:hover {
-    background: #f9fafb;
+    background: rgba(0, 255, 136, 0.1);
+    border-color: rgba(0, 255, 136, 0.3);
 }
 
 .league-filter-item label {
@@ -570,7 +575,7 @@ header h1 {
 .loading-message {
     text-align: center;
     padding: 40px 20px;
-    color: #64748b;
+    color: rgba(255,255,255,0.5);
     font-size: 14px;
     font-weight: 500;
     display: flex;
@@ -583,8 +588,8 @@ header h1 {
     content: '';
     width: 40px;
     height: 40px;
-    border: 3px solid #e2e8f0;
-    border-top-color: #22d3ee;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: #00ff88;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -594,12 +599,12 @@ header h1 {
 }
 
 .error-message {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #dc2626;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
     padding: 14px 18px;
     border-radius: 8px;
-    margin: 18px 20px;
+    margin: 18px 0;
     text-align: center;
     font-size: 13px;
 }
@@ -1738,22 +1743,23 @@ header h1 {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
 }
 
 .modal-content {
-    background: #ffffff;
+    background: #1a1a1f;
     margin: 5% auto;
     padding: 35px;
     border-radius: 16px;
     width: 90%;
     max-width: 440px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255,255,255,0.06);
 }
 
 .modal-content h2 {
-    color: #1a1d29;
+    color: white;
     margin-bottom: 22px;
     text-align: center;
     font-size: 22px;
@@ -1761,7 +1767,7 @@ header h1 {
 }
 
 .close {
-    color: #9ca3af;
+    color: rgba(255,255,255,0.4);
     float: right;
     font-size: 30px;
     font-weight: bold;
@@ -1770,7 +1776,7 @@ header h1 {
 }
 
 .close:hover {
-    color: #1a1d29;
+    color: white;
 }
 
 /* Auth forms */
@@ -1783,55 +1789,56 @@ header h1 {
 .auth-form input {
     width: 100%;
     padding: 13px;
-    background: #f9fafb;
-    border: 1.5px solid #e5e7eb;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 8px;
     font-size: 14px;
-    color: #1a1d29;
+    color: white;
     transition: all 0.2s;
 }
 
 .auth-form input:focus {
     outline: none;
-    border-color: #22d3ee;
-    background: #ffffff;
+    border-color: #00ff88;
+    background: rgba(255,255,255,0.06);
 }
 
 .auth-form input::placeholder {
-    color: #9ca3af;
+    color: rgba(255,255,255,0.4);
 }
 
 .auth-form button {
     width: 100%;
     padding: 13px;
-    background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    color: #000;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 700;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+    transition: all 0.15s;
+    box-shadow: none;
 }
 
 .auth-form button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(34, 211, 238, 0.4);
+    transform: none;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    filter: brightness(1.1);
 }
 
 /* Google Sign In button */
 .btn-google-signin {
     width: 100%;
     padding: 12px;
-    background: white;
-    color: #1f2937;
-    border: 1px solid #d1d5db;
+    background: rgba(255,255,255,0.04);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 8px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1840,10 +1847,10 @@ header h1 {
 }
 
 .btn-google-signin:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.2);
+    transform: none;
+    box-shadow: none;
 }
 
 .btn-google-signin svg {
@@ -1856,7 +1863,7 @@ header h1 {
     align-items: center;
     text-align: center;
     margin: 20px 0;
-    color: #9ca3af;
+    color: rgba(255,255,255,0.4);
     font-size: 13px;
 }
 
@@ -1864,7 +1871,7 @@ header h1 {
 .auth-divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .auth-divider span {
@@ -1874,8 +1881,12 @@ header h1 {
 .auth-switch {
     text-align: center;
     margin-top: 12px;
-    color: #6b7280;
+    color: rgba(255,255,255,0.5);
     font-size: 13px;
+}
+
+.auth-switch a {
+    color: #00ff88;
 }
 
 .auth-switch a {
@@ -2262,24 +2273,25 @@ header h1 {
 
 /* Competitions page styles */
 .competitions-section {
-    background: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+    background: transparent;
+    border-radius: 0;
+    overflow: visible;
+    box-shadow: none;
+    border: none;
 }
 
 .section-header-with-button {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 18px 20px;
-    background: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 0 0 16px 0;
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 20px;
 }
 
 .section-header-with-button h2 {
-    color: #1a1d29;
+    color: white;
     font-size: 17px;
     font-weight: 700;
     text-transform: uppercase;
@@ -2290,38 +2302,38 @@ header h1 {
 /* REMOVED - Now using unified-design.css for btn-create-competition */
 
 .competitions-list {
-    padding: 20px;
+    padding: 0;
 }
 
 .competitions-subheader {
     font-size: 14px;
     font-weight: 700;
-    color: #1a1d29;
+    color: rgba(255,255,255,0.5);
     margin-bottom: 12px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #e5e7eb;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .no-competitions {
     text-align: center;
-    color: #9ca3af;
+    color: rgba(255,255,255,0.4);
     padding: 30px 20px;
     font-size: 13px;
 }
 
 .competition-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
     padding: 16px 18px;
     margin-bottom: 10px;
-    transition: all 0.2s ease;
+    transition: all 0.15s;
     cursor: pointer;
 }
 
 .competition-card:hover {
-    border-color: #22d3ee;
-    background: #fafafa;
+    border-color: rgba(0, 255, 136, 0.3);
+    background: rgba(0, 255, 136, 0.05);
 }
 
 .competition-header {
@@ -2334,21 +2346,21 @@ header h1 {
 .competition-name {
     font-size: 16px;
     font-weight: 700;
-    color: #0f172a;
+    color: white;
     margin: 0;
 }
 
 .creator-badge {
     font-size: 11px;
     padding: 4px 10px;
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    color: #92400e;
+    background: rgba(0, 255, 136, 0.15);
+    color: #00ff88;
     border-radius: 6px;
     font-weight: 700;
 }
 
 .competition-description {
-    color: #6b7280;
+    color: rgba(255,255,255,0.5);
     font-size: 13px;
     margin-bottom: 14px;
     line-height: 1.5;
@@ -3540,26 +3552,18 @@ header h1 {
 }
 
 .hero-banner {
-    background:
-        linear-gradient(135deg, rgba(59, 130, 246, 0.85) 0%, rgba(30, 64, 175, 0.9) 50%, rgba(124, 58, 237, 0.85) 100%),
-        url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=1600&h=900&fit=crop') center/cover;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
     border-radius: 16px;
-    padding: 25px 20px;
+    padding: 30px 20px;
     margin: 10px 0 20px;
-    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+    box-shadow: none;
     position: relative;
     overflow: hidden;
 }
 
 .hero-banner::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -10%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    border-radius: 50%;
+    display: none;
 }
 
 .hero-content {
@@ -3583,12 +3587,13 @@ header h1 {
     font-size: 28px;
     font-weight: 900;
     margin-bottom: 6px;
-    text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    text-shadow: none;
+    color: white;
 }
 
 .hero-subtitle {
     font-size: 14px;
-    opacity: 0.95;
+    color: rgba(255,255,255,0.6);
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.4;
@@ -3601,13 +3606,13 @@ header h1 {
 .welcome-content h2 {
     font-size: 36px;
     font-weight: 800;
-    color: #0f172a;
+    color: white;
     margin-bottom: 16px;
 }
 
 .welcome-content > p {
     font-size: 18px;
-    color: #64748b;
+    color: rgba(255,255,255,0.6);
     margin-bottom: 60px;
     max-width: 600px;
     margin-left: auto;
@@ -3629,15 +3634,18 @@ header h1 {
 
 .feature-item {
     padding: 15px 12px;
-    background: white;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: none;
+    transition: all 0.15s;
 }
 
 .feature-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    transform: none;
+    background: rgba(0, 255, 136, 0.05);
+    border-color: rgba(0, 255, 136, 0.2);
+    box-shadow: none;
 }
 
 .feature-icon {
@@ -3649,13 +3657,13 @@ header h1 {
 .feature-item h3 {
     font-size: 16px;
     font-weight: 700;
-    color: #0f172a;
+    color: white;
     margin-bottom: 6px;
 }
 
 .feature-item p {
     font-size: 13px;
-    color: #64748b;
+    color: rgba(255,255,255,0.5);
     line-height: 1.5;
 }
 
@@ -4197,7 +4205,7 @@ header h1 {
 .stats-summary h2 {
     font-size: 24px;
     font-weight: 700;
-    color: #1e293b;
+    color: white;
     margin-bottom: 20px;
 }
 
@@ -4209,23 +4217,24 @@ header h1 {
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border: 2px solid #e2e8f0;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
     border-radius: 12px;
     padding: 20px;
     text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.15s;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: none;
+    background: rgba(255,255,255,0.05);
+    box-shadow: none;
 }
 
 .stat-label {
     font-size: 13px;
     font-weight: 600;
-    color: #64748b;
+    color: rgba(255,255,255,0.5);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 10px;
@@ -4234,14 +4243,14 @@ header h1 {
 .stat-value {
     font-size: 32px;
     font-weight: 800;
-    color: #1e293b;
+    color: white;
     line-height: 1;
 }
 
 .stat-percentage {
     font-size: 14px;
     font-weight: 600;
-    color: #22d3ee;
+    color: #00ff88;
     margin-top: 5px;
 }
 
@@ -4256,22 +4265,23 @@ header h1 {
 }
 
 .stats-box {
-    background: white;
-    border: 1.5px solid #e5e7eb;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
     border-radius: 12px;
     padding: 20px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.15s;
 }
 
 .stats-box:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: none;
+    background: rgba(255,255,255,0.05);
+    box-shadow: none;
 }
 
 .stats-box h3 {
     font-size: 18px;
     font-weight: 700;
-    color: #1e293b;
+    color: white;
     margin-bottom: 15px;
 }
 
@@ -4280,7 +4290,7 @@ header h1 {
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .stats-row:last-child {
@@ -4289,32 +4299,33 @@ header h1 {
 
 .stats-row span {
     font-size: 14px;
-    color: #64748b;
+    color: rgba(255,255,255,0.5);
 }
 
 .stats-row strong {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: white;
 }
 
 .match-history {
-    background: white;
-    border: 1.5px solid #e5e7eb;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
     border-radius: 12px;
     padding: 20px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.15s;
 }
 
 .match-history:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: none;
+    background: rgba(255,255,255,0.05);
+    box-shadow: none;
 }
 
 .match-history h3 {
     font-size: 18px;
     font-weight: 700;
-    color: #1e293b;
+    color: white;
     margin-bottom: 15px;
 }
 

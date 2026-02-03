@@ -449,12 +449,12 @@ async function getAllUsersWithTips() {
 // Wait for header elements to exist (header.js is a module and loads after this script)
 async function waitForHeaderElements(maxAttempts = 50) {
     let attempts = 0;
-    // Wait for both mainNavButtons and currentUsername to exist
-    while ((!document.getElementById('mainNavButtons') || !document.getElementById('currentUsername')) && attempts < maxAttempts) {
+    // Wait for mainNavButtons to exist
+    while (!document.getElementById('mainNavButtons') && attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 50));
         attempts++;
     }
-    return document.getElementById('currentUsername') !== null;
+    return document.getElementById('mainNavButtons') !== null;
 }
 
 // Called when user logs in
@@ -474,36 +474,10 @@ async function onUserLoggedIn(user) {
     // Wait for header elements to be rendered (header.js is a module, loads after regular scripts)
     await waitForHeaderElements();
 
-    // Update UI - fetch displayName from database
-    const currentUsername = document.getElementById('currentUsername');
-    const usernameDisplay = document.getElementById('usernameDisplay');
-
-    if (currentUsername) {
-        // Use displayName from user metadata (set during signup)
-        const displayName = user.user_metadata?.display_name || user.email.split('@')[0];
-        currentUsername.textContent = `Innlogget som ${displayName}`;
-        currentUsername.style.display = 'block';
-
-        // Show username display
-        if (usernameDisplay) {
-            usernameDisplay.style.display = 'inline';
-        }
-        // Show user section with fade-in
-        const currentUserDiv = currentUsername.closest('.current-user');
-        if (currentUserDiv) {
-            currentUserDiv.classList.add('loaded');
-        }
-    }
-
-    const signOutBtn = document.getElementById('signOutBtn');
-    if (signOutBtn) {
-        signOutBtn.style.display = 'inline-block';
-    }
-
-    // Show user stats bar (for premium header)
-    const userStatsBar = document.getElementById('userStatsBar');
-    if (userStatsBar) {
-        userStatsBar.style.display = 'flex';
+    // Show header right content (points badge)
+    const headerRight = document.getElementById('headerRightContent');
+    if (headerRight) {
+        headerRight.style.display = 'flex';
     }
 
     // Show navigation buttons immediately
@@ -528,27 +502,9 @@ function onUserLoggedOut() {
     }
 
     // Update UI on index.html - hide header elements
-    // Note: Header uses 'currentUsername', legacy code used 'usernameDisplay'
-    const currentUsername = document.getElementById('currentUsername');
-    if (currentUsername) {
-        currentUsername.style.display = 'none';
-        currentUsername.textContent = '';
-    }
-
-    const usernameDisplay = document.getElementById('usernameDisplay');
-    if (usernameDisplay) {
-        usernameDisplay.style.display = 'none';
-    }
-
-    const signOutBtn = document.getElementById('signOutBtn');
-    if (signOutBtn) {
-        signOutBtn.style.display = 'none';
-    }
-
-    // Hide user stats bar (for premium header)
-    const userStatsBar = document.getElementById('userStatsBar');
-    if (userStatsBar) {
-        userStatsBar.style.display = 'none';
+    const headerRight = document.getElementById('headerRightContent');
+    if (headerRight) {
+        headerRight.style.display = 'none';
     }
 
     // Hide navigation buttons
