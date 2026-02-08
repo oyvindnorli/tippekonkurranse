@@ -57,6 +57,7 @@ export function initHeader(activePage = 'index') {
                 </div>
                 <div class="header-right" id="headerRightContent" style="display: ${btnDisplayStyle};">
                     <span class="points-badge" id="headerPointsBadge">0 poeng</span>
+                    <span class="user-name-display" id="currentUsername">${usernameText}</span>
                     <button onclick="signOut()" class="btn-logout-neon" title="Logg ut">Logg ut</button>
                 </div>
             </div>

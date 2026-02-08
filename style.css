@@ -181,7 +181,9 @@ header h1 {
 }
 
 .user-name-display {
-    display: none;
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.4);
 }
 
 /* Points pill - Neon green style */
