@@ -1111,10 +1111,10 @@ function renderMatches() {
         const leagueRoundSection = document.createElement('div');
         leagueRoundSection.className = 'league-round-section';
 
-        // Create league/round header
+        // Create league/round header with pill badges
         const leagueRoundHeader = document.createElement('div');
         leagueRoundHeader.className = 'league-round-header';
-        leagueRoundHeader.textContent = `${group.leagueName} - ${group.round}`;
+        leagueRoundHeader.innerHTML = `<span class="pill pill-league">${group.leagueName}</span><span class="pill pill-round">${group.round}</span>`;
         leagueRoundSection.appendChild(leagueRoundHeader);
 
         // Group matches by date within this league/round
@@ -1126,7 +1126,7 @@ function renderMatches() {
 
         const dateHeader = document.createElement('div');
         dateHeader.className = 'date-header';
-        dateHeader.textContent = dateLabel;
+        dateHeader.innerHTML = `<span class="pill pill-date">${dateLabel}</span>`;
         dateGroup.appendChild(dateHeader);
 
         // Group matches by time within this date
@@ -1169,8 +1169,7 @@ function renderMatches() {
             const leagueLogo = firstMatch.leagueLogo ? `<img src="${firstMatch.leagueLogo}" alt="${firstMatch.leagueName || 'Liga'}" class="league-badge-vg" onerror="this.style.display='none'">` : '';
 
             timeHeader.innerHTML = `
-                <div class="time-badge-vg">${cleanTime}</div>
-                ${leagueLogo}
+                <span class="pill pill-time">${cleanTime}</span>
             `;
             dateGroup.appendChild(timeHeader);
 
