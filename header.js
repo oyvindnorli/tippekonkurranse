@@ -53,7 +53,7 @@ export function initHeader(activePage = 'index') {
             <!-- Top Bar with Brand and Points -->
             <div class="header-top-bar">
                 <div class="header-brand">
-                    <h1 class="brand-title">Tippe</h1>
+                    <h1 class="brand-title">Tippekonkurranse</h1>
                 </div>
                 <div class="header-right" id="headerRightContent" style="display: ${btnDisplayStyle};">
                     <span class="points-badge" id="headerPointsBadge">0 poeng</span>
