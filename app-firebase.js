@@ -4,7 +4,7 @@ import { calculatePoints, getOutcome, formatMatchTime, sortMatchesByDate, filter
 import { formatDateRange, getDateLabel, groupMatchesByDate, toISODate, getStartOfDay, getEndOfDay } from './js/utils/dateUtils.js';
 import { STORAGE_KEYS, TIMEOUTS, ERROR_MESSAGES } from './js/constants/appConstants.js';
 import { ErrorHandler, retryOperation } from './js/utils/errorHandler.js';
-import { updateHeaderStats } from './header.js';
+
 import { getLeagueIds } from './leagues.config.js';
 
 // Match data - will be loaded from API or mock data
@@ -1424,8 +1424,7 @@ function updateTotalScore() {
         scoreElement.textContent = totalScore.toFixed(1);
     }
 
-    // Update header stats using shared header component
-    updateHeaderStats(totalScore, userTips.length);
+
 }
 
 // Date navigation functions

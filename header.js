@@ -56,7 +56,6 @@ export function initHeader(activePage = 'index') {
                     <h1 class="brand-title">Tippekonkurranse</h1>
                 </div>
                 <div class="header-right" id="headerRightContent" style="display: ${btnDisplayStyle};">
-                    <span class="points-badge" id="headerPointsBadge">0 poeng</span>
                     <span class="user-name-display" id="currentUsername">${usernameText}</span>
                     <button onclick="signOut()" class="btn-logout-neon" title="Logg ut">Logg ut</button>
                 </div>
@@ -78,15 +77,7 @@ export function initHeader(activePage = 'index') {
     `;
 }
 
-/**
- * Update user stats in header
- */
-export function updateHeaderStats(totalPoints, totalTips) {
-    const pointsBadge = document.getElementById('headerPointsBadge');
-    if (pointsBadge) {
-        pointsBadge.textContent = `${totalPoints} poeng`;
-    }
-}
+
 
 /**
  * Update username in header
