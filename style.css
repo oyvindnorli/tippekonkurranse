@@ -233,8 +233,7 @@ header h1 {
 }
 
 .brand-title::after {
-    content: '.';
-    color: #00ff88;
+    display: none;
 }
 
 .btn-logout-premium {
