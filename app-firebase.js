@@ -4,7 +4,7 @@ import { calculatePoints, getOutcome, formatMatchTime, sortMatchesByDate, filter
 import { formatDateRange, getDateLabel, groupMatchesByDate, toISODate, getStartOfDay, getEndOfDay } from './js/utils/dateUtils.js';
 import { STORAGE_KEYS, TIMEOUTS, ERROR_MESSAGES } from './js/constants/appConstants.js';
 import { ErrorHandler, retryOperation } from './js/utils/errorHandler.js';
-
+import { updateHeaderUsername, updateHeaderAuthState } from './header.js';
 import { getLeagueIds } from './leagues.config.js';
 
 // Match data - will be loaded from API or mock data
@@ -902,6 +902,11 @@ function init() {
             // Set flag IMMEDIATELY to prevent race condition
             hasLoadedInitialMatches = true;
 
+            // Update header with current user's name
+            const displayName = user.user_metadata?.display_name || user.email?.split('@')[0] || '';
+            updateHeaderUsername(displayName);
+            updateHeaderAuthState(true);
+
             // User is signed in, load preferences first
             selectedLeagues = await loadSelectedLeagues(user.id);
             API_CONFIG.LEAGUES = Array.from(selectedLeagues);
@@ -1003,6 +1008,7 @@ function init() {
         } else {
             // User is not signed in, reset flag so data loads on next login
             hasLoadedInitialMatches = false;
+            updateHeaderAuthState(false);
 
             // Show welcome section
             if (welcomeSection) {
