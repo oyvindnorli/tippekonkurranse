@@ -545,7 +545,7 @@ header h1 {
 
 .league-filter-item span {
     font-size: 13px;
-    color: #1f2937;
+    color: rgba(255,255,255,0.8);
     font-weight: 500;
 }
 
