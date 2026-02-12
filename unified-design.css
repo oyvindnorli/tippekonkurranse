@@ -1,6 +1,7 @@
 /* ==================================
    UNIFIED DESIGN SYSTEM
    Konsistent styling på tvers av alle sider
+   FotMob-inspired Light Theme
    ================================== */
 
 /* BUTTONS - Standard buttons used across all pages */
@@ -8,8 +9,8 @@
 /* Primary button - Main action buttons */
 .btn-primary {
     padding: 10px 20px;
-    background: linear-gradient(135deg, #00ff88, #00cc6a);
-    color: #000;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #fff;
     border: none;
     border-radius: 10px;
     font-weight: 700;
@@ -21,8 +22,8 @@
 
 .btn-primary:hover {
     transform: none;
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-    filter: brightness(1.1);
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+    filter: brightness(1.05);
 }
 
 .btn-primary:active {
@@ -39,9 +40,9 @@
 /* Secondary button - Alternative actions */
 .btn-secondary {
     padding: 10px 20px;
-    background: rgba(255,255,255,0.04);
-    color: white;
-    border: 1px solid rgba(255,255,255,0.1);
+    background: #ffffff;
+    color: #374151;
+    border: 1px solid #d1d5db;
     border-radius: 10px;
     font-weight: 600;
     font-size: 14px;
@@ -50,8 +51,8 @@
 }
 
 .btn-secondary:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.2);
+    background: #f9fafb;
+    border-color: #9ca3af;
     transform: none;
 }
 
@@ -68,7 +69,7 @@
 /* Success button - Confirmation actions */
 .btn-success {
     padding: 10px 20px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -76,28 +77,28 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.2);
 }
 
 .btn-success:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 }
 
 /* CARDS - Container styling */
 
 .card {
-    background: rgba(255,255,255,0.03);
+    background: #ffffff;
     border-radius: 16px;
     padding: 20px;
-    border: 1px solid rgba(255,255,255,0.04);
-    box-shadow: none;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     transition: all 0.15s;
 }
 
 .card:hover {
-    background: rgba(255,255,255,0.05);
-    box-shadow: none;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 .card-header {
@@ -106,18 +107,18 @@
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid #f3f4f6;
 }
 
 .card-title {
     font-size: 18px;
     font-weight: 700;
-    color: white;
+    color: #111827;
     margin: 0;
 }
 
 .card-content {
-    color: rgba(255,255,255,0.6);
+    color: #6b7280;
     line-height: 1.6;
 }
 
@@ -131,9 +132,9 @@
 
 .filter-btn {
     padding: 8px 16px;
-    background: rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: #ffffff;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
     font-weight: 600;
     font-size: 13px;
@@ -142,23 +143,23 @@
 }
 
 .filter-btn:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.12);
-    color: white;
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
 }
 
 .filter-btn.active {
-    background: rgba(0, 255, 136, 0.15);
-    color: #00ff88;
-    border-color: rgba(0, 255, 136, 0.3);
+    background: #dcfce7;
+    color: #16a34a;
+    border-color: #bbf7d0;
 }
 
 /* League filter button - Main filter trigger */
 .league-filter-btn {
     padding: 10px 20px;
-    background: rgba(0, 255, 136, 0.1);
-    color: #00ff88;
-    border: 1px solid rgba(0, 255, 136, 0.3);
+    background: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
     border-radius: 10px;
     font-weight: 600;
     font-size: 14px;
@@ -171,8 +172,8 @@
 }
 
 .league-filter-btn:hover {
-    background: rgba(0, 255, 136, 0.2);
-    border-color: rgba(0, 255, 136, 0.5);
+    background: #bbf7d0;
+    border-color: #86efac;
     transform: none;
     box-shadow: none;
 }
@@ -184,9 +185,9 @@
 /* Filter action buttons (Velg alle, Fjern alle) */
 .filter-action-btn {
     padding: 6px 12px;
-    background: rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: #ffffff;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
     border-radius: 6px;
     font-weight: 600;
     font-size: 12px;
@@ -195,17 +196,17 @@
 }
 
 .filter-action-btn:hover {
-    background: rgba(0, 255, 136, 0.1);
-    border-color: rgba(0, 255, 136, 0.3);
-    color: #00ff88;
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #16a34a;
 }
 
 /* CREATE/ACTION BUTTONS - Specific to certain pages */
 
 .btn-create-competition {
     padding: 10px 20px;
-    background: linear-gradient(135deg, #00ff88, #00cc6a);
-    color: #000;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #fff;
     border: none;
     border-radius: 10px;
     font-weight: 700;
@@ -217,18 +218,18 @@
 
 .btn-create-competition:hover {
     transform: none;
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-    filter: brightness(1.1);
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+    filter: brightness(1.05);
 }
 
 /* STATS CARDS - For statistics pages */
 
 .stats-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.04);
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 24px;
-    box-shadow: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .stats-card-header {
@@ -241,7 +242,7 @@
 .stats-card-title {
     font-size: 16px;
     font-weight: 700;
-    color: white;
+    color: #111827;
     margin: 0;
 }
 
@@ -257,7 +258,7 @@
 .section-title {
     font-size: 22px;
     font-weight: 700;
-    color: white;
+    color: #111827;
     margin: 0;
 }
 
@@ -273,23 +274,23 @@
 }
 
 .badge-primary {
-    background: rgba(0, 255, 136, 0.1);
-    color: #00ff88;
+    background: #dcfce7;
+    color: #16a34a;
 }
 
 .badge-success {
-    background: rgba(0, 255, 136, 0.1);
-    color: #00ff88;
+    background: #dcfce7;
+    color: #16a34a;
 }
 
 .badge-warning {
-    background: rgba(251, 191, 36, 0.1);
-    color: #fbbf24;
+    background: #fef3c7;
+    color: #92400e;
 }
 
 .badge-danger {
-    background: rgba(239, 68, 68, 0.1);
-    color: #fca5a5;
+    background: #fee2e2;
+    color: #dc2626;
 }
 
 /* RESPONSIVE */

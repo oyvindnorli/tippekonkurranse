@@ -1,35 +1,37 @@
 /* ==================================
-   Variant 5B: Neon Accent Design
+   FotMob-inspired Light Theme
    ================================== */
 
-/* Match Card - Dark with neon accents */
+/* Match Card - White with subtle shadow */
 .match-card {
-    padding: 16px;
-    margin-bottom: 12px;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.04);
+    padding: 0;
+    margin-bottom: 4px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: none;
     transition: all 0.15s;
     position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden;
 }
 
 .match-card:hover {
-    background: rgba(255,255,255,0.05);
+    background: #ffffff;
     transform: none;
-    box-shadow: none;
-    border-color: rgba(255,255,255,0.08);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    border-color: transparent;
 }
 
 .match-card.has-tip {
-    background: rgba(0, 255, 136, 0.05);
-    border-color: rgba(0, 255, 136, 0.2);
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
     border-left: none;
-    box-shadow: none;
+    box-shadow: 0 1px 3px rgba(22,163,74,0.06);
 }
 
 .match-card.has-tip:hover {
-    background: rgba(0, 255, 136, 0.08);
-    box-shadow: none;
+    background: #ecfdf5;
+    box-shadow: 0 2px 6px rgba(22,163,74,0.08);
 }
 
 /* Main match content - teams and scores side by side */
@@ -37,7 +39,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    padding: 14px 16px;
+    margin-bottom: 0;
 }
 
 /* Teams Section */
@@ -62,9 +65,10 @@
 }
 
 .team-name-v2 {
+    font-family: 'DM Sans', sans-serif;
     font-size: 15px;
-    font-weight: 600;
-    color: white;
+    font-weight: 500;
+    color: #111827;
 }
 
 /* Scores Section */
@@ -85,8 +89,8 @@
     width: 32px;
     height: 32px;
     border: none;
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.6);
+    background: #f3f4f6;
+    color: #6b7280;
     font-size: 18px;
     font-weight: 600;
     border-radius: 8px;
@@ -100,8 +104,8 @@
 }
 
 .btn-v2:hover:not(:disabled) {
-    background: rgba(255,255,255,0.12);
-    color: white;
+    background: #e5e7eb;
+    color: #374151;
     transform: none;
     box-shadow: none;
 }
@@ -123,8 +127,8 @@
     justify-content: center;
     font-size: 18px;
     font-weight: 800;
-    color: white;
-    background: rgba(255,255,255,0.08);
+    color: #374151;
+    background: #f3f4f6;
     border: none;
     border-radius: 8px;
     box-shadow: none;
@@ -132,26 +136,27 @@
 
 /* Saved state for scores */
 .match-card.has-tip .score-display-v2 {
-    background: rgba(0, 255, 136, 0.2);
-    color: #00ff88;
+    background: #16a34a;
+    color: #ffffff;
 }
 
-/* Odds Line - Below match content */
+/* Odds Line - Integrated footer */
 .odds-line-v2 {
     display: flex;
-    gap: 8px;
+    gap: 0;
     padding-left: 0;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(255,255,255,0.04);
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 1px solid #f3f4f6;
+    background: #f9fafb;
 }
 
 .odds-badge-v2 {
     flex: 1;
-    padding: 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     font-size: 13px;
     display: flex;
     flex-direction: column;
@@ -161,25 +166,30 @@
     transition: all 0.15s;
 }
 
+.odds-badge-v2:not(:last-child) {
+    border-right: 1px solid #f3f4f6;
+}
+
 .odds-badge-v2:hover {
-    background: rgba(0, 255, 136, 0.1);
-    border-color: rgba(0, 255, 136, 0.3);
+    background: #f0fdf4;
+    border-color: #f3f4f6;
     transform: none;
     box-shadow: none;
 }
 
 .odds-label-v2 {
-    font-size: 10px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.4);
+    font-size: 9px;
+    font-weight: 700;
+    color: #9ca3af;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .odds-value-v2 {
-    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
     font-weight: 700;
-    color: white;
+    color: #374151;
 }
 
 /* Time Header */
@@ -187,14 +197,14 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 0;
+    padding: 4px 8px;
     background: transparent;
     border-bottom: none;
 }
 
-/* League/Round Section - Top level grouping */
+/* League/Round Section */
 .league-round-section {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 /* Pill badges - shared base */
@@ -208,27 +218,27 @@
 }
 
 .pill-league {
-    background: rgba(0,255,136,0.15);
-    color: #00ff88;
-    border: 1px solid rgba(0,255,136,0.25);
+    background: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
 }
 
 .pill-round {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
 }
 
 .pill-date {
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.10);
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
 }
 
 .pill-time {
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.45);
-    border: 1px solid rgba(255,255,255,0.10);
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
     font-variant-numeric: tabular-nums;
 }
 
@@ -237,7 +247,7 @@
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
-    padding: 16px 0 8px;
+    padding: 12px 8px 8px;
     background: transparent;
     border: none;
     box-shadow: none;
@@ -256,7 +266,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 0;
+    padding: 6px 8px;
     background: transparent;
     border-bottom: none;
 }
@@ -316,7 +326,7 @@
 
 @media (max-width: 480px) {
     .match-card {
-        padding: 12px 0;
+        padding: 0;
     }
 
     .team-logo-v2 {
@@ -341,21 +351,22 @@
     }
 }
 
-/* Container adjustments for cleaner look */
+/* Container adjustments */
 .matches-section {
     max-width: 800px;
     margin: 0 auto;
-    padding: 16px;
+    padding: 12px;
 }
 
 .matches-section h2 {
-    font-size: 22px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 20px;
+    display: none;
 }
 
-/* Overall container - removed background to keep stadium background from style.css */
+.matches-section h2::before {
+    display: none;
+}
+
+/* Overall container */
 .container {
     min-height: 100vh;
 }
@@ -384,13 +395,4 @@ main {
     padding: 0;
     box-shadow: none;
     border: none;
-}
-
-/* Section titles */
-.matches-section h2 {
-    display: none;
-}
-
-.matches-section h2::before {
-    display: none;
 }
