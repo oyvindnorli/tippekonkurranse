@@ -215,23 +215,36 @@ class FootballApiService {
                 roundsMap.get(round).push(match);
             });
 
-            // Find the earliest round by date, skipping rounds with only 1 match (likely postponed)
-            let earliestRound = null;
-            let earliestDate = null;
+            // Find the earliest "main" round (>1 match) by date
+            let mainRound = null;
+            let mainRoundStartDate = null;
+            let mainRoundEndDate = null;
 
             roundsMap.forEach((matches, roundKey) => {
-                // Skip rounds with only 1 match (likely postponed/rescheduled)
                 if (matches.length <= 1) return;
-                const firstMatchDate = new Date(matches[0].commence_time || matches[0].timestamp * 1000);
-                if (!earliestDate || firstMatchDate < earliestDate) {
-                    earliestDate = firstMatchDate;
-                    earliestRound = roundKey;
+                const startDate = new Date(matches[0].commence_time || matches[0].timestamp * 1000);
+                if (!mainRound || startDate < mainRoundStartDate) {
+                    mainRound = roundKey;
+                    mainRoundStartDate = startDate;
+                    const lastMatch = matches[matches.length - 1];
+                    mainRoundEndDate = new Date(lastMatch.commence_time || lastMatch.timestamp * 1000);
                 }
             });
 
-            if (earliestRound) {
-                const firstRoundMatches = roundsMap.get(earliestRound) || [];
-                nextRoundMatches.push(...firstRoundMatches);
+            if (mainRound) {
+                // Include all matches from the main round
+                nextRoundMatches.push(...roundsMap.get(mainRound));
+
+                // Also include postponed matches (1-match rounds) that play before/during the main round
+                roundsMap.forEach((matches, roundKey) => {
+                    if (roundKey === mainRound) return;
+                    if (matches.length === 1) {
+                        const matchDate = new Date(matches[0].commence_time || matches[0].timestamp * 1000);
+                        if (matchDate <= mainRoundEndDate) {
+                            nextRoundMatches.push(...matches);
+                        }
+                    }
+                });
             }
         });
 
