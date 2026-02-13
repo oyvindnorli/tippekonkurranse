@@ -442,15 +442,18 @@ async function loadAvailableRounds() {
             }
         }
 
-        // Sort rounds by start date
-        rounds.sort((a, b) => a.startDate - b.startDate);
+        // Filter out rounds with only 1 match (likely postponed/rescheduled matches)
+        const filteredRounds = rounds.filter(r => r.matchCount > 1);
 
-        if (rounds.length === 0) {
+        // Sort rounds by start date
+        filteredRounds.sort((a, b) => a.startDate - b.startDate);
+
+        if (filteredRounds.length === 0) {
             roundsList.innerHTML = '<div class="error-message">Ingen kommende runder funnet</div>';
             return;
         }
 
-        roundsList.innerHTML = rounds.map(round => `
+        roundsList.innerHTML = filteredRounds.map(round => `
             <div class="selection-item" onclick="selectRound('${round.id}')" id="round-${round.id}">
                 <div class="selection-icon">${round.icon}</div>
                 <div class="selection-content">
@@ -461,7 +464,7 @@ async function loadAvailableRounds() {
         `).join('');
 
         // Store rounds for later
-        window.availableRounds = rounds;
+        window.availableRounds = filteredRounds;
 
     } catch (error) {
         console.error('❌ Error loading rounds:', error);

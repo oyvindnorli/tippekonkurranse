@@ -215,11 +215,13 @@ class FootballApiService {
                 roundsMap.get(round).push(match);
             });
 
-            // Find the earliest round by date (not just first key)
+            // Find the earliest round by date, skipping rounds with only 1 match (likely postponed)
             let earliestRound = null;
             let earliestDate = null;
 
             roundsMap.forEach((matches, roundKey) => {
+                // Skip rounds with only 1 match (likely postponed/rescheduled)
+                if (matches.length <= 1) return;
                 const firstMatchDate = new Date(matches[0].commence_time || matches[0].timestamp * 1000);
                 if (!earliestDate || firstMatchDate < earliestDate) {
                     earliestDate = firstMatchDate;
