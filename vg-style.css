@@ -140,56 +140,43 @@
     color: #ffffff;
 }
 
-/* Odds Line - Integrated footer */
-.odds-line-v2 {
-    display: flex;
-    gap: 0;
-    padding-left: 0;
-    margin-top: 0;
-    padding-top: 0;
-    border-top: 1px solid #f3f4f6;
-    background: #f9fafb;
-}
-
-.odds-badge-v2 {
-    flex: 1;
-    padding: 8px;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    font-size: 13px;
+/* Visual Odds Bar */
+.odds-visual {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 140px;
+    flex-shrink: 0;
+    margin: 0 12px;
+    gap: 5px;
+}
+
+.prob-bar {
+    display: flex;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
     gap: 2px;
-    cursor: pointer;
-    transition: all 0.15s;
 }
 
-.odds-badge-v2:not(:last-child) {
-    border-right: 1px solid #f3f4f6;
+.prob-seg {
+    height: 100%;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
 }
 
-.odds-badge-v2:hover {
-    background: #f0fdf4;
-    border-color: #f3f4f6;
-    transform: none;
-    box-shadow: none;
+.odds-numbers {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
 }
 
-.odds-label-v2 {
-    font-size: 9px;
+.odds-num {
+    font-size: 11px;
     font-weight: 700;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.odds-value-v2 {
     font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    color: #374151;
+    transition: color 0.3s ease;
 }
 
 /* Time Header */
@@ -313,14 +300,9 @@
         font-size: 15px;
     }
 
-    .odds-line-v2 {
-        padding-left: 0;
-        width: 100%;
-    }
-
-    .odds-badge-v2 {
-        flex: 1;
-        justify-content: center;
+    .odds-visual {
+        width: 100px;
+        margin: 0 8px;
     }
 }
 
@@ -348,6 +330,18 @@
         width: 26px;
         height: 30px;
         font-size: 14px;
+    }
+}
+
+@media (max-width: 420px) {
+    .odds-visual {
+        width: 90px;
+        margin: 0 6px;
+        gap: 3px;
+    }
+
+    .odds-num {
+        font-size: 10px;
     }
 }
 

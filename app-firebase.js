@@ -6,6 +6,7 @@ import { STORAGE_KEYS, TIMEOUTS, ERROR_MESSAGES } from './js/constants/appConsta
 import { ErrorHandler, retryOperation } from './js/utils/errorHandler.js';
 import { updateHeaderUsername, updateHeaderAuthState } from './header.js';
 import { getLeagueIds } from './leagues.config.js';
+import { getTeamColors } from './js/utils/colorExtractor.js';
 
 // Match data - will be loaded from API or mock data
 let matches = [];
@@ -304,6 +305,19 @@ function formatOdds(odds) {
     if (isNaN(num)) return odds;
     // Round to 1 decimal, then remove trailing .0
     return Number(num.toFixed(1)).toString();
+}
+
+// Update odds bar/number colors after async color extraction
+function updateOddsColors(matchId, homeColor, awayColor) {
+    const probHome = document.getElementById(`prob-home-${matchId}`);
+    const probAway = document.getElementById(`prob-away-${matchId}`);
+    const oddsHome = document.getElementById(`odds-home-${matchId}`);
+    const oddsAway = document.getElementById(`odds-away-${matchId}`);
+
+    if (probHome) probHome.style.background = homeColor;
+    if (probAway) probAway.style.background = awayColor;
+    if (oddsHome) oddsHome.style.color = homeColor;
+    if (oddsAway) oddsAway.style.color = awayColor;
 }
 
 // Load user tips from Firebase
@@ -1207,8 +1221,39 @@ function renderMatches() {
                 if (!awayLogo) {
                 }
 
+                // Build odds visual HTML
+                let oddsVisualHtml = '';
+                if (match.odds && match.odds.H && match.odds.U && match.odds.B) {
+                    const H = parseFloat(match.odds.H);
+                    const U = parseFloat(match.odds.U);
+                    const B = parseFloat(match.odds.B);
+                    const invSum = (1/H) + (1/U) + (1/B);
+                    const pctH = ((1/H) / invSum * 100).toFixed(1);
+                    const pctU = ((1/U) / invSum * 100).toFixed(1);
+                    const pctB = ((1/B) / invSum * 100).toFixed(1);
+
+                    // Get initial colors (fallbacks or cached)
+                    const colors = getTeamColors(homeLogo, awayLogo, (resolved) => {
+                        updateOddsColors(match.id, resolved.homeColor, resolved.awayColor);
+                    });
+
+                    oddsVisualHtml = `
+                        <div class="odds-visual" id="odds-visual-${match.id}">
+                            <div class="prob-bar">
+                                <div class="prob-seg" id="prob-home-${match.id}" style="width:${pctH}%; background:${colors.homeColor}"></div>
+                                <div class="prob-seg" style="width:${pctU}%; background:#d1d5db"></div>
+                                <div class="prob-seg" id="prob-away-${match.id}" style="width:${pctB}%; background:${colors.awayColor}"></div>
+                            </div>
+                            <div class="odds-numbers">
+                                <span class="odds-num" id="odds-home-${match.id}" style="color:${colors.homeColor}">${formatOdds(H)}</span>
+                                <span class="odds-num" style="color:#9ca3af">${formatOdds(U)}</span>
+                                <span class="odds-num" id="odds-away-${match.id}" style="color:${colors.awayColor}">${formatOdds(B)}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 matchCard.innerHTML = `
-                    <!-- Variant 2: Colored Badges Layout -->
                     <div class="match-main-v2">
                         <div class="match-teams-v2">
                             <div class="team-v2">
@@ -1220,6 +1265,7 @@ function renderMatches() {
                                 <span class="team-name-v2">${match.awayTeam}</span>
                             </div>
                         </div>
+                        ${oddsVisualHtml}
                         <div class="match-scores-v2">
                             <div class="score-row-v2">
                                 <button class="btn-v2" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
@@ -1233,22 +1279,6 @@ function renderMatches() {
                             </div>
                         </div>
                     </div>
-                    ${match.odds && match.odds.H && match.odds.U && match.odds.B ? `
-                        <div class="odds-line-v2">
-                            <div class="odds-badge-v2" onclick="setScoreFromOdds('${match.id}', 'home')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                                <span class="odds-label-v2">H</span>
-                                <span class="odds-value-v2">${formatOdds(match.odds.H)}</span>
-                            </div>
-                            <div class="odds-badge-v2" onclick="setScoreFromOdds('${match.id}', 'draw')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                                <span class="odds-label-v2">U</span>
-                                <span class="odds-value-v2">${formatOdds(match.odds.U)}</span>
-                            </div>
-                            <div class="odds-badge-v2" onclick="setScoreFromOdds('${match.id}', 'away')" ${match.result ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                                <span class="odds-label-v2">B</span>
-                                <span class="odds-value-v2">${formatOdds(match.odds.B)}</span>
-                            </div>
-                        </div>
-                    ` : ''}
                     <span style="display: none;">
                         <span id="home-score-${match.id}">${homeScore}</span>
                         <span id="away-score-${match.id}">${awayScore}</span>
