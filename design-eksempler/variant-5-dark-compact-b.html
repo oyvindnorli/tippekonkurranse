@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variant 5B: Mørk Kompakt - Neon Accent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .logo span {
+            color: #00ff88;
+        }
+
+        .points {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #000;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .tabs a {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            text-decoration: none;
+            color: rgba(255,255,255,0.4);
+            font-size: 14px;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .tabs a.active {
+            color: #00ff88;
+        }
+
+        .tabs a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 2px;
+        }
+
+        /* Content */
+        .content {
+            padding: 20px;
+        }
+
+        /* League header */
+        .league-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .league-header span {
+            color: #00ff88;
+        }
+
+        /* Match card */
+        .match-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .match-time {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            font-weight: 500;
+        }
+
+        .match-status {
+            font-size: 11px;
+            padding: 4px 10px;
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .teams-scores {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .teams {
+            flex: 1;
+        }
+
+        .team-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 0;
+        }
+
+        .team-logo {
+            width: 28px;
+            height: 28px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .team-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .scores {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .score-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(255,255,255,0.06);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.6);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .score-btn:hover {
+            background: rgba(255,255,255,0.12);
+            color: white;
+        }
+
+        .score-btn:active {
+            transform: scale(0.95);
+        }
+
+        .score-value {
+            width: 40px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+        }
+
+        /* Odds */
+        .odds-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .odd-btn {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .odd-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .odd-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .odd-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            margin-top: 2px;
+        }
+
+        /* Saved state */
+        .match-card.saved {
+            border-color: rgba(0, 255, 136, 0.2);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .match-card.saved .score-value {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .match-card.saved .match-status {
+            background: #00ff88;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">Tippe<span>.</span></div>
+            <div class="points">127 poeng</div>
+        </header>
+
+        <nav class="tabs">
+            <a href="#" class="active">Tipp</a>
+            <a href="#">Konkurranser</a>
+            <a href="#">Statistikk</a>
+        </nav>
+
+        <div class="content">
+            <div class="league-header">
+                <span>●</span> Premier League · Runde 24
+            </div>
+
+            <div class="match-card saved">
+                <div class="match-header">
+                    <span class="match-time">Lørdag 16:00</span>
+                    <span class="match-status">Lagret</span>
+                </div>
+                <div class="teams-scores">
+                    <div class="teams">
+                        <div class="team-row">
+                            <div class="team-logo">🐺</div>
+                            <div class="team-name">Wolves</div>
+                        </div>
+                        <div class="team-row">
+                            <div class="team-logo">🍒</div>
+                            <div class="team-name">Bournemouth</div>
+                        </div>
+                    </div>
+                    <div class="scores">
+                        <div class="score-row">
+                            <button class="score-btn">−</button>
+                            <span class="score-value">1</span>
+                            <button class="score-btn">+</button>
+                        </div>
+                        <div class="score-row">
+                            <button class="score-btn">−</button>
+                            <span class="score-value">0</span>
+                            <button class="score-btn">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="odds-row">
+                    <div class="odd-btn">
+                        <div class="odd-label">Hjemme</div>
+                        <div class="odd-value">2.9</div>
+                    </div>
+                    <div class="odd-btn">
+                        <div class="odd-label">Uavgjort</div>
+                        <div class="odd-value">3.4</div>
+                    </div>
+                    <div class="odd-btn">
+                        <div class="odd-label">Borte</div>
+                        <div class="odd-value">2.3</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="match-card">
+                <div class="match-header">
+                    <span class="match-time">Lørdag 16:00</span>
+                </div>
+                <div class="teams-scores">
+                    <div class="teams">
+                        <div class="team-row">
+                            <div class="team-logo">🦅</div>
+                            <div class="team-name">Brighton</div>
+                        </div>
+                        <div class="team-row">
+                            <div class="team-logo">🔵</div>
+                            <div class="team-name">Everton</div>
+                        </div>
+                    </div>
+                    <div class="scores">
+                        <div class="score-row">
+                            <button class="score-btn">−</button>
+                            <span class="score-value">?</span>
+                            <button class="score-btn">+</button>
+                        </div>
+                        <div class="score-row">
+                            <button class="score-btn">−</button>
+                            <span class="score-value">?</span>
+                            <button class="score-btn">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="odds-row">
+                    <div class="odd-btn">
+                        <div class="odd-label">Hjemme</div>
+                        <div class="odd-value">1.8</div>
+                    </div>
+                    <div class="odd-btn">
+                        <div class="odd-label">Uavgjort</div>
+                        <div class="odd-value">3.5</div>
+                    </div>
+                    <div class="odd-btn">
+                        <div class="odd-label">Borte</div>
+                        <div class="odd-value">4.3</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="match-card">
+                <div class="match-header">
+                    <span class="match-time">Lørdag 16:00</span>
+                </div>
+                <div class="teams-scores">
+                    <div class="teams">
+                        <div class="team-row">
+                            <div class="team-logo">🦢</div>
+                            <div class="team-name">Leeds</div>
+                        </div>
+                        <div class="team-row">
+                            <div class="team-logo">🔴</div>
+                            <div class="team-name">Arsenal</div>
+                        </div>
+                    </div>
+                    <div class="scores">
+                        <div class="score-row">
+                            <button class="score-btn">−</button>
+                            <span class="score-value">?</span>
+                            <button class="score-btn">+</button>
+                        </div>
+                        <div class="score-row">
+                            <button class="score-btn">−</button>
+                            <span class="score-value">?</span>
+                            <button class="score-btn">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="odds-row">
+                    <div class="odd-btn">
+                        <div class="odd-label">Hjemme</div>
+                        <div class="odd-value">6.2</div>
+                    </div>
+                    <div class="odd-btn">
+                        <div class="odd-label">Uavgjort</div>
+                        <div class="odd-value">4.5</div>
+                    </div>
+                    <div class="odd-btn">
+                        <div class="odd-label">Borte</div>
+                        <div class="odd-value">1.5</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

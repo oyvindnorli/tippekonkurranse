@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odds Visualisering - Designforslag</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f2f3f5;
+            color: #111827;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .variant-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #16a34a;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .variant-desc {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+        .variant-section {
+            margin-bottom: 32px;
+        }
+        /* Base match card (same as live site) */
+        .match-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        .match-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+        }
+        .match-teams {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .team-logo {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .team-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #111827;
+        }
+        .match-scores {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .score-row {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-display {
+            width: 40px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: #374151;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+        /* Old footer odds (for reference) */
+        .odds-footer {
+            display: flex;
+            border-top: 1px solid #f3f4f6;
+            background: #f9fafb;
+        }
+        .odds-footer-item {
+            flex: 1;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .odds-footer-item:not(:last-child) {
+            border-right: 1px solid #f3f4f6;
+        }
+        .odds-footer-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+        }
+        .odds-footer-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        /* ========================================
+           VARIANT A: Probability Bar (Tricolor)
+           ======================================== */
+        .odds-bar-a {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            margin: 0 16px;
+            max-width: 180px;
+        }
+        .prob-bar-a {
+            display: flex;
+            width: 100%;
+            height: 28px;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .prob-segment-a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            transition: all 0.3s;
+            position: relative;
+            min-width: 28px;
+        }
+        .prob-segment-a.home {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+        .prob-segment-a.draw {
+            background: #9ca3af;
+        }
+        .prob-segment-a.away {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+        .prob-label-a {
+            font-size: 10px;
+            opacity: 0.85;
+        }
+
+        /* ========================================
+           VARIANT B: Gradient Bar with Numbers Below
+           ======================================== */
+        .odds-inline-b {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            margin: 0 12px;
+            max-width: 180px;
+            gap: 4px;
+        }
+        .prob-bar-b {
+            display: flex;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .prob-seg-b.home { background: #16a34a; }
+        .prob-seg-b.draw { background: #d1d5db; }
+        .prob-seg-b.away { background: #3b82f6; }
+        .odds-numbers-b {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .odds-num-b {
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .odds-num-b.home { color: #16a34a; }
+        .odds-num-b.draw { color: #9ca3af; }
+        .odds-num-b.away { color: #3b82f6; }
+
+        /* ========================================
+           VARIANT C: Stacked Dots / Confidence
+           ======================================== */
+        .odds-dots-c {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            margin: 0 12px;
+            max-width: 180px;
+            justify-content: center;
+        }
+        .odds-dot-c {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .dot-circle-c {
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            transition: all 0.3s;
+        }
+        .dot-circle-c.home { background: linear-gradient(135deg, #16a34a, #15803d); }
+        .dot-circle-c.draw { background: #9ca3af; }
+        .dot-circle-c.away { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .dot-label-c {
+            font-size: 9px;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+        }
+
+        /* ========================================
+           VARIANT D: Heat Background Rows
+           ======================================== */
+        .match-main-d {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0;
+        }
+        .team-row-d {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            position: relative;
+        }
+        .team-row-d .team {
+            z-index: 1;
+            position: relative;
+        }
+        .team-row-d .score-row {
+            z-index: 1;
+            position: relative;
+        }
+        .heat-bg-d {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            border-radius: 0;
+            transition: width 0.5s ease;
+        }
+        .heat-bg-d.home {
+            background: linear-gradient(90deg, rgba(22,163,74,0.12) 0%, rgba(22,163,74,0) 100%);
+        }
+        .heat-bg-d.away {
+            background: linear-gradient(90deg, rgba(59,130,246,0.12) 0%, rgba(59,130,246,0) 100%);
+        }
+        .odds-tag-d {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            z-index: 1;
+        }
+        .odds-tag-d.home { background: rgba(22,163,74,0.1); color: #16a34a; }
+        .odds-tag-d.away { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .team-row-d:first-child { border-bottom: 1px solid #f3f4f6; }
+        .draw-odds-d {
+            display: flex;
+            justify-content: center;
+            padding: 4px 0;
+            background: #f9fafb;
+            border-top: 1px solid #f3f4f6;
+        }
+        .draw-tag-d {
+            font-size: 10px;
+            font-weight: 700;
+            color: #9ca3af;
+        }
+
+        /* ========================================
+           VARIANT E: Mini Chart + Percentage
+           ======================================== */
+        .odds-visual-e {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            margin: 0 12px;
+            max-width: 160px;
+            gap: 2px;
+        }
+        .prob-ring-e {
+            width: 48px;
+            height: 48px;
+            position: relative;
+        }
+        .prob-ring-e svg {
+            width: 48px;
+            height: 48px;
+            transform: rotate(-90deg);
+        }
+        .prob-ring-e circle {
+            fill: none;
+            stroke-width: 5;
+            cx: 24;
+            cy: 24;
+            r: 20;
+        }
+        .ring-bg { stroke: #f3f4f6; }
+        .ring-home { stroke: #16a34a; }
+        .ring-draw { stroke: #d1d5db; }
+        .ring-away { stroke: #3b82f6; }
+        .prob-center-e {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+            font-weight: 800;
+            color: #16a34a;
+        }
+        .odds-row-e {
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .odds-row-e span { color: #9ca3af; }
+        .odds-row-e .val { font-weight: 700; }
+        .odds-row-e .home .val { color: #16a34a; }
+        .odds-row-e .draw .val { color: #9ca3af; }
+        .odds-row-e .away .val { color: #3b82f6; }
+
+        /* ========================================
+           VARIANT F: Integrated Bar in Card
+           ======================================== */
+        .odds-strip-f {
+            display: flex;
+            height: 4px;
+        }
+        .strip-home-f { background: #16a34a; }
+        .strip-draw-f { background: #e5e7eb; }
+        .strip-away-f { background: #3b82f6; }
+        .odds-overlay-f {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 16px;
+            background: #fafafa;
+        }
+        .odds-item-f {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .odds-pct-f {
+            font-size: 13px;
+            font-weight: 800;
+        }
+        .odds-pct-f.home { color: #16a34a; }
+        .odds-pct-f.draw { color: #9ca3af; }
+        .odds-pct-f.away { color: #3b82f6; }
+        .odds-val-f {
+            font-size: 11px;
+            font-weight: 500;
+            color: #9ca3af;
+        }
+        .odds-lbl-f {
+            font-size: 9px;
+            font-weight: 700;
+            color: #d1d5db;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <h1>Odds Visualisering</h1>
+    <p class="subtitle">6 forslag til visuell odds i kampkortet. Eksempel: Wolves 2.40 – Uavgjort 3.30 – Arsenal 2.90</p>
+
+    <script>
+        // Example odds
+        const H = 2.40, U = 3.30, B = 2.90;
+        // Implied probabilities
+        const pH = (1/H), pU = (1/U), pB = (1/B);
+        const total = pH + pU + pB;
+        const pctH = Math.round((pH/total)*100);
+        const pctU = Math.round((pU/total)*100);
+        const pctB = 100 - pctH - pctU;
+
+        // Match 2: Clear favorite
+        const H2 = 1.55, U2 = 4.20, B2 = 5.50;
+        const pH2 = (1/H2), pU2 = (1/U2), pB2 = (1/B2);
+        const total2 = pH2 + pU2 + pB2;
+        const pctH2 = Math.round((pH2/total2)*100);
+        const pctU2 = Math.round((pU2/total2)*100);
+        const pctB2 = 100 - pctH2 - pctU2;
+    </script>
+
+    <!-- VARIANT A: Probability Bar (Tricolor) -->
+    <div class="variant-section">
+        <div class="variant-label">A — Sannsynlighetsbar</div>
+        <div class="variant-desc">Trefarget bar mellom lag og score. Bredde = sannsynlighet. Tall viser odds.</div>
+
+        <div class="match-card">
+            <div class="match-main">
+                <div class="match-teams">
+                    <div class="team">
+                        <div class="team-logo">🐺</div>
+                        <span class="team-name">Wolves</span>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo">🔴</div>
+                        <span class="team-name">Arsenal</span>
+                    </div>
+                </div>
+                <div class="odds-bar-a">
+                    <div class="prob-bar-a">
+                        <div class="prob-segment-a home" style="width: 42%;">
+                            <span>2.40</span>
+                        </div>
+                        <div class="prob-segment-a draw" style="width: 30%;">
+                            <span>3.30</span>
+                        </div>
+                        <div class="prob-segment-a away" style="width: 28%;">
+                            <span>2.90</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="match-scores">
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-main">
+                <div class="match-teams">
+                    <div class="team">
+                        <div class="team-logo">🔵</div>
+                        <span class="team-name">Man City</span>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo">⚫</div>
+                        <span class="team-name">Newcastle</span>
+                    </div>
+                </div>
+                <div class="odds-bar-a">
+                    <div class="prob-bar-a">
+                        <div class="prob-segment-a home" style="width: 57%;">
+                            <span>1.55</span>
+                        </div>
+                        <div class="prob-segment-a draw" style="width: 21%;">
+                            <span>4.20</span>
+                        </div>
+                        <div class="prob-segment-a away" style="width: 22%;">
+                            <span>5.50</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="match-scores">
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VARIANT B: Slim Bar + Colored Numbers -->
+    <div class="variant-section">
+        <div class="variant-label">B — Tynn bar + fargetall</div>
+        <div class="variant-desc">Slank bar med odds-tall i matchende farger under. Diskret men informativt.</div>
+
+        <div class="match-card">
+            <div class="match-main">
+                <div class="match-teams">
+                    <div class="team">
+                        <div class="team-logo">🐺</div>
+                        <span class="team-name">Wolves</span>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo">🔴</div>
+                        <span class="team-name">Arsenal</span>
+                    </div>
+                </div>
+                <div class="odds-inline-b">
+                    <div class="prob-bar-b">
+                        <div class="prob-seg-b home" style="width: 42%;"></div>
+                        <div class="prob-seg-b draw" style="width: 30%;"></div>
+                        <div class="prob-seg-b away" style="width: 28%;"></div>
+                    </div>
+                    <div class="odds-numbers-b">
+                        <span class="odds-num-b home">2.40</span>
+                        <span class="odds-num-b draw">3.30</span>
+                        <span class="odds-num-b away">2.90</span>
+                    </div>
+                </div>
+                <div class="match-scores">
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-main">
+                <div class="match-teams">
+                    <div class="team">
+                        <div class="team-logo">🔵</div>
+                        <span class="team-name">Man City</span>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo">⚫</div>
+                        <span class="team-name">Newcastle</span>
+                    </div>
+                </div>
+                <div class="odds-inline-b">
+                    <div class="prob-bar-b">
+                        <div class="prob-seg-b home" style="width: 57%;"></div>
+                        <div class="prob-seg-b draw" style="width: 21%;"></div>
+                        <div class="prob-seg-b away" style="width: 22%;"></div>
+                    </div>
+                    <div class="odds-numbers-b">
+                        <span class="odds-num-b home">1.55</span>
+                        <span class="odds-num-b draw">4.20</span>
+                        <span class="odds-num-b away">5.50</span>
+                    </div>
+                </div>
+                <div class="match-scores">
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VARIANT C: Sized Dots / Bubbles -->
+    <div class="variant-section">
+        <div class="variant-label">C — Sannsynlighetssirkler</div>
+        <div class="variant-desc">Tre sirkler der størrelse viser sannsynlighet. Odds i midten.</div>
+
+        <div class="match-card">
+            <div class="match-main">
+                <div class="match-teams">
+                    <div class="team">
+                        <div class="team-logo">🐺</div>
+                        <span class="team-name">Wolves</span>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo">🔴</div>
+                        <span class="team-name">Arsenal</span>
+                    </div>
+                </div>
+                <div class="odds-dots-c">
+                    <div class="odds-dot-c">
+                        <div class="dot-circle-c home" style="width: 38px; height: 38px; font-size: 11px;">2.40</div>
+                        <span class="dot-label-c">H</span>
+                    </div>
+                    <div class="odds-dot-c">
+                        <div class="dot-circle-c draw" style="width: 30px; height: 30px; font-size: 10px;">3.30</div>
+                        <span class="dot-label-c">U</span>
+                    </div>
+                    <div class="odds-dot-c">
+                        <div class="dot-circle-c away" style="width: 34px; height: 34px; font-size: 11px;">2.90</div>
+                        <span class="dot-label-c">B</span>
+                    </div>
+                </div>
+                <div class="match-scores">
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-main">
+                <div class="match-teams">
+                    <div class="team">
+                        <div class="team-logo">🔵</div>
+                        <span class="team-name">Man City</span>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo">⚫</div>
+                        <span class="team-name">Newcastle</span>
+                    </div>
+                </div>
+                <div class="odds-dots-c">
+                    <div class="odds-dot-c">
+                        <div class="dot-circle-c home" style="width: 44px; height: 44px; font-size: 12px;">1.55</div>
+                        <span class="dot-label-c">H</span>
+                    </div>
+                    <div class="odds-dot-c">
+                        <div class="dot-circle-c draw" style="width: 26px; height: 26px; font-size: 9px;">4.20</div>
+                        <span class="dot-label-c">U</span>
+                    </div>
+                    <div class="odds-dot-c">
+                        <div class="dot-circle-c away" style="width: 24px; height: 24px; font-size: 9px;">5.50</div>
+                        <span class="dot-label-c">B</span>
+                    </div>
+                </div>
+                <div class="match-scores">
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VARIANT D: Heat Background per Row -->
+    <div class="variant-section">
+        <div class="variant-label">D — Fargefelt per rad</div>
+        <div class="variant-desc">Bakgrunnen bak hvert lag farges proporsjonalt med sannsynlighet. Odds som badge.</div>
+
+        <div class="match-card">
+            <div class="team-row-d">
+                <div class="heat-bg-d home" style="width: 42%;"></div>
+                <div class="team">
+                    <div class="team-logo">🐺</div>
+                    <span class="team-name">Wolves</span>
+                    <span class="odds-tag-d home">2.40</span>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+            <div class="team-row-d">
+                <div class="heat-bg-d away" style="width: 35%;"></div>
+                <div class="team">
+                    <div class="team-logo">🔴</div>
+                    <span class="team-name">Arsenal</span>
+                    <span class="odds-tag-d away">2.90</span>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+            <div class="draw-odds-d">
+                <span class="draw-tag-d">Uavgjort: 3.30</span>
+            </div>
+        </div>
+
+        <div class="match-card" style="margin-top: 6px;">
+            <div class="team-row-d">
+                <div class="heat-bg-d home" style="width: 57%;"></div>
+                <div class="team">
+                    <div class="team-logo">🔵</div>
+                    <span class="team-name">Man City</span>
+                    <span class="odds-tag-d home">1.55</span>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+            <div class="team-row-d">
+                <div class="heat-bg-d away" style="width: 16%;"></div>
+                <div class="team">
+                    <div class="team-logo">⚫</div>
+                    <span class="team-name">Newcastle</span>
+                    <span class="odds-tag-d away">5.50</span>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+            <div class="draw-odds-d">
+                <span class="draw-tag-d">Uavgjort: 4.20</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- VARIANT E: Donut Chart -->
+    <div class="variant-section">
+        <div class="variant-label">E — Mini ringdiagram</div>
+        <div class="variant-desc">Ringdiagram med prosent i midten. Favorittens farge dominerer.</div>
+
+        <div class="match-card">
+            <div class="match-main">
+                <div class="match-teams">
+                    <div class="team">
+                        <div class="team-logo">🐺</div>
+                        <span class="team-name">Wolves</span>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo">🔴</div>
+                        <span class="team-name">Arsenal</span>
+                    </div>
+                </div>
+                <div class="odds-visual-e">
+                    <div class="prob-ring-e">
+                        <!-- 42% home, 30% draw, 28% away — circumference = 2π*20 ≈ 125.66 -->
+                        <svg viewBox="0 0 48 48">
+                            <circle class="ring-bg" stroke-dasharray="125.66" stroke-dashoffset="0"/>
+                            <circle class="ring-home" stroke-dasharray="52.78 125.66" stroke-dashoffset="0"/>
+                            <circle class="ring-draw" stroke-dasharray="37.70 125.66" stroke-dashoffset="-52.78"/>
+                            <circle class="ring-away" stroke-dasharray="35.18 125.66" stroke-dashoffset="-90.48"/>
+                        </svg>
+                        <span class="prob-center-e">42%</span>
+                    </div>
+                    <div class="odds-row-e">
+                        <span class="home"><span class="val">2.40</span></span>
+                        <span class="draw"><span class="val">3.30</span></span>
+                        <span class="away"><span class="val">2.90</span></span>
+                    </div>
+                </div>
+                <div class="match-scores">
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-main">
+                <div class="match-teams">
+                    <div class="team">
+                        <div class="team-logo">🔵</div>
+                        <span class="team-name">Man City</span>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo">⚫</div>
+                        <span class="team-name">Newcastle</span>
+                    </div>
+                </div>
+                <div class="odds-visual-e">
+                    <div class="prob-ring-e">
+                        <svg viewBox="0 0 48 48">
+                            <circle class="ring-bg" stroke-dasharray="125.66" stroke-dashoffset="0"/>
+                            <circle class="ring-home" stroke-dasharray="71.63 125.66" stroke-dashoffset="0"/>
+                            <circle class="ring-draw" stroke-dasharray="26.39 125.66" stroke-dashoffset="-71.63"/>
+                            <circle class="ring-away" stroke-dasharray="27.64 125.66" stroke-dashoffset="-98.02"/>
+                        </svg>
+                        <span class="prob-center-e">57%</span>
+                    </div>
+                    <div class="odds-row-e">
+                        <span class="home"><span class="val">1.55</span></span>
+                        <span class="draw"><span class="val">4.20</span></span>
+                        <span class="away"><span class="val">5.50</span></span>
+                    </div>
+                </div>
+                <div class="match-scores">
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VARIANT F: Color Strip + Percentage Footer -->
+    <div class="variant-section">
+        <div class="variant-label">F — Fargestripe + prosent-footer</div>
+        <div class="variant-desc">Tynn fargestripe mellom innhold og footer. Prosent + odds i bunn.</div>
+
+        <div class="match-card">
+            <div class="match-main">
+                <div class="match-teams">
+                    <div class="team">
+                        <div class="team-logo">🐺</div>
+                        <span class="team-name">Wolves</span>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo">🔴</div>
+                        <span class="team-name">Arsenal</span>
+                    </div>
+                </div>
+                <div class="match-scores">
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                </div>
+            </div>
+            <div class="odds-strip-f">
+                <div class="strip-home-f" style="width: 42%;"></div>
+                <div class="strip-draw-f" style="width: 30%;"></div>
+                <div class="strip-away-f" style="width: 28%;"></div>
+            </div>
+            <div class="odds-overlay-f">
+                <div class="odds-item-f">
+                    <span class="odds-lbl-f">H</span>
+                    <span class="odds-pct-f home">42%</span>
+                    <span class="odds-val-f">2.40</span>
+                </div>
+                <div class="odds-item-f">
+                    <span class="odds-lbl-f">U</span>
+                    <span class="odds-pct-f draw">30%</span>
+                    <span class="odds-val-f">3.30</span>
+                </div>
+                <div class="odds-item-f">
+                    <span class="odds-lbl-f">B</span>
+                    <span class="odds-pct-f away">28%</span>
+                    <span class="odds-val-f">2.90</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card" style="margin-top: 6px;">
+            <div class="match-main">
+                <div class="match-teams">
+                    <div class="team">
+                        <div class="team-logo">🔵</div>
+                        <span class="team-name">Man City</span>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo">⚫</div>
+                        <span class="team-name">Newcastle</span>
+                    </div>
+                </div>
+                <div class="match-scores">
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="btn">−</div>
+                        <div class="score-display">?</div>
+                        <div class="btn">+</div>
+                    </div>
+                </div>
+            </div>
+            <div class="odds-strip-f">
+                <div class="strip-home-f" style="width: 57%;"></div>
+                <div class="strip-draw-f" style="width: 21%;"></div>
+                <div class="strip-away-f" style="width: 22%;"></div>
+            </div>
+            <div class="odds-overlay-f">
+                <div class="odds-item-f">
+                    <span class="odds-lbl-f">H</span>
+                    <span class="odds-pct-f home">57%</span>
+                    <span class="odds-val-f">1.55</span>
+                </div>
+                <div class="odds-item-f">
+                    <span class="odds-lbl-f">U</span>
+                    <span class="odds-pct-f draw">21%</span>
+                    <span class="odds-val-f">4.20</span>
+                </div>
+                <div class="odds-item-f">
+                    <span class="odds-lbl-f">B</span>
+                    <span class="odds-pct-f away">22%</span>
+                    <span class="odds-val-f">5.50</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

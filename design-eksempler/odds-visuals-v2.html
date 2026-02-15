@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odds Visualisering v2 - Nye designforslag</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f2f3f5;
+            color: #111827;
+            padding: 20px;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 30px;
+        }
+        .variant-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #16a34a;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .variant-desc {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .variant-section {
+            margin-bottom: 36px;
+        }
+        .match-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        .score-row {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-display {
+            width: 40px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: #374151;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+
+
+        /* ========================================
+           VARIANT G: Lagfargebokser med tekst inni
+           Full-width fargebokser per lag
+           ======================================== */
+        .match-g {
+            display: flex;
+            flex-direction: column;
+        }
+        .team-box-g {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .team-box-g.home {
+            border-radius: 12px 12px 0 0;
+        }
+        .team-box-g.away {
+            border-radius: 0 0 12px 12px;
+        }
+        .team-box-g .team-info-g {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1;
+        }
+        .team-box-g .team-logo-g {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .team-box-g .team-name-g {
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+        .team-box-g .odds-badge-g {
+            font-size: 13px;
+            font-weight: 800;
+            color: white;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 10px;
+            border-radius: 6px;
+            z-index: 1;
+        }
+        .team-box-g .score-controls-g {
+            display: flex;
+            gap: 3px;
+            z-index: 1;
+        }
+        .team-box-g .score-controls-g .btn-g {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .team-box-g .score-controls-g .score-g {
+            width: 34px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 800;
+            color: white;
+            background: rgba(255,255,255,0.15);
+            border-radius: 6px;
+        }
+        .draw-strip-g {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px 0;
+            background: #f3f4f6;
+            gap: 6px;
+        }
+        .draw-strip-g span {
+            font-size: 10px;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+
+        /* ========================================
+           VARIANT H: Kompakt fargestripe-kort
+           Lagene som fargede pills i en rad
+           ======================================== */
+        .match-h {
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .teams-row-h {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .team-pill-h {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .team-pill-h .logo-h {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .team-pill-h .name-h {
+            font-size: 13px;
+            font-weight: 600;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .team-pill-h .odds-h {
+            font-size: 12px;
+            font-weight: 800;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 7px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .vs-circle-h {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 800;
+            color: #9ca3af;
+            flex-shrink: 0;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            z-index: 1;
+            margin: 0 -4px;
+        }
+        .bottom-row-h {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .draw-badge-h {
+            font-size: 10px;
+            font-weight: 700;
+            color: #9ca3af;
+            background: #f3f4f6;
+            padding: 3px 10px;
+            border-radius: 4px;
+        }
+        .scores-h {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .score-group-h {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+        .score-group-h .btn-h {
+            width: 26px;
+            height: 26px;
+            border: none;
+            background: #f3f4f6;
+            color: #9ca3af;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-group-h .val-h {
+            width: 30px;
+            height: 26px;
+            font-size: 15px;
+            font-weight: 800;
+            color: #374151;
+            background: #f3f4f6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-sep-h {
+            font-size: 13px;
+            font-weight: 800;
+            color: #d1d5db;
+        }
+
+
+        /* ========================================
+           VARIANT I: Split-card med fargegradient
+           Kort delt i to med lagfarger som bakgrunn
+           ======================================== */
+        .match-i {
+            display: flex;
+            min-height: 80px;
+            position: relative;
+        }
+        .team-half-i {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 10px;
+            position: relative;
+            gap: 4px;
+        }
+        .team-half-i.home {
+            border-radius: 12px 0 0 12px;
+        }
+        .team-half-i.away {
+            border-radius: 0 12px 12px 0;
+        }
+        .team-half-i .logo-i {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+        .team-half-i .name-i {
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .team-half-i .odds-i {
+            font-size: 11px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.8);
+        }
+        .team-half-i .score-mini-i {
+            display: flex;
+            gap: 2px;
+            margin-top: 2px;
+        }
+        .team-half-i .score-mini-i .btn-i {
+            width: 24px;
+            height: 22px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .team-half-i .score-mini-i .val-i {
+            width: 28px;
+            height: 22px;
+            font-size: 14px;
+            font-weight: 800;
+            color: white;
+            background: rgba(255,255,255,0.15);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .center-divider-i {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            z-index: 2;
+            gap: 0;
+        }
+        .center-divider-i .draw-val-i {
+            font-size: 10px;
+            font-weight: 800;
+            color: #9ca3af;
+        }
+        .center-divider-i .draw-label-i {
+            font-size: 7px;
+            font-weight: 700;
+            color: #d1d5db;
+            text-transform: uppercase;
+        }
+
+
+        /* ========================================
+           VARIANT J: Tippekupong-stil
+           Klassisk betting slip med lagfargepills
+           ======================================== */
+        .match-j {
+            padding: 0;
+        }
+        .match-header-j {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px 8px;
+        }
+        .team-tag-j {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            color: white;
+        }
+        .team-tag-j .logo-j {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+        .team-tag-j .name-j {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .match-dash-j {
+            font-size: 12px;
+            font-weight: 700;
+            color: #d1d5db;
+        }
+        .odds-grid-j {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px;
+            padding: 0 14px 10px;
+        }
+        .odds-cell-j {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 2px solid transparent;
+        }
+        .odds-cell-j:hover {
+            transform: scale(1.02);
+        }
+        .odds-cell-j.home-cell {
+            background: rgba(22,163,74,0.06);
+            border-color: rgba(22,163,74,0.12);
+        }
+        .odds-cell-j.draw-cell {
+            background: #f9fafb;
+            border-color: #f3f4f6;
+        }
+        .odds-cell-j.away-cell {
+            background: rgba(59,130,246,0.06);
+            border-color: rgba(59,130,246,0.12);
+        }
+        .odds-cell-j .cell-label-j {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 2px;
+        }
+        .odds-cell-j.home-cell .cell-label-j { color: #16a34a; }
+        .odds-cell-j.draw-cell .cell-label-j { color: #9ca3af; }
+        .odds-cell-j.away-cell .cell-label-j { color: #3b82f6; }
+        .odds-cell-j .cell-odds-j {
+            font-size: 16px;
+            font-weight: 800;
+        }
+        .odds-cell-j.home-cell .cell-odds-j { color: #16a34a; }
+        .odds-cell-j.draw-cell .cell-odds-j { color: #6b7280; }
+        .odds-cell-j.away-cell .cell-odds-j { color: #3b82f6; }
+        .odds-cell-j .cell-pct-j {
+            font-size: 10px;
+            font-weight: 600;
+            color: #9ca3af;
+        }
+        .score-footer-j {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-top: 1px solid #f3f4f6;
+            background: #fafafa;
+        }
+
+
+        /* ========================================
+           VARIANT K: Gradient Clash
+           To lagfarger møtes i midten
+           ======================================== */
+        .match-k {
+            position: relative;
+            overflow: hidden;
+        }
+        .gradient-bg-k {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.08;
+        }
+        .match-content-k {
+            position: relative;
+            z-index: 1;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .teams-clash-k {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .team-side-k {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .team-side-k.away {
+            flex-direction: row-reverse;
+        }
+        .team-side-k .logo-k {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            flex-shrink: 0;
+        }
+        .team-side-k .info-k {
+            display: flex;
+            flex-direction: column;
+        }
+        .team-side-k.away .info-k {
+            align-items: flex-end;
+        }
+        .team-side-k .name-k {
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+        }
+        .team-side-k .odds-k {
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .clash-center-k {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .clash-vs-k {
+            font-size: 10px;
+            font-weight: 800;
+            color: #d1d5db;
+        }
+        .clash-draw-k {
+            font-size: 10px;
+            font-weight: 700;
+            color: #9ca3af;
+            background: #f3f4f6;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .clash-bar-k {
+            display: flex;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            gap: 2px;
+        }
+        .clash-seg-k {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+        .clash-seg-k.draw { background: #d1d5db; }
+        .scores-row-k {
+            display: flex;
+            justify-content: space-between;
+        }
+        .score-block-k {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+        .score-block-k .btn-k {
+            width: 28px;
+            height: 26px;
+            border: none;
+            background: #f3f4f6;
+            color: #9ca3af;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-block-k .val-k {
+            width: 32px;
+            height: 26px;
+            font-size: 15px;
+            font-weight: 800;
+            color: #374151;
+            background: #f3f4f6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        /* ========================================
+           VARIANT L: Scoreboard / Stadion-tavle
+           Mørk header med lagfarger som sidebar
+           ======================================== */
+        .match-l {
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        .scoreboard-header-l {
+            display: flex;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 0;
+        }
+        .sb-team-l {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        .sb-team-l::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.2;
+        }
+        .sb-team-l.away {
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+        .sb-team-l .logo-l {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+        .sb-team-l .details-l {
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .sb-team-l .name-l {
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+        }
+        .sb-team-l .odds-l {
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .sb-divider-l {
+            width: 1px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .sb-draw-l {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            white-space: nowrap;
+        }
+        .sb-bar-l {
+            display: flex;
+            height: 4px;
+        }
+        .sb-seg-l.draw { background: #4b5563; }
+        .scoreboard-body-l {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: white;
+        }
+
+
+        /* ========================================
+           VARIANT M: Inline fargeboks-chips
+           Kompakt layout med lagnavnene som
+           fargede bokser inline med odds-bar
+           ======================================== */
+        .match-m {
+            padding: 12px 14px;
+        }
+        .inline-row-m {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .team-chip-m {
+            padding: 5px 10px;
+            border-radius: 6px;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+        .team-chip-m .chip-logo {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+        }
+        .bar-between-m {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: center;
+        }
+        .bar-track-m {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            display: flex;
+            overflow: hidden;
+            gap: 1px;
+        }
+        .bar-track-m .seg-m { height: 100%; border-radius: 2px; }
+        .bar-track-m .seg-m.draw { background: #d1d5db; }
+        .draw-odds-m {
+            font-size: 9px;
+            font-weight: 700;
+            color: #9ca3af;
+        }
+        .scores-row-m {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+
+        /* ========================================
+           VARIANT N: Moderne tippekort
+           Lag-badge med fargestripe i bunn
+           ======================================== */
+        .match-n {
+            padding: 12px 14px 0;
+        }
+        .teams-header-n {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .team-badge-n {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .team-badge-n .color-dot-n {
+            width: 6px;
+            height: 24px;
+            border-radius: 3px;
+        }
+        .team-badge-n .badge-info-n {
+            display: flex;
+            flex-direction: column;
+        }
+        .team-badge-n .badge-name-n {
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+        }
+        .team-badge-n .badge-odds-n {
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .center-n {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .score-compact-n {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .score-compact-n .sc-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: #f3f4f6;
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-compact-n .sc-val {
+            font-size: 20px;
+            font-weight: 800;
+            color: #374151;
+            min-width: 20px;
+            text-align: center;
+        }
+        .score-compact-n .sc-dash {
+            font-size: 16px;
+            font-weight: 700;
+            color: #d1d5db;
+            margin: 0 2px;
+        }
+        .draw-label-n {
+            font-size: 10px;
+            font-weight: 700;
+            color: #9ca3af;
+        }
+        .bar-footer-n {
+            display: flex;
+            height: 5px;
+            margin: 0 -14px;
+            gap: 0;
+        }
+        .bar-footer-n .seg-n {
+            height: 100%;
+            transition: width 0.3s;
+        }
+        .bar-footer-n .seg-n.draw { background: #e5e7eb; }
+
+
+        /* ========================================
+           VARIANT O: Tipperad med alt inline
+           En rad: [LagBoks] [Score] [bar] [Score] [LagBoks]
+           ======================================== */
+        .match-o {
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .team-block-o {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            color: white;
+            flex-shrink: 0;
+            min-width: 0;
+        }
+        .team-block-o.away {
+            flex-direction: row-reverse;
+        }
+        .team-block-o .logo-o {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+        .team-block-o .name-o {
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .middle-o {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 0;
+        }
+        .score-inline-o {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .score-inline-o .btn-o {
+            width: 22px;
+            height: 22px;
+            border: none;
+            background: #f3f4f6;
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-inline-o .num-o {
+            font-size: 18px;
+            font-weight: 800;
+            color: #374151;
+            min-width: 18px;
+            text-align: center;
+        }
+        .score-inline-o .dash-o {
+            font-size: 14px;
+            font-weight: 700;
+            color: #d1d5db;
+            margin: 0 1px;
+        }
+        .odds-mini-row-o {
+            display: flex;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .odds-mini-row-o .draw { color: #9ca3af; }
+
+
+        /* ========================================
+           VARIANT P: Lagfarge-felt med sannsynlighetsbar
+           Stor bar med lagfarge + lagnavn inni baren
+           ======================================== */
+        .match-p {
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .mega-bar-p {
+            display: flex;
+            height: 36px;
+            border-radius: 8px;
+            overflow: hidden;
+            gap: 2px;
+        }
+        .mega-seg-p {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            color: white;
+            padding: 0 8px;
+            min-width: 0;
+            overflow: hidden;
+            transition: width 0.3s;
+        }
+        .mega-seg-p .seg-logo {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+        .mega-seg-p .seg-name {
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mega-seg-p .seg-odds {
+            font-size: 11px;
+            font-weight: 800;
+            flex-shrink: 0;
+            opacity: 0.85;
+        }
+        .mega-seg-p.draw-seg {
+            background: #9ca3af;
+            min-width: 40px;
+        }
+        .mega-seg-p.draw-seg .seg-name {
+            font-size: 10px;
+        }
+        .scores-center-p {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            align-items: center;
+        }
+
+
+        /* ========================================
+           VARIANT Q: Minimal fargeboks + odds under
+           Rene fargede bokser for lagene,
+           odds som footer-stripe
+           ======================================== */
+        .match-q {
+            display: flex;
+            flex-direction: column;
+        }
+        .teams-area-q {
+            display: flex;
+            gap: 3px;
+            padding: 3px;
+        }
+        .team-card-q {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: white;
+            position: relative;
+        }
+        .team-card-q .logo-q {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .team-card-q .info-q {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .team-card-q .name-q {
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .team-card-q .odds-q {
+            font-size: 11px;
+            font-weight: 800;
+            opacity: 0.75;
+        }
+        .team-card-q .score-mini-q {
+            display: flex;
+            gap: 2px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        .team-card-q .score-mini-q .btn-q {
+            width: 24px;
+            height: 22px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .team-card-q .score-mini-q .val-q {
+            width: 26px;
+            height: 22px;
+            font-size: 14px;
+            font-weight: 800;
+            color: white;
+            background: rgba(255,255,255,0.15);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .odds-strip-q {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 14px;
+            gap: 12px;
+            background: #fafafa;
+        }
+        .odds-strip-q .item-q {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .odds-strip-q .lbl-q {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #d1d5db;
+        }
+        .odds-strip-q .pct-q {
+            font-size: 11px;
+            font-weight: 800;
+        }
+        .odds-strip-q .pct-q.home { color: #16a34a; }
+        .odds-strip-q .pct-q.draw { color: #9ca3af; }
+        .odds-strip-q .pct-q.away { color: #3b82f6; }
+
+
+        /* ========================================
+           VARIANT R: Elegante fargebokser
+           med avrundet design, lagfarge-bakgrunn
+           med subtil gradient og hvit tekst
+           ======================================== */
+        .match-r {
+            padding: 0;
+            overflow: hidden;
+        }
+        .team-row-r {
+            display: flex;
+            align-items: center;
+            padding: 0;
+        }
+        .team-color-bar-r {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            color: white;
+            flex: 1;
+            min-width: 0;
+        }
+        .team-color-bar-r .logo-r {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .team-color-bar-r .name-r {
+            font-size: 14px;
+            font-weight: 600;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .team-color-bar-r .odds-r {
+            font-size: 12px;
+            font-weight: 800;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .score-area-r {
+            display: flex;
+            gap: 3px;
+            padding: 0 12px;
+            flex-shrink: 0;
+            background: white;
+        }
+        .score-area-r .btn-r {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #f3f4f6;
+            color: #9ca3af;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-area-r .val-r {
+            width: 34px;
+            height: 28px;
+            font-size: 16px;
+            font-weight: 800;
+            color: #374151;
+            background: #f3f4f6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .row-separator-r {
+            height: 1px;
+            background: rgba(255,255,255,0.15);
+        }
+        .draw-footer-r {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 14px;
+            background: #fafafa;
+        }
+        .draw-footer-r .bar-r {
+            flex: 1;
+            height: 4px;
+            display: flex;
+            border-radius: 2px;
+            overflow: hidden;
+            gap: 2px;
+            margin-right: 10px;
+        }
+        .draw-footer-r .bar-r .seg-r {
+            height: 100%;
+            border-radius: 2px;
+        }
+        .draw-footer-r .bar-r .seg-r.draw { background: #d1d5db; }
+        .draw-footer-r .draw-info-r {
+            font-size: 10px;
+            font-weight: 700;
+            color: #9ca3af;
+            flex-shrink: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Odds Visualisering v2</h1>
+    <p class="subtitle">Nye designforslag med lagfarger og tekst i fargebokser. Eksempler med Wolves og Arsenal / Man City og Newcastle.</p>
+
+    <!-- ============== VARIANT G ============== -->
+    <div class="variant-section">
+        <div class="variant-label">G — Full lagfarge-rader</div>
+        <div class="variant-desc">Hvert lag har egen farget rad. Lagnavn og score integrert i fargen. Uavgjort-odds i smal stripe mellom.</div>
+
+        <div class="match-card" style="box-shadow: none;">
+            <div class="match-g">
+                <div class="team-box-g home" style="background: linear-gradient(135deg, #FDB913, #e5a811);">
+                    <div class="team-info-g">
+                        <div class="team-logo-g">🐺</div>
+                        <span class="team-name-g">Wolves</span>
+                        <span class="odds-badge-g">2.40</span>
+                    </div>
+                    <div class="score-controls-g">
+                        <div class="btn-g">−</div>
+                        <div class="score-g">?</div>
+                        <div class="btn-g">+</div>
+                    </div>
+                </div>
+                <div class="draw-strip-g">
+                    <span>Uavgjort</span>
+                    <span>3.30</span>
+                </div>
+                <div class="team-box-g away" style="background: linear-gradient(135deg, #EF0107, #c70106);">
+                    <div class="team-info-g">
+                        <div class="team-logo-g">🔴</div>
+                        <span class="team-name-g">Arsenal</span>
+                        <span class="odds-badge-g">2.90</span>
+                    </div>
+                    <div class="score-controls-g">
+                        <div class="btn-g">−</div>
+                        <div class="score-g">?</div>
+                        <div class="btn-g">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card" style="box-shadow: none; margin-top: 8px;">
+            <div class="match-g">
+                <div class="team-box-g home" style="background: linear-gradient(135deg, #6CABDD, #5a9bcc);">
+                    <div class="team-info-g">
+                        <div class="team-logo-g">🔵</div>
+                        <span class="team-name-g">Man City</span>
+                        <span class="odds-badge-g">1.55</span>
+                    </div>
+                    <div class="score-controls-g">
+                        <div class="btn-g">−</div>
+                        <div class="score-g">?</div>
+                        <div class="btn-g">+</div>
+                    </div>
+                </div>
+                <div class="draw-strip-g">
+                    <span>Uavgjort</span>
+                    <span>4.20</span>
+                </div>
+                <div class="team-box-g away" style="background: linear-gradient(135deg, #241F20, #3a3536);">
+                    <div class="team-info-g">
+                        <div class="team-logo-g">⚫</div>
+                        <span class="team-name-g">Newcastle</span>
+                        <span class="odds-badge-g">5.50</span>
+                    </div>
+                    <div class="score-controls-g">
+                        <div class="btn-g">−</div>
+                        <div class="score-g">?</div>
+                        <div class="btn-g">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============== VARIANT H ============== -->
+    <div class="variant-section">
+        <div class="variant-label">H — Fargede pills med VS-sirkel</div>
+        <div class="variant-desc">Lagene som fargede pills i en rad med VS-sirkel mellom. Kompakt og moderne.</div>
+
+        <div class="match-card">
+            <div class="match-h">
+                <div class="teams-row-h">
+                    <div class="team-pill-h" style="background: linear-gradient(135deg, #FDB913, #e5a811);">
+                        <span class="logo-h">🐺</span>
+                        <span class="name-h">Wolves</span>
+                        <span class="odds-h">2.40</span>
+                    </div>
+                    <div class="vs-circle-h">VS</div>
+                    <div class="team-pill-h" style="background: linear-gradient(135deg, #EF0107, #c70106);">
+                        <span class="logo-h">🔴</span>
+                        <span class="name-h">Arsenal</span>
+                        <span class="odds-h">2.90</span>
+                    </div>
+                </div>
+                <div class="bottom-row-h">
+                    <div class="draw-badge-h">U: 3.30</div>
+                    <div class="scores-h">
+                        <div class="score-group-h">
+                            <div class="btn-h">−</div>
+                            <div class="val-h">?</div>
+                            <div class="btn-h">+</div>
+                        </div>
+                        <span class="score-sep-h">–</span>
+                        <div class="score-group-h">
+                            <div class="btn-h">−</div>
+                            <div class="val-h">?</div>
+                            <div class="btn-h">+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-h">
+                <div class="teams-row-h">
+                    <div class="team-pill-h" style="background: linear-gradient(135deg, #6CABDD, #5a9bcc);">
+                        <span class="logo-h">🔵</span>
+                        <span class="name-h">Man City</span>
+                        <span class="odds-h">1.55</span>
+                    </div>
+                    <div class="vs-circle-h">VS</div>
+                    <div class="team-pill-h" style="background: linear-gradient(135deg, #241F20, #3a3536);">
+                        <span class="logo-h">⚫</span>
+                        <span class="name-h">Newcastle</span>
+                        <span class="odds-h">5.50</span>
+                    </div>
+                </div>
+                <div class="bottom-row-h">
+                    <div class="draw-badge-h">U: 4.20</div>
+                    <div class="scores-h">
+                        <div class="score-group-h">
+                            <div class="btn-h">−</div>
+                            <div class="val-h">?</div>
+                            <div class="btn-h">+</div>
+                        </div>
+                        <span class="score-sep-h">–</span>
+                        <div class="score-group-h">
+                            <div class="btn-h">−</div>
+                            <div class="val-h">?</div>
+                            <div class="btn-h">+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============== VARIANT I ============== -->
+    <div class="variant-section">
+        <div class="variant-label">I — Split-kort med halvdeler</div>
+        <div class="variant-desc">Kortet delt i to med lagfargene som bakgrunn. Uavgjort-odds i sirkel midt mellom.</div>
+
+        <div class="match-card" style="box-shadow: none;">
+            <div class="match-i">
+                <div class="team-half-i home" style="background: linear-gradient(135deg, #FDB913, #daa210);">
+                    <div class="logo-i">🐺</div>
+                    <div class="name-i">Wolves</div>
+                    <div class="odds-i">2.40</div>
+                    <div class="score-mini-i">
+                        <div class="btn-i">−</div>
+                        <div class="val-i">?</div>
+                        <div class="btn-i">+</div>
+                    </div>
+                </div>
+                <div class="team-half-i away" style="background: linear-gradient(135deg, #EF0107, #c70106);">
+                    <div class="logo-i">🔴</div>
+                    <div class="name-i">Arsenal</div>
+                    <div class="odds-i">2.90</div>
+                    <div class="score-mini-i">
+                        <div class="btn-i">−</div>
+                        <div class="val-i">?</div>
+                        <div class="btn-i">+</div>
+                    </div>
+                </div>
+                <div class="center-divider-i">
+                    <span class="draw-val-i">3.30</span>
+                    <span class="draw-label-i">U</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card" style="box-shadow: none; margin-top: 8px;">
+            <div class="match-i">
+                <div class="team-half-i home" style="background: linear-gradient(135deg, #6CABDD, #5a9bcc);">
+                    <div class="logo-i">🔵</div>
+                    <div class="name-i">Man City</div>
+                    <div class="odds-i">1.55</div>
+                    <div class="score-mini-i">
+                        <div class="btn-i">−</div>
+                        <div class="val-i">?</div>
+                        <div class="btn-i">+</div>
+                    </div>
+                </div>
+                <div class="team-half-i away" style="background: linear-gradient(135deg, #241F20, #3a3536);">
+                    <div class="logo-i">⚫</div>
+                    <div class="name-i">Newcastle</div>
+                    <div class="odds-i">5.50</div>
+                    <div class="score-mini-i">
+                        <div class="btn-i">−</div>
+                        <div class="val-i">?</div>
+                        <div class="btn-i">+</div>
+                    </div>
+                </div>
+                <div class="center-divider-i">
+                    <span class="draw-val-i">4.20</span>
+                    <span class="draw-label-i">U</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============== VARIANT J ============== -->
+    <div class="variant-section">
+        <div class="variant-label">J — Tippekupong med odds-grid</div>
+        <div class="variant-desc">Lagnavn som fargede tags over et odds-grid. Gir tippekupong-følelse med klikkbare odds-celler.</div>
+
+        <div class="match-card">
+            <div class="match-j">
+                <div class="match-header-j">
+                    <div class="team-tag-j" style="background: linear-gradient(135deg, #FDB913, #e5a811);">
+                        <span class="logo-j">🐺</span>
+                        <span class="name-j">Wolves</span>
+                    </div>
+                    <span class="match-dash-j">vs</span>
+                    <div class="team-tag-j" style="background: linear-gradient(135deg, #EF0107, #c70106);">
+                        <span class="logo-j">🔴</span>
+                        <span class="name-j">Arsenal</span>
+                    </div>
+                </div>
+                <div class="odds-grid-j">
+                    <div class="odds-cell-j home-cell">
+                        <span class="cell-label-j">Hjemme</span>
+                        <span class="cell-odds-j">2.40</span>
+                        <span class="cell-pct-j">42%</span>
+                    </div>
+                    <div class="odds-cell-j draw-cell">
+                        <span class="cell-label-j">Uavgjort</span>
+                        <span class="cell-odds-j">3.30</span>
+                        <span class="cell-pct-j">30%</span>
+                    </div>
+                    <div class="odds-cell-j away-cell">
+                        <span class="cell-label-j">Borte</span>
+                        <span class="cell-odds-j">2.90</span>
+                        <span class="cell-pct-j">28%</span>
+                    </div>
+                </div>
+                <div class="score-footer-j">
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                    <span class="score-sep-h">–</span>
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-j">
+                <div class="match-header-j">
+                    <div class="team-tag-j" style="background: linear-gradient(135deg, #6CABDD, #5a9bcc);">
+                        <span class="logo-j">🔵</span>
+                        <span class="name-j">Man City</span>
+                    </div>
+                    <span class="match-dash-j">vs</span>
+                    <div class="team-tag-j" style="background: linear-gradient(135deg, #241F20, #3a3536);">
+                        <span class="logo-j">⚫</span>
+                        <span class="name-j">Newcastle</span>
+                    </div>
+                </div>
+                <div class="odds-grid-j">
+                    <div class="odds-cell-j home-cell">
+                        <span class="cell-label-j">Hjemme</span>
+                        <span class="cell-odds-j">1.55</span>
+                        <span class="cell-pct-j">57%</span>
+                    </div>
+                    <div class="odds-cell-j draw-cell">
+                        <span class="cell-label-j">Uavgjort</span>
+                        <span class="cell-odds-j">4.20</span>
+                        <span class="cell-pct-j">21%</span>
+                    </div>
+                    <div class="odds-cell-j away-cell">
+                        <span class="cell-label-j">Borte</span>
+                        <span class="cell-odds-j">5.50</span>
+                        <span class="cell-pct-j">22%</span>
+                    </div>
+                </div>
+                <div class="score-footer-j">
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                    <span class="score-sep-h">–</span>
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============== VARIANT K ============== -->
+    <div class="variant-section">
+        <div class="variant-label">K — Gradient Clash</div>
+        <div class="variant-desc">To lag mot hverandre med lagfarger, sannsynlighetsbar og score på hver side. Kamp-stemning.</div>
+
+        <div class="match-card">
+            <div class="match-k">
+                <div class="gradient-bg-k" style="background: linear-gradient(90deg, #FDB913 0%, transparent 40%, transparent 60%, #EF0107 100%);"></div>
+                <div class="match-content-k">
+                    <div class="teams-clash-k">
+                        <div class="team-side-k">
+                            <div class="logo-k" style="background: linear-gradient(135deg, #FDB913, #e5a811);">🐺</div>
+                            <div class="info-k">
+                                <span class="name-k">Wolves</span>
+                                <span class="odds-k" style="color: #b8900d;">2.40</span>
+                            </div>
+                        </div>
+                        <div class="clash-center-k">
+                            <span class="clash-vs-k">VS</span>
+                            <span class="clash-draw-k">U: 3.30</span>
+                        </div>
+                        <div class="team-side-k away">
+                            <div class="logo-k" style="background: linear-gradient(135deg, #EF0107, #c70106);">🔴</div>
+                            <div class="info-k">
+                                <span class="name-k">Arsenal</span>
+                                <span class="odds-k" style="color: #c70106;">2.90</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clash-bar-k">
+                        <div class="clash-seg-k" style="width: 42%; background: #FDB913;"></div>
+                        <div class="clash-seg-k draw" style="width: 30%;"></div>
+                        <div class="clash-seg-k" style="width: 28%; background: #EF0107;"></div>
+                    </div>
+                    <div class="scores-row-k">
+                        <div class="score-block-k">
+                            <div class="btn-k">−</div>
+                            <div class="val-k">?</div>
+                            <div class="btn-k">+</div>
+                        </div>
+                        <div class="score-block-k">
+                            <div class="btn-k">−</div>
+                            <div class="val-k">?</div>
+                            <div class="btn-k">+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-k">
+                <div class="gradient-bg-k" style="background: linear-gradient(90deg, #6CABDD 0%, transparent 40%, transparent 60%, #241F20 100%);"></div>
+                <div class="match-content-k">
+                    <div class="teams-clash-k">
+                        <div class="team-side-k">
+                            <div class="logo-k" style="background: linear-gradient(135deg, #6CABDD, #5a9bcc);">🔵</div>
+                            <div class="info-k">
+                                <span class="name-k">Man City</span>
+                                <span class="odds-k" style="color: #4a8ab5;">1.55</span>
+                            </div>
+                        </div>
+                        <div class="clash-center-k">
+                            <span class="clash-vs-k">VS</span>
+                            <span class="clash-draw-k">U: 4.20</span>
+                        </div>
+                        <div class="team-side-k away">
+                            <div class="logo-k" style="background: linear-gradient(135deg, #241F20, #3a3536);">⚫</div>
+                            <div class="info-k">
+                                <span class="name-k">Newcastle</span>
+                                <span class="odds-k" style="color: #555;">5.50</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clash-bar-k">
+                        <div class="clash-seg-k" style="width: 57%; background: #6CABDD;"></div>
+                        <div class="clash-seg-k draw" style="width: 21%;"></div>
+                        <div class="clash-seg-k" style="width: 22%; background: #241F20;"></div>
+                    </div>
+                    <div class="scores-row-k">
+                        <div class="score-block-k">
+                            <div class="btn-k">−</div>
+                            <div class="val-k">?</div>
+                            <div class="btn-k">+</div>
+                        </div>
+                        <div class="score-block-k">
+                            <div class="btn-k">−</div>
+                            <div class="val-k">?</div>
+                            <div class="btn-k">+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============== VARIANT L ============== -->
+    <div class="variant-section">
+        <div class="variant-label">L — Stadion-tavle</div>
+        <div class="variant-desc">Mørk header med lagene i sine farger, som en stadion-resultattavle. Sannsynlighetsbar som skillelinje.</div>
+
+        <div class="match-card match-l">
+            <div class="scoreboard-header-l">
+                <div class="sb-team-l">
+                    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg, #FDB913, transparent);opacity:0.15;"></div>
+                    <div class="logo-l">🐺</div>
+                    <div class="details-l">
+                        <span class="name-l">Wolves</span>
+                        <span class="odds-l" style="color: #FDB913;">2.40</span>
+                    </div>
+                </div>
+                <div class="sb-divider-l">
+                    <span class="sb-draw-l">U: 3.30</span>
+                </div>
+                <div class="sb-team-l away">
+                    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(225deg, #EF0107, transparent);opacity:0.15;"></div>
+                    <div class="logo-l">🔴</div>
+                    <div class="details-l">
+                        <span class="name-l">Arsenal</span>
+                        <span class="odds-l" style="color: #EF0107;">2.90</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sb-bar-l">
+                <div class="sb-seg-l" style="width: 42%; background: #FDB913;"></div>
+                <div class="sb-seg-l draw" style="width: 30%;"></div>
+                <div class="sb-seg-l" style="width: 28%; background: #EF0107;"></div>
+            </div>
+            <div class="scoreboard-body-l">
+                <div class="score-block-k">
+                    <div class="btn-k">−</div>
+                    <div class="val-k">?</div>
+                    <div class="btn-k">+</div>
+                </div>
+                <div class="score-block-k">
+                    <div class="btn-k">−</div>
+                    <div class="val-k">?</div>
+                    <div class="btn-k">+</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card match-l" style="margin-top: 8px;">
+            <div class="scoreboard-header-l">
+                <div class="sb-team-l">
+                    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg, #6CABDD, transparent);opacity:0.15;"></div>
+                    <div class="logo-l">🔵</div>
+                    <div class="details-l">
+                        <span class="name-l">Man City</span>
+                        <span class="odds-l" style="color: #6CABDD;">1.55</span>
+                    </div>
+                </div>
+                <div class="sb-divider-l">
+                    <span class="sb-draw-l">U: 4.20</span>
+                </div>
+                <div class="sb-team-l away">
+                    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(225deg, #fff, transparent);opacity:0.05;"></div>
+                    <div class="logo-l">⚫</div>
+                    <div class="details-l">
+                        <span class="name-l">Newcastle</span>
+                        <span class="odds-l" style="color: #aaa;">5.50</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sb-bar-l">
+                <div class="sb-seg-l" style="width: 57%; background: #6CABDD;"></div>
+                <div class="sb-seg-l draw" style="width: 21%;"></div>
+                <div class="sb-seg-l" style="width: 22%; background: #555;"></div>
+            </div>
+            <div class="scoreboard-body-l">
+                <div class="score-block-k">
+                    <div class="btn-k">−</div>
+                    <div class="val-k">?</div>
+                    <div class="btn-k">+</div>
+                </div>
+                <div class="score-block-k">
+                    <div class="btn-k">−</div>
+                    <div class="val-k">?</div>
+                    <div class="btn-k">+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============== VARIANT M ============== -->
+    <div class="variant-section">
+        <div class="variant-label">M — Inline lag-chips med bar</div>
+        <div class="variant-desc">Lagnavn som kompakte fargede chips med sannsynlighetsbar mellom. Alt i en rad.</div>
+
+        <div class="match-card">
+            <div class="match-m">
+                <div class="inline-row-m">
+                    <div class="team-chip-m" style="background: linear-gradient(135deg, #FDB913, #e5a811);">
+                        <span class="chip-logo">🐺</span>
+                        Wolves
+                    </div>
+                    <div class="bar-between-m">
+                        <div class="bar-track-m">
+                            <div class="seg-m" style="width: 42%; background: #FDB913;"></div>
+                            <div class="seg-m draw" style="width: 30%;"></div>
+                            <div class="seg-m" style="width: 28%; background: #EF0107;"></div>
+                        </div>
+                        <span class="draw-odds-m">U: 3.30</span>
+                    </div>
+                    <div class="team-chip-m" style="background: linear-gradient(135deg, #EF0107, #c70106);">
+                        <span class="chip-logo">🔴</span>
+                        Arsenal
+                    </div>
+                </div>
+                <div class="scores-row-m">
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                    <span class="score-sep-h">–</span>
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-m">
+                <div class="inline-row-m">
+                    <div class="team-chip-m" style="background: linear-gradient(135deg, #6CABDD, #5a9bcc);">
+                        <span class="chip-logo">🔵</span>
+                        Man City
+                    </div>
+                    <div class="bar-between-m">
+                        <div class="bar-track-m">
+                            <div class="seg-m" style="width: 57%; background: #6CABDD;"></div>
+                            <div class="seg-m draw" style="width: 21%;"></div>
+                            <div class="seg-m" style="width: 22%; background: #241F20;"></div>
+                        </div>
+                        <span class="draw-odds-m">U: 4.20</span>
+                    </div>
+                    <div class="team-chip-m" style="background: linear-gradient(135deg, #241F20, #3a3536);">
+                        <span class="chip-logo">⚫</span>
+                        Newcastle
+                    </div>
+                </div>
+                <div class="scores-row-m">
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                    <span class="score-sep-h">–</span>
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============== VARIANT N ============== -->
+    <div class="variant-section">
+        <div class="variant-label">N — Fargedot + scoreboard-sentral</div>
+        <div class="variant-desc">Lagene på hver side med fargeprikk, scoren i midten. Fargestripe i bunn som sannsynlighetsbar.</div>
+
+        <div class="match-card">
+            <div class="match-n">
+                <div class="teams-header-n">
+                    <div class="team-badge-n">
+                        <div class="color-dot-n" style="background: linear-gradient(180deg, #FDB913, #e5a811);"></div>
+                        <div class="badge-info-n">
+                            <span class="badge-name-n">Wolves</span>
+                            <span class="badge-odds-n" style="color: #b8900d;">2.40</span>
+                        </div>
+                    </div>
+                    <div class="center-n">
+                        <div class="score-compact-n">
+                            <div class="sc-btn">−</div>
+                            <span class="sc-val">?</span>
+                            <span class="sc-dash">–</span>
+                            <span class="sc-val">?</span>
+                            <div class="sc-btn">+</div>
+                        </div>
+                        <span class="draw-label-n">U: 3.30</span>
+                    </div>
+                    <div class="team-badge-n" style="flex-direction: row-reverse;">
+                        <div class="color-dot-n" style="background: linear-gradient(180deg, #EF0107, #c70106);"></div>
+                        <div class="badge-info-n" style="align-items: flex-end;">
+                            <span class="badge-name-n">Arsenal</span>
+                            <span class="badge-odds-n" style="color: #c70106;">2.90</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bar-footer-n">
+                <div class="seg-n" style="width: 42%; background: #FDB913;"></div>
+                <div class="seg-n draw" style="width: 30%;"></div>
+                <div class="seg-n" style="width: 28%; background: #EF0107;"></div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-n">
+                <div class="teams-header-n">
+                    <div class="team-badge-n">
+                        <div class="color-dot-n" style="background: linear-gradient(180deg, #6CABDD, #5a9bcc);"></div>
+                        <div class="badge-info-n">
+                            <span class="badge-name-n">Man City</span>
+                            <span class="badge-odds-n" style="color: #4a8ab5;">1.55</span>
+                        </div>
+                    </div>
+                    <div class="center-n">
+                        <div class="score-compact-n">
+                            <div class="sc-btn">−</div>
+                            <span class="sc-val">?</span>
+                            <span class="sc-dash">–</span>
+                            <span class="sc-val">?</span>
+                            <div class="sc-btn">+</div>
+                        </div>
+                        <span class="draw-label-n">U: 4.20</span>
+                    </div>
+                    <div class="team-badge-n" style="flex-direction: row-reverse;">
+                        <div class="color-dot-n" style="background: linear-gradient(180deg, #241F20, #3a3536);"></div>
+                        <div class="badge-info-n" style="align-items: flex-end;">
+                            <span class="badge-name-n">Newcastle</span>
+                            <span class="badge-odds-n" style="color: #555;">5.50</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bar-footer-n">
+                <div class="seg-n" style="width: 57%; background: #6CABDD;"></div>
+                <div class="seg-n draw" style="width: 21%;"></div>
+                <div class="seg-n" style="width: 22%; background: #3a3536;"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============== VARIANT P ============== -->
+    <div class="variant-section">
+        <div class="variant-label">P — Mega sannsynlighetsbar</div>
+        <div class="variant-desc">Stor bar der begge lag har navn OG odds inne i sine fargesegmenter. Alt i ett visuelt element.</div>
+
+        <div class="match-card">
+            <div class="match-p">
+                <div class="mega-bar-p">
+                    <div class="mega-seg-p" style="width: 42%; background: linear-gradient(135deg, #FDB913, #e5a811);">
+                        <span class="seg-logo">🐺</span>
+                        <span class="seg-name">Wolves</span>
+                        <span class="seg-odds">2.40</span>
+                    </div>
+                    <div class="mega-seg-p draw-seg" style="width: 16%;">
+                        <span class="seg-odds">3.30</span>
+                    </div>
+                    <div class="mega-seg-p" style="width: 42%; background: linear-gradient(135deg, #EF0107, #c70106);">
+                        <span class="seg-odds">2.90</span>
+                        <span class="seg-name">Arsenal</span>
+                        <span class="seg-logo">🔴</span>
+                    </div>
+                </div>
+                <div class="scores-center-p">
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                    <span class="score-sep-h">–</span>
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-p">
+                <div class="mega-bar-p">
+                    <div class="mega-seg-p" style="width: 55%; background: linear-gradient(135deg, #6CABDD, #5a9bcc);">
+                        <span class="seg-logo">🔵</span>
+                        <span class="seg-name">Man City</span>
+                        <span class="seg-odds">1.55</span>
+                    </div>
+                    <div class="mega-seg-p draw-seg" style="width: 15%;">
+                        <span class="seg-odds">4.20</span>
+                    </div>
+                    <div class="mega-seg-p" style="width: 30%; background: linear-gradient(135deg, #241F20, #3a3536);">
+                        <span class="seg-odds">5.50</span>
+                        <span class="seg-name">Newc.</span>
+                        <span class="seg-logo">⚫</span>
+                    </div>
+                </div>
+                <div class="scores-center-p">
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                    <span class="score-sep-h">–</span>
+                    <div class="score-group-h">
+                        <div class="btn-h">−</div>
+                        <div class="val-h">?</div>
+                        <div class="btn-h">+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============== VARIANT Q ============== -->
+    <div class="variant-section">
+        <div class="variant-label">Q — Doble lagkort</div>
+        <div class="variant-desc">To fargede lagkort side om side med score integrert. Prosent-footer under.</div>
+
+        <div class="match-card">
+            <div class="match-q">
+                <div class="teams-area-q">
+                    <div class="team-card-q" style="background: linear-gradient(135deg, #FDB913, #daa210);">
+                        <span class="logo-q">🐺</span>
+                        <div class="info-q">
+                            <span class="name-q">Wolves</span>
+                            <span class="odds-q">2.40</span>
+                        </div>
+                        <div class="score-mini-q">
+                            <div class="btn-q">−</div>
+                            <div class="val-q">?</div>
+                            <div class="btn-q">+</div>
+                        </div>
+                    </div>
+                    <div class="team-card-q" style="background: linear-gradient(135deg, #EF0107, #c70106);">
+                        <span class="logo-q">🔴</span>
+                        <div class="info-q">
+                            <span class="name-q">Arsenal</span>
+                            <span class="odds-q">2.90</span>
+                        </div>
+                        <div class="score-mini-q">
+                            <div class="btn-q">−</div>
+                            <div class="val-q">?</div>
+                            <div class="btn-q">+</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="odds-strip-q">
+                    <div class="item-q">
+                        <span class="lbl-q">H</span>
+                        <span class="pct-q home">42%</span>
+                    </div>
+                    <div class="item-q">
+                        <span class="lbl-q">U</span>
+                        <span class="pct-q draw">30%</span>
+                    </div>
+                    <div class="item-q">
+                        <span class="lbl-q">B</span>
+                        <span class="pct-q away">28%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-q">
+                <div class="teams-area-q">
+                    <div class="team-card-q" style="background: linear-gradient(135deg, #6CABDD, #5a9bcc);">
+                        <span class="logo-q">🔵</span>
+                        <div class="info-q">
+                            <span class="name-q">Man City</span>
+                            <span class="odds-q">1.55</span>
+                        </div>
+                        <div class="score-mini-q">
+                            <div class="btn-q">−</div>
+                            <div class="val-q">?</div>
+                            <div class="btn-q">+</div>
+                        </div>
+                    </div>
+                    <div class="team-card-q" style="background: linear-gradient(135deg, #241F20, #3a3536);">
+                        <span class="logo-q">⚫</span>
+                        <div class="info-q">
+                            <span class="name-q">Newcastle</span>
+                            <span class="odds-q">5.50</span>
+                        </div>
+                        <div class="score-mini-q">
+                            <div class="btn-q">−</div>
+                            <div class="val-q">?</div>
+                            <div class="btn-q">+</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="odds-strip-q">
+                    <div class="item-q">
+                        <span class="lbl-q">H</span>
+                        <span class="pct-q home">57%</span>
+                    </div>
+                    <div class="item-q">
+                        <span class="lbl-q">U</span>
+                        <span class="pct-q draw">21%</span>
+                    </div>
+                    <div class="item-q">
+                        <span class="lbl-q">B</span>
+                        <span class="pct-q away">22%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============== VARIANT R ============== -->
+    <div class="variant-section">
+        <div class="variant-label">R — Lagfarge-felt med hvit score</div>
+        <div class="variant-desc">Hvert lag har farget felt med navn og odds. Score-kontrollene i hvit sone til h&oslash;yre. Sannsynlighetsbar i footer.</div>
+
+        <div class="match-card match-r">
+            <div class="team-row-r">
+                <div class="team-color-bar-r" style="background: linear-gradient(135deg, #FDB913, #daa210);">
+                    <span class="logo-r">🐺</span>
+                    <span class="name-r">Wolves</span>
+                    <span class="odds-r">2.40</span>
+                </div>
+                <div class="score-area-r">
+                    <div class="btn-r">−</div>
+                    <div class="val-r">?</div>
+                    <div class="btn-r">+</div>
+                </div>
+            </div>
+            <div class="team-row-r">
+                <div class="team-color-bar-r" style="background: linear-gradient(135deg, #EF0107, #c70106);">
+                    <span class="logo-r">🔴</span>
+                    <span class="name-r">Arsenal</span>
+                    <span class="odds-r">2.90</span>
+                </div>
+                <div class="score-area-r">
+                    <div class="btn-r">−</div>
+                    <div class="val-r">?</div>
+                    <div class="btn-r">+</div>
+                </div>
+            </div>
+            <div class="draw-footer-r">
+                <div class="bar-r">
+                    <div class="seg-r" style="width: 42%; background: #FDB913;"></div>
+                    <div class="seg-r draw" style="width: 30%;"></div>
+                    <div class="seg-r" style="width: 28%; background: #EF0107;"></div>
+                </div>
+                <span class="draw-info-r">U: 3.30</span>
+            </div>
+        </div>
+
+        <div class="match-card match-r">
+            <div class="team-row-r">
+                <div class="team-color-bar-r" style="background: linear-gradient(135deg, #6CABDD, #5a9bcc);">
+                    <span class="logo-r">🔵</span>
+                    <span class="name-r">Man City</span>
+                    <span class="odds-r">1.55</span>
+                </div>
+                <div class="score-area-r">
+                    <div class="btn-r">−</div>
+                    <div class="val-r">?</div>
+                    <div class="btn-r">+</div>
+                </div>
+            </div>
+            <div class="team-row-r">
+                <div class="team-color-bar-r" style="background: linear-gradient(135deg, #241F20, #3a3536);">
+                    <span class="logo-r">⚫</span>
+                    <span class="name-r">Newcastle</span>
+                    <span class="odds-r">5.50</span>
+                </div>
+                <div class="score-area-r">
+                    <div class="btn-r">−</div>
+                    <div class="val-r">?</div>
+                    <div class="btn-r">+</div>
+                </div>
+            </div>
+            <div class="draw-footer-r">
+                <div class="bar-r">
+                    <div class="seg-r" style="width: 57%; background: #6CABDD;"></div>
+                    <div class="seg-r draw" style="width: 21%;"></div>
+                    <div class="seg-r" style="width: 22%; background: #3a3536;"></div>
+                </div>
+                <span class="draw-info-r">U: 4.20</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

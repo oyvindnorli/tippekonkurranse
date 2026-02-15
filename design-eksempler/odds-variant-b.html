@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variant B - Tynn bar + lagfarger</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f2f3f5;
+            color: #111827;
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        h2 {
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+        .subtitle {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #16a34a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 28px;
+            margin-bottom: 10px;
+        }
+
+        /* Pill headers (same as live site) */
+        .pill-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 0;
+            flex-wrap: wrap;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .pill-league { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+        .pill-round { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+        .pill-date { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+        .pill-time { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+
+        /* Match card base */
+        .match-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        .match-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+        }
+        .match-teams {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .team-logo {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .team-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #111827;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Odds visual: Thin bar + colored numbers */
+        .odds-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 140px;
+            flex-shrink: 0;
+            margin: 0 12px;
+            gap: 5px;
+        }
+        .prob-bar {
+            display: flex;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            gap: 2px;
+        }
+        .prob-seg {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+        .odds-numbers {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .odds-num {
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* Scores */
+        .match-scores {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .score-row {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-display {
+            width: 40px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: #374151;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+        .match-card.has-tip .score-display {
+            background: #16a34a;
+            color: #ffffff;
+        }
+        .match-card.has-tip {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* Responsive */
+        @media (max-width: 420px) {
+            .odds-visual { width: 100px; margin: 0 8px; }
+            .odds-num { font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Variant B — Tynn bar + lagfarger</h2>
+    <p class="subtitle">Fargene matcher lagenes primærfarger. Uavgjort er alltid nøytral grå.</p>
+
+    <!-- Premier League -->
+    <div class="section-label">Premier League kamper</div>
+    <div class="pill-row">
+        <span class="pill pill-league">Premier League</span>
+        <span class="pill pill-round">Runde 27</span>
+    </div>
+    <div class="pill-row">
+        <span class="pill pill-date">Lørdag 21. feb</span>
+        <span class="pill pill-time">16:00</span>
+    </div>
+
+    <!-- Wolves vs Arsenal -->
+    <div class="match-card">
+        <div class="match-main">
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-logo">🐺</div>
+                    <span class="team-name">Wolves</span>
+                </div>
+                <div class="team">
+                    <div class="team-logo">🔴</div>
+                    <span class="team-name">Arsenal</span>
+                </div>
+            </div>
+            <div class="odds-visual">
+                <div class="prob-bar">
+                    <div class="prob-seg" style="width: 42%; background: #FDB913;"></div>
+                    <div class="prob-seg" style="width: 30%; background: #d1d5db;"></div>
+                    <div class="prob-seg" style="width: 28%; background: #EF0107;"></div>
+                </div>
+                <div class="odds-numbers">
+                    <span class="odds-num" style="color: #d4a017;">2.40</span>
+                    <span class="odds-num" style="color: #9ca3af;">3.30</span>
+                    <span class="odds-num" style="color: #EF0107;">2.90</span>
+                </div>
+            </div>
+            <div class="match-scores">
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Man City vs Newcastle -->
+    <div class="match-card">
+        <div class="match-main">
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-logo">🔵</div>
+                    <span class="team-name">Man City</span>
+                </div>
+                <div class="team">
+                    <div class="team-logo">⚫</div>
+                    <span class="team-name">Newcastle</span>
+                </div>
+            </div>
+            <div class="odds-visual">
+                <div class="prob-bar">
+                    <div class="prob-seg" style="width: 57%; background: #6CABDD;"></div>
+                    <div class="prob-seg" style="width: 21%; background: #d1d5db;"></div>
+                    <div class="prob-seg" style="width: 22%; background: #241F20;"></div>
+                </div>
+                <div class="odds-numbers">
+                    <span class="odds-num" style="color: #4a90b8;">1.55</span>
+                    <span class="odds-num" style="color: #9ca3af;">4.20</span>
+                    <span class="odds-num" style="color: #241F20;">5.50</span>
+                </div>
+            </div>
+            <div class="match-scores">
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liverpool vs Chelsea (has-tip example) -->
+    <div class="pill-row">
+        <span class="pill pill-time">18:30</span>
+    </div>
+    <div class="match-card has-tip">
+        <div class="match-main">
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-logo">🔴</div>
+                    <span class="team-name">Liverpool</span>
+                </div>
+                <div class="team">
+                    <div class="team-logo">🔵</div>
+                    <span class="team-name">Chelsea</span>
+                </div>
+            </div>
+            <div class="odds-visual">
+                <div class="prob-bar">
+                    <div class="prob-seg" style="width: 52%; background: #C8102E;"></div>
+                    <div class="prob-seg" style="width: 25%; background: #d1d5db;"></div>
+                    <div class="prob-seg" style="width: 23%; background: #034694;"></div>
+                </div>
+                <div class="odds-numbers">
+                    <span class="odds-num" style="color: #C8102E;">1.75</span>
+                    <span class="odds-num" style="color: #9ca3af;">3.80</span>
+                    <span class="odds-num" style="color: #034694;">4.50</span>
+                </div>
+            </div>
+            <div class="match-scores">
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">2</div>
+                    <div class="btn">+</div>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">1</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aston Villa vs Tottenham -->
+    <div class="pill-row">
+        <span class="pill pill-time">21:00</span>
+    </div>
+    <div class="match-card">
+        <div class="match-main">
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-logo">🟤</div>
+                    <span class="team-name">Aston Villa</span>
+                </div>
+                <div class="team">
+                    <div class="team-logo">⚪</div>
+                    <span class="team-name">Tottenham</span>
+                </div>
+            </div>
+            <div class="odds-visual">
+                <div class="prob-bar">
+                    <div class="prob-seg" style="width: 38%; background: #670E36;"></div>
+                    <div class="prob-seg" style="width: 28%; background: #d1d5db;"></div>
+                    <div class="prob-seg" style="width: 34%; background: #132257;"></div>
+                </div>
+                <div class="odds-numbers">
+                    <span class="odds-num" style="color: #670E36;">2.60</span>
+                    <span class="odds-num" style="color: #9ca3af;">3.40</span>
+                    <span class="odds-num" style="color: #132257;">2.70</span>
+                </div>
+            </div>
+            <div class="match-scores">
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Man United vs Everton -->
+    <div class="pill-row">
+        <span class="pill pill-date">Søndag 22. feb</span>
+        <span class="pill pill-time">15:00</span>
+    </div>
+    <div class="match-card">
+        <div class="match-main">
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-logo">🔴</div>
+                    <span class="team-name">Man United</span>
+                </div>
+                <div class="team">
+                    <div class="team-logo">🔵</div>
+                    <span class="team-name">Everton</span>
+                </div>
+            </div>
+            <div class="odds-visual">
+                <div class="prob-bar">
+                    <div class="prob-seg" style="width: 60%; background: #DA291C;"></div>
+                    <div class="prob-seg" style="width: 22%; background: #d1d5db;"></div>
+                    <div class="prob-seg" style="width: 18%; background: #003399;"></div>
+                </div>
+                <div class="odds-numbers">
+                    <span class="odds-num" style="color: #DA291C;">1.45</span>
+                    <span class="odds-num" style="color: #9ca3af;">4.50</span>
+                    <span class="odds-num" style="color: #003399;">6.50</span>
+                </div>
+            </div>
+            <div class="match-scores">
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brighton vs Brentford -->
+    <div class="match-card">
+        <div class="match-main">
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-logo">🔵</div>
+                    <span class="team-name">Brighton</span>
+                </div>
+                <div class="team">
+                    <div class="team-logo">🐝</div>
+                    <span class="team-name">Brentford</span>
+                </div>
+            </div>
+            <div class="odds-visual">
+                <div class="prob-bar">
+                    <div class="prob-seg" style="width: 44%; background: #0057B8;"></div>
+                    <div class="prob-seg" style="width: 28%; background: #d1d5db;"></div>
+                    <div class="prob-seg" style="width: 28%; background: #E30613;"></div>
+                </div>
+                <div class="odds-numbers">
+                    <span class="odds-num" style="color: #0057B8;">2.20</span>
+                    <span class="odds-num" style="color: #9ca3af;">3.40</span>
+                    <span class="odds-num" style="color: #E30613;">3.20</span>
+                </div>
+            </div>
+            <div class="match-scores">
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-label" style="margin-top: 32px;">Champions League</div>
+    <div class="pill-row">
+        <span class="pill pill-league">Champions League</span>
+        <span class="pill pill-round">Runde 32</span>
+    </div>
+    <div class="pill-row">
+        <span class="pill pill-date">Tirsdag 17. feb</span>
+        <span class="pill pill-time">21:00</span>
+    </div>
+
+    <!-- Bayern vs Celtic -->
+    <div class="match-card">
+        <div class="match-main">
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-logo">🔴</div>
+                    <span class="team-name">Bayern München</span>
+                </div>
+                <div class="team">
+                    <div class="team-logo">🍀</div>
+                    <span class="team-name">Celtic</span>
+                </div>
+            </div>
+            <div class="odds-visual">
+                <div class="prob-bar">
+                    <div class="prob-seg" style="width: 72%; background: #DC052D;"></div>
+                    <div class="prob-seg" style="width: 16%; background: #d1d5db;"></div>
+                    <div class="prob-seg" style="width: 12%; background: #16853E;"></div>
+                </div>
+                <div class="odds-numbers">
+                    <span class="odds-num" style="color: #DC052D;">1.18</span>
+                    <span class="odds-num" style="color: #9ca3af;">7.50</span>
+                    <span class="odds-num" style="color: #16853E;">13.0</span>
+                </div>
+            </div>
+            <div class="match-scores">
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PSG vs Man City -->
+    <div class="match-card">
+        <div class="match-main">
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-logo">🔵</div>
+                    <span class="team-name">PSG</span>
+                </div>
+                <div class="team">
+                    <div class="team-logo">🔵</div>
+                    <span class="team-name">Man City</span>
+                </div>
+            </div>
+            <div class="odds-visual">
+                <div class="prob-bar">
+                    <div class="prob-seg" style="width: 40%; background: #004170;"></div>
+                    <div class="prob-seg" style="width: 28%; background: #d1d5db;"></div>
+                    <div class="prob-seg" style="width: 32%; background: #6CABDD;"></div>
+                </div>
+                <div class="odds-numbers">
+                    <span class="odds-num" style="color: #004170;">2.50</span>
+                    <span class="odds-num" style="color: #9ca3af;">3.40</span>
+                    <span class="odds-num" style="color: #4a90b8;">2.80</span>
+                </div>
+            </div>
+            <div class="match-scores">
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+                <div class="score-row">
+                    <div class="btn">−</div>
+                    <div class="score-display">?</div>
+                    <div class="btn">+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

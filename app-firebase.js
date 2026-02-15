@@ -307,17 +307,37 @@ function formatOdds(odds) {
     return Number(num.toFixed(1)).toString();
 }
 
-// Update odds bar/number colors after async color extraction
+// Update odds colors after async color extraction (K3 Neon Glow)
 function updateOddsColors(matchId, homeColor, awayColor) {
+    // Bar segments
     const probHome = document.getElementById(`prob-home-${matchId}`);
     const probAway = document.getElementById(`prob-away-${matchId}`);
-    const oddsHome = document.getElementById(`odds-home-${matchId}`);
-    const oddsAway = document.getElementById(`odds-away-${matchId}`);
-
     if (probHome) probHome.style.background = homeColor;
     if (probAway) probAway.style.background = awayColor;
-    if (oddsHome) oddsHome.style.color = homeColor;
-    if (oddsAway) oddsAway.style.color = awayColor;
+
+    // Glow effects
+    const glowHome = document.getElementById(`glow-home-${matchId}`);
+    const glowAway = document.getElementById(`glow-away-${matchId}`);
+    if (glowHome) glowHome.style.background = homeColor;
+    if (glowAway) glowAway.style.background = awayColor;
+
+    // Odds pills
+    const pillHome = document.getElementById(`odds-pill-home-${matchId}`);
+    const pillAway = document.getElementById(`odds-pill-away-${matchId}`);
+    if (pillHome) pillHome.style.background = homeColor;
+    if (pillAway) pillAway.style.background = awayColor;
+
+    // Logo circle backgrounds
+    const logoBgHome = document.getElementById(`logo-bg-home-${matchId}`);
+    const logoBgAway = document.getElementById(`logo-bg-away-${matchId}`);
+    if (logoBgHome) logoBgHome.style.background = homeColor;
+    if (logoBgAway) logoBgAway.style.background = awayColor;
+
+    // Bar labels
+    const lblHome = document.getElementById(`lbl-home-${matchId}`);
+    const lblAway = document.getElementById(`lbl-away-${matchId}`);
+    if (lblHome) lblHome.style.color = homeColor;
+    if (lblAway) lblAway.style.color = awayColor;
 }
 
 // Load user tips from Firebase
@@ -1221,9 +1241,19 @@ function renderMatches() {
                 if (!awayLogo) {
                 }
 
-                // Build odds visual HTML
-                let oddsVisualHtml = '';
-                if (match.odds && match.odds.H && match.odds.U && match.odds.B) {
+                // Build K3 Neon Glow match card
+                const hasOdds = match.odds && match.odds.H && match.odds.U && match.odds.B;
+                let glowHtml = '';
+                let oddsBarHtml = '';
+                let centerHtml = '<div class="clash-center"><span class="clash-vs">VS</span></div>';
+                let homePillHtml = '';
+                let awayPillHtml = '';
+                let logoHomeStyle = 'background: #f3f4f6';
+                let logoAwayStyle = 'background: #f3f4f6';
+                let logoHomeClass = 'clash-logo no-color';
+                let logoAwayClass = 'clash-logo no-color';
+
+                if (hasOdds) {
                     const H = parseFloat(match.odds.H);
                     const U = parseFloat(match.odds.U);
                     const B = parseFloat(match.odds.B);
@@ -1232,41 +1262,72 @@ function renderMatches() {
                     const pctU = ((1/U) / invSum * 100).toFixed(1);
                     const pctB = ((1/B) / invSum * 100).toFixed(1);
 
-                    // Get initial colors (fallbacks or cached)
                     const colors = getTeamColors(homeLogo, awayLogo, (resolved) => {
                         updateOddsColors(match.id, resolved.homeColor, resolved.awayColor);
                     });
 
-                    oddsVisualHtml = `
-                        <div class="odds-visual" id="odds-visual-${match.id}">
-                            <div class="prob-bar">
-                                <div class="prob-seg" id="prob-home-${match.id}" style="width:${pctH}%; background:${colors.homeColor}"></div>
-                                <div class="prob-seg" style="width:${pctU}%; background:#d1d5db"></div>
-                                <div class="prob-seg" id="prob-away-${match.id}" style="width:${pctB}%; background:${colors.awayColor}"></div>
+                    glowHtml = `
+                        <div class="glow-home" id="glow-home-${match.id}" style="background: ${colors.homeColor}"></div>
+                        <div class="glow-away" id="glow-away-${match.id}" style="background: ${colors.awayColor}"></div>
+                    `;
+
+                    logoHomeStyle = `background: ${colors.homeColor}`;
+                    logoAwayStyle = `background: ${colors.awayColor}`;
+                    logoHomeClass = 'clash-logo';
+                    logoAwayClass = 'clash-logo';
+
+                    homePillHtml = `<span class="odds-pill" id="odds-pill-home-${match.id}" style="background: ${colors.homeColor}">${formatOdds(H)}</span>`;
+                    awayPillHtml = `<span class="odds-pill" id="odds-pill-away-${match.id}" style="background: ${colors.awayColor}">${formatOdds(B)}</span>`;
+
+                    centerHtml = `
+                        <div class="clash-center">
+                            <div class="draw-circle">${formatOdds(U)}</div>
+                            <span class="draw-lbl">Uavgjort</span>
+                        </div>
+                    `;
+
+                    oddsBarHtml = `
+                        <div class="clash-bar-area">
+                            <div class="clash-bar">
+                                <div class="clash-seg" id="prob-home-${match.id}" style="width:${pctH}%; background:${colors.homeColor}"></div>
+                                <div class="clash-seg draw" style="width:${pctU}%"></div>
+                                <div class="clash-seg" id="prob-away-${match.id}" style="width:${pctB}%; background:${colors.awayColor}"></div>
                             </div>
-                            <div class="odds-numbers">
-                                <span class="odds-num" id="odds-home-${match.id}" style="color:${colors.homeColor}">${formatOdds(H)}</span>
-                                <span class="odds-num" style="color:#9ca3af">${formatOdds(U)}</span>
-                                <span class="odds-num" id="odds-away-${match.id}" style="color:${colors.awayColor}">${formatOdds(B)}</span>
+                            <div class="clash-bar-labels">
+                                <span class="clash-bar-lbl" id="lbl-home-${match.id}" style="color:${colors.homeColor}">${Math.round(parseFloat(pctH))}%</span>
+                                <span class="clash-bar-lbl draw">${Math.round(parseFloat(pctU))}%</span>
+                                <span class="clash-bar-lbl" id="lbl-away-${match.id}" style="color:${colors.awayColor}">${Math.round(parseFloat(pctB))}%</span>
                             </div>
                         </div>
                     `;
                 }
 
                 matchCard.innerHTML = `
+                    ${glowHtml}
                     <div class="match-main-v2">
-                        <div class="match-teams-v2">
-                            <div class="team-v2">
-                                <img src="${homeLogo}" class="team-logo-v2" alt="${match.homeTeam}" onerror="this.style.display='none'">
-                                <span class="team-name-v2">${match.homeTeam}</span>
+                        <div class="clash-teams">
+                            <div class="clash-side">
+                                <div class="${logoHomeClass}" id="logo-bg-home-${match.id}" style="${logoHomeStyle}">
+                                    <img src="${homeLogo}" class="clash-logo-img" alt="${match.homeTeam}" onerror="this.style.display='none'">
+                                </div>
+                                <div class="clash-info">
+                                    <span class="clash-name">${match.homeTeam}</span>
+                                    ${homePillHtml}
+                                </div>
                             </div>
-                            <div class="team-v2">
-                                <img src="${awayLogo}" class="team-logo-v2" alt="${match.awayTeam}" onerror="this.style.display='none'">
-                                <span class="team-name-v2">${match.awayTeam}</span>
+                            ${centerHtml}
+                            <div class="clash-side away">
+                                <div class="${logoAwayClass}" id="logo-bg-away-${match.id}" style="${logoAwayStyle}">
+                                    <img src="${awayLogo}" class="clash-logo-img" alt="${match.awayTeam}" onerror="this.style.display='none'">
+                                </div>
+                                <div class="clash-info">
+                                    <span class="clash-name">${match.awayTeam}</span>
+                                    ${awayPillHtml}
+                                </div>
                             </div>
                         </div>
-                        ${oddsVisualHtml}
-                        <div class="match-scores-v2">
+                        ${oddsBarHtml}
+                        <div class="clash-scores">
                             <div class="score-row-v2">
                                 <button class="btn-v2" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
                                 <div class="score-display-v2" id="home-score-btn-${match.id}">${homeScore === '?' ? '?' : homeScore}</div>

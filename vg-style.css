@@ -34,41 +34,151 @@
     box-shadow: 0 2px 6px rgba(22,163,74,0.08);
 }
 
-/* Main match content - teams and scores side by side */
+/* Main match content - K3 Neon Glow clash layout */
 .match-main-v2 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 16px;
-    margin-bottom: 0;
-}
-
-/* Teams Section */
-.match-teams-v2 {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    padding: 14px;
+    position: relative;
+    z-index: 1;
 }
 
-.team-v2 {
+/* Neon glow effects */
+.glow-home {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    bottom: -20px;
+    width: 80px;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.25;
+    z-index: 0;
+    pointer-events: none;
+    transition: background 0.3s ease;
+}
+
+.glow-away {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    bottom: -20px;
+    width: 80px;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.25;
+    z-index: 0;
+    pointer-events: none;
+    transition: background 0.3s ease;
+}
+
+/* Teams facing each other */
+.clash-teams {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.clash-side {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
-.team-logo-v2 {
-    width: 24px;
-    height: 24px;
+.clash-side.away {
+    flex-direction: row-reverse;
+}
+
+.clash-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: background 0.3s ease;
+}
+
+.clash-logo.no-color {
+    background: #f3f4f6;
+}
+
+.clash-logo-img {
+    width: 22px;
+    height: 22px;
     object-fit: contain;
+}
+
+.clash-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.clash-side.away .clash-info {
+    align-items: flex-end;
+}
+
+.clash-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.odds-pill {
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: 800;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 2px;
+    width: fit-content;
+    transition: background 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+
+.clash-side.away .odds-pill {
+    align-self: flex-end;
+}
+
+/* Draw center */
+.clash-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
     flex-shrink: 0;
 }
 
-.team-name-v2 {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    color: #111827;
+.draw-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: #9ca3af;
+    background: white;
+}
+
+.draw-lbl {
+    font-size: 8px;
+    font-weight: 700;
+    color: #d1d5db;
+    text-transform: uppercase;
+}
+
+.clash-vs {
+    font-size: 11px;
+    font-weight: 800;
+    color: #d1d5db;
 }
 
 /* Scores Section */
@@ -140,43 +250,52 @@
     color: #ffffff;
 }
 
-/* Visual Odds Bar */
-.odds-visual {
+/* Probability bar */
+.clash-bar-area {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 140px;
-    flex-shrink: 0;
-    margin: 0 12px;
-    gap: 5px;
+    gap: 3px;
 }
 
-.prob-bar {
+.clash-bar {
     display: flex;
     width: 100%;
-    height: 6px;
-    border-radius: 3px;
+    height: 8px;
+    border-radius: 4px;
     overflow: hidden;
     gap: 2px;
 }
 
-.prob-seg {
+.clash-seg {
     height: 100%;
-    border-radius: 3px;
+    border-radius: 4px;
     transition: background-color 0.3s ease;
 }
 
-.odds-numbers {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
+.clash-seg.draw {
+    background: #e5e7eb;
 }
 
-.odds-num {
-    font-size: 11px;
+.clash-bar-labels {
+    display: flex;
+    justify-content: space-between;
+}
+
+.clash-bar-lbl {
+    font-size: 10px;
     font-weight: 700;
     font-family: 'DM Sans', sans-serif;
     transition: color 0.3s ease;
+}
+
+.clash-bar-lbl.draw {
+    color: #9ca3af;
+}
+
+/* Score controls row */
+.clash-scores {
+    display: flex;
+    justify-content: space-between;
 }
 
 /* Time Header */
@@ -265,23 +384,32 @@
 /* Responsive - Mobile optimization */
 @media (max-width: 600px) {
     .match-main-v2 {
-        gap: 8px;
+        padding: 12px;
+        gap: 6px;
     }
 
-    .match-teams-v2 {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .team-name-v2 {
-        font-size: 14px;
+    .clash-name {
+        font-size: 13px;
+        max-width: 90px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    .match-scores-v2 {
-        gap: 4px;
+    .clash-logo {
+        width: 30px;
+        height: 30px;
+    }
+
+    .clash-logo-img {
+        width: 18px;
+        height: 18px;
+    }
+
+    .draw-circle {
+        width: 28px;
+        height: 28px;
+        font-size: 9px;
     }
 
     .score-row-v2 {
@@ -289,59 +417,79 @@
     }
 
     .btn-v2 {
-        width: 32px;
-        height: 32px;
+        width: 30px;
+        height: 30px;
         font-size: 16px;
     }
 
     .score-display-v2 {
         width: 28px;
-        height: 32px;
+        height: 30px;
         font-size: 15px;
-    }
-
-    .odds-visual {
-        width: 100px;
-        margin: 0 8px;
     }
 }
 
 @media (max-width: 480px) {
-    .match-card {
-        padding: 0;
+    .match-main-v2 {
+        padding: 10px;
     }
 
-    .team-logo-v2 {
-        width: 20px;
-        height: 20px;
+    .clash-name {
+        font-size: 12px;
+        max-width: 75px;
     }
 
-    .team-name-v2 {
-        font-size: 13px;
+    .clash-side {
+        gap: 6px;
+    }
+
+    .clash-logo {
+        width: 28px;
+        height: 28px;
+    }
+
+    .clash-logo-img {
+        width: 16px;
+        height: 16px;
+    }
+
+    .odds-pill {
+        font-size: 10px;
+        padding: 1px 6px;
     }
 
     .btn-v2 {
-        width: 30px;
-        height: 30px;
-        font-size: 15px;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
     }
 
     .score-display-v2 {
-        width: 26px;
-        height: 30px;
-        font-size: 14px;
+        width: 24px;
+        height: 28px;
+        font-size: 13px;
+    }
+
+    .glow-home,
+    .glow-away {
+        width: 60px;
+        filter: blur(25px);
+        opacity: 0.2;
     }
 }
 
-@media (max-width: 420px) {
-    .odds-visual {
-        width: 90px;
-        margin: 0 6px;
-        gap: 3px;
+@media (max-width: 380px) {
+    .clash-name {
+        font-size: 11px;
+        max-width: 60px;
     }
 
-    .odds-num {
-        font-size: 10px;
+    .clash-bar-lbl {
+        font-size: 9px;
+    }
+
+    .draw-lbl {
+        display: none;
     }
 }
 

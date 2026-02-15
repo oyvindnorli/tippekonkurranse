@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Theme Forslag v2 — Varierte</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #1a1a2e;
+            padding: 20px 0;
+        }
+        .variant-label {
+            color: #ff6b6b;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 60px 20px 6px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,107,107,0.2);
+            font-weight: 700;
+        }
+        .variant-label:first-child { margin-top: 10px; }
+        .description {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            margin: 0 20px 16px;
+            line-height: 1.5;
+        }
+
+        /* =============================================
+           A: AVIS — Editorial / Newspaper
+           ============================================= */
+        .v-avis { background: #f5f0e8; }
+        .v-avis .header {
+            background: #1a1a1a;
+            color: white;
+        }
+        .v-avis .top-bar {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 16px 20px 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .v-avis .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+        .v-avis .tagline {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 2px;
+        }
+        .v-avis .meta-bar {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 6px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+        }
+        .v-avis nav {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+            background: #f5f0e8;
+            border-bottom: 2px solid #1a1a1a;
+        }
+        .v-avis nav a {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            color: #78716c;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        .v-avis nav a.active {
+            color: #1a1a1a;
+        }
+        .v-avis nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #dc2626;
+        }
+        .v-avis .content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 16px 20px;
+        }
+        .v-avis .section-label {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a1a;
+            border-bottom: 1px solid #d6d3d1;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+        }
+        .v-avis .section-label span {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            color: #a8a29e;
+            margin-left: 8px;
+        }
+        .v-avis .card {
+            background: #ffffff;
+            border: 1px solid #e7e5e4;
+            border-radius: 4px;
+            padding: 16px;
+            margin-top: 10px;
+        }
+        .v-avis .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            color: #1a1a1a;
+            padding: 5px 0;
+            font-weight: 500;
+        }
+        .v-avis .score-btn {
+            width: 34px; height: 34px;
+            background: #dc2626;
+            border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #fff; font-size: 14px;
+        }
+        .v-avis .odds-row {
+            display: flex; gap: 6px; margin-top: 10px;
+            border-top: 1px solid #f5f5f4; padding-top: 10px;
+        }
+        .v-avis .odds-box {
+            flex: 1; text-align: center; padding: 6px;
+            background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 4px;
+        }
+        .v-avis .odds-label { font-size: 9px; color: #a8a29e; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .v-avis .odds-val { font-size: 15px; color: #1a1a1a; font-weight: 700; }
+
+        /* =============================================
+           B: NEON POP — Hvit bakgrunn, fargesprekk
+           ============================================= */
+        .v-neon { background: #ffffff; }
+        .v-neon .header {
+            background: #ffffff;
+            border-bottom: 3px solid #000;
+        }
+        .v-neon .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .v-neon .brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #000;
+            letter-spacing: -1px;
+        }
+        .v-neon .brand .highlight {
+            background: #a3e635;
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+        .v-neon .meta {
+            font-size: 11px;
+            color: #a3a3a3;
+        }
+        .v-neon nav {
+            display: flex;
+            gap: 8px;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 8px 20px 14px;
+        }
+        .v-neon nav a {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            color: #737373;
+            text-decoration: none;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            border: 2px solid #e5e5e5;
+            border-radius: 12px;
+            transition: all 0.15s;
+        }
+        .v-neon nav a.active {
+            color: #000;
+            background: #a3e635;
+            border-color: #000;
+        }
+        .v-neon .content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 16px 20px;
+        }
+        .v-neon .pill {
+            display: inline-block;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: #000;
+            color: #a3e635;
+        }
+        .v-neon .pill-round {
+            background: #f5f5f5;
+            color: #525252;
+        }
+        .v-neon .card {
+            background: #ffffff;
+            border: 2px solid #e5e5e5;
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .v-neon .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            color: #000;
+            padding: 5px 0;
+            font-weight: 600;
+        }
+        .v-neon .score-btn {
+            width: 36px; height: 36px;
+            background: #a3e635;
+            border: 2px solid #000;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700; color: #000; font-size: 15px;
+        }
+        .v-neon .odds-row {
+            display: flex; gap: 8px; margin-top: 12px;
+            border-top: 2px solid #f5f5f5; padding-top: 10px;
+        }
+        .v-neon .odds-box {
+            flex: 1; text-align: center; padding: 8px;
+            border: 1px solid #e5e5e5; border-radius: 8px;
+        }
+        .v-neon .odds-label { font-size: 10px; color: #a3a3a3; font-weight: 700; }
+        .v-neon .odds-val { font-family: 'Space Grotesk', sans-serif; font-size: 16px; color: #000; font-weight: 700; }
+
+        /* =============================================
+           C: SUNSET — Gradient bakgrunn, mørk header
+           ============================================= */
+        .v-sunset { background: linear-gradient(180deg, #fef2f2 0%, #fff7ed 50%, #fefce8 100%); min-height: 500px; }
+        .v-sunset .header {
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+        }
+        .v-sunset .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .v-sunset .brand {
+            font-family: 'Sora', sans-serif;
+            font-size: 19px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+        .v-sunset .meta {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+        }
+        .v-sunset nav {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 20px 10px;
+            gap: 6px;
+        }
+        .v-sunset nav a {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            color: rgba(255,255,255,0.55);
+            text-decoration: none;
+            font-family: 'Sora', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .v-sunset nav a.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+        }
+        .v-sunset .content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 16px 20px;
+        }
+        .v-sunset .pill {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 100px;
+            background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(219,39,119,0.1));
+            color: #7c3aed;
+            border: 1px solid rgba(124,58,237,0.2);
+        }
+        .v-sunset .pill-round {
+            background: rgba(0,0,0,0.04);
+            color: #78716c;
+            border-color: rgba(0,0,0,0.08);
+        }
+        .v-sunset .card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        }
+        .v-sunset .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Sora', sans-serif;
+            font-size: 14px;
+            color: #1c1917;
+            padding: 5px 0;
+            font-weight: 600;
+        }
+        .v-sunset .score-btn {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #fff; font-size: 14px;
+        }
+        .v-sunset .odds-row {
+            display: flex; gap: 8px; margin-top: 10px;
+            border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px;
+        }
+        .v-sunset .odds-box {
+            flex: 1; text-align: center; padding: 8px;
+            background: rgba(124,58,237,0.04); border-radius: 8px;
+        }
+        .v-sunset .odds-label { font-size: 10px; color: #a8a29e; font-weight: 600; }
+        .v-sunset .odds-val { font-family: 'Sora', sans-serif; font-size: 14px; color: #44403c; font-weight: 700; }
+
+        /* =============================================
+           D: FOTMOB — Inspirert av sports-apper
+           ============================================= */
+        .v-fotmob { background: #f2f3f5; }
+        .v-fotmob .header {
+            background: #ffffff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .v-fotmob .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .v-fotmob .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .v-fotmob .brand-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: white; font-weight: 800;
+        }
+        .v-fotmob .brand-text {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+        }
+        .v-fotmob .meta {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        .v-fotmob nav {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+            gap: 0;
+        }
+        .v-fotmob nav a {
+            flex: 1;
+            text-align: center;
+            padding: 11px 8px;
+            color: #9ca3af;
+            text-decoration: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .v-fotmob nav a.active {
+            color: #16a34a;
+        }
+        .v-fotmob nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: #16a34a;
+            border-radius: 3px 3px 0 0;
+        }
+        .v-fotmob .content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 12px 12px;
+        }
+        .v-fotmob .date-strip {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            padding: 8px 8px;
+        }
+        .v-fotmob .league-strip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: #6b7280;
+        }
+        .v-fotmob .league-dot {
+            width: 6px; height: 6px;
+            background: #16a34a;
+            border-radius: 50%;
+        }
+        .v-fotmob .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 0;
+            margin-top: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .v-fotmob .match-body { padding: 14px 16px; }
+        .v-fotmob .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            color: #111827;
+            padding: 4px 0;
+            font-weight: 500;
+        }
+        .v-fotmob .score-btn {
+            width: 32px; height: 32px;
+            background: #16a34a;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #fff; font-size: 14px;
+        }
+        .v-fotmob .odds-row {
+            display: flex;
+            background: #f9fafb;
+            border-top: 1px solid #f3f4f6;
+        }
+        .v-fotmob .odds-box {
+            flex: 1; text-align: center; padding: 8px;
+        }
+        .v-fotmob .odds-box:not(:last-child) {
+            border-right: 1px solid #f3f4f6;
+        }
+        .v-fotmob .odds-label { font-size: 9px; color: #9ca3af; font-weight: 700; text-transform: uppercase; }
+        .v-fotmob .odds-val { font-family: 'DM Sans', sans-serif; font-size: 14px; color: #374151; font-weight: 700; }
+        .v-fotmob .time-tag {
+            font-size: 12px;
+            color: #9ca3af;
+            padding: 4px 8px;
+        }
+
+        /* =============================================
+           E: DARK HYBRID — Mørk header, lys kropp
+           ============================================= */
+        .v-hybrid { background: #f5f5f5; }
+        .v-hybrid .header {
+            background: #111111;
+        }
+        .v-hybrid .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .v-hybrid .brand {
+            font-family: 'Sora', sans-serif;
+            font-size: 17px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+        .v-hybrid .brand .accent {
+            color: #22c55e;
+        }
+        .v-hybrid .meta {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+        }
+        .v-hybrid nav {
+            display: flex;
+            gap: 4px;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 4px 20px 12px;
+        }
+        .v-hybrid nav a {
+            flex: 1;
+            text-align: center;
+            padding: 9px;
+            color: rgba(255,255,255,0.35);
+            text-decoration: none;
+            font-family: 'Sora', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.15s;
+        }
+        .v-hybrid nav a.active {
+            color: #000;
+            background: #22c55e;
+            font-weight: 700;
+        }
+        .v-hybrid .content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 16px 16px;
+        }
+        .v-hybrid .section-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .v-hybrid .pill {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: #111;
+            color: #22c55e;
+        }
+        .v-hybrid .pill-round {
+            background: #e5e5e5;
+            color: #525252;
+        }
+        .v-hybrid .pill-date {
+            background: transparent;
+            color: #a3a3a3;
+            font-weight: 500;
+            padding: 5px 0;
+        }
+        .v-hybrid .card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 8px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+        }
+        .v-hybrid .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Sora', sans-serif;
+            font-size: 14px;
+            color: #171717;
+            padding: 5px 0;
+            font-weight: 600;
+        }
+        .v-hybrid .score-btn {
+            width: 34px; height: 34px;
+            background: #22c55e;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #fff; font-size: 14px;
+        }
+        .v-hybrid .odds-row {
+            display: flex; gap: 6px; margin-top: 10px;
+            border-top: 1px solid #f5f5f5; padding-top: 10px;
+        }
+        .v-hybrid .odds-box {
+            flex: 1; text-align: center; padding: 8px;
+            background: #fafafa; border-radius: 8px;
+        }
+        .v-hybrid .odds-label { font-size: 10px; color: #a3a3a3; font-weight: 600; }
+        .v-hybrid .odds-val { font-family: 'Sora', sans-serif; font-size: 14px; color: #262626; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<h2 class="variant-label">A — Avis / Editorial</h2>
+<p class="description">Avislignende look. Svart header, kremfarget bakgrunn, serif-logo, rød aksent.</p>
+<div class="v-avis">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">Tippekonkurranse</div>
+            <div class="tagline">Fotball &middot; Tipping &middot; Venner</div>
+        </div>
+        <div class="meta-bar">
+            <span>Søndag 9. februar 2026</span>
+            <span>Øyvind &nbsp;&middot;&nbsp; Logg ut</span>
+        </div>
+    </div>
+    <nav>
+        <a href="#" class="active">Tipp</a>
+        <a href="#">Konkurranser</a>
+        <a href="#">Statistikk</a>
+    </nav>
+    <div class="content">
+        <div class="section-label">Premier League <span>Runde 26</span></div>
+        <div class="card">
+            <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+            <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+            <div class="odds-row">
+                <div class="odds-box"><div class="odds-label">H</div><div class="odds-val">2.5</div></div>
+                <div class="odds-box"><div class="odds-label">U</div><div class="odds-val">3.3</div></div>
+                <div class="odds-box"><div class="odds-label">B</div><div class="odds-val">2.8</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="variant-label">B — Neon Pop</h2>
+<p class="description">Hvit bakgrunn, tykke borders, limegrønn neon, bold typografi. Lekent og ungt.</p>
+<div class="v-neon">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">Tippe<span class="highlight">konkurranse</span></div>
+            <div class="meta">Øyvind &nbsp;&middot;&nbsp; Logg ut</div>
+        </div>
+        <nav>
+            <a href="#" class="active">Tipp</a>
+            <a href="#">Konkurranser</a>
+            <a href="#">Statistikk</a>
+        </nav>
+    </div>
+    <div class="content">
+        <span class="pill">Premier League</span> <span class="pill pill-round">Runde 26</span>
+        <div class="card">
+            <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+            <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+            <div class="odds-row">
+                <div class="odds-box"><div class="odds-label">H</div><div class="odds-val">2.5</div></div>
+                <div class="odds-box"><div class="odds-label">U</div><div class="odds-val">3.3</div></div>
+                <div class="odds-box"><div class="odds-label">B</div><div class="odds-val">2.8</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="variant-label">C — Sunset Gradient</h2>
+<p class="description">Lilla-rosa gradient header, varm gradient bakgrunn, glassmorphism kort. Modig og fargerikt.</p>
+<div class="v-sunset">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">Tippekonkurranse</div>
+            <div class="meta">Øyvind &nbsp;&middot;&nbsp; Logg ut</div>
+        </div>
+        <nav>
+            <a href="#" class="active">Tipp</a>
+            <a href="#">Konkurranser</a>
+            <a href="#">Statistikk</a>
+        </nav>
+    </div>
+    <div class="content">
+        <span class="pill">Premier League</span> <span class="pill pill-round">Runde 26</span>
+        <div class="card">
+            <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+            <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+            <div class="odds-row">
+                <div class="odds-box"><div class="odds-label">H</div><div class="odds-val">2.5</div></div>
+                <div class="odds-box"><div class="odds-label">U</div><div class="odds-val">3.3</div></div>
+                <div class="odds-box"><div class="odds-label">B</div><div class="odds-val">2.8</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="variant-label">D — FotMob-inspirert</h2>
+<p class="description">Inspirert av sportsapper. Kompakt, funksjonelt, grønn aksent, tydelig hierarki.</p>
+<div class="v-fotmob">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">
+                <div class="brand-icon">T</div>
+                <div class="brand-text">Tippekonkurranse</div>
+            </div>
+            <div class="meta">Øyvind</div>
+        </div>
+        <nav>
+            <a href="#" class="active">Tipp</a>
+            <a href="#">Konkurranser</a>
+            <a href="#">Statistikk</a>
+        </nav>
+    </div>
+    <div class="content">
+        <div class="league-strip"><span class="league-dot"></span>Premier League — Runde 26</div>
+        <div class="date-strip">Tirsdag 10. februar</div>
+        <div class="time-tag">20:30</div>
+        <div class="card">
+            <div class="match-body">
+                <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+                <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+            </div>
+            <div class="odds-row">
+                <div class="odds-box"><div class="odds-label">H</div><div class="odds-val">2.5</div></div>
+                <div class="odds-box"><div class="odds-label">U</div><div class="odds-val">3.3</div></div>
+                <div class="odds-box"><div class="odds-label">B</div><div class="odds-val">2.8</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="variant-label">E — Dark/Light Hybrid</h2>
+<p class="description">Mørk header (beholder "appen"-følelsen), men lys kropp med hvite kort. Beste fra begge verdener.</p>
+<div class="v-hybrid">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">Tippe<span class="accent">konkurranse</span></div>
+            <div class="meta">Øyvind &nbsp;&middot;&nbsp; Logg ut</div>
+        </div>
+        <nav>
+            <a href="#" class="active">Tipp</a>
+            <a href="#">Konkurranser</a>
+            <a href="#">Statistikk</a>
+        </nav>
+    </div>
+    <div class="content">
+        <div class="section-row">
+            <span class="pill">Premier League</span>
+            <span class="pill pill-round">Runde 26</span>
+            <span class="pill pill-date">Tir 10. feb</span>
+        </div>
+        <div class="card">
+            <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+            <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+            <div class="odds-row">
+                <div class="odds-box"><div class="odds-label">H</div><div class="odds-val">2.5</div></div>
+                <div class="odds-box"><div class="odds-label">U</div><div class="odds-val">3.3</div></div>
+                <div class="odds-box"><div class="odds-label">B</div><div class="odds-val">2.8</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

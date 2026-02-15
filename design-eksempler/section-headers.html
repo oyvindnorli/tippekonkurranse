@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section Header Designforslag</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0f;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        h2.variant-label {
+            color: #00ff88;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 40px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0,255,136,0.2);
+        }
+        h2.variant-label:first-child { margin-top: 0; }
+        .description {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        /* Fake match card for context */
+        .fake-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 8px;
+        }
+        .fake-card .teams {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .fake-card .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .fake-card .team-name { color: rgba(255,255,255,0.85); }
+        .fake-card .score-btn {
+            width: 32px; height: 32px;
+            background: #00ff88;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #000; font-size: 14px;
+        }
+
+        /* =============================================
+           VARIANT A: Nåværende design (referanse)
+           ============================================= */
+        .v-current .league-round-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 16px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .v-current .league-round-header::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+        }
+        .v-current .date-header {
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.4);
+            padding: 8px 0;
+        }
+        .v-current .time-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            margin-top: 8px;
+        }
+        .v-current .time-badge {
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* =============================================
+           VARIANT B: Kompakt linje med pill-badges
+           ============================================= */
+        .v-pills .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 0 12px;
+            flex-wrap: wrap;
+        }
+        .v-pills .pill {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 100px;
+            letter-spacing: 0.3px;
+        }
+        .v-pills .pill-league {
+            background: rgba(0,255,136,0.12);
+            color: #00ff88;
+            border: 1px solid rgba(0,255,136,0.2);
+        }
+        .v-pills .pill-round {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .v-pills .pill-date {
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .v-pills .pill-time {
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.35);
+            border: 1px solid rgba(255,255,255,0.06);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* =============================================
+           VARIANT C: Venstre-border med samlet info
+           ============================================= */
+        .v-border .section-header {
+            border-left: 3px solid #00ff88;
+            padding: 8px 0 8px 14px;
+            margin: 16px 0 12px;
+        }
+        .v-border .header-league {
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 0.5px;
+        }
+        .v-border .header-meta {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+            margin-top: 3px;
+        }
+        .v-border .time-separator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0 6px;
+        }
+        .v-border .time-separator .time-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.3);
+            font-variant-numeric: tabular-nums;
+        }
+        .v-border .time-separator .line {
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* =============================================
+           VARIANT D: Banner-kort med gradient
+           ============================================= */
+        .v-banner .section-header {
+            background: linear-gradient(135deg, rgba(0,255,136,0.08) 0%, rgba(0,255,136,0.02) 100%);
+            border: 1px solid rgba(0,255,136,0.1);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin: 16px 0 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .v-banner .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .v-banner .header-league {
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.85);
+        }
+        .v-banner .header-round {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .v-banner .header-date {
+            font-size: 12px;
+            color: rgba(0,255,136,0.6);
+            font-weight: 500;
+            text-align: right;
+        }
+        .v-banner .time-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 0 6px;
+        }
+        .v-banner .time-chip {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.05);
+            padding: 3px 10px;
+            border-radius: 6px;
+        }
+
+        /* =============================================
+           VARIANT E: Minimalistisk tidslinje
+           ============================================= */
+        .v-timeline .section-header {
+            padding: 16px 0 8px;
+        }
+        .v-timeline .header-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2px;
+        }
+        .v-timeline .league-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.7);
+        }
+        .v-timeline .round-tag {
+            font-size: 10px;
+            font-weight: 600;
+            color: #00ff88;
+            background: rgba(0,255,136,0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .v-timeline .date-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+        }
+        .v-timeline .time-marker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0 6px;
+        }
+        .v-timeline .time-dot {
+            width: 6px;
+            height: 6px;
+            background: rgba(0,255,136,0.5);
+            border-radius: 50%;
+        }
+        .v-timeline .time-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.45);
+            font-variant-numeric: tabular-nums;
+        }
+        .v-timeline .time-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* =============================================
+           VARIANT F: Flat & ultra-kompakt
+           ============================================= */
+        .v-flat .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            padding: 16px 0 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+        }
+        .v-flat .league-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.6);
+        }
+        .v-flat .separator {
+            color: rgba(255,255,255,0.15);
+            font-weight: 300;
+        }
+        .v-flat .round-name {
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+        }
+        .v-flat .date-name {
+            font-size: 12px;
+            color: rgba(255,255,255,0.25);
+            margin-left: auto;
+        }
+        .v-flat .time-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.25);
+            padding: 8px 0 4px;
+        }
+    </style>
+</head>
+<body>
+
+<h2 class="variant-label">A — Nåværende design (referanse)</h2>
+<p class="description">Dagens versjon: Uppercase header, grønn prikk, og separate linjer for dato/tid.</p>
+<div class="v-current">
+    <div class="league-round-header">Premier League - Runde 26</div>
+    <div class="date-header">Tirsdag, 10. februar</div>
+    <div class="time-header">
+        <span class="time-badge">20:30</span>
+    </div>
+    <div class="fake-card"><div class="teams">
+        <div class="team-row"><span class="team-name">Everton</span><div class="score-btn">1</div></div>
+        <div class="team-row"><span class="team-name">Bournemouth</span><div class="score-btn">0</div></div>
+    </div></div>
+</div>
+
+<h2 class="variant-label">B — Pill-badges (kompakt, alt på én linje)</h2>
+<p class="description">All info som fargekodet pills. Tar lite plass, lett å skanne.</p>
+<div class="v-pills">
+    <div class="section-header">
+        <span class="pill pill-league">Premier League</span>
+        <span class="pill pill-round">Runde 26</span>
+        <span class="pill pill-date">Tir 10. feb</span>
+        <span class="pill pill-time">20:30</span>
+    </div>
+    <div class="fake-card"><div class="teams">
+        <div class="team-row"><span class="team-name">Everton</span><div class="score-btn">1</div></div>
+        <div class="team-row"><span class="team-name">Bournemouth</span><div class="score-btn">0</div></div>
+    </div></div>
+</div>
+
+<h2 class="variant-label">C — Venstre-border med tidslinje</h2>
+<p class="description">Grønn venstre-kant på liga-info, og klokkeslett som en separator-linje.</p>
+<div class="v-border">
+    <div class="section-header">
+        <div class="header-league">Premier League</div>
+        <div class="header-meta">Runde 26 &middot; Tirsdag, 10. februar</div>
+    </div>
+    <div class="time-separator">
+        <span class="time-label">20:30</span>
+        <span class="line"></span>
+    </div>
+    <div class="fake-card"><div class="teams">
+        <div class="team-row"><span class="team-name">Everton</span><div class="score-btn">1</div></div>
+        <div class="team-row"><span class="team-name">Bournemouth</span><div class="score-btn">0</div></div>
+    </div></div>
+</div>
+
+<h2 class="variant-label">D — Banner-kort med gradient</h2>
+<p class="description">Liga-info i et lite kort med subtil grønn gradient. Dato til høyre.</p>
+<div class="v-banner">
+    <div class="section-header">
+        <div class="header-left">
+            <div class="header-league">Premier League</div>
+            <div class="header-round">Runde 26</div>
+        </div>
+        <div class="header-date">Tir 10. februar</div>
+    </div>
+    <div class="time-row">
+        <span class="time-chip">20:30</span>
+    </div>
+    <div class="fake-card"><div class="teams">
+        <div class="team-row"><span class="team-name">Everton</span><div class="score-btn">1</div></div>
+        <div class="team-row"><span class="team-name">Bournemouth</span><div class="score-btn">0</div></div>
+    </div></div>
+</div>
+
+<h2 class="variant-label">E — Minimalistisk tidslinje</h2>
+<p class="description">Liganavn + runde-tag, dato under. Klokkeslett med prikk og strek som tidslinje.</p>
+<div class="v-timeline">
+    <div class="section-header">
+        <div class="header-top">
+            <span class="league-name">Premier League</span>
+            <span class="round-tag">Runde 26</span>
+        </div>
+        <div class="date-label">Tirsdag, 10. februar</div>
+    </div>
+    <div class="time-marker">
+        <span class="time-dot"></span>
+        <span class="time-text">20:30</span>
+        <span class="time-line"></span>
+    </div>
+    <div class="fake-card"><div class="teams">
+        <div class="team-row"><span class="team-name">Everton</span><div class="score-btn">1</div></div>
+        <div class="team-row"><span class="team-name">Bournemouth</span><div class="score-btn">0</div></div>
+    </div></div>
+</div>
+
+<h2 class="variant-label">F — Flat & ultra-kompakt</h2>
+<p class="description">Alt på én linje med skilletegn. Minst mulig visuelt fotavtrykk.</p>
+<div class="v-flat">
+    <div class="section-header">
+        <span class="league-name">Premier League</span>
+        <span class="separator">/</span>
+        <span class="round-name">Runde 26</span>
+        <span class="date-name">Tir 10. feb</span>
+    </div>
+    <div class="time-label">20:30</div>
+    <div class="fake-card"><div class="teams">
+        <div class="team-row"><span class="team-name">Everton</span><div class="score-btn">1</div></div>
+        <div class="team-row"><span class="team-name">Bournemouth</span><div class="score-btn">0</div></div>
+    </div></div>
+</div>
+
+</body>
+</html>

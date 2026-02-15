@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Eksempler - Tippekonkurranse</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        p.intro {
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 40px;
+            font-size: 15px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-preview {
+            height: 200px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .card-preview.dark {
+            background: linear-gradient(135deg, #1e3a5f, #0f172a);
+        }
+
+        .card-preview.light {
+            background: #f8fafc;
+        }
+
+        .card-preview.white {
+            background: white;
+        }
+
+        .card-preview.gray {
+            background: #eef2f7;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .card a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #22d3ee, #10b981);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .card a:hover {
+            transform: scale(1.05);
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h1>Design Eksempler</h1>
+    <p class="intro">Klikk på en variant for å se den i full størrelse. Alle er responsive og fungerer på mobil.</p>
+
+    <h2 style="color: #22d3ee; margin: 40px 0 20px; text-align: center;">★ NYE: Mørk + Kompakt blandinger</h2>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-preview dark">🌙</div>
+            <div class="card-content">
+                <div class="tags">
+                    <span class="tag">Mørk</span>
+                    <span class="tag">Kompakt</span>
+                    <span class="tag">Cyan</span>
+                </div>
+                <h2>5A: Glassmorphism</h2>
+                <p>Mørk bakgrunn med cyan aksenter. Kompakt liste-layout med glassmorphism-effekter.</p>
+                <a href="variant-5-dark-compact-a.html">Se eksempel →</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-preview" style="background: #0a0a0f;">💚</div>
+            <div class="card-content">
+                <div class="tags">
+                    <span class="tag">Mørk</span>
+                    <span class="tag">Neon</span>
+                    <span class="tag">Grønn</span>
+                </div>
+                <h2>5B: Neon Accent</h2>
+                <p>Helt mørk bakgrunn med neongrønn aksentfarge. Kortbasert layout med tydelig visuelt hierarki.</p>
+                <a href="variant-5-dark-compact-b.html">Se eksempel →</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-preview" style="background: #111827;">🔷</div>
+            <div class="card-content">
+                <div class="tags">
+                    <span class="tag">Mørk</span>
+                    <span class="tag">Ultra Clean</span>
+                    <span class="tag">Blå</span>
+                </div>
+                <h2>5C: Ultra Clean</h2>
+                <p>Minimalistisk mørkt design med blå aksenter. Grupperte kamper i én sammenhengende liste.</p>
+                <a href="variant-5-dark-compact-c.html">Se eksempel →</a>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="color: #9ca3af; margin: 60px 0 20px; text-align: center;">Tidligere varianter</h2>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-preview light">🎯</div>
+            <div class="card-content">
+                <div class="tags">
+                    <span class="tag">Minimalistisk</span>
+                    <span class="tag">Lys</span>
+                </div>
+                <h2>Variant 1: Minimalistisk</h2>
+                <p>Rent og enkelt design med fokus på innholdet. Hvit bakgrunn, subtile kanter, ingen distraksjoner.</p>
+                <a href="variant-1-minimalist.html">Se eksempel →</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-preview dark">🌟</div>
+            <div class="card-content">
+                <div class="tags">
+                    <span class="tag">Sporty</span>
+                    <span class="tag">Mørk</span>
+                </div>
+                <h2>Variant 2: Sporty</h2>
+                <p>Moderne mørkt tema med gradient-aksenter. Gir en premium følelse som passer godt til sport.</p>
+                <a href="variant-2-sporty.html">Se eksempel →</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-preview gray">📱</div>
+            <div class="card-content">
+                <div class="tags">
+                    <span class="tag">iOS-stil</span>
+                    <span class="tag">Kort</span>
+                </div>
+                <h2>Variant 3: Clean Cards</h2>
+                <p>Inspirert av iOS-design med rene kort og tydelig visuelt hierarki. Sticky header og tabs.</p>
+                <a href="variant-3-clean-cards.html">Se eksempel →</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-preview white">📋</div>
+            <div class="card-content">
+                <div class="tags">
+                    <span class="tag">Kompakt</span>
+                    <span class="tag">Liste</span>
+                </div>
+                <h2>Variant 4: Kompakt Liste</h2>
+                <p>Effektiv bruk av plass med liste-layout. Viser flere kamper på skjermen samtidig. Fast stats-bar nederst.</p>
+                <a href="variant-4-compact.html">Se eksempel →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

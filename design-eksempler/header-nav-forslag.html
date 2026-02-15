@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header + Nav Designforslag</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0f;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px 0;
+        }
+        .variant-label {
+            color: #00ff88;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 50px 20px 6px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0,255,136,0.15);
+            font-weight: 700;
+        }
+        .variant-label:first-child { margin-top: 10px; }
+        .description {
+            font-size: 12px;
+            color: rgba(255,255,255,0.35);
+            margin: 0 20px 16px;
+            line-height: 1.5;
+        }
+
+        /* Fake content for context */
+        .fake-content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .fake-pill {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 100px;
+            background: rgba(0,255,136,0.15);
+            color: #00ff88;
+            border: 1px solid rgba(0,255,136,0.25);
+        }
+        .fake-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .fake-card .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: rgba(255,255,255,0.85);
+            padding: 4px 0;
+        }
+        .fake-card .score-btn {
+            width: 32px; height: 32px;
+            background: #00ff88;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #000; font-size: 14px;
+        }
+
+        /* =============================================
+           A: Nåværende (referanse)
+           ============================================= */
+        .v-a .header {
+            background: #0a0a0f;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .v-a .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .v-a .brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+        .v-a .meta {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+        .v-a nav {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .v-a nav a {
+            flex: 1;
+            text-align: center;
+            padding: 14px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            position: relative;
+        }
+        .v-a nav a.active {
+            color: #00ff88;
+        }
+        .v-a nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 2px;
+        }
+
+        /* =============================================
+           B: Gradient brand + pill nav
+           ============================================= */
+        .v-b .header {
+            background: #0a0a0f;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .v-b .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .v-b .brand {
+            font-size: 18px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+        .v-b .meta {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+        }
+        .v-b nav {
+            display: flex;
+            gap: 6px;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 6px 20px 12px;
+        }
+        .v-b nav a {
+            flex: 1;
+            text-align: center;
+            padding: 8px 12px;
+            color: rgba(255,255,255,0.45);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.2s;
+        }
+        .v-b nav a.active {
+            color: #00ff88;
+            background: rgba(0,255,136,0.1);
+            border-color: rgba(0,255,136,0.25);
+        }
+
+        /* =============================================
+           C: Kompakt header med ikon-nav
+           ============================================= */
+        .v-c .header {
+            background: #0a0a0f;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .v-c .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .v-c .brand {
+            font-size: 16px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.3px;
+        }
+        .v-c .brand .accent {
+            color: #00ff88;
+        }
+        .v-c .meta {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+        }
+        .v-c nav {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+        .v-c nav a {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 10px 8px;
+            color: rgba(255,255,255,0.35);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .v-c nav a .icon {
+            font-size: 18px;
+        }
+        .v-c nav a.active {
+            color: #00ff88;
+        }
+        .v-c nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 30%;
+            right: 30%;
+            height: 2px;
+            background: #00ff88;
+            border-radius: 2px;
+        }
+
+        /* =============================================
+           D: Full-width gradient bar + floating nav
+           ============================================= */
+        .v-d .header {
+            background: linear-gradient(180deg, rgba(0,255,136,0.06) 0%, #0a0a0f 100%);
+            border-bottom: 1px solid rgba(0,255,136,0.08);
+        }
+        .v-d .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px 8px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .v-d .brand {
+            font-size: 22px;
+            font-weight: 900;
+            color: white;
+            letter-spacing: -1px;
+        }
+        .v-d .brand .dot {
+            color: #00ff88;
+        }
+        .v-d .meta {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+        }
+        .v-d nav {
+            display: flex;
+            gap: 4px;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 8px 20px 14px;
+        }
+        .v-d nav a {
+            flex: 1;
+            text-align: center;
+            padding: 10px 12px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .v-d nav a.active {
+            color: #000;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            font-weight: 700;
+        }
+        .v-d nav a:not(.active):hover {
+            color: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* =============================================
+           E: Minimalt brand, segmented control nav
+           ============================================= */
+        .v-e .header {
+            background: #0a0a0f;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .v-e .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .v-e .brand {
+            font-size: 15px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .v-e .meta {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+        }
+        .v-e nav {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 20px 12px;
+        }
+        .v-e .nav-track {
+            display: flex;
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 3px;
+            gap: 3px;
+        }
+        .v-e nav a {
+            flex: 1;
+            text-align: center;
+            padding: 9px 12px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .v-e nav a.active {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* =============================================
+           F: Kort logo + underline tabs med ikoner
+           ============================================= */
+        .v-f .header {
+            background: #0a0a0f;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .v-f .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .v-f .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .v-f .brand-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .v-f .brand-text {
+            font-size: 17px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+        .v-f .meta {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+        }
+        .v-f nav {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .v-f nav a {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 8px;
+            color: rgba(255,255,255,0.35);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .v-f nav a .icon {
+            font-size: 15px;
+            opacity: 0.7;
+        }
+        .v-f nav a.active {
+            color: #00ff88;
+        }
+        .v-f nav a.active .icon {
+            opacity: 1;
+        }
+        .v-f nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+        }
+    </style>
+</head>
+<body>
+
+<h2 class="variant-label">A — Nåværende (referanse)</h2>
+<p class="description">Ren tekst, enkel underline-indikator.</p>
+<div class="v-a">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">Tippekonkurranse</div>
+            <div class="meta">Innlogget som Øyvind &nbsp; Logg ut</div>
+        </div>
+        <nav>
+            <a href="#" class="active">Tipp</a>
+            <a href="#">Konkurranser</a>
+            <a href="#">Statistikk</a>
+        </nav>
+    </div>
+    <div class="fake-content">
+        <span class="fake-pill">Premier League</span>
+        <div class="fake-card">
+            <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+            <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+        </div>
+    </div>
+</div>
+
+<h2 class="variant-label">B — Gradient brand + pill-nav</h2>
+<p class="description">Logoen med grønn-blå gradient. Nav-knapper som avrundede pills.</p>
+<div class="v-b">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">Tippekonkurranse</div>
+            <div class="meta">Innlogget som Øyvind &nbsp; Logg ut</div>
+        </div>
+        <nav>
+            <a href="#" class="active">Tipp</a>
+            <a href="#">Konkurranser</a>
+            <a href="#">Statistikk</a>
+        </nav>
+    </div>
+    <div class="fake-content">
+        <span class="fake-pill">Premier League</span>
+        <div class="fake-card">
+            <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+            <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+        </div>
+    </div>
+</div>
+
+<h2 class="variant-label">C — Kompakt med ikon-nav</h2>
+<p class="description">Mindre logo med grønn aksent. Navigasjon med ikoner og tekst under, app-lignende.</p>
+<div class="v-c">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">Tippe<span class="accent">konkurranse</span></div>
+            <div class="meta">Øyvind &nbsp; Logg ut</div>
+        </div>
+        <nav>
+            <a href="#" class="active"><span class="icon">&check;</span>Tipp</a>
+            <a href="#"><span class="icon">&#9733;</span>Konkurranser</a>
+            <a href="#"><span class="icon">&#9776;</span>Statistikk</a>
+        </nav>
+    </div>
+    <div class="fake-content">
+        <span class="fake-pill">Premier League</span>
+        <div class="fake-card">
+            <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+            <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+        </div>
+    </div>
+</div>
+
+<h2 class="variant-label">D — Gradient header + filled active tab</h2>
+<p class="description">Subtil grønn gradient i bakgrunnen. Aktiv tab har solid grønn bakgrunn med mørk tekst.</p>
+<div class="v-d">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">Tippe<span class="dot">.</span></div>
+            <div class="meta">Øyvind &nbsp; Logg ut</div>
+        </div>
+        <nav>
+            <a href="#" class="active">Tipp</a>
+            <a href="#">Konkurranser</a>
+            <a href="#">Statistikk</a>
+        </nav>
+    </div>
+    <div class="fake-content">
+        <span class="fake-pill">Premier League</span>
+        <div class="fake-card">
+            <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+            <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+        </div>
+    </div>
+</div>
+
+<h2 class="variant-label">E — Uppercase brand + segmented control</h2>
+<p class="description">Smalere logo i uppercase. iOS-inspirert segmented control for navigasjon.</p>
+<div class="v-e">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">Tippekonkurranse</div>
+            <div class="meta">Øyvind &nbsp; Logg ut</div>
+        </div>
+        <nav>
+            <div class="nav-track">
+                <a href="#" class="active">Tipp</a>
+                <a href="#">Konkurranser</a>
+                <a href="#">Statistikk</a>
+            </div>
+        </nav>
+    </div>
+    <div class="fake-content">
+        <span class="fake-pill">Premier League</span>
+        <div class="fake-card">
+            <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+            <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+        </div>
+    </div>
+</div>
+
+<h2 class="variant-label">F — Logo-ikon + gradient underline</h2>
+<p class="description">Liten grønn ikon-boks ved logoen. Ikoner i nav med gradient-underline som fader ut.</p>
+<div class="v-f">
+    <div class="header">
+        <div class="top-bar">
+            <div class="brand">
+                <div class="brand-icon">&#9917;</div>
+                <div class="brand-text">Tippekonkurranse</div>
+            </div>
+            <div class="meta">Øyvind &nbsp; Logg ut</div>
+        </div>
+        <nav>
+            <a href="#" class="active"><span class="icon">&check;</span>Tipp</a>
+            <a href="#"><span class="icon">&#9733;</span>Konkurranser</a>
+            <a href="#"><span class="icon">&#9776;</span>Statistikk</a>
+        </nav>
+    </div>
+    <div class="fake-content">
+        <span class="fake-pill">Premier League</span>
+        <div class="fake-card">
+            <div class="team-row"><span>Everton</span><div class="score-btn">1</div></div>
+            <div class="team-row"><span>Bournemouth</span><div class="score-btn">0</div></div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
