@@ -1,5 +1,6 @@
 /* ==================================
    FotMob-inspired Light Theme
+   L8d Kompakt Layout
    ================================== */
 
 /* Match Card - White with subtle shadow */
@@ -34,56 +35,38 @@
     box-shadow: 0 2px 6px rgba(22,163,74,0.08);
 }
 
-/* Main match content - K3 Neon Glow clash layout */
+/* Gradient background overlay */
+.gradient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+/* Main match content - L8d Kompakt layout */
 .match-main-v2 {
+    position: relative;
+    z-index: 1;
+    padding: 10px 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 14px;
-    position: relative;
-    z-index: 1;
 }
 
-/* Neon glow effects */
-.glow-home {
-    position: absolute;
-    top: -20px;
-    left: -20px;
-    bottom: -20px;
-    width: 80px;
-    border-radius: 50%;
-    filter: blur(30px);
-    opacity: 0.25;
-    z-index: 0;
-    pointer-events: none;
-    transition: background 0.3s ease;
-}
-
-.glow-away {
-    position: absolute;
-    top: -20px;
-    right: -20px;
-    bottom: -20px;
-    width: 80px;
-    border-radius: 50%;
-    filter: blur(30px);
-    opacity: 0.25;
-    z-index: 0;
-    pointer-events: none;
-    transition: background 0.3s ease;
-}
-
-/* Teams facing each other */
+/* Teams row */
 .clash-teams {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
 .clash-side {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .clash-side.away {
@@ -91,9 +74,9 @@
 }
 
 .clash-logo {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -107,168 +90,128 @@
 }
 
 .clash-logo-img {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
     object-fit: contain;
-}
-
-.clash-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.clash-side.away .clash-info {
-    align-items: flex-end;
 }
 
 .clash-name {
     font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: #111827;
 }
 
-.odds-pill {
-    display: inline-flex;
-    font-size: 11px;
-    font-weight: 800;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    margin-top: 2px;
-    width: fit-content;
-    transition: background 0.3s ease;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+/* Score center area */
+.clash-mid {
+    display: flex;
+    align-items: center;
+    gap: 3px;
 }
 
-.clash-side.away .odds-pill {
-    align-self: flex-end;
-}
-
-/* Draw center */
-.clash-center {
+.score-btns {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 1px;
-    flex-shrink: 0;
+    gap: 2px;
 }
 
-.draw-circle {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 2px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 800;
-    color: #9ca3af;
-    background: white;
-}
-
-.draw-lbl {
-    font-size: 8px;
-    font-weight: 700;
-    color: #d1d5db;
-    text-transform: uppercase;
-}
-
-.clash-vs {
-    font-size: 11px;
-    font-weight: 800;
-    color: #d1d5db;
-}
-
-/* Scores Section */
-.match-scores-v2 {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.score-row-v2 {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-
-.btn-v2 {
-    width: 32px;
-    height: 32px;
+.btn-mini {
+    width: 18px;
+    height: 14px;
     border: none;
     background: #f3f4f6;
-    color: #6b7280;
-    font-size: 18px;
-    font-weight: 600;
-    border-radius: 8px;
+    color: #9ca3af;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 3px;
     cursor: pointer;
-    transition: all 0.15s;
     display: flex;
     align-items: center;
     justify-content: center;
     user-select: none;
-    box-shadow: none;
+    transition: all 0.15s;
 }
 
-.btn-v2:hover:not(:disabled) {
+.btn-mini:hover:not(:disabled) {
     background: #e5e7eb;
     color: #374151;
-    transform: none;
-    box-shadow: none;
 }
 
-.btn-v2:active:not(:disabled) {
+.btn-mini:active:not(:disabled) {
     transform: scale(0.95);
 }
 
-.btn-v2:disabled {
+.btn-mini:disabled {
     opacity: 0.3;
     cursor: not-allowed;
 }
 
-.score-display-v2 {
-    width: 40px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
+.score-num {
+    font-size: 20px;
     font-weight: 800;
     color: #374151;
-    background: #f3f4f6;
-    border: none;
-    border-radius: 8px;
-    box-shadow: none;
+    width: 26px;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
 }
 
-/* Saved state for scores */
-.match-card.has-tip .score-display-v2 {
-    background: #16a34a;
-    color: #ffffff;
+.match-card.has-tip .score-num {
+    color: #16a34a;
 }
 
-/* Probability bar */
-.clash-bar-area {
+.score-colon {
+    font-size: 16px;
+    font-weight: 800;
+    color: #d1d5db;
+}
+
+/* Odds bar row */
+.clash-bar-row {
+    display: flex;
+    align-items: center;
+}
+
+.odds-left {
+    font-size: 11px;
+    font-weight: 800;
+    width: 34px;
+    text-align: left;
+    flex-shrink: 0;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.3s ease;
+}
+
+.odds-right {
+    font-size: 11px;
+    font-weight: 800;
+    width: 34px;
+    text-align: right;
+    flex-shrink: 0;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.3s ease;
+}
+
+.bar-mid {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    align-items: center;
+    gap: 2px;
+    margin: 0 6px;
 }
 
 .clash-bar {
-    display: flex;
     width: 100%;
-    height: 8px;
-    border-radius: 4px;
+    display: flex;
+    height: 6px;
+    border-radius: 3px;
     overflow: hidden;
     gap: 2px;
 }
 
 .clash-seg {
     height: 100%;
-    border-radius: 4px;
+    border-radius: 3px;
     transition: background-color 0.3s ease;
 }
 
@@ -276,26 +219,11 @@
     background: #e5e7eb;
 }
 
-.clash-bar-labels {
-    display: flex;
-    justify-content: space-between;
-}
-
-.clash-bar-lbl {
-    font-size: 10px;
+.u-label {
+    font-size: 9px;
     font-weight: 700;
-    font-family: 'DM Sans', sans-serif;
-    transition: color 0.3s ease;
-}
-
-.clash-bar-lbl.draw {
     color: #9ca3af;
-}
-
-/* Score controls row */
-.clash-scores {
-    display: flex;
-    justify-content: space-between;
+    font-family: 'DM Sans', sans-serif;
 }
 
 /* Time Header */
@@ -384,68 +312,21 @@
 /* Responsive - Mobile optimization */
 @media (max-width: 600px) {
     .match-main-v2 {
-        padding: 12px;
+        padding: 10px;
         gap: 6px;
     }
 
     .clash-name {
-        font-size: 13px;
-        max-width: 90px;
+        font-size: 12px;
+        max-width: 80px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
     .clash-logo {
-        width: 30px;
-        height: 30px;
-    }
-
-    .clash-logo-img {
-        width: 18px;
-        height: 18px;
-    }
-
-    .draw-circle {
-        width: 28px;
-        height: 28px;
-        font-size: 9px;
-    }
-
-    .score-row-v2 {
-        gap: 3px;
-    }
-
-    .btn-v2 {
-        width: 30px;
-        height: 30px;
-        font-size: 16px;
-    }
-
-    .score-display-v2 {
-        width: 28px;
-        height: 30px;
-        font-size: 15px;
-    }
-}
-
-@media (max-width: 480px) {
-    .match-main-v2 {
-        padding: 10px;
-    }
-
-    .clash-name {
-        font-size: 12px;
-        max-width: 75px;
-    }
-
-    .clash-side {
-        gap: 6px;
-    }
-
-    .clash-logo {
-        width: 28px;
-        height: 28px;
+        width: 26px;
+        height: 26px;
     }
 
     .clash-logo-img {
@@ -453,43 +334,87 @@
         height: 16px;
     }
 
-    .odds-pill {
-        font-size: 10px;
-        padding: 1px 6px;
+    .score-num {
+        font-size: 18px;
+        width: 24px;
     }
 
-    .btn-v2 {
-        width: 28px;
-        height: 28px;
+    .btn-mini {
+        width: 17px;
+        height: 13px;
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 480px) {
+    .match-main-v2 {
+        padding: 8px 10px;
+    }
+
+    .clash-name {
+        font-size: 11px;
+        max-width: 65px;
+    }
+
+    .clash-side {
+        gap: 5px;
+    }
+
+    .clash-logo {
+        width: 24px;
+        height: 24px;
+    }
+
+    .clash-logo-img {
+        width: 14px;
+        height: 14px;
+    }
+
+    .score-num {
+        font-size: 16px;
+        width: 22px;
+    }
+
+    .btn-mini {
+        width: 16px;
+        height: 12px;
+        font-size: 9px;
+    }
+
+    .score-colon {
         font-size: 14px;
     }
 
-    .score-display-v2 {
-        width: 24px;
-        height: 28px;
-        font-size: 13px;
+    .odds-left,
+    .odds-right {
+        font-size: 10px;
+        width: 30px;
     }
 
-    .glow-home,
-    .glow-away {
-        width: 60px;
-        filter: blur(25px);
-        opacity: 0.2;
+    .u-label {
+        font-size: 8px;
     }
 }
 
 @media (max-width: 380px) {
     .clash-name {
-        font-size: 11px;
-        max-width: 60px;
+        font-size: 10px;
+        max-width: 55px;
     }
 
-    .clash-bar-lbl {
+    .score-num {
+        font-size: 15px;
+        width: 20px;
+    }
+
+    .score-colon {
+        font-size: 12px;
+    }
+
+    .odds-left,
+    .odds-right {
         font-size: 9px;
-    }
-
-    .draw-lbl {
-        display: none;
+        width: 26px;
     }
 }
 

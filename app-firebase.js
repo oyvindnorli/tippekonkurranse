@@ -307,7 +307,7 @@ function formatOdds(odds) {
     return Number(num.toFixed(1)).toString();
 }
 
-// Update odds colors after async color extraction (K3 Neon Glow)
+// Update odds colors after async color extraction (L8d Kompakt)
 function updateOddsColors(matchId, homeColor, awayColor) {
     // Bar segments
     const probHome = document.getElementById(`prob-home-${matchId}`);
@@ -315,29 +315,21 @@ function updateOddsColors(matchId, homeColor, awayColor) {
     if (probHome) probHome.style.background = homeColor;
     if (probAway) probAway.style.background = awayColor;
 
-    // Glow effects
-    const glowHome = document.getElementById(`glow-home-${matchId}`);
-    const glowAway = document.getElementById(`glow-away-${matchId}`);
-    if (glowHome) glowHome.style.background = homeColor;
-    if (glowAway) glowAway.style.background = awayColor;
-
-    // Odds pills
-    const pillHome = document.getElementById(`odds-pill-home-${matchId}`);
-    const pillAway = document.getElementById(`odds-pill-away-${matchId}`);
-    if (pillHome) pillHome.style.background = homeColor;
-    if (pillAway) pillAway.style.background = awayColor;
-
-    // Logo circle backgrounds
+    // Logo backgrounds
     const logoBgHome = document.getElementById(`logo-bg-home-${matchId}`);
     const logoBgAway = document.getElementById(`logo-bg-away-${matchId}`);
     if (logoBgHome) logoBgHome.style.background = homeColor;
     if (logoBgAway) logoBgAway.style.background = awayColor;
 
-    // Bar labels
+    // Odds labels
     const lblHome = document.getElementById(`lbl-home-${matchId}`);
     const lblAway = document.getElementById(`lbl-away-${matchId}`);
     if (lblHome) lblHome.style.color = homeColor;
     if (lblAway) lblAway.style.color = awayColor;
+
+    // Gradient background
+    const gradientBg = document.getElementById(`gradient-bg-${matchId}`);
+    if (gradientBg) gradientBg.style.background = `linear-gradient(90deg, ${homeColor} 0%, transparent 30%, transparent 70%, ${awayColor} 100%)`;
 }
 
 // Load user tips from Firebase
@@ -1241,13 +1233,10 @@ function renderMatches() {
                 if (!awayLogo) {
                 }
 
-                // Build K3 Neon Glow match card
+                // Build L8d Kompakt match card
                 const hasOdds = match.odds && match.odds.H && match.odds.U && match.odds.B;
-                let glowHtml = '';
+                let gradientHtml = '';
                 let oddsBarHtml = '';
-                let centerHtml = '<div class="clash-center"><span class="clash-vs">VS</span></div>';
-                let homePillHtml = '';
-                let awayPillHtml = '';
                 let logoHomeStyle = 'background: #f3f4f6';
                 let logoAwayStyle = 'background: #f3f4f6';
                 let logoHomeClass = 'clash-logo no-color';
@@ -1266,79 +1255,60 @@ function renderMatches() {
                         updateOddsColors(match.id, resolved.homeColor, resolved.awayColor);
                     });
 
-                    glowHtml = `
-                        <div class="glow-home" id="glow-home-${match.id}" style="background: ${colors.homeColor}"></div>
-                        <div class="glow-away" id="glow-away-${match.id}" style="background: ${colors.awayColor}"></div>
-                    `;
+                    gradientHtml = `<div class="gradient-bg" id="gradient-bg-${match.id}" style="background: linear-gradient(90deg, ${colors.homeColor} 0%, transparent 30%, transparent 70%, ${colors.awayColor} 100%);"></div>`;
 
                     logoHomeStyle = `background: ${colors.homeColor}`;
                     logoAwayStyle = `background: ${colors.awayColor}`;
                     logoHomeClass = 'clash-logo';
                     logoAwayClass = 'clash-logo';
 
-                    homePillHtml = `<span class="odds-pill" id="odds-pill-home-${match.id}" style="background: ${colors.homeColor}">${formatOdds(H)}</span>`;
-                    awayPillHtml = `<span class="odds-pill" id="odds-pill-away-${match.id}" style="background: ${colors.awayColor}">${formatOdds(B)}</span>`;
-
-                    centerHtml = `
-                        <div class="clash-center">
-                            <div class="draw-circle">${formatOdds(U)}</div>
-                            <span class="draw-lbl">Uavgjort</span>
-                        </div>
-                    `;
-
                     oddsBarHtml = `
-                        <div class="clash-bar-area">
-                            <div class="clash-bar">
-                                <div class="clash-seg" id="prob-home-${match.id}" style="width:${pctH}%; background:${colors.homeColor}"></div>
-                                <div class="clash-seg draw" style="width:${pctU}%"></div>
-                                <div class="clash-seg" id="prob-away-${match.id}" style="width:${pctB}%; background:${colors.awayColor}"></div>
+                        <div class="clash-bar-row">
+                            <span class="odds-left" id="lbl-home-${match.id}" style="color:${colors.homeColor}">${formatOdds(H)}</span>
+                            <div class="bar-mid">
+                                <div class="clash-bar">
+                                    <div class="clash-seg" id="prob-home-${match.id}" style="width:${pctH}%; background:${colors.homeColor}"></div>
+                                    <div class="clash-seg draw" style="width:${pctU}%"></div>
+                                    <div class="clash-seg" id="prob-away-${match.id}" style="width:${pctB}%; background:${colors.awayColor}"></div>
+                                </div>
+                                <span class="u-label">U: ${formatOdds(U)}</span>
                             </div>
-                            <div class="clash-bar-labels">
-                                <span class="clash-bar-lbl" id="lbl-home-${match.id}" style="color:${colors.homeColor}">${Math.round(parseFloat(pctH))}%</span>
-                                <span class="clash-bar-lbl draw">${Math.round(parseFloat(pctU))}%</span>
-                                <span class="clash-bar-lbl" id="lbl-away-${match.id}" style="color:${colors.awayColor}">${Math.round(parseFloat(pctB))}%</span>
-                            </div>
+                            <span class="odds-right" id="lbl-away-${match.id}" style="color:${colors.awayColor}">${formatOdds(B)}</span>
                         </div>
                     `;
                 }
 
                 matchCard.innerHTML = `
-                    ${glowHtml}
+                    ${gradientHtml}
                     <div class="match-main-v2">
                         <div class="clash-teams">
                             <div class="clash-side">
                                 <div class="${logoHomeClass}" id="logo-bg-home-${match.id}" style="${logoHomeStyle}">
                                     <img src="${homeLogo}" class="clash-logo-img" alt="${match.homeTeam}" onerror="this.style.display='none'">
                                 </div>
-                                <div class="clash-info">
-                                    <span class="clash-name">${match.homeTeam}</span>
-                                    ${homePillHtml}
+                                <span class="clash-name">${match.homeTeam}</span>
+                            </div>
+                            <div class="clash-mid">
+                                <div class="score-btns">
+                                    <button class="btn-mini" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
+                                    <button class="btn-mini" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>&#8722;</button>
+                                </div>
+                                <span class="score-num" id="home-score-btn-${match.id}">${homeScore === '?' ? '?' : homeScore}</span>
+                                <span class="score-colon">:</span>
+                                <span class="score-num" id="away-score-btn-${match.id}">${awayScore === '?' ? '?' : awayScore}</span>
+                                <div class="score-btns">
+                                    <button class="btn-mini" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
+                                    <button class="btn-mini" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>&#8722;</button>
                                 </div>
                             </div>
-                            ${centerHtml}
                             <div class="clash-side away">
                                 <div class="${logoAwayClass}" id="logo-bg-away-${match.id}" style="${logoAwayStyle}">
                                     <img src="${awayLogo}" class="clash-logo-img" alt="${match.awayTeam}" onerror="this.style.display='none'">
                                 </div>
-                                <div class="clash-info">
-                                    <span class="clash-name">${match.awayTeam}</span>
-                                    ${awayPillHtml}
-                                </div>
+                                <span class="clash-name">${match.awayTeam}</span>
                             </div>
                         </div>
                         ${oddsBarHtml}
-                        <div class="clash-scores">
-                            <div class="score-row-v2">
-                                <button class="btn-v2" onclick="updateScore('${match.id}', 'home', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <div class="score-display-v2" id="home-score-btn-${match.id}">${homeScore === '?' ? '?' : homeScore}</div>
-                                <button class="btn-v2" onclick="updateScore('${match.id}', 'home', true)" ${match.result ? 'disabled' : ''}>+</button>
-                            </div>
-                            <div class="score-row-v2">
-                                <button class="btn-v2" onclick="updateScore('${match.id}', 'away', false)" ${match.result ? 'disabled' : ''}>−</button>
-                                <div class="score-display-v2" id="away-score-btn-${match.id}">${awayScore === '?' ? '?' : awayScore}</div>
-                                <button class="btn-v2" onclick="updateScore('${match.id}', 'away', true)" ${match.result ? 'disabled' : ''}>+</button>
-                            </div>
-                        </div>
                     </div>
                     <span style="display: none;">
                         <span id="home-score-${match.id}">${homeScore}</span>
