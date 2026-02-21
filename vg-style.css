@@ -67,10 +67,13 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    flex: 1;
+    min-width: 0;
 }
 
 .clash-side.away {
     flex-direction: row-reverse;
+    justify-content: flex-end;
 }
 
 .clash-logo {
@@ -100,6 +103,9 @@
     font-size: 13px;
     font-weight: 700;
     color: #111827;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Score center area */
@@ -107,6 +113,7 @@
     display: flex;
     align-items: center;
     gap: 3px;
+    flex-shrink: 0;
 }
 
 .score-btns {
