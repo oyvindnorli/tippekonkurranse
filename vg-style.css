@@ -73,7 +73,6 @@
 
 .clash-side.away {
     flex-direction: row-reverse;
-    justify-content: flex-end;
 }
 
 .clash-logo {
