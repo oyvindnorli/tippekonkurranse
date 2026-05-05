@@ -20,6 +20,7 @@ screenshots/
 
 # Python server (kun for lokal testing)
 server.py
+server.log
 __pycache__/
 
 # Vercel
