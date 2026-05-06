@@ -1,12 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/vm2026",
-      "destination": "/vm2026.html"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/vm2026.html"
     }
   ]
 }

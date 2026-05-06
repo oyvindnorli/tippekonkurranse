@@ -8,8 +8,8 @@ const WC_FROM = '2026-06-11';
 const WC_TO = '2026-07-19';
 const API_BASE = '/api/football';
 const REDIRECT_URL = window.location.hostname === 'localhost'
-    ? `${window.location.origin}/vm2026.html`
-    : 'https://tippekonkurran.se/vm2026';
+    ? window.location.origin
+    : 'https://tippekonkurran.se';
 
 // --- STATE ---
 let client;
