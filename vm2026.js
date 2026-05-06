@@ -595,9 +595,9 @@ function renderOdds(odds) {
     if (!odds) return '';
     return `
         <div class=”vm-odds”>
-            <span class=”vm-odd-btn”><span class=”vm-odd-l”>H</span><span class=”vm-odd-n”>${odds.H ? Math.ceil(odds.H) : '-'}</span></span>
-            <span class=”vm-odd-btn”><span class=”vm-odd-l”>U</span><span class=”vm-odd-n”>${odds.U ? Math.ceil(odds.U) : '-'}</span></span>
-            <span class=”vm-odd-btn”><span class=”vm-odd-l”>B</span><span class=”vm-odd-n”>${odds.B ? Math.ceil(odds.B) : '-'}</span></span>
+            <span class=”vm-odd-btn vm-odd-home”>${odds.H ? Math.ceil(odds.H) : '-'}</span>
+            <span class=”vm-odd-btn vm-odd-draw”>${odds.U ? Math.ceil(odds.U) : '-'}</span>
+            <span class=”vm-odd-btn vm-odd-away”>${odds.B ? Math.ceil(odds.B) : '-'}</span>
         </div>
     `;
 }
