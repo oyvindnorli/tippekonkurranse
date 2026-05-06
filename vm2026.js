@@ -518,7 +518,7 @@ function renderMatchCard(match) {
             : `<span class=”vm-match-vs”>vs</span>`;
 
     const tipSection = renderTipSection(match, tip, started, isFinished, isLive);
-    const oddsSection = match.odds ? renderOdds(match.odds) : '';
+    const oddsSection = '';
 
     return `
         <div class="${cardClass}" data-match-id="${match.id}">
