@@ -431,20 +431,28 @@ body {
 /* --- ODDS --- */
 .vm-odds {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     justify-content: center;
-    margin-top: 6px;
+    margin-top: 8px;
+    margin-bottom: 2px;
 }
 
 .vm-odd-btn {
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 5px;
     font-size: 0.82rem;
     font-weight: 600;
     background: #f3f4f6;
-    color: var(--wc-muted);
+    color: var(--wc-text);
     border: none;
     cursor: default;
+    text-align: center;
+}
+
+.vm-odd-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--wc-muted);
 }
 
 /* --- LEADERBOARD --- */
