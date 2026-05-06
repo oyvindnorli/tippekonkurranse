@@ -593,19 +593,23 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
 function renderOdds(odds) {
     if (!odds) return '';
+    const col = 'display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;flex:1;';
+    const lbl = 'font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;';
+    const val = 'font-size:1.05rem;font-weight:700;color:#111827;';
+    const sep = 'border-left:1px solid #e5e7eb;';
     return `
-        <div class=”vm-odds”>
-            <div class=”vm-odd-col”>
-                <span class=”vm-odd-lbl”>Hjemme</span>
-                <span class=”vm-odd-val”>${odds.H ? Math.ceil(odds.H) : '-'}</span>
+        <div style=”display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #e5e7eb;margin-top:14px;padding-top:10px;”>
+            <div style=”${col}”>
+                <span style=”${lbl}”>Hjemme</span>
+                <span style=”${val}”>${odds.H ? Math.ceil(odds.H) : '-'}</span>
             </div>
-            <div class=”vm-odd-col”>
-                <span class=”vm-odd-lbl”>Uavgjort</span>
-                <span class=”vm-odd-val”>${odds.U ? Math.ceil(odds.U) : '-'}</span>
+            <div style=”${col}${sep}”>
+                <span style=”${lbl}”>Uavgjort</span>
+                <span style=”${val}”>${odds.U ? Math.ceil(odds.U) : '-'}</span>
             </div>
-            <div class=”vm-odd-col”>
-                <span class=”vm-odd-lbl”>Borte</span>
-                <span class=”vm-odd-val”>${odds.B ? Math.ceil(odds.B) : '-'}</span>
+            <div style=”${col}${sep}”>
+                <span style=”${lbl}”>Borte</span>
+                <span style=”${val}”>${odds.B ? Math.ceil(odds.B) : '-'}</span>
             </div>
         </div>
     `;
