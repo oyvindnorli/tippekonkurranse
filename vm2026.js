@@ -658,9 +658,9 @@ function groupByRound(matches) {
 function formatRound(round) {
     if (!round) return 'Ukjent runde';
     const map = {
-        'Group Stage - 1': 'Gruppespill â€“ Runde 1',
-        'Group Stage - 2': 'Gruppespill â€“ Runde 2',
-        'Group Stage - 3': 'Gruppespill â€“ Runde 3',
+        'Group Stage - 1': 'Gruppespill - Runde 1',
+        'Group Stage - 2': 'Gruppespill - Runde 2',
+        'Group Stage - 3': 'Gruppespill - Runde 3',
         'Round of 32': 'Runde av 32',
         'Round of 16': 'Åttedelsfinale',
         'Quarter-finals': 'Kvartfinale',
