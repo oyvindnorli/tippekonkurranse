@@ -593,9 +593,9 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
 function renderOdds(odds) {
     if (!odds) return '';
-    const pill = 'display:inline-block;padding:5px 16px;border-radius:6px;background:#f3f4f6;font-size:0.95rem;font-weight:700;color:#111827;';
+    const pill = 'display:inline-block;padding:5px 16px;border-radius:6px;background:#f3f4f6;font-size:0.95rem;font-weight:700;color:#111827;margin:0 4px;';
     return `
-        <div style=”display:flex;justify-content:center;gap:8px;border-top:1px solid #e5e7eb;margin-top:14px;padding-top:12px;”>
+        <div style=”text-align:center;border-top:1px solid #e5e7eb;margin-top:14px;padding-top:12px;”>
             <span style=”${pill}”>${odds.H ? Math.ceil(odds.H) : '-'}</span>
             <span style=”${pill}”>${odds.U ? Math.ceil(odds.U) : '-'}</span>
             <span style=”${pill}”>${odds.B ? Math.ceil(odds.B) : '-'}</span>
