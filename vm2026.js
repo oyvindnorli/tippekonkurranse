@@ -1,4 +1,4 @@
-// vm2026.js — VM 2026 tippekonkurranse (standalone module)
+﻿// vm2026.js â€” VM 2026 tippekonkurranse (standalone module)
 
 const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
@@ -16,7 +16,7 @@ let client;
 let currentUser = null;
 let currentSession = null;
 let wcMatches = [];
-let userTips = {};   // matchId (string) → { homeScore, awayScore, odds, points }
+let userTips = {};   // matchId (string) â†’ { homeScore, awayScore, odds, points }
 let activeTab = 'matches';
 
 // --- INIT ---
@@ -365,7 +365,7 @@ async function loadLeaderboard() {
         // Fetch all WC match IDs
         const matchIds = wcMatches.filter(m => m.completed).map(m => m.id);
         if (!matchIds.length) {
-            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen fullførte kamper ennå — kom tilbake etter første kampdag!</div>`;
+            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen fullfÃ¸rte kamper ennÃ¥ â€” kom tilbake etter fÃ¸rste kampdag!</div>`;
             return;
         }
 
@@ -404,13 +404,13 @@ async function loadLeaderboard() {
             .sort((a, b) => b.totalPoints - a.totalPoints);
 
         if (!sorted.length) {
-            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen har tippet ennå.</div>`;
+            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen har tippet ennÃ¥.</div>`;
             return;
         }
 
         container.innerHTML = sorted.map((player, i) => {
             const pos = i + 1;
-            const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
+            const medal = pos === 1 ? 'ðŸ¥‡' : pos === 2 ? 'ðŸ¥ˆ' : pos === 3 ? 'ðŸ¥‰' : pos;
             const isCurrent = currentUser && player.uid === currentUser.id;
             return `
                 <div class="vm-leaderboard-row${isCurrent ? ' current-user' : ''}">
@@ -434,9 +434,9 @@ function renderMatches() {
     if (!wcMatches.length) {
         container.innerHTML = `
             <div class="vm-empty">
-                <div class="vm-empty-icon">⏳</div>
+                <div class="vm-empty-icon">â³</div>
                 <div class="vm-empty-title">Kamper lastes snart</div>
-                <div class="vm-empty-sub">VM-kampene vil dukke opp her i god tid før første sparkoff 11. juni 2026.</div>
+                <div class="vm-empty-sub">VM-kampene vil dukke opp her i god tid fÃ¸r fÃ¸rste sparkoff 11. juni 2026.</div>
             </div>
         `;
         return;
@@ -445,7 +445,7 @@ function renderMatches() {
     // Login prompt for unauthenticated users (above matches, not blocking)
     const loginPrompt = !currentUser ? `
         <div class="vm-login-prompt">
-            <p>Logg inn med Google for å legge inn tips og se deg selv på ledertabellen.</p>
+            <p>Logg inn med Google for Ã¥ legge inn tips og se deg selv pÃ¥ ledertabellen.</p>
             <button class="vm-btn-google" onclick="handleGoogleSignIn()" style="max-width:260px;margin:0 auto;">
                 ${googleSvg()}
                 Logg inn med Google
@@ -508,13 +508,13 @@ function renderMatchCard(match) {
     const statusBadge = isLive
         ? `<span class="vm-match-status-live">LIVE ${match.elapsed ? match.elapsed + "'" : ''}</span>`
         : isFinished
-            ? `<span style="color:var(--wc-green);font-size:0.75rem;font-weight:700">FULLFØRT</span>`
+            ? `<span style="color:var(--wc-green);font-size:0.75rem;font-weight:700">FULLFÃ˜RT</span>`
             : '';
 
     const vsOrScore = isFinished && match.result
-        ? `<span class="vm-result-score">${match.result.home}–${match.result.away}</span>`
+        ? `<span class="vm-result-score">${match.result.home}â€“${match.result.away}</span>`
         : isLive && match.result
-            ? `<span class="vm-result-score" style="color:var(--wc-red)">${match.result.home}–${match.result.away}</span>`
+            ? `<span class="vm-result-score" style="color:var(--wc-red)">${match.result.home}â€“${match.result.away}</span>`
             : `<span class="vm-match-vs">vs</span>`;
 
     const tipSection = renderTipSection(match, tip, started, isFinished, isLive);
@@ -529,12 +529,12 @@ function renderMatchCard(match) {
             <div class="vm-match-teams">
                 <div class="vm-team">
                     ${teamLogo(match.homeLogo, match.homeTeam)}
-                    <span>${escapeHtml(match.homeTeam)}</span>
+                    <span>${escapeHtml(teamName(match.homeTeam))}</span>
                 </div>
                 ${vsOrScore}
                 <div class="vm-team away">
                     ${teamLogo(match.awayLogo, match.awayTeam)}
-                    <span>${escapeHtml(match.awayTeam)}</span>
+                    <span>${escapeHtml(teamName(match.awayTeam))}</span>
                 </div>
             </div>
             ${oddsSection}
@@ -550,14 +550,14 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
     if (isFinished) {
         if (!tip) {
-            return `<div class="vm-no-tip-locked">Du la ikke inn tips på denne kampen.</div>`;
+            return `<div class="vm-no-tip-locked">Du la ikke inn tips pÃ¥ denne kampen.</div>`;
         }
         const pts = tip.points !== null && tip.points !== undefined
             ? tip.points
             : calculatePoints(tip, match);
         return `
             <div class="vm-tip-saved">
-                <span>Ditt tips: <strong class="vm-tip-score">${tip.homeScore}–${tip.awayScore}</strong></span>
+                <span>Ditt tips: <strong class="vm-tip-score">${tip.homeScore}â€“${tip.awayScore}</strong></span>
                 <span class="${pts > 0 ? 'vm-tip-points' : 'vm-tip-no-points'}">
                     ${pts > 0 ? '+' + pts.toFixed(1) + ' p' : '0 p'}
                 </span>
@@ -567,12 +567,12 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
     if (isLive || (started && !isFinished)) {
         if (tip) {
-            return `<div class="vm-tip-locked">Ditt tips: ${tip.homeScore}–${tip.awayScore} (låst)</div>`;
+            return `<div class="vm-tip-locked">Ditt tips: ${tip.homeScore}â€“${tip.awayScore} (lÃ¥st)</div>`;
         }
-        return `<div class="vm-tip-locked">Kampen har startet — tipping er stengt.</div>`;
+        return `<div class="vm-tip-locked">Kampen har startet â€” tipping er stengt.</div>`;
     }
 
-    // Upcoming — show tip form
+    // Upcoming â€” show tip form
     const savedHome = tip?.homeScore ?? '';
     const savedAway = tip?.awayScore ?? '';
     return `
@@ -581,7 +581,7 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
             <input class="vm-score-input" type="number" min="0" max="20"
                 data-match-id="${mid}" data-team="home"
                 value="${savedHome}" placeholder="0">
-            <span class="vm-score-dash">–</span>
+            <span class="vm-score-dash">â€“</span>
             <input class="vm-score-input" type="number" min="0" max="20"
                 data-match-id="${mid}" data-team="away"
                 value="${savedAway}" placeholder="0">
@@ -595,9 +595,9 @@ function renderOdds(odds) {
     if (!odds) return '';
     return `
         <div class="vm-odds">
-            <span class="vm-odd-btn">H ${odds.H?.toFixed(2) ?? '–'}</span>
-            <span class="vm-odd-btn">U ${odds.U?.toFixed(2) ?? '–'}</span>
-            <span class="vm-odd-btn">B ${odds.B?.toFixed(2) ?? '–'}</span>
+            <span class="vm-odd-btn">H ${odds.H?.toFixed(2) ?? 'â€“'}</span>
+            <span class="vm-odd-btn">U ${odds.U?.toFixed(2) ?? 'â€“'}</span>
+            <span class="vm-odd-btn">B ${odds.B?.toFixed(2) ?? 'â€“'}</span>
         </div>
     `;
 }
@@ -635,12 +635,12 @@ window.submitTip = async function(matchId) {
 
     if (ok) {
         if (feedback) {
-            feedback.textContent = '✓ Lagret!';
+            feedback.textContent = 'âœ“ Lagret!';
             feedback.style.color = 'var(--wc-green)';
             setTimeout(() => { if (feedback) feedback.textContent = ''; }, 2500);
         }
     } else {
-        if (feedback) { feedback.textContent = 'Kunne ikke lagre. Prøv igjen.'; feedback.style.color = '#ef4444'; }
+        if (feedback) { feedback.textContent = 'Kunne ikke lagre. PrÃ¸v igjen.'; feedback.style.color = '#ef4444'; }
     }
 };
 
@@ -658,11 +658,11 @@ function groupByRound(matches) {
 function formatRound(round) {
     if (!round) return 'Ukjent runde';
     const map = {
-        'Group Stage - 1': 'Gruppespill – Runde 1',
-        'Group Stage - 2': 'Gruppespill – Runde 2',
-        'Group Stage - 3': 'Gruppespill – Runde 3',
+        'Group Stage - 1': 'Gruppespill â€“ Runde 1',
+        'Group Stage - 2': 'Gruppespill â€“ Runde 2',
+        'Group Stage - 3': 'Gruppespill â€“ Runde 3',
         'Round of 32': 'Runde av 32',
-        'Round of 16': 'Åttedelsfinale',
+        'Round of 16': 'Ã…ttedelsfinale',
         'Quarter-finals': 'Kvartfinale',
         'Semi-finals': 'Semifinale',
         '3rd Place Final': 'Bronsefinale',
@@ -680,6 +680,99 @@ function teamLogo(logoUrl, teamName) {
         return `<img class="vm-team-logo" src="${logoUrl}" alt="${escapeHtml(teamName)}" loading="lazy" onerror="this.style.display='none'">`;
     }
     return `<div class="vm-team-logo-placeholder">${escapeHtml(teamName.charAt(0))}</div>`;
+}
+
+const COUNTRY_NO = {
+    'Afghanistan': 'Afghanistan',
+    'Albania': 'Albania',
+    'Algeria': 'Algerie',
+    'Argentina': 'Argentina',
+    'Australia': 'Australia',
+    'Austria': 'Ã˜sterrike',
+    'Belgium': 'Belgia',
+    'Bolivia': 'Bolivia',
+    'Bosnia & Herzegovina': 'Bosnia-Hercegovina',
+    'Bosnia-Herzegovina': 'Bosnia-Hercegovina',
+    'Brazil': 'Brasil',
+    'Cameroon': 'Kamerun',
+    'Canada': 'Canada',
+    'Cape Verde Islands': 'Kapp Verde',
+    'Cape Verde': 'Kapp Verde',
+    'Chile': 'Chile',
+    'China': 'Kina',
+    'Colombia': 'Colombia',
+    'Congo DR': 'DR Kongo',
+    'Costa Rica': 'Costa Rica',
+    'Croatia': 'Kroatia',
+    'Cuba': 'Cuba',
+    'CuraÃ§ao': 'CuraÃ§ao',
+    'Czech Republic': 'Tsjekkia',
+    'Czechia': 'Tsjekkia',
+    'Denmark': 'Danmark',
+    'Ecuador': 'Ecuador',
+    'Egypt': 'Egypt',
+    'England': 'England',
+    'Finland': 'Finland',
+    'France': 'Frankrike',
+    'Germany': 'Tyskland',
+    'Ghana': 'Ghana',
+    'Greece': 'Hellas',
+    'Haiti': 'Haiti',
+    'Honduras': 'Honduras',
+    'Hungary': 'Ungarn',
+    'Iceland': 'Island',
+    'India': 'India',
+    'Indonesia': 'Indonesia',
+    'Iran': 'Iran',
+    'Iraq': 'Irak',
+    'Ireland': 'Irland',
+    'Israel': 'Israel',
+    'Italy': 'Italia',
+    'Ivory Coast': 'Elfenbenskysten',
+    'Jamaica': 'Jamaica',
+    'Japan': 'Japan',
+    'Jordan': 'Jordan',
+    'Kenya': 'Kenya',
+    'Mexico': 'Mexico',
+    'Morocco': 'Marokko',
+    'Netherlands': 'Nederland',
+    'New Zealand': 'New Zealand',
+    'Nigeria': 'Nigeria',
+    'North Korea': 'Nord-Korea',
+    'Norway': 'Norge',
+    'Panama': 'Panama',
+    'Paraguay': 'Paraguay',
+    'Peru': 'Peru',
+    'Poland': 'Polen',
+    'Portugal': 'Portugal',
+    'Qatar': 'Qatar',
+    'Romania': 'Romania',
+    'Russia': 'Russland',
+    'Saudi Arabia': 'Saudi-Arabia',
+    'Scotland': 'Skottland',
+    'Senegal': 'Senegal',
+    'Serbia': 'Serbia',
+    'Slovakia': 'Slovakia',
+    'Slovenia': 'Slovenia',
+    'South Africa': 'SÃ¸r-Afrika',
+    'South Korea': 'SÃ¸r-Korea',
+    'Spain': 'Spania',
+    'Sweden': 'Sverige',
+    'Switzerland': 'Sveits',
+    'Tunisia': 'Tunisia',
+    'TÃ¼rkiye': 'Tyrkia',
+    'Turkey': 'Tyrkia',
+    'USA': 'USA',
+    'Ukraine': 'Ukraina',
+    'United States': 'USA',
+    'Uruguay': 'Uruguay',
+    'Uzbekistan': 'Usbekistan',
+    'Venezuela': 'Venezuela',
+    'Wales': 'Wales',
+};
+
+function teamName(name) {
+    return COUNTRY_NO[name] || name;
 }
 
 function escapeHtml(str) {
@@ -704,7 +797,7 @@ function startCountdown() {
     function tick() {
         const diff = target - new Date();
         if (diff <= 0) {
-            el.innerHTML = '<span style="font-weight:700">VM ER I GANG! ⚽</span>';
+            el.innerHTML = '<span style="font-weight:700">VM ER I GANG! âš½</span>';
             return;
         }
         const d = Math.floor(diff / 86400000);
