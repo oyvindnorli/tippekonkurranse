@@ -438,21 +438,33 @@ body {
 }
 
 .vm-odd-btn {
-    padding: 4px 12px;
-    border-radius: 5px;
-    font-size: 0.82rem;
-    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 7px;
     background: #f3f4f6;
     color: var(--wc-text);
     border: none;
     cursor: default;
-    text-align: center;
+    min-width: 48px;
 }
 
-.vm-odd-label {
-    font-size: 0.72rem;
+.vm-odd-l {
+    font-size: 0.62rem;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     color: var(--wc-muted);
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.vm-odd-n {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--wc-text);
+    line-height: 1;
 }
 
 /* --- LEADERBOARD --- */
