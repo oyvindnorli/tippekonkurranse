@@ -557,7 +557,7 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
             : calculatePoints(tip, match);
         return `
             <div class="vm-tip-saved">
-                <span>Ditt tips: <strong class="vm-tip-score">${tip.homeScore}â€“${tip.awayScore}</strong></span>
+                <span>Ditt tips: <strong class=”vm-tip-score”>${tip.homeScore}-${tip.awayScore}</strong></span>
                 <span class="${pts > 0 ? 'vm-tip-points' : 'vm-tip-no-points'}">
                     ${pts > 0 ? '+' + pts.toFixed(1) + ' p' : '0 p'}
                 </span>
@@ -567,12 +567,12 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
     if (isLive || (started && !isFinished)) {
         if (tip) {
-            return `<div class="vm-tip-locked">Ditt tips: ${tip.homeScore}â€“${tip.awayScore} (låst)</div>`;
+            return `<div class=”vm-tip-locked”>Ditt tips: ${tip.homeScore}-${tip.awayScore} (låst)</div>`;
         }
-        return `<div class="vm-tip-locked">Kampen har startet â€” tipping er stengt.</div>`;
+        return `<div class=”vm-tip-locked”>Kampen har startet - tipping er stengt.</div>`;
     }
 
-    // Upcoming â€” show tip form
+    // Upcoming - show tip form
     const savedHome = tip?.homeScore ?? '';
     const savedAway = tip?.awayScore ?? '';
     return `
