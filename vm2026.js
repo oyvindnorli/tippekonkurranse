@@ -1,4 +1,4 @@
-﻿// vm2026.js â€” VM 2026 tippekonkurranse (standalone module)
+// vm2026.js â€” VM 2026 tippekonkurranse (standalone module)
 
 const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
@@ -365,7 +365,7 @@ async function loadLeaderboard() {
         // Fetch all WC match IDs
         const matchIds = wcMatches.filter(m => m.completed).map(m => m.id);
         if (!matchIds.length) {
-            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen fullfÃ¸rte kamper ennÃ¥ â€” kom tilbake etter fÃ¸rste kampdag!</div>`;
+            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen fullførte kamper ennå â€” kom tilbake etter første kampdag!</div>`;
             return;
         }
 
@@ -404,7 +404,7 @@ async function loadLeaderboard() {
             .sort((a, b) => b.totalPoints - a.totalPoints);
 
         if (!sorted.length) {
-            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen har tippet ennÃ¥.</div>`;
+            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen har tippet ennå.</div>`;
             return;
         }
 
@@ -436,7 +436,7 @@ function renderMatches() {
             <div class="vm-empty">
                 <div class="vm-empty-icon">â³</div>
                 <div class="vm-empty-title">Kamper lastes snart</div>
-                <div class="vm-empty-sub">VM-kampene vil dukke opp her i god tid fÃ¸r fÃ¸rste sparkoff 11. juni 2026.</div>
+                <div class="vm-empty-sub">VM-kampene vil dukke opp her i god tid før første sparkoff 11. juni 2026.</div>
             </div>
         `;
         return;
@@ -445,7 +445,7 @@ function renderMatches() {
     // Login prompt for unauthenticated users (above matches, not blocking)
     const loginPrompt = !currentUser ? `
         <div class="vm-login-prompt">
-            <p>Logg inn med Google for Ã¥ legge inn tips og se deg selv pÃ¥ ledertabellen.</p>
+            <p>Logg inn med Google for å legge inn tips og se deg selv på ledertabellen.</p>
             <button class="vm-btn-google" onclick="handleGoogleSignIn()" style="max-width:260px;margin:0 auto;">
                 ${googleSvg()}
                 Logg inn med Google
@@ -508,7 +508,7 @@ function renderMatchCard(match) {
     const statusBadge = isLive
         ? `<span class="vm-match-status-live">LIVE ${match.elapsed ? match.elapsed + "'" : ''}</span>`
         : isFinished
-            ? `<span style="color:var(--wc-green);font-size:0.75rem;font-weight:700">FULLFÃ˜RT</span>`
+            ? `<span style="color:var(--wc-green);font-size:0.75rem;font-weight:700">FULLFØRT</span>`
             : '';
 
     const vsOrScore = isFinished && match.result
@@ -550,7 +550,7 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
     if (isFinished) {
         if (!tip) {
-            return `<div class="vm-no-tip-locked">Du la ikke inn tips pÃ¥ denne kampen.</div>`;
+            return `<div class="vm-no-tip-locked">Du la ikke inn tips på denne kampen.</div>`;
         }
         const pts = tip.points !== null && tip.points !== undefined
             ? tip.points
@@ -567,7 +567,7 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
     if (isLive || (started && !isFinished)) {
         if (tip) {
-            return `<div class="vm-tip-locked">Ditt tips: ${tip.homeScore}â€“${tip.awayScore} (lÃ¥st)</div>`;
+            return `<div class="vm-tip-locked">Ditt tips: ${tip.homeScore}â€“${tip.awayScore} (låst)</div>`;
         }
         return `<div class="vm-tip-locked">Kampen har startet â€” tipping er stengt.</div>`;
     }
@@ -640,7 +640,7 @@ window.submitTip = async function(matchId) {
             setTimeout(() => { if (feedback) feedback.textContent = ''; }, 2500);
         }
     } else {
-        if (feedback) { feedback.textContent = 'Kunne ikke lagre. PrÃ¸v igjen.'; feedback.style.color = '#ef4444'; }
+        if (feedback) { feedback.textContent = 'Kunne ikke lagre. Prøv igjen.'; feedback.style.color = '#ef4444'; }
     }
 };
 
@@ -662,7 +662,7 @@ function formatRound(round) {
         'Group Stage - 2': 'Gruppespill â€“ Runde 2',
         'Group Stage - 3': 'Gruppespill â€“ Runde 3',
         'Round of 32': 'Runde av 32',
-        'Round of 16': 'Ã…ttedelsfinale',
+        'Round of 16': 'Åttedelsfinale',
         'Quarter-finals': 'Kvartfinale',
         'Semi-finals': 'Semifinale',
         '3rd Place Final': 'Bronsefinale',
@@ -688,7 +688,7 @@ const COUNTRY_NO = {
     'Algeria': 'Algerie',
     'Argentina': 'Argentina',
     'Australia': 'Australia',
-    'Austria': 'Ã˜sterrike',
+    'Austria': 'Østerrike',
     'Belgium': 'Belgia',
     'Bolivia': 'Bolivia',
     'Bosnia & Herzegovina': 'Bosnia-Hercegovina',
@@ -705,7 +705,7 @@ const COUNTRY_NO = {
     'Costa Rica': 'Costa Rica',
     'Croatia': 'Kroatia',
     'Cuba': 'Cuba',
-    'CuraÃ§ao': 'CuraÃ§ao',
+    'Curaçao': 'Curaçao',
     'Czech Republic': 'Tsjekkia',
     'Czechia': 'Tsjekkia',
     'Denmark': 'Danmark',
@@ -754,8 +754,8 @@ const COUNTRY_NO = {
     'Serbia': 'Serbia',
     'Slovakia': 'Slovakia',
     'Slovenia': 'Slovenia',
-    'South Africa': 'SÃ¸r-Afrika',
-    'South Korea': 'SÃ¸r-Korea',
+    'South Africa': 'Sør-Afrika',
+    'South Korea': 'Sør-Korea',
     'Spain': 'Spania',
     'Sweden': 'Sverige',
     'Switzerland': 'Sveits',
