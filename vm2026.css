@@ -452,6 +452,16 @@ body {
 .vm-odd-draw { background: #fef9c3; color: #92400e; }
 .vm-odd-away { background: #dcfce7; color: #166534; }
 
+.vm-odds-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--wc-muted);
+    align-self: center;
+    margin-right: 2px;
+}
+
 /* --- LEADERBOARD --- */
 .vm-leaderboard-empty {
     text-align: center;
