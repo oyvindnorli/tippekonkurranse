@@ -512,10 +512,10 @@ function renderMatchCard(match) {
             : '';
 
     const vsOrScore = isFinished && match.result
-        ? `<span class="vm-result-score">${match.result.home}â€“${match.result.away}</span>`
+        ? `<span class=”vm-result-score”>${match.result.home}-${match.result.away}</span>`
         : isLive && match.result
-            ? `<span class="vm-result-score" style="color:var(--wc-red)">${match.result.home}â€“${match.result.away}</span>`
-            : `<span class="vm-match-vs">vs</span>`;
+            ? `<span class=”vm-result-score” style=”color:var(--wc-red)”>${match.result.home}-${match.result.away}</span>`
+            : `<span class=”vm-match-vs”>vs</span>`;
 
     const tipSection = renderTipSection(match, tip, started, isFinished, isLive);
     const oddsSection = match.odds ? renderOdds(match.odds) : '';
