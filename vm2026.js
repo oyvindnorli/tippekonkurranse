@@ -518,7 +518,7 @@ function renderMatchCard(match) {
             : `<span class=”vm-match-vs”>vs</span>`;
 
     const tipSection = renderTipSection(match, tip, started, isFinished, isLive);
-    const oddsSection = '';
+    const oddsSection = match.odds ? renderOdds(match.odds) : '';
 
     return `
         <div class="${cardClass}" data-match-id="${match.id}">
@@ -595,11 +595,17 @@ function renderOdds(odds) {
     if (!odds) return '';
     return `
         <div class=”vm-odds”>
-            <div class=”vm-odds-label”>Odds</div>
-            <div class=”vm-odds-row”>
-                <span class=”vm-odd-btn vm-odd-home”>${odds.H ? Math.ceil(odds.H) : '-'}</span>
-                <span class=”vm-odd-btn vm-odd-draw”>${odds.U ? Math.ceil(odds.U) : '-'}</span>
-                <span class=”vm-odd-btn vm-odd-away”>${odds.B ? Math.ceil(odds.B) : '-'}</span>
+            <div class=”vm-odd-col”>
+                <span class=”vm-odd-lbl”>Hjemme</span>
+                <span class=”vm-odd-val”>${odds.H ? Math.ceil(odds.H) : '-'}</span>
+            </div>
+            <div class=”vm-odd-col”>
+                <span class=”vm-odd-lbl”>Uavgjort</span>
+                <span class=”vm-odd-val”>${odds.U ? Math.ceil(odds.U) : '-'}</span>
+            </div>
+            <div class=”vm-odd-col”>
+                <span class=”vm-odd-lbl”>Borte</span>
+                <span class=”vm-odd-val”>${odds.B ? Math.ceil(odds.B) : '-'}</span>
             </div>
         </div>
     `;
