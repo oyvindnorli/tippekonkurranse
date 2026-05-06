@@ -581,7 +581,7 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
             <input class="vm-score-input" type="number" min="0" max="20"
                 data-match-id="${mid}" data-team="home"
                 value="${savedHome}" placeholder="0">
-            <span class="vm-score-dash">â€“</span>
+            <span class=”vm-score-dash”>-</span>
             <input class="vm-score-input" type="number" min="0" max="20"
                 data-match-id="${mid}" data-team="away"
                 value="${savedAway}" placeholder="0">
@@ -675,11 +675,12 @@ function isMatchLive(status) {
     return ['1H', '2H', 'HT', 'ET', 'BT', 'P', 'LIVE'].includes(status);
 }
 
-function teamLogo(logoUrl, teamName) {
+function teamLogo(logoUrl, rawName) {
+    const initial = teamName(rawName).charAt(0);
     if (logoUrl) {
-        return `<img class="vm-team-logo" src="${logoUrl}" alt="${escapeHtml(teamName)}" loading="lazy" onerror="this.style.display='none'">`;
+        return `<img class="vm-team-logo" src="${logoUrl}" alt="" loading="lazy" onerror="this.style.display='none'">`;
     }
-    return `<div class="vm-team-logo-placeholder">${escapeHtml(teamName.charAt(0))}</div>`;
+    return `<div class="vm-team-logo-placeholder">${escapeHtml(initial)}</div>`;
 }
 
 const COUNTRY_NO = {
