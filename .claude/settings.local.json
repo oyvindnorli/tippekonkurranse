@@ -21,7 +21,8 @@
       "Bash(git revert:*)",
       "Bash(dir \"C:\\Users\\aa167\\Documents\\Prosjekter\\Tippekonkurranse\\screenshots\" /O-D /B)",
       "Bash(node:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

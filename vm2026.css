@@ -1,0 +1,588 @@
+/* VM 2026 - FIFA World Cup tippekonkurranse */
+
+:root {
+    --wc-red: #C00;
+    --wc-gold: #D4A017;
+    --wc-dark: #1a1a2e;
+    --wc-card: #fff;
+    --wc-border: #e5e7eb;
+    --wc-text: #111827;
+    --wc-muted: #6b7280;
+    --wc-green: #059669;
+    --wc-locked: #f3f4f6;
+    --radius: 10px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: #f5f5f5;
+    color: var(--wc-text);
+    min-height: 100vh;
+}
+
+/* --- HEADER --- */
+.vm-header {
+    background: linear-gradient(135deg, #8B0000 0%, #CC0000 50%, #8B0000 100%);
+    color: #fff;
+    padding: 0 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.vm-header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    gap: 12px;
+}
+
+.vm-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vm-trophy { font-size: 2rem; line-height: 1; }
+
+.vm-brand-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+}
+
+.vm-brand-sub {
+    font-size: 0.72rem;
+    opacity: 0.8;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+}
+
+.vm-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.vm-username {
+    font-size: 0.82rem;
+    opacity: 0.9;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* --- BUTTONS --- */
+.vm-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+}
+.vm-btn:hover { opacity: 0.88; }
+
+.vm-btn-google {
+    background: #fff;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.vm-btn-google:hover { background: #f8f8f8; }
+
+.vm-btn-outline {
+    background: transparent;
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.6);
+}
+
+.vm-btn-sm {
+    padding: 7px 14px;
+    font-size: 0.82rem;
+    background: var(--wc-red);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+.vm-btn-sm:hover { opacity: 0.85; }
+.vm-btn-sm:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* --- TABS --- */
+.vm-tabs {
+    background: #fff;
+    border-bottom: 1px solid var(--wc-border);
+    display: flex;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.vm-tab {
+    padding: 13px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--wc-muted);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+.vm-tab:hover { color: var(--wc-red); }
+.vm-tab.active { color: var(--wc-red); border-bottom-color: var(--wc-red); }
+
+/* --- MAIN CONTENT --- */
+.vm-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+}
+
+/* --- BANNER (countdown / info) --- */
+.vm-banner {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.vm-banner-icon { font-size: 2.4rem; flex-shrink: 0; }
+
+.vm-banner-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.vm-banner-sub {
+    font-size: 0.82rem;
+    opacity: 0.75;
+}
+
+.vm-countdown {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.vm-countdown-unit {
+    text-align: center;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 6px 10px;
+    min-width: 52px;
+}
+
+.vm-countdown-num {
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.vm-countdown-label {
+    font-size: 0.65rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+/* --- LOGIN PROMPT --- */
+.vm-login-prompt {
+    background: #fff;
+    border: 1.5px dashed var(--wc-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.vm-login-prompt p {
+    color: var(--wc-muted);
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+}
+
+/* --- ROUND GROUP --- */
+.vm-round-group { margin-bottom: 28px; }
+
+.vm-round-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.vm-round-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--wc-muted);
+}
+
+.vm-round-line {
+    flex: 1;
+    height: 1px;
+    background: var(--wc-border);
+}
+
+/* --- MATCH CARD --- */
+.vm-match-card {
+    background: var(--wc-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin-bottom: 10px;
+    transition: box-shadow 0.15s;
+}
+.vm-match-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
+.vm-match-card.locked { background: var(--wc-locked); }
+.vm-match-card.finished { border-left: 3px solid var(--wc-green); }
+.vm-match-card.live { border-left: 3px solid var(--wc-red); }
+
+.vm-match-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 0.75rem;
+    color: var(--wc-muted);
+}
+
+.vm-match-status-live {
+    background: var(--wc-red);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.vm-match-teams {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.vm-team {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.vm-team.away { flex-direction: row-reverse; text-align: right; }
+
+.vm-team-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.vm-team-logo-placeholder {
+    width: 28px;
+    height: 28px;
+    background: #e5e7eb;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.vm-match-vs {
+    font-size: 0.8rem;
+    color: var(--wc-muted);
+    font-weight: 600;
+    text-align: center;
+    min-width: 36px;
+}
+
+.vm-result-score {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--wc-text);
+}
+
+/* --- TIP FORM --- */
+.vm-tip-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.vm-tip-label {
+    font-size: 0.75rem;
+    color: var(--wc-muted);
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.vm-score-input {
+    width: 42px;
+    height: 36px;
+    text-align: center;
+    border: 1.5px solid var(--wc-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    background: #fff;
+    color: var(--wc-text);
+    transition: border-color 0.15s;
+}
+.vm-score-input:focus { outline: none; border-color: var(--wc-red); }
+.vm-score-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.vm-score-dash {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--wc-muted);
+}
+
+/* --- TIP SUMMARY (after save) --- */
+.vm-tip-saved {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+}
+
+.vm-tip-score {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.vm-tip-points {
+    font-weight: 700;
+    color: var(--wc-green);
+}
+
+.vm-tip-no-points { color: var(--wc-muted); }
+
+/* --- LOCKED TIP --- */
+.vm-tip-locked {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--wc-muted);
+    padding: 8px;
+    font-style: italic;
+}
+
+.vm-no-tip-locked {
+    text-align: center;
+    font-size: 0.78rem;
+    color: #9ca3af;
+    padding: 8px;
+}
+
+/* --- ODDS --- */
+.vm-odds {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 6px;
+}
+
+.vm-odd-btn {
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: var(--wc-muted);
+    border: none;
+    cursor: default;
+}
+
+/* --- LEADERBOARD --- */
+.vm-leaderboard-empty {
+    text-align: center;
+    color: var(--wc-muted);
+    padding: 40px 20px;
+    font-size: 0.9rem;
+}
+
+.vm-leaderboard-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+}
+
+.vm-leaderboard-row.current-user {
+    border: 2px solid var(--wc-red);
+    background: #fff5f5;
+}
+
+.vm-lb-pos {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--wc-muted);
+}
+
+.vm-lb-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.vm-lb-score {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--wc-red);
+    white-space: nowrap;
+}
+
+/* --- LOADING & STATES --- */
+.vm-loading {
+    text-align: center;
+    color: var(--wc-muted);
+    padding: 40px 20px;
+    font-size: 0.9rem;
+}
+
+.vm-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f4f6;
+    border-top-color: var(--wc-red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.vm-empty {
+    text-align: center;
+    color: var(--wc-muted);
+    padding: 60px 20px;
+}
+
+.vm-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.vm-empty-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+.vm-empty-sub { font-size: 0.85rem; margin-bottom: 16px; }
+
+/* --- MODAL --- */
+.vm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.vm-modal-box {
+    background: #fff;
+    border-radius: 14px;
+    padding: 28px 28px 24px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.vm-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--wc-muted);
+    line-height: 1;
+}
+.vm-modal-close:hover { color: var(--wc-text); }
+
+.vm-modal-box h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.vm-modal-box p {
+    color: var(--wc-muted);
+    font-size: 0.88rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+/* --- SAVE FEEDBACK --- */
+.vm-save-feedback {
+    font-size: 0.72rem;
+    margin-top: 4px;
+    text-align: center;
+    height: 16px;
+    color: var(--wc-green);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 500px) {
+    .vm-brand-sub { display: none; }
+    .vm-team { font-size: 0.82rem; }
+    .vm-countdown { gap: 8px; }
+    .vm-countdown-unit { min-width: 42px; padding: 5px 7px; }
+    .vm-countdown-num { font-size: 1.2rem; }
+}
