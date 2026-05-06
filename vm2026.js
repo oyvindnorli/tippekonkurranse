@@ -453,8 +453,20 @@ function renderMatches() {
         </div>
     ` : '';
 
+    // Sort: live first, then upcoming (chronological), then finished (most recent last)
+    const sorted = [...wcMatches].sort((a, b) => {
+        const priority = m => {
+            if (isMatchLive(m.status)) return 0;
+            if (!m.completed && !isMatchLive(m.status)) return 1;
+            return 2;
+        };
+        const pa = priority(a), pb = priority(b);
+        if (pa !== pb) return pa - pb;
+        return new Date(a.commence_time) - new Date(b.commence_time);
+    });
+
     // Group matches by round
-    const rounds = groupByRound(wcMatches);
+    const rounds = groupByRound(sorted);
 
     const roundsHtml = rounds.map(({ round, matches }) => `
         <div class="vm-round-group">
