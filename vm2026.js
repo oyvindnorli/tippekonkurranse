@@ -594,10 +594,10 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 function renderOdds(odds) {
     if (!odds) return '';
     return `
-        <div class="vm-odds">
-            <span class="vm-odd-btn">H ${odds.H?.toFixed(2) ?? 'â€“'}</span>
-            <span class="vm-odd-btn">U ${odds.U?.toFixed(2) ?? 'â€“'}</span>
-            <span class="vm-odd-btn">B ${odds.B?.toFixed(2) ?? 'â€“'}</span>
+        <div class=”vm-odds”>
+            <span class=”vm-odd-btn”>H ${odds.H ? Math.ceil(odds.H) : '-'}</span>
+            <span class=”vm-odd-btn”>U ${odds.U ? Math.ceil(odds.U) : '-'}</span>
+            <span class=”vm-odd-btn”>B ${odds.B ? Math.ceil(odds.B) : '-'}</span>
         </div>
     `;
 }
