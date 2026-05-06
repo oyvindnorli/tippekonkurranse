@@ -431,36 +431,40 @@ body {
 /* --- ODDS --- */
 .vm-odds {
     display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 8px;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
     margin-bottom: 2px;
+    gap: 6px;
+}
+
+.vm-odds-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--wc-muted);
+}
+
+.vm-odds-row {
+    display: flex;
+    gap: 6px;
 }
 
 .vm-odd-btn {
-    padding: 5px 16px;
-    border-radius: 20px;
-    font-size: 0.88rem;
+    padding: 5px 0;
+    border-radius: 5px;
+    font-size: 0.9rem;
     font-weight: 700;
     border: none;
     cursor: default;
-    min-width: 44px;
+    width: 44px;
     text-align: center;
 }
 
 .vm-odd-home { background: #dbeafe; color: #1d4ed8; }
 .vm-odd-draw { background: #fef9c3; color: #92400e; }
 .vm-odd-away { background: #dcfce7; color: #166534; }
-
-.vm-odds-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--wc-muted);
-    align-self: center;
-    margin-right: 2px;
-}
 
 /* --- LEADERBOARD --- */
 .vm-leaderboard-empty {
