@@ -505,40 +505,40 @@ function renderMatchCard(match) {
         weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
     });
 
-    const statusBadge = isLive
-        ? `<span class="vm-match-status-live">LIVE ${match.elapsed ? match.elapsed + "'" : ''}</span>`
+    const badge = isLive
+        ? `<span class=”vm-card-badge vm-card-badge-live”>⚡ LIVE${match.elapsed ? ' ' + match.elapsed + “'” : ''}</span>`
         : isFinished
-            ? `<span style="color:var(--wc-green);font-size:0.75rem;font-weight:700">FULLFØRT</span>`
-            : '';
+            ? `<span class=”vm-card-badge”>FT</span>`
+            : `<span class=”vm-card-badge”>${escapeHtml(match.round ? formatRound(match.round) : '')}</span>`;
 
-    const vsOrScore = isFinished && match.result
-        ? `<span class=”vm-result-score”>${match.result.home}-${match.result.away}</span>`
-        : isLive && match.result
-            ? `<span class=”vm-result-score” style=”color:var(--wc-red)”>${match.result.home}-${match.result.away}</span>`
-            : `<span class=”vm-match-vs”>vs</span>`;
+    const centerContent = (isFinished || isLive) && match.result
+        ? `<div class=”vm-result-score${isLive ? ' live' : ''}”>${match.result.home}–${match.result.away}</div>`
+        : `<div class=”vm-card-vs”>vs</div>`;
 
     const tipSection = renderTipSection(match, tip, started, isFinished, isLive);
     const oddsSection = match.odds ? renderOdds(match.odds) : '';
 
     return `
-        <div class="${cardClass}" data-match-id="${match.id}">
-            <div class="vm-match-meta">
-                <span>${timeStr}</span>
-                ${statusBadge}
+        <div class=”${cardClass}” data-match-id=”${match.id}”>
+            <div class=”vm-card-topbar”>
+                <span class=”vm-card-time”>${timeStr}</span>
+                ${badge}
             </div>
-            <div class="vm-match-teams">
-                <div class="vm-team">
-                    ${teamLogo(match.homeLogo, match.homeTeam)}
-                    <span>${escapeHtml(teamName(match.homeTeam))}</span>
+            <div class=”vm-card-body”>
+                <div class=”vm-card-teams”>
+                    <div class=”vm-card-team”>
+                        ${teamLogo(match.homeLogo, match.homeTeam)}
+                        <span class=”vm-card-team-name”>${escapeHtml(teamName(match.homeTeam))}</span>
+                    </div>
+                    <div class=”vm-card-center”>${centerContent}</div>
+                    <div class=”vm-card-team”>
+                        ${teamLogo(match.awayLogo, match.awayTeam)}
+                        <span class=”vm-card-team-name”>${escapeHtml(teamName(match.awayTeam))}</span>
+                    </div>
                 </div>
-                ${vsOrScore}
-                <div class="vm-team away">
-                    ${teamLogo(match.awayLogo, match.awayTeam)}
-                    <span>${escapeHtml(teamName(match.awayTeam))}</span>
-                </div>
+                ${oddsSection}
+                ${tipSection}
             </div>
-            ${oddsSection}
-            ${tipSection}
         </div>
     `;
 }
@@ -550,15 +550,15 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
     if (isFinished) {
         if (!tip) {
-            return `<div class="vm-no-tip-locked">Du la ikke inn tips på denne kampen.</div>`;
+            return `<div class=”vm-no-tip-locked”>Du la ikke inn tips på denne kampen.</div>`;
         }
         const pts = tip.points !== null && tip.points !== undefined
             ? tip.points
             : calculatePoints(tip, match);
         return `
-            <div class="vm-tip-saved">
-                <span>Ditt tips: <strong class=”vm-tip-score”>${tip.homeScore}-${tip.awayScore}</strong></span>
-                <span class="${pts > 0 ? 'vm-tip-points' : 'vm-tip-no-points'}">
+            <div class=”vm-tip-saved”>
+                <span>Ditt tips: <strong class=”vm-tip-score”>${tip.homeScore}–${tip.awayScore}</strong></span>
+                <span class=”${pts > 0 ? 'vm-tip-points' : 'vm-tip-no-points'}”>
                     ${pts > 0 ? '+' + pts.toFixed(1) + ' p' : '0 p'}
                 </span>
             </div>
@@ -567,40 +567,44 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
     if (isLive || (started && !isFinished)) {
         if (tip) {
-            return `<div class=”vm-tip-locked”>Ditt tips: ${tip.homeScore}-${tip.awayScore} (låst)</div>`;
+            return `<div class=”vm-tip-locked”>Ditt tips: ${tip.homeScore}–${tip.awayScore} (låst)</div>`;
         }
-        return `<div class=”vm-tip-locked”>Kampen har startet - tipping er stengt.</div>`;
+        return `<div class=”vm-tip-locked”>Kampen har startet – tipping er stengt.</div>`;
     }
 
     // Upcoming - show tip form
     const savedHome = tip?.homeScore ?? '';
     const savedAway = tip?.awayScore ?? '';
     return `
-        <div class="vm-tip-form">
-            <span class="vm-tip-label">Ditt tips:</span>
-            <input class="vm-score-input" type="number" min="0" max="20"
-                data-match-id="${mid}" data-team="home"
-                value="${savedHome}" placeholder="0">
-            <span class=”vm-score-dash”>-</span>
-            <input class="vm-score-input" type="number" min="0" max="20"
-                data-match-id="${mid}" data-team="away"
-                value="${savedAway}" placeholder="0">
-            <button class="vm-btn-sm" onclick="submitTip('${mid}')">Lagre</button>
+        <div class=”vm-tip-form”>
+            <span class=”vm-tip-label”>Ditt tips:</span>
+            <input class=”vm-score-input” type=”number” min=”0” max=”20”
+                data-match-id=”${mid}” data-team=”home”
+                value=”${savedHome}” placeholder=”0”>
+            <span class=”vm-score-dash”>–</span>
+            <input class=”vm-score-input” type=”number” min=”0” max=”20”
+                data-match-id=”${mid}” data-team=”away”
+                value=”${savedAway}” placeholder=”0”>
+            <button class=”vm-btn-sm” onclick=”submitTip('${mid}')”>Lagre</button>
         </div>
-        <div class="vm-save-feedback" id="feedback-${mid}"></div>
+        <div class=”vm-save-feedback” id=”feedback-${mid}”></div>
     `;
 }
 
 function renderOdds(odds) {
     if (!odds) return '';
-    const fmt = v => v ? Math.round(parseFloat(v)) : '-';
-    const tbl = 'width:100%;table-layout:fixed;border-collapse:collapse;margin-top:12px;border-radius:8px;overflow:hidden;';
-    const tr = 'background:#f3f4f6;';
-    const td = 'text-align:center;padding:10px 0;border-right:1px solid #e5e7eb;';
-    const tdLast = 'text-align:center;padding:10px 0;';
-    const lbl = 'font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#9ca3af;';
-    const val = 'font-size:18px;font-weight:700;color:#111827;';
-    return `<table style=”${tbl}”><tr style=”${tr}”><td style=”${td}”><span style=”${lbl}”>1</span><br><span style=”${val}”>${fmt(odds.H)}</span></td><td style=”${td}”><span style=”${lbl}”>X</span><br><span style=”${val}”>${fmt(odds.U)}</span></td><td style=”${tdLast}”><span style=”${lbl}”>2</span><br><span style=”${val}”>${fmt(odds.B)}</span></td></tr></table>`;
+    const fmt = v => {
+        if (!v) return '-';
+        const n = parseFloat(v);
+        return Number.isInteger(n) ? n : n.toFixed(1);
+    };
+    return `
+        <div class=”vm-odds”>
+            <div class=”vm-odd-col”><span class=”vm-odd-lbl”>1</span><span class=”vm-odd-val”>${fmt(odds.H)}</span></div>
+            <div class=”vm-odd-col”><span class=”vm-odd-lbl”>X</span><span class=”vm-odd-val”>${fmt(odds.U)}</span></div>
+            <div class=”vm-odd-col”><span class=”vm-odd-lbl”>2</span><span class=”vm-odd-val”>${fmt(odds.B)}</span></div>
+        </div>
+    `;
 }
 
 // --- TIP SUBMISSION ---
