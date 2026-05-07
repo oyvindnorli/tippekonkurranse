@@ -410,7 +410,7 @@ async function loadLeaderboard() {
 
         container.innerHTML = sorted.map((player, i) => {
             const pos = i + 1;
-            const medal = pos === 1 ? 'ðŸ¥‡' : pos === 2 ? 'ðŸ¥ˆ' : pos === 3 ? 'ðŸ¥‰' : pos;
+            const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
             const isCurrent = currentUser && player.uid === currentUser.id;
             return `
                 <div class="vm-leaderboard-row${isCurrent ? ' current-user' : ''}">
