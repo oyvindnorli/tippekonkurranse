@@ -32,6 +32,14 @@ jobs:
         run: |
           python populate_matches.py
 
+      - name: Run populate_vm2026.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          python populate_vm2026.py
+
       - name: Log completion
         run: |
           echo "✅ Matches and odds updated successfully at $(date)"
