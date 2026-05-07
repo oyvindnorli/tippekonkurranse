@@ -1,4 +1,4 @@
-// vm2026.js â€” VM 2026 tippekonkurranse (standalone module)
+// vm2026.js – VM 2026 tippekonkurranse (standalone module)
 
 const SUPABASE_URL = 'https://ntbhjbstmbnfiaywfkkz.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YmhqYnN0bWJuZmlheXdma2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyOTYwNTAsImV4cCI6MjA3ODg3MjA1MH0.5R1QJZxXK5Rwdt2WPEKWAno1SBY6aFUQJPbwjOhar8E';
@@ -16,7 +16,7 @@ let client;
 let currentUser = null;
 let currentSession = null;
 let wcMatches = [];
-let userTips = {};   // matchId (string) â†’ { homeScore, awayScore, odds, points }
+let userTips = {};   // matchId (string) → { homeScore, awayScore, odds, points }
 let activeTab = 'matches';
 
 // --- INIT ---
@@ -365,7 +365,7 @@ async function loadLeaderboard() {
         // Fetch all WC match IDs
         const matchIds = wcMatches.filter(m => m.completed).map(m => m.id);
         if (!matchIds.length) {
-            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen fullførte kamper ennå â€” kom tilbake etter første kampdag!</div>`;
+            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen fullførte kamper ennå – kom tilbake etter første kampdag!</div>`;
             return;
         }
 
@@ -434,7 +434,7 @@ function renderMatches() {
     if (!wcMatches.length) {
         container.innerHTML = `
             <div class="vm-empty">
-                <div class="vm-empty-icon">â³</div>
+                <div class="vm-empty-icon">⏳</div>
                 <div class="vm-empty-title">Kamper lastes snart</div>
                 <div class="vm-empty-sub">VM-kampene vil dukke opp her i god tid før første sparkoff 11. juni 2026.</div>
             </div>
@@ -636,7 +636,7 @@ window.submitTip = async function(matchId) {
 
     if (ok) {
         if (feedback) {
-            feedback.textContent = 'âœ“ Lagret!';
+            feedback.textContent = '✓ Lagret!';
             feedback.style.color = 'var(--wc-green)';
             setTimeout(() => { if (feedback) feedback.textContent = ''; }, 2500);
         }
@@ -762,7 +762,7 @@ const COUNTRY_NO = {
     'Sweden': 'Sverige',
     'Switzerland': 'Sveits',
     'Tunisia': 'Tunisia',
-    'TÃ¼rkiye': 'Tyrkia',
+    'Türkiye': 'Tyrkia',
     'Turkey': 'Tyrkia',
     'USA': 'USA',
     'Ukraine': 'Ukraina',
@@ -799,7 +799,7 @@ function startCountdown() {
     function tick() {
         const diff = target - new Date();
         if (diff <= 0) {
-            el.innerHTML = '<span style="font-weight:700">VM ER I GANG! âš½</span>';
+            el.innerHTML = '<span style="font-weight:700">VM ER I GANG! ⚽</span>';
             return;
         }
         const d = Math.floor(diff / 86400000);
