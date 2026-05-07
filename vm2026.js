@@ -593,7 +593,7 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
 function renderOdds(odds) {
     if (!odds) return '';
-    const fmt = v => v ? parseFloat(v).toFixed(2) : '-';
+    const fmt = v => v ? Math.round(parseFloat(v)) : '-';
     return `
         <div class=”vm-odds”>
             <div class=”vm-odd-col”>

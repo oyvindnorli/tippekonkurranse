@@ -432,9 +432,11 @@ body {
 .vm-odds {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    border-top: 1px solid var(--wc-border);
-    margin-top: 14px;
-    padding-top: 10px;
+    justify-items: center;
+    background: var(--wc-locked);
+    border-radius: 8px;
+    margin-top: 12px;
+    padding: 8px 0;
 }
 
 .vm-odd-col {
@@ -446,7 +448,7 @@ body {
 }
 
 .vm-odd-col + .vm-odd-col {
-    border-left: 1px solid var(--wc-border);
+    border-left: 1px solid #d1d5db;
 }
 
 .vm-odd-lbl {
