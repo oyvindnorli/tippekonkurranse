@@ -430,21 +430,21 @@ body {
 
 /* --- ODDS --- */
 .vm-odds {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    justify-items: center;
+    display: flex;
+    align-items: stretch;
     background: var(--wc-locked);
     border-radius: 8px;
     margin-top: 12px;
-    padding: 8px 0;
+    overflow: hidden;
 }
 
 .vm-odd-col {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
-    padding: 4px 0;
+    gap: 2px;
+    padding: 8px 0;
 }
 
 .vm-odd-col + .vm-odd-col {
