@@ -40,6 +40,13 @@ jobs:
         run: |
           python populate_vm2026.py
 
+      - name: Run update_scores.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          python update_scores.py
+
       - name: Log completion
         run: |
           echo "✅ Matches and odds updated successfully at $(date)"
