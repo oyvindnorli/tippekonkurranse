@@ -594,13 +594,13 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 function renderOdds(odds) {
     if (!odds) return '';
     const fmt = v => v ? Math.round(parseFloat(v)) : '-';
-    const wrap = 'margin-top:12px;background:#f3f4f6;border-radius:8px;overflow:hidden;';
-    const tbl = 'width:100%;table-layout:fixed;border-collapse:collapse;';
-    const td = 'text-align:center;padding:9px 0;border-right:1px solid #e5e7eb;';
-    const tdLast = 'text-align:center;padding:9px 0;';
-    const lbl = 'display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#9ca3af;';
-    const val = 'display:block;font-size:17px;font-weight:700;color:#111827;margin-top:1px;';
-    return `<div style=”${wrap}”><table style=”${tbl}”><tr><td style=”${td}”><span style=”${lbl}”>1</span><span style=”${val}”>${fmt(odds.H)}</span></td><td style=”${td}”><span style=”${lbl}”>X</span><span style=”${val}”>${fmt(odds.U)}</span></td><td style=”${tdLast}”><span style=”${lbl}”>2</span><span style=”${val}”>${fmt(odds.B)}</span></td></tr></table></div>`;
+    const tbl = 'width:100%;table-layout:fixed;border-collapse:collapse;margin-top:12px;border-radius:8px;overflow:hidden;';
+    const tr = 'background:#f3f4f6;';
+    const td = 'text-align:center;padding:10px 0;border-right:1px solid #e5e7eb;';
+    const tdLast = 'text-align:center;padding:10px 0;';
+    const lbl = 'font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#9ca3af;';
+    const val = 'font-size:18px;font-weight:700;color:#111827;';
+    return `<table style=”${tbl}”><tr style=”${tr}”><td style=”${td}”><span style=”${lbl}”>1</span><br><span style=”${val}”>${fmt(odds.H)}</span></td><td style=”${td}”><span style=”${lbl}”>X</span><br><span style=”${val}”>${fmt(odds.U)}</span></td><td style=”${tdLast}”><span style=”${lbl}”>2</span><br><span style=”${val}”>${fmt(odds.B)}</span></td></tr></table>`;
 }
 
 // --- TIP SUBMISSION ---
