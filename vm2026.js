@@ -505,11 +505,15 @@ function renderMatchCard(match) {
         weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
     });
 
-    const badge = isLive
-        ? `<span class=”vm-card-badge vm-card-badge-live”>⚡ LIVE${match.elapsed ? ' ' + match.elapsed + “'” : ''}</span>`
-        : isFinished
-            ? `<span class=”vm-card-badge”>FT</span>`
-            : `<span class=”vm-card-badge”>${escapeHtml(match.round ? formatRound(match.round) : '')}</span>`;
+    const elapsedStr = match.elapsed ? ' ' + match.elapsed + “'” : '';
+    let badge;
+    if (isLive) {
+        badge = `<span class=”vm-card-badge vm-card-badge-live”>LIVE${elapsedStr}</span>`;
+    } else if (isFinished) {
+        badge = `<span class=”vm-card-badge”>FT</span>`;
+    } else {
+        badge = `<span class=”vm-card-badge”>${escapeHtml(match.round ? formatRound(match.round) : '')}</span>`;
+    }
 
     const centerContent = (isFinished || isLive) && match.result
         ? `<div class=”vm-result-score${isLive ? ' live' : ''}”>${match.result.home}–${match.result.away}</div>`
