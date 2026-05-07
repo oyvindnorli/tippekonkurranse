@@ -594,22 +594,22 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 function renderOdds(odds) {
     if (!odds) return '';
     const fmt = v => v ? Math.round(parseFloat(v)) : '-';
-    const wrap = 'display:flex;align-items:stretch;background:#f3f4f6;border-radius:8px;margin-top:12px;overflow:hidden;';
-    const col = 'flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;';
-    const colBorder = col + 'border-left:1px solid #d1d5db;';
-    const lbl = 'font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;';
-    const val = 'font-size:1.05rem;font-weight:700;color:#111827;';
+    const wrap = 'background:#f3f4f6;border-radius:8px;margin-top:12px;padding:8px 0;font-size:0;text-align:center;';
+    const col = 'display:inline-block;width:33.33%;vertical-align:top;text-align:center;box-sizing:border-box;';
+    const colMid = col + 'border-left:1px solid #d1d5db;border-right:1px solid #d1d5db;';
+    const lbl = 'display:block;font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;';
+    const val = 'display:block;font-size:1.05rem;font-weight:700;color:#111827;margin-top:2px;';
     return `
         <div style=”${wrap}”>
             <div style=”${col}”>
                 <span style=”${lbl}”>1</span>
                 <span style=”${val}”>${fmt(odds.H)}</span>
             </div>
-            <div style=”${colBorder}”>
+            <div style=”${colMid}”>
                 <span style=”${lbl}”>X</span>
                 <span style=”${val}”>${fmt(odds.U)}</span>
             </div>
-            <div style=”${colBorder}”>
+            <div style=”${col}”>
                 <span style=”${lbl}”>2</span>
                 <span style=”${val}”>${fmt(odds.B)}</span>
             </div>
