@@ -594,19 +594,24 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 function renderOdds(odds) {
     if (!odds) return '';
     const fmt = v => v ? Math.round(parseFloat(v)) : '-';
+    const wrap = 'display:flex;align-items:stretch;background:#f3f4f6;border-radius:8px;margin-top:12px;overflow:hidden;';
+    const col = 'flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;';
+    const colBorder = col + 'border-left:1px solid #d1d5db;';
+    const lbl = 'font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;';
+    const val = 'font-size:1.05rem;font-weight:700;color:#111827;';
     return `
-        <div class=”vm-odds”>
-            <div class=”vm-odd-col”>
-                <span class=”vm-odd-lbl”>1</span>
-                <span class=”vm-odd-val”>${fmt(odds.H)}</span>
+        <div style=”${wrap}”>
+            <div style=”${col}”>
+                <span style=”${lbl}”>1</span>
+                <span style=”${val}”>${fmt(odds.H)}</span>
             </div>
-            <div class=”vm-odd-col”>
-                <span class=”vm-odd-lbl”>X</span>
-                <span class=”vm-odd-val”>${fmt(odds.U)}</span>
+            <div style=”${colBorder}”>
+                <span style=”${lbl}”>X</span>
+                <span style=”${val}”>${fmt(odds.U)}</span>
             </div>
-            <div class=”vm-odd-col”>
-                <span class=”vm-odd-lbl”>2</span>
-                <span class=”vm-odd-val”>${fmt(odds.B)}</span>
+            <div style=”${colBorder}”>
+                <span style=”${lbl}”>2</span>
+                <span style=”${val}”>${fmt(odds.B)}</span>
             </div>
         </div>
     `;
