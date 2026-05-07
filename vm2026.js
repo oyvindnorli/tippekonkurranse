@@ -593,12 +593,21 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
 function renderOdds(odds) {
     if (!odds) return '';
-    const pill = 'display:inline-block;padding:5px 16px;border-radius:6px;background:#f3f4f6;font-size:0.95rem;font-weight:700;color:#111827;margin:0 4px;';
+    const fmt = v => v ? parseFloat(v).toFixed(2) : '-';
     return `
-        <div style=”text-align:center;border-top:1px solid #e5e7eb;margin-top:14px;padding-top:12px;”>
-            <span style=”${pill}”>${odds.H ? Math.ceil(odds.H) : '-'}</span>
-            <span style=”${pill}”>${odds.U ? Math.ceil(odds.U) : '-'}</span>
-            <span style=”${pill}”>${odds.B ? Math.ceil(odds.B) : '-'}</span>
+        <div class=”vm-odds”>
+            <div class=”vm-odd-col”>
+                <span class=”vm-odd-lbl”>1</span>
+                <span class=”vm-odd-val”>${fmt(odds.H)}</span>
+            </div>
+            <div class=”vm-odd-col”>
+                <span class=”vm-odd-lbl”>X</span>
+                <span class=”vm-odd-val”>${fmt(odds.U)}</span>
+            </div>
+            <div class=”vm-odd-col”>
+                <span class=”vm-odd-lbl”>2</span>
+                <span class=”vm-odd-val”>${fmt(odds.B)}</span>
+            </div>
         </div>
     `;
 }
