@@ -431,6 +431,17 @@ async function loadLeaderboard() {
             .map(([uid, data]) => ({ uid, ...data }))
             .sort((a, b) => b.totalPoints - a.totalPoints || b.tipsCount - a.tipsCount);
 
+        // Build display names: first name only, add last initial if duplicate first name
+        const firstNames = sorted.map(p => p.name.trim().split(/\s+/)[0]);
+        sorted.forEach((player, i) => {
+            const parts = player.name.trim().split(/\s+/);
+            const firstName = parts[0];
+            const hasDuplicate = firstNames.some((n, j) => n === firstName && j !== i);
+            player.displayName = hasDuplicate && parts[1]
+                ? `${firstName} ${parts[1][0]}.`
+                : firstName;
+        });
+
         const pretournament = completedCount === 0;
         const header = pretournament
             ? `<div class="vm-leaderboard-empty" style="margin-bottom:16px;color:var(--wc-muted);font-size:0.85rem">VM starter 11. juni – ${sorted.length} deltaker${sorted.length !== 1 ? 'e' : ''} er klare!</div>`
@@ -446,7 +457,7 @@ async function loadLeaderboard() {
             return `
                 <div class="vm-leaderboard-row${isCurrent ? ' current-user' : ''}">
                     <div class="vm-lb-pos">${medal}</div>
-                    <div class="vm-lb-name">${escapeHtml(player.name)}${isCurrent ? ' <span style="color:var(--wc-red);font-size:0.75rem">(deg)</span>' : ''}</div>
+                    <div class="vm-lb-name">${escapeHtml(player.displayName)}${isCurrent ? ' <span style="color:var(--wc-red);font-size:0.75rem">(deg)</span>' : ''}</div>
                     <div class="vm-lb-score">${scoreText}</div>
                 </div>
             `;
