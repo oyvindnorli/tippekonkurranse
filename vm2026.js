@@ -151,8 +151,32 @@ function renderCurrentTab() {
     else loadLeaderboard();
 }
 
+// --- PREVIEW MODE ---
+function getPreviewMatch() {
+    return {
+        id: 999999,
+        homeTeam: 'USA',
+        awayTeam: 'Portugal',
+        homeLogo: 'https://media.api-sports.io/football/teams/6667.png',
+        awayLogo: 'https://media.api-sports.io/football/teams/27.png',
+        commence_time: new Date(Date.now() - 63 * 60000).toISOString(),
+        status: '2H',
+        round: 'Group Stage - 1',
+        league_id: WC_LEAGUE_ID,
+        result: { home: 1, away: 1 },
+        odds: { H: 3.2, U: 3.4, B: 2.1 },
+        completed: false,
+        elapsed: 63
+    };
+}
+
 // --- MATCH DATA ---
 async function loadMatches() {
+    if (new URLSearchParams(window.location.search).get('preview') === 'live') {
+        wcMatches = [getPreviewMatch()];
+        return;
+    }
+
     // 1. Try Supabase cache
     const supabaseMatches = await fetchMatchesFromSupabase();
 
