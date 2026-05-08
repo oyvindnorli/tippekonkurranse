@@ -172,16 +172,15 @@ function getPreviewMatch() {
 
 // --- MATCH DATA ---
 async function loadMatches() {
-    if (new URLSearchParams(window.location.search).get('preview') === 'live') {
-        wcMatches = [getPreviewMatch()];
-        return;
-    }
+    const preview = new URLSearchParams(window.location.search).get('preview') === 'live';
+
+    // 1. Try Supabase cache
 
     // 1. Try Supabase cache
     const supabaseMatches = await fetchMatchesFromSupabase();
 
     if (supabaseMatches.length > 0) {
-        wcMatches = supabaseMatches;
+        wcMatches = preview ? [getPreviewMatch(), ...supabaseMatches] : supabaseMatches;
         return;
     }
 
@@ -189,9 +188,9 @@ async function loadMatches() {
     const apiMatches = await fetchMatchesFromAPI();
     if (apiMatches.length > 0) {
         await tryInsertMatchesToSupabase(apiMatches);
-        wcMatches = apiMatches;
+        wcMatches = preview ? [getPreviewMatch(), ...apiMatches] : apiMatches;
     } else {
-        wcMatches = [];
+        wcMatches = preview ? [getPreviewMatch()] : [];
     }
 }
 
