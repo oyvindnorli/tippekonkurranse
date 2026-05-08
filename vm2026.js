@@ -94,7 +94,7 @@ async function upsertUserProfile(user) {
         || user.email?.split('@')[0]
         || 'Ukjent';
     try {
-        await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/users?on_conflict=id`, {
             method: 'POST',
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
@@ -104,6 +104,7 @@ async function upsertUserProfile(user) {
             },
             body: JSON.stringify({ id: user.id, display_name: displayName, email: user.email })
         });
+        if (!r.ok) console.warn('upsertUserProfile failed:', r.status, await r.text());
     } catch (e) {
         console.warn('Could not upsert user profile:', e);
     }
