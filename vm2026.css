@@ -258,6 +258,70 @@ body {
     background: var(--wc-border);
 }
 
+/* --- LIVE SECTION HEADER --- */
+.vm-section-live-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--wc-red);
+    margin-bottom: 10px;
+}
+
+.vm-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--wc-red);
+    animation: pulse-dot 1.4s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.75); }
+}
+
+/* --- FINISHED SECTION --- */
+.vm-section-finished {
+    margin-top: 8px;
+    margin-bottom: 28px;
+}
+
+.vm-finished-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--wc-border);
+    padding: 12px 0;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--wc-muted);
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.vm-finished-toggle:hover { color: var(--wc-text); }
+
+.vm-toggle-arrow {
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform 0.2s;
+}
+
+.vm-finished-matches {
+    margin-top: 4px;
+}
+
 /* --- MATCH CARD (Variant 5 – Moderne) --- */
 .vm-match-card {
     background: #fff;

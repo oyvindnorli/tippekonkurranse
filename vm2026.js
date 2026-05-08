@@ -535,32 +535,58 @@ function renderMatches() {
         </div>
     ` : '';
 
-    // Sort: live first, then upcoming (chronological), then finished (most recent last)
-    const sorted = [...wcMatches].sort((a, b) => {
-        const priority = m => {
-            if (isMatchLive(m.status)) return 0;
-            if (!m.completed && !isMatchLive(m.status)) return 1;
-            return 2;
-        };
-        const pa = priority(a), pb = priority(b);
-        if (pa !== pb) return pa - pb;
-        return new Date(a.commence_time) - new Date(b.commence_time);
-    });
+    // Split into three groups
+    const live = wcMatches.filter(m => isMatchLive(m.status));
+    const upcoming = wcMatches
+        .filter(m => !m.completed && !isMatchLive(m.status))
+        .sort((a, b) => new Date(a.commence_time) - new Date(b.commence_time));
+    const finished = wcMatches
+        .filter(m => m.completed)
+        .sort((a, b) => new Date(b.commence_time) - new Date(a.commence_time));
 
-    // Group matches by round
-    const rounds = groupByRound(sorted);
+    let html = loginPrompt;
 
-    const roundsHtml = rounds.map(({ round, matches }) => `
-        <div class="vm-round-group">
-            <div class="vm-round-header">
-                <span class="vm-round-title">${escapeHtml(formatRound(round))}</span>
-                <div class="vm-round-line"></div>
+    // Live section
+    if (live.length > 0) {
+        html += `
+            <div class="vm-section-live-header">
+                <span class="vm-live-dot"></span>
+                Live nå
             </div>
-            ${matches.map(m => renderMatchCard(m)).join('')}
-        </div>
-    `).join('');
+            ${live.map(m => renderMatchCard(m)).join('')}
+        `;
+    }
 
-    container.innerHTML = loginPrompt + roundsHtml;
+    // Upcoming section grouped by round
+    if (upcoming.length > 0) {
+        const rounds = groupByRound(upcoming);
+        html += rounds.map(({ round, matches }) => `
+            <div class="vm-round-group">
+                <div class="vm-round-header">
+                    <span class="vm-round-title">${escapeHtml(formatRound(round))}</span>
+                    <div class="vm-round-line"></div>
+                </div>
+                ${matches.map(m => renderMatchCard(m)).join('')}
+            </div>
+        `).join('');
+    }
+
+    // Finished section (collapsed by default)
+    if (finished.length > 0) {
+        html += `
+            <div class="vm-section-finished">
+                <button class="vm-finished-toggle" onclick="toggleFinished(this)" aria-expanded="false">
+                    <span>Ferdige kamper (${finished.length})</span>
+                    <span class="vm-toggle-arrow">▾</span>
+                </button>
+                <div class="vm-finished-matches" style="display:none">
+                    ${finished.map(m => renderMatchCard(m)).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
 
     // Attach tip input listeners
     if (currentUser) {
@@ -733,6 +759,14 @@ window.submitTip = async function(matchId) {
     } else {
         if (feedback) { feedback.textContent = 'Kunne ikke lagre. Prøv igjen.'; feedback.style.color = '#ef4444'; }
     }
+};
+
+window.toggleFinished = function(btn) {
+    const panel = btn.nextElementSibling;
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!expanded));
+    btn.querySelector('.vm-toggle-arrow').textContent = expanded ? '▾' : '▴';
+    panel.style.display = expanded ? 'none' : 'block';
 };
 
 // --- HELPERS ---
