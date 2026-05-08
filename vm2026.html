@@ -6,7 +6,7 @@
     <title>VM 2026 Tippekonkurranse</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="vm2026.css?v=9">
+    <link rel="stylesheet" href="vm2026.css?v=10">
 </head>
 <body>
 
@@ -37,6 +37,7 @@
         <div class="vm-tabs">
             <button class="vm-tab active" data-tab="matches" onclick="showTab('matches')">⚽ Kamper</button>
             <button class="vm-tab" data-tab="leaderboard" onclick="showTab('leaderboard')">🏆 Ledertabell</button>
+            <button class="vm-tab" data-tab="info" onclick="showTab('info')">&#9432; Info</button>
         </div>
     </div>
 
@@ -74,6 +75,65 @@
                     <div>Laster ledertabell...</div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- INFO TAB -->
+    <div id="tab-info" class="vm-tab-content" style="display:none">
+        <div class="vm-content">
+
+            <div class="vm-info-section">
+                <h2 class="vm-info-heading">&#127942; Premiert</h2>
+                <div class="vm-info-prizes">
+                    <div class="vm-info-prize">
+                        <span class="vm-info-prize-pos">&#129351;</span>
+                        <span class="vm-info-prize-label">1. plass</span>
+                        <span class="vm-info-prize-value">7 flaxlodd</span>
+                    </div>
+                    <div class="vm-info-prize">
+                        <span class="vm-info-prize-pos">&#129352;</span>
+                        <span class="vm-info-prize-label">2. plass</span>
+                        <span class="vm-info-prize-value">2 flaxlodd</span>
+                    </div>
+                    <div class="vm-info-prize">
+                        <span class="vm-info-prize-pos">&#129353;</span>
+                        <span class="vm-info-prize-label">3. plass</span>
+                        <span class="vm-info-prize-value">1 flaxlodd</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vm-info-section">
+                <h2 class="vm-info-heading">&#127919; Slik gir du poeng</h2>
+                <div class="vm-info-card">
+                    <div class="vm-info-row">
+                        <div class="vm-info-row-icon">&#10003;</div>
+                        <div>
+                            <div class="vm-info-row-title">Riktig utgangstegn (H / U / B)</div>
+                            <div class="vm-info-row-desc">Du f&#229;r oddsen for kampen i poeng. Eksempel: odds 3 gir 3 poeng.</div>
+                        </div>
+                    </div>
+                    <div class="vm-info-divider"></div>
+                    <div class="vm-info-row">
+                        <div class="vm-info-row-icon vm-info-row-icon--bonus">+3</div>
+                        <div>
+                            <div class="vm-info-row-title">Riktig resultat</div>
+                            <div class="vm-info-row-desc">Treffer du eksakt resultat f&#229;r du 3 bonuspoeng i tillegg.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="vm-info-example">
+                    <div class="vm-info-example-title">Eksempel</div>
+                    <div class="vm-info-example-body">
+                        Kampen ender 2&#8202;&#8211;&#8202;1. Odds p&#229; hjemmeseier (H) er 3.
+                        <br><br>
+                        &#8226; Du tippet 1&#8202;&#8211;&#8202;0 &rarr; riktig tegn: <strong>3 p</strong><br>
+                        &#8226; Du tippet 2&#8202;&#8211;&#8202;1 &rarr; riktig tegn + riktig resultat: <strong>3 + 3 = 6 p</strong><br>
+                        &#8226; Du tippet 0&#8202;&#8211;&#8202;0 &rarr; feil tegn: <strong>0 p</strong>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 

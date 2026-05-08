@@ -621,6 +621,101 @@ body {
     color: var(--wc-green);
 }
 
+/* --- INFO TAB --- */
+.vm-info-section {
+    margin-bottom: 20px;
+}
+
+.vm-info-heading {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--wc-muted);
+    margin-bottom: 12px;
+}
+
+.vm-info-prizes {
+    display: flex;
+    gap: 10px;
+}
+
+.vm-info-prize {
+    flex: 1;
+    background: var(--wc-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vm-info-prize-pos { font-size: 1.8rem; }
+.vm-info-prize-label { font-size: 0.72rem; color: var(--wc-muted); font-weight: 600; }
+.vm-info-prize-value { font-size: 0.95rem; font-weight: 700; color: var(--wc-text); }
+
+.vm-info-card {
+    background: var(--wc-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.vm-info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+}
+
+.vm-info-row-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--wc-green);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.vm-info-row-icon--bonus {
+    background: var(--wc-red);
+    font-size: 0.75rem;
+}
+
+.vm-info-row-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 3px; }
+.vm-info-row-desc { font-size: 0.82rem; color: var(--wc-muted); line-height: 1.4; }
+.vm-info-divider { height: 1px; background: var(--wc-border); margin: 0 16px; }
+
+.vm-info-example {
+    background: #f9fafb;
+    border: 1px solid var(--wc-border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+}
+
+.vm-info-example-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--wc-muted);
+    margin-bottom: 8px;
+}
+
+.vm-info-example-body {
+    font-size: 0.85rem;
+    color: var(--wc-text);
+    line-height: 1.6;
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 500px) {
     .vm-brand-sub { display: none; }
