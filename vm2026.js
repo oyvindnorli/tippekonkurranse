@@ -362,14 +362,13 @@ async function loadLeaderboard() {
     container.innerHTML = `<div class="vm-loading"><div class="vm-spinner"></div><div>Laster ledertabell...</div></div>`;
 
     try {
-        // Fetch all WC match IDs
-        const matchIds = wcMatches.filter(m => m.completed).map(m => m.id);
-        if (!matchIds.length) {
-            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen fullførte kamper ennå – kom tilbake etter første kampdag!</div>`;
+        const allMatchIds = wcMatches.map(m => m.id);
+        if (!allMatchIds.length) {
+            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen kamper lastet ennå.</div>`;
             return;
         }
 
-        const filter = matchIds.map(id => `match_id.eq.${id}`).join(',');
+        const filter = allMatchIds.map(id => `match_id.eq.${id}`).join(',');
         const res = await fetch(
             `${SUPABASE_URL}/rest/v1/tips?or=(${filter})&select=*,users(id,display_name,email)`,
             { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
@@ -377,7 +376,14 @@ async function loadLeaderboard() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const tips = await res.json();
 
-        // Group by user and calculate total points
+        if (!tips.length) {
+            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen har tippet ennå – vær først ute!</div>`;
+            return;
+        }
+
+        const completedCount = wcMatches.filter(m => m.completed).length;
+
+        // Group by user
         const users = {};
         tips.forEach(tip => {
             const uid = tip.user_id;
@@ -388,35 +394,37 @@ async function loadLeaderboard() {
                     tipsCount: 0
                 };
             }
+            users[uid].tipsCount++;
             const match = wcMatches.find(m => m.id === tip.match_id);
             if (match?.completed && match.result) {
-                const pts = calculatePoints(
+                users[uid].totalPoints += calculatePoints(
                     { homeScore: tip.home_score, awayScore: tip.away_score, odds: tip.odds },
                     { result: match.result, odds: match.odds }
                 );
-                users[uid].totalPoints += pts;
-                users[uid].tipsCount++;
             }
         });
 
         const sorted = Object.entries(users)
             .map(([uid, data]) => ({ uid, ...data }))
-            .sort((a, b) => b.totalPoints - a.totalPoints);
+            .sort((a, b) => b.totalPoints - a.totalPoints || b.tipsCount - a.tipsCount);
 
-        if (!sorted.length) {
-            container.innerHTML = `<div class="vm-leaderboard-empty">Ingen har tippet ennå.</div>`;
-            return;
-        }
+        const pretournament = completedCount === 0;
+        const header = pretournament
+            ? `<div class="vm-leaderboard-empty" style="margin-bottom:16px;color:var(--wc-muted);font-size:0.85rem">VM starter 11. juni – ${sorted.length} deltaker${sorted.length !== 1 ? 'e' : ''} er klare!</div>`
+            : '';
 
-        container.innerHTML = sorted.map((player, i) => {
+        container.innerHTML = header + sorted.map((player, i) => {
             const pos = i + 1;
-            const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
+            const medal = pos === 1 && !pretournament ? '🥇' : pos === 2 && !pretournament ? '🥈' : pos === 3 && !pretournament ? '🥉' : pos;
             const isCurrent = currentUser && player.uid === currentUser.id;
+            const scoreText = pretournament
+                ? `${player.tipsCount} tips`
+                : `${player.totalPoints.toFixed(1)} p`;
             return `
                 <div class="vm-leaderboard-row${isCurrent ? ' current-user' : ''}">
                     <div class="vm-lb-pos">${medal}</div>
                     <div class="vm-lb-name">${escapeHtml(player.name)}${isCurrent ? ' <span style="color:var(--wc-red);font-size:0.75rem">(deg)</span>' : ''}</div>
-                    <div class="vm-lb-score">${player.totalPoints.toFixed(1)} p</div>
+                    <div class="vm-lb-score">${scoreText}</div>
                 </div>
             `;
         }).join('');
