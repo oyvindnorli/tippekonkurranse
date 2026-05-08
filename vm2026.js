@@ -86,6 +86,7 @@ async function onLoggedIn(user) {
     await upsertUserProfile(user);
     await loadMatches();
     await Promise.all([loadUserTips(), loadAllTipsForLiveAndFinished()]);
+    if (new URLSearchParams(window.location.search).get('preview') === 'live') injectPreviewTips();
     renderCurrentTab();
 }
 
@@ -208,7 +209,6 @@ async function loadMatches() {
         }
     }
 
-    if (preview) injectPreviewTips();
 }
 
 function injectPreviewTips() {
