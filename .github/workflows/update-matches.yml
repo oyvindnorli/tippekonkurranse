@@ -2,8 +2,8 @@ name: Update Matches and Odds
 
 on:
   schedule:
-    # Run every hour at minute 0
-    - cron: '0 * * * *'
+    # Run every 5 minutes (~576 API calls/day, well within 7500 pro limit)
+    - cron: '*/5 * * * *'
   workflow_dispatch: # Allows manual triggering from GitHub UI
 
 jobs:
