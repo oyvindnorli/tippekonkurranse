@@ -82,9 +82,31 @@ window.handleSignOut = handleSignOut;
 
 async function onLoggedIn(user) {
     updateAuthUI(true, user);
+    await upsertUserProfile(user);
     await loadMatches();
     await loadUserTips();
     renderCurrentTab();
+}
+
+async function upsertUserProfile(user) {
+    const displayName = user.user_metadata?.full_name
+        || user.user_metadata?.name
+        || user.email?.split('@')[0]
+        || 'Ukjent';
+    try {
+        await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${currentSession.access_token}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify({ id: user.id, display_name: displayName, email: user.email })
+        });
+    } catch (e) {
+        console.warn('Could not upsert user profile:', e);
+    }
 }
 
 function onLoggedOut() {
