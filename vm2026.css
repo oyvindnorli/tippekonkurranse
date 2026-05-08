@@ -619,8 +619,8 @@ body {
 }
 
 .vm-leaderboard-row.current-user {
-    border: 2px solid var(--wc-red);
-    background: #fff5f5;
+    border: 2px solid var(--wc-green);
+    background: #f0fdf4;
 }
 
 .vm-lb-pos {
@@ -638,7 +638,7 @@ body {
 .vm-lb-score {
     font-weight: 700;
     font-size: 0.95rem;
-    color: var(--wc-red);
+    color: var(--wc-green);
     white-space: nowrap;
 }
 

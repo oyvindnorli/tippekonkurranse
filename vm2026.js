@@ -561,7 +561,7 @@ async function loadLeaderboard() {
             return `
                 <div class="vm-leaderboard-row${isCurrent ? ' current-user' : ''}">
                     <div class="vm-lb-pos">${medal}</div>
-                    <div class="vm-lb-name">${escapeHtml(player.displayName)}${isCurrent ? ' <span style="color:var(--wc-red);font-size:0.75rem">(deg)</span>' : ''}</div>
+                    <div class="vm-lb-name">${escapeHtml(player.displayName)}${isCurrent ? ' <span style="color:var(--wc-green);font-size:0.75rem">(deg)</span>' : ''}</div>
                     <div class="vm-lb-score">${scoreText}</div>
                 </div>
             `;
