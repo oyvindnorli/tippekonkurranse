@@ -638,7 +638,7 @@ body {
 .vm-lb-score {
     font-weight: 700;
     font-size: 0.95rem;
-    color: var(--wc-green);
+    color: var(--wc-text);
     white-space: nowrap;
 }
 
