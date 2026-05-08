@@ -193,23 +193,38 @@ async function loadMatches() {
     const preview = new URLSearchParams(window.location.search).get('preview') === 'live';
 
     // 1. Try Supabase cache
-
-    // 1. Try Supabase cache
     const supabaseMatches = await fetchMatchesFromSupabase();
 
     if (supabaseMatches.length > 0) {
         wcMatches = preview ? [...getPreviewMatches(), ...supabaseMatches] : supabaseMatches;
-        return;
+    } else {
+        // 2. Fetch from API-Football and try to cache
+        const apiMatches = await fetchMatchesFromAPI();
+        if (apiMatches.length > 0) {
+            await tryInsertMatchesToSupabase(apiMatches);
+            wcMatches = preview ? [...getPreviewMatches(), ...apiMatches] : apiMatches;
+        } else {
+            wcMatches = preview ? getPreviewMatches() : [];
+        }
     }
 
-    // 2. Fetch from API-Football and try to cache
-    const apiMatches = await fetchMatchesFromAPI();
-    if (apiMatches.length > 0) {
-        await tryInsertMatchesToSupabase(apiMatches);
-        wcMatches = preview ? [...getPreviewMatches(), ...apiMatches] : apiMatches;
-    } else {
-        wcMatches = preview ? getPreviewMatches() : [];
-    }
+    if (preview) injectPreviewTips();
+}
+
+function injectPreviewTips() {
+    // Brazil 2–1 Argentina (FT): variety of tips with different outcomes
+    allMatchTips['999998'] = [
+        { userId: 'p1', displayName: 'Lars',  homeScore: 2, awayScore: 0 },
+        { userId: 'p2', displayName: 'Kari',  homeScore: 1, awayScore: 1 },
+        { userId: 'p3', displayName: 'Ole',   homeScore: 2, awayScore: 1 },
+        { userId: 'p4', displayName: 'Marte', homeScore: 0, awayScore: 2 },
+    ];
+    // USA 1–1 Portugal (LIVE 63'): just scores, no points shown
+    allMatchTips['999999'] = [
+        { userId: 'p1', displayName: 'Lars',  homeScore: 2, awayScore: 1 },
+        { userId: 'p2', displayName: 'Kari',  homeScore: 0, awayScore: 0 },
+        { userId: 'p3', displayName: 'Ole',   homeScore: 1, awayScore: 2 },
+    ];
 }
 
 async function fetchMatchesFromSupabase() {
