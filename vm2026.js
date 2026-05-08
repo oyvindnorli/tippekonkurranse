@@ -189,6 +189,21 @@ function getPreviewMatches() {
     ];
 }
 
+function getPreviewLeaderboardTips() {
+    const mkUser = (id, name) => ({ id, display_name: name, email: null });
+    return [
+        // Brazil 2–1 Argentina (FT, match 999998) – odds H:2.1
+        { user_id: 'p1', match_id: 999998, home_score: 2, away_score: 0, odds: null, users: mkUser('p1', 'Lars Larsen') },
+        { user_id: 'p2', match_id: 999998, home_score: 1, away_score: 1, odds: null, users: mkUser('p2', 'Kari Hansen') },
+        { user_id: 'p3', match_id: 999998, home_score: 2, away_score: 1, odds: null, users: mkUser('p3', 'Ole Nordmann') },
+        { user_id: 'p4', match_id: 999998, home_score: 0, away_score: 2, odds: null, users: mkUser('p4', 'Marte Olsen') },
+        // USA 1–1 Portugal (LIVE, match 999999) – not completed, no points yet
+        { user_id: 'p1', match_id: 999999, home_score: 2, away_score: 1, odds: null, users: mkUser('p1', 'Lars Larsen') },
+        { user_id: 'p2', match_id: 999999, home_score: 0, away_score: 0, odds: null, users: mkUser('p2', 'Kari Hansen') },
+        { user_id: 'p3', match_id: 999999, home_score: 1, away_score: 2, odds: null, users: mkUser('p3', 'Ole Nordmann') },
+    ];
+}
+
 // --- MATCH DATA ---
 async function loadMatches() {
     const preview = new URLSearchParams(window.location.search).get('preview') === 'live';
@@ -483,6 +498,10 @@ async function loadLeaderboard() {
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const tips = await res.json();
+
+        if (new URLSearchParams(window.location.search).get('preview') === 'live') {
+            tips.push(...getPreviewLeaderboardTips());
+        }
 
         if (!tips.length) {
             container.innerHTML = `<div class="vm-leaderboard-empty">Ingen har tippet ennå – vær først ute!</div>`;
