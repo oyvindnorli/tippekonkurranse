@@ -554,6 +554,50 @@ body {
     padding: 8px;
 }
 
+/* --- OTHERS' TIPS --- */
+.vm-others-tips {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--wc-border);
+}
+
+.vm-others-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--wc-muted);
+    margin-bottom: 6px;
+}
+
+.vm-others-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.vm-others-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #f3f4f6;
+    border-radius: 20px;
+    padding: 3px 10px 3px 8px;
+    font-size: 0.78rem;
+    color: var(--wc-text);
+}
+
+.vm-others-pts {
+    margin-left: 2px;
+    font-size: 0.72rem;
+    color: var(--wc-muted);
+}
+
+.vm-others-pts.correct {
+    color: var(--wc-green);
+    font-weight: 700;
+}
+
 /* --- LEADERBOARD --- */
 .vm-leaderboard-empty {
     text-align: center;

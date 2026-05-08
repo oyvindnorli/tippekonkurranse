@@ -16,7 +16,8 @@ let client;
 let currentUser = null;
 let currentSession = null;
 let wcMatches = [];
-let userTips = {};   // matchId (string) → { homeScore, awayScore, odds, points }
+let userTips = {};      // matchId (string) → { homeScore, awayScore, odds, points }
+let allMatchTips = {}; // matchId (string) → [{userId, displayName, homeScore, awayScore}]
 let activeTab = 'matches';
 
 // --- INIT ---
@@ -84,7 +85,7 @@ async function onLoggedIn(user) {
     updateAuthUI(true, user);
     await upsertUserProfile(user);
     await loadMatches();
-    await loadUserTips();
+    await Promise.all([loadUserTips(), loadAllTipsForLiveAndFinished()]);
     renderCurrentTab();
 }
 
@@ -350,6 +351,35 @@ async function loadUserTips() {
         });
     } catch (e) {
         console.error('Error loading tips:', e);
+    }
+}
+
+async function loadAllTipsForLiveAndFinished() {
+    if (!currentSession?.access_token) return;
+    const targets = wcMatches.filter(m => m.completed || isMatchLive(m.status));
+    if (!targets.length) return;
+    const filter = targets.map(m => `match_id.eq.${m.id}`).join(',');
+    try {
+        const res = await fetch(
+            `${SUPABASE_URL}/rest/v1/tips?or=(${filter})&select=match_id,home_score,away_score,user_id,users(display_name,email)`,
+            { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentSession.access_token}` } }
+        );
+        if (!res.ok) return;
+        const tips = await res.json();
+        allMatchTips = {};
+        tips.forEach(tip => {
+            const mid = String(tip.match_id);
+            if (!allMatchTips[mid]) allMatchTips[mid] = [];
+            const rawName = tip.users?.display_name || tip.users?.email?.split('@')[0] || 'Ukjent';
+            allMatchTips[mid].push({
+                userId: tip.user_id,
+                displayName: rawName.trim().split(/\s+/)[0],
+                homeScore: tip.home_score,
+                awayScore: tip.away_score
+            });
+        });
+    } catch (e) {
+        console.warn('Could not load all tips:', e);
     }
 }
 
@@ -629,6 +659,7 @@ function renderMatchCard(match) {
 
     const tipSection = renderTipSection(match, tip, started, isFinished, isLive);
     const oddsSection = match.odds ? renderOdds(match.odds) : '';
+    const othersSection = (isFinished || isLive) ? renderOthersTips(match, isFinished) : '';
 
     return `
         <div class="${cardClass}" data-match-id="${match.id}">
@@ -650,6 +681,7 @@ function renderMatchCard(match) {
                 </div>
                 ${oddsSection}
                 ${tipSection}
+                ${othersSection}
             </div>
         </div>
     `;
@@ -700,6 +732,34 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
             <button class="vm-btn-sm" onclick="submitTip('${mid}')">Lagre</button>
         </div>
         <div class="vm-save-feedback" id="feedback-${mid}"></div>
+    `;
+}
+
+function renderOthersTips(match, isFinished) {
+    if (!currentUser) return '';
+    const tips = allMatchTips[String(match.id)];
+    if (!tips || !tips.length) return '';
+    const others = tips.filter(t => t.userId !== currentUser.id);
+    if (!others.length) return '';
+
+    const pills = others.map(t => {
+        let extra = '';
+        if (isFinished && match.result) {
+            const pts = calculatePoints(
+                { homeScore: t.homeScore, awayScore: t.awayScore, odds: null },
+                { result: match.result, odds: match.odds }
+            );
+            const correct = getOutcome(t.homeScore, t.awayScore) === getOutcome(match.result.home, match.result.away);
+            extra = `<span class="vm-others-pts${correct ? ' correct' : ''}">${pts > 0 ? '+' + pts.toFixed(1) : '0'}</span>`;
+        }
+        return `<div class="vm-others-pill">${escapeHtml(t.displayName)} <strong>${t.homeScore}–${t.awayScore}</strong>${extra}</div>`;
+    }).join('');
+
+    return `
+        <div class="vm-others-tips">
+            <div class="vm-others-label">Andre tips</div>
+            <div class="vm-others-list">${pills}</div>
+        </div>
     `;
 }
 
