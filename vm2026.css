@@ -334,28 +334,35 @@ body {
 .vm-match-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.11), 0 0 0 1px rgba(0,0,0,0.04); }
 
 .vm-card-topbar {
-    padding: 8px 16px;
+    padding: 10px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #1e293b;
+    background: #fff;
+    border-bottom: 1px solid #f1f5f9;
 }
-.vm-match-card.live .vm-card-topbar { background: var(--wc-red); }
-.vm-match-card.finished .vm-card-topbar { background: var(--wc-green); }
-.vm-match-card.locked .vm-card-topbar { background: #475569; }
+.vm-match-card.live .vm-card-topbar { background: var(--wc-red); border-bottom: none; }
+.vm-match-card.finished .vm-card-topbar { background: var(--wc-green); border-bottom: none; }
+.vm-match-card.locked .vm-card-topbar { background: #475569; border-bottom: none; }
 
 .vm-card-time {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: rgba(255,255,255,0.85);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #64748b;
 }
+.vm-match-card.live .vm-card-time,
+.vm-match-card.finished .vm-card-time,
+.vm-match-card.locked .vm-card-time { color: rgba(255,255,255,0.85); }
 
 .vm-card-badge {
     font-size: 0.65rem;
     font-weight: 600;
-    color: rgba(255,255,255,0.55);
+    color: #cbd5e1;
     letter-spacing: 0.3px;
 }
+.vm-match-card.live .vm-card-badge,
+.vm-match-card.finished .vm-card-badge,
+.vm-match-card.locked .vm-card-badge { color: rgba(255,255,255,0.7); }
 
 .vm-card-badge-live {
     color: #fff;
@@ -474,6 +481,7 @@ body {
 .vm-tip-form {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     background: #f8fafc;
     border: 1.5px dashed #cbd5e1;
