@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kampkort – Tipping-varianter</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', system-ui, sans-serif; background: #f0f2f5; color: #111; }
+h1 { text-align: center; font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; padding-top: 32px; }
+.page-sub { text-align: center; color: #888; font-size: 0.85rem; margin-bottom: 48px; }
+.page-wrap { max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; }
+.variant-block { margin-bottom: 64px; }
+.variant-title {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 2px; color: #aaa; margin-bottom: 6px;
+    padding-bottom: 8px; border-bottom: 1px solid #ddd;
+}
+.variant-desc { font-size: 0.82rem; color: #888; margin-bottom: 16px; line-height: 1.5; }
+
+/* shared inputs */
+input[type=number] {
+    width: 52px; height: 44px;
+    border: 2px solid #e2e8f0; border-radius: 10px;
+    font-size: 1.1rem; font-weight: 800; text-align: center;
+    font-family: inherit; color: #111;
+    -moz-appearance: textfield; appearance: textfield;
+    background: #fff; outline: none;
+    transition: border-color 0.15s;
+}
+input[type=number]:focus { border-color: #3b82f6; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+
+/* ========================================================
+   VARIANT 1 – Store flagg, ren
+   Logoen er stor og luftig. Odds som en enkel pill-rad
+   mellom lagene og tippefeltet.
+   ======================================================== */
+
+.v1 {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+.v1-top {
+    padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+}
+.v1-time { font-size: 0.78rem; color: #64748b; font-weight: 500; }
+.v1-round { font-size: 0.72rem; color: #cbd5e1; font-weight: 600; }
+.v1-body {
+    padding: 20px 20px 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+}
+.v1-team { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.v1-logo { width: 56px; height: 56px; object-fit: contain; }
+.v1-name { font-size: 0.9rem; font-weight: 700; color: #1e293b; text-align: center; }
+.v1-vs { font-size: 1.6rem; font-weight: 800; color: #e2e8f0; }
+.v1-odds {
+    display: flex; gap: 8px; justify-content: center;
+    padding: 14px 20px;
+}
+.v1-odd {
+    display: flex; flex-direction: column; align-items: center;
+    background: #f8fafc; border-radius: 10px;
+    padding: 6px 14px; gap: 2px; flex: 1;
+}
+.v1-odd-lbl { font-size: 0.6rem; font-weight: 700; color: #94a3b8; letter-spacing: 0.5px; }
+.v1-odd-val { font-size: 0.95rem; font-weight: 800; color: #334155; }
+.v1-tip-wrap {
+    padding: 0 20px 16px;
+}
+.v1-tip {
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+}
+.v1-tip-label { font-size: 0.78rem; color: #64748b; font-weight: 500; flex-shrink: 0; }
+.v1-tip-inputs { display: flex; align-items: center; gap: 8px; flex: 1; }
+.v1-dash { font-size: 1.2rem; font-weight: 700; color: #cbd5e1; }
+.v1-btn {
+    background: #1e293b; color: #fff;
+    border: none; border-radius: 8px;
+    padding: 0 16px; height: 40px;
+    font-family: inherit; font-size: 0.8rem; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+    transition: background 0.15s; flex-shrink: 0;
+}
+.v1-btn:hover { background: #334155; }
+.v1 input[type=number] { width: 48px; height: 40px; font-size: 1rem; }
+
+
+/* ========================================================
+   VARIANT 2 – Flagg i fokus, tips under
+   Ingen topbar-border. Logoene er store med lagnavn
+   i fet skrift. Odds horisontalt med lagfargeaksentar.
+   Tips-felt er bred og tydelig.
+   ======================================================== */
+
+.v2 {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.09);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+.v2-header {
+    background: #1e293b;
+    padding: 10px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.v2-time { font-size: 0.75rem; color: rgba(255,255,255,0.65); font-weight: 500; }
+.v2-round { font-size: 0.7rem; color: rgba(255,255,255,0.35); font-weight: 600; letter-spacing: 0.3px; }
+.v2-matchup {
+    padding: 22px 20px 16px;
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    align-items: center;
+    gap: 8px;
+}
+.v2-team { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.v2-logo { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.12)); }
+.v2-name { font-size: 1rem; font-weight: 800; color: #0f172a; text-align: center; }
+.v2-center { text-align: center; }
+.v2-vs { font-size: 1.4rem; font-weight: 800; color: #e2e8f0; }
+.v2-odds {
+    display: flex; gap: 6px;
+    padding: 0 20px 16px;
+}
+.v2-odd {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+    background: #f8fafc; border-radius: 8px; padding: 7px 10px;
+}
+.v2-odd-lbl { font-size: 0.7rem; font-weight: 700; color: #94a3b8; }
+.v2-odd-val { font-size: 0.88rem; font-weight: 800; color: #334155; }
+.v2-tipbox {
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+}
+.v2-tip-label { font-size: 0.8rem; color: #64748b; font-weight: 600; flex-shrink: 0; }
+.v2-tip-inputs { display: flex; align-items: center; gap: 8px; flex: 1; }
+.v2-dash { font-size: 1.1rem; font-weight: 700; color: #cbd5e1; }
+.v2-btn {
+    background: #2563eb; color: #fff;
+    border: none; border-radius: 10px;
+    padding: 0 20px; height: 44px;
+    font-family: inherit; font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; flex-shrink: 0;
+    transition: background 0.15s;
+}
+.v2-btn:hover { background: #1d4ed8; }
+
+
+/* ========================================================
+   VARIANT 3 – Minimalistisk med stor logo
+   Ingen bokser rundt odds. Alt er luftig whitespace.
+   Logoen er den klare stjernen. Odds som en enkel linje.
+   ======================================================== */
+
+.v3 {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+.v3-dateline {
+    padding: 12px 20px 0;
+    font-size: 0.75rem; color: #94a3b8; font-weight: 500;
+    display: flex; justify-content: space-between;
+}
+.v3-teams {
+    padding: 16px 20px 12px;
+    display: grid;
+    grid-template-columns: 1fr 48px 1fr;
+    align-items: center;
+    gap: 8px;
+}
+.v3-team { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.v3-logo { width: 52px; height: 52px; object-fit: contain; }
+.v3-name { font-size: 0.85rem; font-weight: 700; color: #111; text-align: center; line-height: 1.2; }
+.v3-vs { font-size: 1.2rem; font-weight: 800; color: #e2e8f0; text-align: center; }
+.v3-odds-line {
+    display: flex; justify-content: center; gap: 20px;
+    padding: 0 20px 14px;
+}
+.v3-odd-inline { font-size: 0.75rem; color: #94a3b8; }
+.v3-odd-inline strong { color: #475569; font-weight: 700; }
+.v3-tip {
+    border-top: 1px solid #f1f5f9;
+    padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.v3-tip-label { font-size: 0.75rem; color: #94a3b8; }
+.v3-tip-right { display: flex; align-items: center; gap: 8px; }
+.v3-dash { font-size: 1rem; font-weight: 700; color: #e2e8f0; }
+.v3-btn {
+    background: #111; color: #fff;
+    border: none; border-radius: 8px;
+    padding: 0 16px; height: 40px;
+    font-family: inherit; font-size: 0.78rem; font-weight: 700;
+    cursor: pointer;
+}
+.v3-btn:hover { background: #333; }
+.v3 input[type=number] { width: 46px; height: 40px; font-size: 1rem; }
+
+
+/* ========================================================
+   VARIANT 4 – Horisontal layout, stor logo
+   Hjemme- og bortelag i en horisontal rad med store
+   logoer og tydelig lagnavn. Odds integrert mellom
+   lagene som en "odds-splitter". Tips-felt under.
+   ======================================================== */
+
+.v4 {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+.v4-top {
+    padding: 10px 18px;
+    background: #f8fafc;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.v4-time { font-size: 0.78rem; color: #64748b; font-weight: 500; }
+.v4-round { font-size: 0.72rem; color: #cbd5e1; font-weight: 600; }
+.v4-row {
+    padding: 18px 20px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+}
+.v4-team { display: flex; align-items: center; gap: 12px; }
+.v4-team.away { flex-direction: row-reverse; }
+.v4-logo { width: 48px; height: 48px; object-fit: contain; flex-shrink: 0; }
+.v4-info { display: flex; flex-direction: column; gap: 2px; }
+.v4-name { font-size: 0.95rem; font-weight: 800; color: #0f172a; }
+.v4-name.away { text-align: right; }
+.v4-team-odds { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+.v4-divider {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.v4-vs-text { font-size: 0.8rem; font-weight: 800; color: #cbd5e1; }
+.v4-draw { font-size: 0.68rem; color: #94a3b8; font-weight: 600; text-align: center; white-space: nowrap; }
+.v4-tip {
+    border-top: 1px solid #f1f5f9;
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+}
+.v4-tip-label { font-size: 0.78rem; color: #64748b; font-weight: 500; flex: 1; }
+.v4-inputs { display: flex; align-items: center; gap: 8px; }
+.v4-dash { font-size: 1.2rem; font-weight: 700; color: #cbd5e1; }
+.v4-btn {
+    background: #0f172a; color: #fff;
+    border: none; border-radius: 10px;
+    padding: 0 18px; height: 44px;
+    font-family: inherit; font-size: 0.82rem; font-weight: 700;
+    cursor: pointer;
+}
+.v4-btn:hover { background: #1e293b; }
+
+
+/* ========================================================
+   VARIANT 5 – Kort med farget aksent-stripe
+   En tynn farget stripe langs venstre kant indikerer
+   kampen er kommende. Store logoer vertikalt.
+   Odds: tre lette piller. Tips: bred og tydelig.
+   ======================================================== */
+
+.v5 {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 12px;
+    display: flex;
+}
+.v5-accent { width: 4px; background: #3b82f6; flex-shrink: 0; }
+.v5-content { flex: 1; }
+.v5-top {
+    padding: 10px 16px 0;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.v5-time { font-size: 0.78rem; color: #64748b; font-weight: 500; }
+.v5-round { font-size: 0.7rem; color: #cbd5e1; font-weight: 600; }
+.v5-teams {
+    padding: 14px 16px 10px;
+    display: grid;
+    grid-template-columns: 1fr 56px 1fr;
+    align-items: center;
+    gap: 8px;
+}
+.v5-team { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.v5-logo { width: 52px; height: 52px; object-fit: contain; }
+.v5-name { font-size: 0.85rem; font-weight: 700; color: #1e293b; text-align: center; }
+.v5-vs { font-size: 1.3rem; font-weight: 800; color: #e2e8f0; text-align: center; }
+.v5-odds {
+    display: flex; justify-content: center; gap: 6px;
+    padding: 0 16px 12px;
+}
+.v5-odd {
+    background: #eff6ff; border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.75rem; color: #3b82f6; font-weight: 700;
+}
+.v5-odd span { color: #93c5fd; font-weight: 500; margin-right: 3px; }
+.v5-tip {
+    border-top: 1px solid #f1f5f9;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+}
+.v5-tip-label { font-size: 0.75rem; color: #94a3b8; flex: 1; }
+.v5-inputs { display: flex; align-items: center; gap: 6px; }
+.v5-dash { font-size: 1.1rem; font-weight: 700; color: #cbd5e1; }
+.v5-btn {
+    background: #3b82f6; color: #fff;
+    border: none; border-radius: 10px;
+    padding: 0 16px; height: 44px;
+    font-family: inherit; font-size: 0.8rem; font-weight: 700;
+    cursor: pointer;
+}
+.v5-btn:hover { background: #2563eb; }
+.v5 input[type=number] { border-color: #dbeafe; }
+.v5 input[type=number]:focus { border-color: #3b82f6; }
+
+
+/* ========================================================
+   VARIANT 6 – Mørk premium
+   Mørk bakgrunn med subtil gradient. Store logoer med
+   glow-effekt. Odds som diskrete tall. Hvit tippeform.
+   ======================================================== */
+
+.v6 {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-radius: 18px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+.v6-top {
+    padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.v6-time { font-size: 0.75rem; color: rgba(255,255,255,0.45); font-weight: 500; }
+.v6-round { font-size: 0.7rem; color: rgba(255,255,255,0.25); font-weight: 600; }
+.v6-matchup {
+    padding: 22px 20px 14px;
+    display: grid;
+    grid-template-columns: 1fr 64px 1fr;
+    align-items: center;
+    gap: 8px;
+}
+.v6-team { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.v6-logo {
+    width: 58px; height: 58px; object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+}
+.v6-name { font-size: 0.9rem; font-weight: 700; color: rgba(255,255,255,0.9); text-align: center; }
+.v6-vs { font-size: 1.5rem; font-weight: 800; color: rgba(255,255,255,0.1); text-align: center; }
+.v6-odds {
+    display: flex; justify-content: center; gap: 20px;
+    padding: 0 20px 16px;
+}
+.v6-odd { text-align: center; }
+.v6-odd-lbl { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.25); letter-spacing: 0.5px; display: block; }
+.v6-odd-val { font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,0.5); }
+.v6-tip {
+    background: rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+}
+.v6-tip-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); flex: 1; }
+.v6-inputs { display: flex; align-items: center; gap: 8px; }
+.v6-dash { font-size: 1.1rem; font-weight: 700; color: rgba(255,255,255,0.15); }
+.v6 input[type=number] {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+    color: #fff;
+}
+.v6 input[type=number]:focus { border-color: rgba(255,255,255,0.5); }
+.v6-btn {
+    background: rgba(255,255,255,0.12); color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 0 18px; height: 44px;
+    font-family: inherit; font-size: 0.8rem; font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.v6-btn:hover { background: rgba(255,255,255,0.2); }
+
+</style>
+</head>
+<body>
+
+<h1>Kampkort – tipping av kommende kamper</h1>
+<p class="page-sub">6 varianter · fokus på lag og flagg · odds sekundær</p>
+
+<div class="page-wrap">
+
+
+<!-- ===================== VARIANT 1 ===================== -->
+<div class="variant-block">
+<div class="variant-title">Variant 1 — Store flagg, ren</div>
+<div class="variant-desc">Store logoer dominerer. Odds som tre like bokser under lagene – tydelig men kompakt. Tippefeltet i en ren bunn-rad.</div>
+
+<div class="v1">
+    <div class="v1-top">
+        <span class="v1-time">torsdag 11. juni 21:00</span>
+        <span class="v1-round">Gruppespill – Runde 1</span>
+    </div>
+    <div class="v1-body">
+        <div class="v1-team">
+            <img class="v1-logo" src="https://media.api-sports.io/football/teams/6.png" alt="">
+            <span class="v1-name">Brasil</span>
+        </div>
+        <div><span class="v1-vs">vs</span></div>
+        <div class="v1-team">
+            <img class="v1-logo" src="https://media.api-sports.io/football/teams/26.png" alt="">
+            <span class="v1-name">Argentina</span>
+        </div>
+    </div>
+    <div class="v1-odds">
+        <div class="v1-odd"><span class="v1-odd-lbl">HJEMME</span><span class="v1-odd-val">2.1</span></div>
+        <div class="v1-odd"><span class="v1-odd-lbl">UAVGJORT</span><span class="v1-odd-val">3.4</span></div>
+        <div class="v1-odd"><span class="v1-odd-lbl">BORTE</span><span class="v1-odd-val">3.6</span></div>
+    </div>
+    <div class="v1-tip-wrap">
+        <div class="v1-tip">
+            <span class="v1-tip-label">Ditt tips:</span>
+            <div class="v1-tip-inputs">
+                <input type="number" min="0" max="20" placeholder="0">
+                <span class="v1-dash">–</span>
+                <input type="number" min="0" max="20" placeholder="0">
+            </div>
+            <button class="v1-btn">Lagre</button>
+        </div>
+    </div>
+</div>
+
+<div class="v1">
+    <div class="v1-top">
+        <span class="v1-time">fredag 12. juni 18:00</span>
+        <span class="v1-round">Gruppespill – Runde 1</span>
+    </div>
+    <div class="v1-body">
+        <div class="v1-team">
+            <img class="v1-logo" src="https://media.api-sports.io/football/teams/6667.png" alt="">
+            <span class="v1-name">USA</span>
+        </div>
+        <div><span class="v1-vs">vs</span></div>
+        <div class="v1-team">
+            <img class="v1-logo" src="https://media.api-sports.io/football/teams/27.png" alt="">
+            <span class="v1-name">Portugal</span>
+        </div>
+    </div>
+    <div class="v1-odds">
+        <div class="v1-odd"><span class="v1-odd-lbl">HJEMME</span><span class="v1-odd-val">3.2</span></div>
+        <div class="v1-odd"><span class="v1-odd-lbl">UAVGJORT</span><span class="v1-odd-val">3.4</span></div>
+        <div class="v1-odd"><span class="v1-odd-lbl">BORTE</span><span class="v1-odd-val">2.1</span></div>
+    </div>
+    <div class="v1-tip-wrap">
+        <div class="v1-tip">
+            <span class="v1-tip-label">Ditt tips:</span>
+            <div class="v1-tip-inputs">
+                <input type="number" min="0" max="20" placeholder="0">
+                <span class="v1-dash">–</span>
+                <input type="number" min="0" max="20" placeholder="0">
+            </div>
+            <button class="v1-btn">Lagre</button>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<!-- ===================== VARIANT 2 ===================== -->
+<div class="variant-block">
+<div class="variant-title">Variant 2 — Mørk topbar, blå lagre-knapp</div>
+<div class="variant-desc">Mørk topbar gir ramme og tyngde. Logoen er stor med subtil skygge. Odds horisontalt i lette bokser. Blå lagre-knapp.</div>
+
+<div class="v2">
+    <div class="v2-header">
+        <span class="v2-time">torsdag 11. juni 21:00</span>
+        <span class="v2-round">Gruppespill – Runde 1</span>
+    </div>
+    <div class="v2-matchup">
+        <div class="v2-team">
+            <img class="v2-logo" src="https://media.api-sports.io/football/teams/6.png" alt="">
+            <span class="v2-name">Brasil</span>
+        </div>
+        <div class="v2-center"><span class="v2-vs">vs</span></div>
+        <div class="v2-team">
+            <img class="v2-logo" src="https://media.api-sports.io/football/teams/26.png" alt="">
+            <span class="v2-name">Argentina</span>
+        </div>
+    </div>
+    <div class="v2-odds">
+        <div class="v2-odd"><span class="v2-odd-lbl">1</span><span class="v2-odd-val">2.1</span></div>
+        <div class="v2-odd"><span class="v2-odd-lbl">X</span><span class="v2-odd-val">3.4</span></div>
+        <div class="v2-odd"><span class="v2-odd-lbl">2</span><span class="v2-odd-val">3.6</span></div>
+    </div>
+    <div class="v2-tipbox">
+        <span class="v2-tip-label">Ditt tips:</span>
+        <div class="v2-tip-inputs">
+            <input type="number" min="0" max="20" placeholder="0">
+            <span class="v2-dash">–</span>
+            <input type="number" min="0" max="20" placeholder="0">
+        </div>
+        <button class="v2-btn">Lagre</button>
+    </div>
+</div>
+
+<div class="v2">
+    <div class="v2-header">
+        <span class="v2-time">fredag 12. juni 18:00</span>
+        <span class="v2-round">Gruppespill – Runde 1</span>
+    </div>
+    <div class="v2-matchup">
+        <div class="v2-team">
+            <img class="v2-logo" src="https://media.api-sports.io/football/teams/6667.png" alt="">
+            <span class="v2-name">USA</span>
+        </div>
+        <div class="v2-center"><span class="v2-vs">vs</span></div>
+        <div class="v2-team">
+            <img class="v2-logo" src="https://media.api-sports.io/football/teams/27.png" alt="">
+            <span class="v2-name">Portugal</span>
+        </div>
+    </div>
+    <div class="v2-odds">
+        <div class="v2-odd"><span class="v2-odd-lbl">1</span><span class="v2-odd-val">3.2</span></div>
+        <div class="v2-odd"><span class="v2-odd-lbl">X</span><span class="v2-odd-val">3.4</span></div>
+        <div class="v2-odd"><span class="v2-odd-lbl">2</span><span class="v2-odd-val">2.1</span></div>
+    </div>
+    <div class="v2-tipbox">
+        <span class="v2-tip-label">Ditt tips:</span>
+        <div class="v2-tip-inputs">
+            <input type="number" min="0" max="20" placeholder="0">
+            <span class="v2-dash">–</span>
+            <input type="number" min="0" max="20" placeholder="0">
+        </div>
+        <button class="v2-btn">Lagre</button>
+    </div>
+</div>
+</div>
+
+
+<!-- ===================== VARIANT 3 ===================== -->
+<div class="variant-block">
+<div class="variant-title">Variant 3 — Minimalistisk, odds som tekst</div>
+<div class="variant-desc">Ingen bokser, ingen bakgrunner. Odds er én diskret linje med tekst. Fokus helt på lag og tippefeltet.</div>
+
+<div class="v3">
+    <div class="v3-dateline">
+        <span>torsdag 11. juni 21:00</span>
+        <span>Gruppespill – Runde 1</span>
+    </div>
+    <div class="v3-teams">
+        <div class="v3-team">
+            <img class="v3-logo" src="https://media.api-sports.io/football/teams/6.png" alt="">
+            <span class="v3-name">Brasil</span>
+        </div>
+        <span class="v3-vs">vs</span>
+        <div class="v3-team">
+            <img class="v3-logo" src="https://media.api-sports.io/football/teams/26.png" alt="">
+            <span class="v3-name">Argentina</span>
+        </div>
+    </div>
+    <div class="v3-odds-line">
+        <span class="v3-odd-inline">Hjemme <strong>2.1</strong></span>
+        <span class="v3-odd-inline">Uavgjort <strong>3.4</strong></span>
+        <span class="v3-odd-inline">Borte <strong>3.6</strong></span>
+    </div>
+    <div class="v3-tip">
+        <span class="v3-tip-label">Ditt tips</span>
+        <div class="v3-tip-right">
+            <input type="number" min="0" max="20" placeholder="0">
+            <span class="v3-dash">–</span>
+            <input type="number" min="0" max="20" placeholder="0">
+            <button class="v3-btn">Lagre</button>
+        </div>
+    </div>
+</div>
+
+<div class="v3">
+    <div class="v3-dateline">
+        <span>fredag 12. juni 18:00</span>
+        <span>Gruppespill – Runde 1</span>
+    </div>
+    <div class="v3-teams">
+        <div class="v3-team">
+            <img class="v3-logo" src="https://media.api-sports.io/football/teams/6667.png" alt="">
+            <span class="v3-name">USA</span>
+        </div>
+        <span class="v3-vs">vs</span>
+        <div class="v3-team">
+            <img class="v3-logo" src="https://media.api-sports.io/football/teams/27.png" alt="">
+            <span class="v3-name">Portugal</span>
+        </div>
+    </div>
+    <div class="v3-odds-line">
+        <span class="v3-odd-inline">Hjemme <strong>3.2</strong></span>
+        <span class="v3-odd-inline">Uavgjort <strong>3.4</strong></span>
+        <span class="v3-odd-inline">Borte <strong>2.1</strong></span>
+    </div>
+    <div class="v3-tip">
+        <span class="v3-tip-label">Ditt tips</span>
+        <div class="v3-tip-right">
+            <input type="number" min="0" max="20" placeholder="0">
+            <span class="v3-dash">–</span>
+            <input type="number" min="0" max="20" placeholder="0">
+            <button class="v3-btn">Lagre</button>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<!-- ===================== VARIANT 4 ===================== -->
+<div class="variant-block">
+<div class="variant-title">Variant 4 — Horisontal med odds-splitter</div>
+<div class="variant-desc">Lagene møtes horisontalt med logo og navn side om side. Odds for hvert lag under lagnavn. Uavgjort-odds i midtsøylen.</div>
+
+<div class="v4">
+    <div class="v4-top">
+        <span class="v4-time">torsdag 11. juni 21:00</span>
+        <span class="v4-round">Gruppespill – Runde 1</span>
+    </div>
+    <div class="v4-row">
+        <div class="v4-team">
+            <img class="v4-logo" src="https://media.api-sports.io/football/teams/6.png" alt="">
+            <div class="v4-info">
+                <span class="v4-name">Brasil</span>
+                <span class="v4-team-odds">Hjemme · 2.1</span>
+            </div>
+        </div>
+        <div class="v4-divider">
+            <span class="v4-vs-text">vs</span>
+            <span class="v4-draw">X · 3.4</span>
+        </div>
+        <div class="v4-team away">
+            <img class="v4-logo" src="https://media.api-sports.io/football/teams/26.png" alt="">
+            <div class="v4-info">
+                <span class="v4-name away">Argentina</span>
+                <span class="v4-team-odds">Borte · 3.6</span>
+            </div>
+        </div>
+    </div>
+    <div class="v4-tip">
+        <span class="v4-tip-label">Ditt tips:</span>
+        <div class="v4-inputs">
+            <input type="number" min="0" max="20" placeholder="0">
+            <span class="v4-dash">–</span>
+            <input type="number" min="0" max="20" placeholder="0">
+        </div>
+        <button class="v4-btn">Lagre</button>
+    </div>
+</div>
+
+<div class="v4">
+    <div class="v4-top">
+        <span class="v4-time">fredag 12. juni 18:00</span>
+        <span class="v4-round">Gruppespill – Runde 1</span>
+    </div>
+    <div class="v4-row">
+        <div class="v4-team">
+            <img class="v4-logo" src="https://media.api-sports.io/football/teams/6667.png" alt="">
+            <div class="v4-info">
+                <span class="v4-name">USA</span>
+                <span class="v4-team-odds">Hjemme · 3.2</span>
+            </div>
+        </div>
+        <div class="v4-divider">
+            <span class="v4-vs-text">vs</span>
+            <span class="v4-draw">X · 3.4</span>
+        </div>
+        <div class="v4-team away">
+            <img class="v4-logo" src="https://media.api-sports.io/football/teams/27.png" alt="">
+            <div class="v4-info">
+                <span class="v4-name away">Portugal</span>
+                <span class="v4-team-odds">Borte · 2.1</span>
+            </div>
+        </div>
+    </div>
+    <div class="v4-tip">
+        <span class="v4-tip-label">Ditt tips:</span>
+        <div class="v4-inputs">
+            <input type="number" min="0" max="20" placeholder="0">
+            <span class="v4-dash">–</span>
+            <input type="number" min="0" max="20" placeholder="0">
+        </div>
+        <button class="v4-btn">Lagre</button>
+    </div>
+</div>
+</div>
+
+
+<!-- ===================== VARIANT 5 ===================== -->
+<div class="variant-block">
+<div class="variant-title">Variant 5 — Blå aksent-stripe</div>
+<div class="variant-desc">Tynn blå stripe langs venstre kant. Odds som blå pills. Gir siden et lett fargeaksentuert preg uten å dominere.</div>
+
+<div class="v5">
+    <div class="v5-accent"></div>
+    <div class="v5-content">
+        <div class="v5-top">
+            <span class="v5-time">torsdag 11. juni 21:00</span>
+            <span class="v5-round">Gruppespill – Runde 1</span>
+        </div>
+        <div class="v5-teams">
+            <div class="v5-team">
+                <img class="v5-logo" src="https://media.api-sports.io/football/teams/6.png" alt="">
+                <span class="v5-name">Brasil</span>
+            </div>
+            <span class="v5-vs">vs</span>
+            <div class="v5-team">
+                <img class="v5-logo" src="https://media.api-sports.io/football/teams/26.png" alt="">
+                <span class="v5-name">Argentina</span>
+            </div>
+        </div>
+        <div class="v5-odds">
+            <span class="v5-odd"><span>1</span> 2.1</span>
+            <span class="v5-odd"><span>X</span> 3.4</span>
+            <span class="v5-odd"><span>2</span> 3.6</span>
+        </div>
+        <div class="v5-tip">
+            <span class="v5-tip-label">Ditt tips:</span>
+            <div class="v5-inputs">
+                <input type="number" min="0" max="20" placeholder="0">
+                <span class="v5-dash">–</span>
+                <input type="number" min="0" max="20" placeholder="0">
+            </div>
+            <button class="v5-btn">Lagre</button>
+        </div>
+    </div>
+</div>
+
+<div class="v5">
+    <div class="v5-accent"></div>
+    <div class="v5-content">
+        <div class="v5-top">
+            <span class="v5-time">fredag 12. juni 18:00</span>
+            <span class="v5-round">Gruppespill – Runde 1</span>
+        </div>
+        <div class="v5-teams">
+            <div class="v5-team">
+                <img class="v5-logo" src="https://media.api-sports.io/football/teams/6667.png" alt="">
+                <span class="v5-name">USA</span>
+            </div>
+            <span class="v5-vs">vs</span>
+            <div class="v5-team">
+                <img class="v5-logo" src="https://media.api-sports.io/football/teams/27.png" alt="">
+                <span class="v5-name">Portugal</span>
+            </div>
+        </div>
+        <div class="v5-odds">
+            <span class="v5-odd"><span>1</span> 3.2</span>
+            <span class="v5-odd"><span>X</span> 3.4</span>
+            <span class="v5-odd"><span>2</span> 2.1</span>
+        </div>
+        <div class="v5-tip">
+            <span class="v5-tip-label">Ditt tips:</span>
+            <div class="v5-inputs">
+                <input type="number" min="0" max="20" placeholder="0">
+                <span class="v5-dash">–</span>
+                <input type="number" min="0" max="20" placeholder="0">
+            </div>
+            <button class="v5-btn">Lagre</button>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<!-- ===================== VARIANT 6 ===================== -->
+<div class="variant-block">
+<div class="variant-title">Variant 6 — Mørkt premium</div>
+<div class="variant-desc">Mørk gradient-bakgrunn. Logoene lyser mot mørket. Odds er subtle og nesten usynlige. Kontrastfull og premium.</div>
+
+<div class="v6">
+    <div class="v6-top">
+        <span class="v6-time">torsdag 11. juni 21:00</span>
+        <span class="v6-round">Gruppespill – Runde 1</span>
+    </div>
+    <div class="v6-matchup">
+        <div class="v6-team">
+            <img class="v6-logo" src="https://media.api-sports.io/football/teams/6.png" alt="">
+            <span class="v6-name">Brasil</span>
+        </div>
+        <div><span class="v6-vs">vs</span></div>
+        <div class="v6-team">
+            <img class="v6-logo" src="https://media.api-sports.io/football/teams/26.png" alt="">
+            <span class="v6-name">Argentina</span>
+        </div>
+    </div>
+    <div class="v6-odds">
+        <div class="v6-odd"><span class="v6-odd-lbl">HJEMME</span><span class="v6-odd-val">2.1</span></div>
+        <div class="v6-odd"><span class="v6-odd-lbl">X</span><span class="v6-odd-val">3.4</span></div>
+        <div class="v6-odd"><span class="v6-odd-lbl">BORTE</span><span class="v6-odd-val">3.6</span></div>
+    </div>
+    <div class="v6-tip">
+        <span class="v6-tip-label">Ditt tips:</span>
+        <div class="v6-inputs">
+            <input type="number" min="0" max="20" placeholder="0">
+            <span class="v6-dash">–</span>
+            <input type="number" min="0" max="20" placeholder="0">
+        </div>
+        <button class="v6-btn">Lagre</button>
+    </div>
+</div>
+
+<div class="v6">
+    <div class="v6-top">
+        <span class="v6-time">fredag 12. juni 18:00</span>
+        <span class="v6-round">Gruppespill – Runde 1</span>
+    </div>
+    <div class="v6-matchup">
+        <div class="v6-team">
+            <img class="v6-logo" src="https://media.api-sports.io/football/teams/6667.png" alt="">
+            <span class="v6-name">USA</span>
+        </div>
+        <div><span class="v6-vs">vs</span></div>
+        <div class="v6-team">
+            <img class="v6-logo" src="https://media.api-sports.io/football/teams/27.png" alt="">
+            <span class="v6-name">Portugal</span>
+        </div>
+    </div>
+    <div class="v6-odds">
+        <div class="v6-odd"><span class="v6-odd-lbl">HJEMME</span><span class="v6-odd-val">3.2</span></div>
+        <div class="v6-odd"><span class="v6-odd-lbl">X</span><span class="v6-odd-val">3.4</span></div>
+        <div class="v6-odd"><span class="v6-odd-lbl">BORTE</span><span class="v6-odd-val">2.1</span></div>
+    </div>
+    <div class="v6-tip">
+        <span class="v6-tip-label">Ditt tips:</span>
+        <div class="v6-inputs">
+            <input type="number" min="0" max="20" placeholder="0">
+            <span class="v6-dash">–</span>
+            <input type="number" min="0" max="20" placeholder="0">
+        </div>
+        <button class="v6-btn">Lagre</button>
+    </div>
+</div>
+</div>
+
+
+</div>
+</body>
+</html>

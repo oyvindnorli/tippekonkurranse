@@ -806,9 +806,9 @@ function renderOdds(odds) {
     };
     return `
         <div class="vm-odds">
-            <div class="vm-odd-col"><span class="vm-odd-lbl">1</span><span class="vm-odd-val">${fmt(odds.H)}</span></div>
-            <div class="vm-odd-col"><span class="vm-odd-lbl">X</span><span class="vm-odd-val">${fmt(odds.U)}</span></div>
-            <div class="vm-odd-col"><span class="vm-odd-lbl">2</span><span class="vm-odd-val">${fmt(odds.B)}</span></div>
+            <div class="vm-odd-col"><span class="vm-odd-lbl">Hjemme</span><span class="vm-odd-val">${fmt(odds.H)}</span></div>
+            <div class="vm-odd-col"><span class="vm-odd-lbl">Uavgjort</span><span class="vm-odd-val">${fmt(odds.U)}</span></div>
+            <div class="vm-odd-col"><span class="vm-odd-lbl">Borte</span><span class="vm-odd-val">${fmt(odds.B)}</span></div>
         </div>
     `;
 }
