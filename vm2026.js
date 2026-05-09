@@ -673,9 +673,9 @@ function renderMatchCard(match) {
     else if (isLive) cardClass += ' live';
     else if (started) cardClass += ' locked';
 
-    const timeStr = matchTime.toLocaleString('no-NO', {
-        weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
-    });
+    const DAYS = ['søndag','mandag','tirsdag','onsdag','torsdag','fredag','lørdag'];
+    const MONTHS = ['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+    const timeStr = `${DAYS[matchTime.getDay()]} ${matchTime.getDate()}. ${MONTHS[matchTime.getMonth()]} ${String(matchTime.getHours()).padStart(2,'0')}:${String(matchTime.getMinutes()).padStart(2,'0')}`;
 
     const elapsedStr = match.elapsed ? ' ' + match.elapsed + "'" : '';
     let badge;
