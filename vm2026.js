@@ -81,6 +81,75 @@ async function handleSignOut() {
 }
 window.handleSignOut = handleSignOut;
 
+// --- USERNAME/PASSWORD AUTH ---
+let authTabMode = 'signin';
+
+window.switchAuthTab = function(mode) {
+    authTabMode = mode;
+    document.getElementById('tabSignin').classList.toggle('active', mode === 'signin');
+    document.getElementById('tabSignup').classList.toggle('active', mode === 'signup');
+    document.getElementById('vmUserSubmitBtn').textContent = mode === 'signin' ? 'Logg inn' : 'Opprett konto';
+    document.getElementById('vmPasswordInput').autocomplete = mode === 'signin' ? 'current-password' : 'new-password';
+    document.getElementById('vmAuthError').style.display = 'none';
+};
+
+function usernameToEmail(username) {
+    return username.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_.]/g, '') + '@tippekonkurran.se';
+}
+
+window.handleUserAuth = async function() {
+    const username = document.getElementById('vmUsernameInput').value.trim();
+    const password = document.getElementById('vmPasswordInput').value;
+    const errorEl = document.getElementById('vmAuthError');
+    const btn = document.getElementById('vmUserSubmitBtn');
+
+    errorEl.style.display = 'none';
+
+    if (username.length < 2) {
+        errorEl.textContent = 'Brukernavn må ha minst 2 tegn.';
+        errorEl.style.display = 'block';
+        return;
+    }
+    if (password.length < 6) {
+        errorEl.textContent = 'Passord må ha minst 6 tegn.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    const email = usernameToEmail(username);
+    btn.disabled = true;
+    btn.textContent = authTabMode === 'signin' ? 'Logger inn...' : 'Oppretter konto...';
+
+    if (authTabMode === 'signup') {
+        const { error } = await client.auth.signUp({
+            email,
+            password,
+            options: { data: { display_name: username } }
+        });
+        if (error) {
+            const alreadyTaken = error.message.toLowerCase().includes('already') || error.status === 422;
+            errorEl.textContent = alreadyTaken
+                ? 'Dette brukernavnet er tatt. Velg et annet, eller logg inn.'
+                : error.message;
+            errorEl.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Opprett konto';
+        } else {
+            closeAuthModal();
+        }
+    } else {
+        const { error } = await client.auth.signInWithPassword({ email, password });
+        if (error) {
+            errorEl.textContent = 'Feil brukernavn eller passord.';
+            errorEl.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Logg inn';
+        } else {
+            closeAuthModal();
+        }
+    }
+};
+
 async function onLoggedIn(user) {
     updateAuthUI(true, user);
     await upsertUserProfile(user);
@@ -91,7 +160,8 @@ async function onLoggedIn(user) {
 }
 
 async function upsertUserProfile(user) {
-    const displayName = user.user_metadata?.full_name
+    const displayName = user.user_metadata?.display_name
+        || user.user_metadata?.full_name
         || user.user_metadata?.name
         || user.email?.split('@')[0]
         || 'Ukjent';
@@ -591,10 +661,9 @@ function renderMatches() {
     // Login prompt for unauthenticated users (above matches, not blocking)
     const loginPrompt = !currentUser ? `
         <div class="vm-login-prompt">
-            <p>Logg inn med Google for å legge inn tips og se deg selv på ledertabellen.</p>
-            <button class="vm-btn-google" onclick="handleGoogleSignIn()" style="max-width:260px;margin:0 auto;">
-                ${googleSvg()}
-                Logg inn med Google
+            <p>Logg inn for å legge inn tips og se deg selv på ledertabellen.</p>
+            <button class="vm-btn vm-btn-primary" onclick="openAuthModal()" style="margin:0 auto;padding:10px 28px;">
+                Logg inn / Opprett konto
             </button>
         </div>
     ` : '';

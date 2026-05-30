@@ -6,7 +6,7 @@
     <title>VM 2026 Tippekonkurranse</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="vm2026.css?v=16">
+    <link rel="stylesheet" href="vm2026.css?v=17">
 </head>
 <body>
 
@@ -22,7 +22,7 @@
             </div>
             <div class="vm-header-right">
                 <span id="vmUsername" class="vm-username" style="display:none"></span>
-                <button id="vmLoginBtn" class="vm-btn vm-btn-outline" onclick="handleGoogleSignIn()">
+                <button id="vmLoginBtn" class="vm-btn vm-btn-outline" onclick="openAuthModal()">
                     Logg inn
                 </button>
                 <button id="vmLogoutBtn" class="vm-btn vm-btn-outline" style="display:none" onclick="handleSignOut()">
@@ -137,12 +137,13 @@
         </div>
     </div>
 
-    <!-- AUTH MODAL (Google only) -->
+    <!-- AUTH MODAL -->
     <div id="vmAuthModal" class="vm-modal-overlay" style="display:none" onclick="if(event.target===this)closeAuthModal()">
         <div class="vm-modal-box">
             <button class="vm-modal-close" onclick="closeAuthModal()">×</button>
             <h2>Logg inn for å tippe</h2>
-            <p>Bruk Google-kontoen din for å delta i VM-tippekonkurransen og se ledertabellen.</p>
+
+            <!-- Google -->
             <button class="vm-btn-google" id="modalGoogleBtn">
                 <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
                     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -152,6 +153,19 @@
                 </svg>
                 Fortsett med Google
             </button>
+
+            <!-- Divider -->
+            <div class="vm-modal-divider"><span>eller</span></div>
+
+            <!-- Brukernavn + passord -->
+            <div class="vm-form-tabs">
+                <button class="vm-form-tab active" id="tabSignin" onclick="switchAuthTab('signin')">Logg inn</button>
+                <button class="vm-form-tab" id="tabSignup" onclick="switchAuthTab('signup')">Ny bruker</button>
+            </div>
+            <input class="vm-auth-input" type="text" id="vmUsernameInput" placeholder="Brukernavn" maxlength="30" autocomplete="username">
+            <input class="vm-auth-input" type="password" id="vmPasswordInput" placeholder="Passord (min. 6 tegn)" autocomplete="current-password">
+            <div class="vm-auth-error" id="vmAuthError" style="display:none"></div>
+            <button class="vm-btn-user-submit" id="vmUserSubmitBtn" onclick="handleUserAuth()">Logg inn</button>
         </div>
     </div>
 
@@ -159,10 +173,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- VM 2026 app -->
-    <script type="module" src="vm2026.js?v=31"></script>
+    <script type="module" src="vm2026.js?v=32"></script>
 
     <script>
-        // closeAuthModal needs to be global (non-module)
+        function openAuthModal() {
+            document.getElementById('vmAuthModal').style.display = 'flex';
+            document.getElementById('vmAuthError').style.display = 'none';
+            document.getElementById('vmUsernameInput').value = '';
+            document.getElementById('vmPasswordInput').value = '';
+        }
         function closeAuthModal() {
             document.getElementById('vmAuthModal').style.display = 'none';
         }
