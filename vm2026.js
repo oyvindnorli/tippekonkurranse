@@ -615,7 +615,7 @@ async function loadLeaderboard() {
         const firstNames = sorted.map(p => p.name.trim().split(/\s+/)[0]);
         sorted.forEach((player, i) => {
             const parts = player.name.trim().split(/\s+/);
-            const firstName = parts[0];
+            const firstName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
             const hasDuplicate = firstNames.some((n, j) => n === firstName && j !== i);
             player.displayName = hasDuplicate && parts[1]
                 ? `${firstName} ${parts[1][0]}.`
