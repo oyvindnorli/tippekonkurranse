@@ -495,21 +495,38 @@ body {
     font-weight: 600;
 }
 
-.vm-score-input {
-    width: 42px;
-    height: 38px;
-    text-align: center;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 800;
-    font-family: inherit;
-    background: #fff;
-    color: #1e293b;
-    transition: border-color 0.15s;
+.vm-score-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
-.vm-score-input:focus { outline: none; border-color: var(--wc-red); }
-.vm-score-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.vm-score-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+    color: #1e293b;
+}
+.vm-score-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+.vm-score-btn:active { background: #e2e8f0; }
+
+.vm-score-val {
+    font-size: 1.3rem;
+    font-weight: 800;
+    min-width: 26px;
+    text-align: center;
+    color: #1e293b;
+}
 
 .vm-score-dash {
     font-size: 1.1rem;

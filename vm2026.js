@@ -727,12 +727,6 @@ function renderMatches() {
 
     container.innerHTML = html;
 
-    // Attach tip input listeners
-    if (currentUser) {
-        container.querySelectorAll('.vm-score-input').forEach(input => {
-            input.addEventListener('input', onScoreInput);
-        });
-    }
 }
 
 function renderMatchCard(match) {
@@ -826,19 +820,23 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
     }
 
     // Upcoming - show tip form
-    const savedHome = tip?.homeScore ?? '';
-    const savedAway = tip?.awayScore ?? '';
+    const state = scoreState[String(mid)];
+    const displayHome = state ? (state.home !== null ? state.home : '–') : (tip ? tip.homeScore : '–');
+    const displayAway = state ? (state.away !== null ? state.away : '–') : (tip ? tip.awayScore : '–');
     return `
         <div class="vm-tip-form">
             <span class="vm-tip-label">Ditt tips:</span>
-            <input class="vm-score-input" type="number" min="0" max="20"
-                data-match-id="${mid}" data-team="home"
-                value="${savedHome}" placeholder="0">
+            <div class="vm-score-ctrl">
+                <button class="vm-score-btn" onclick="adjustScore('${mid}','home',-1)">−</button>
+                <span class="vm-score-val" id="score-home-${mid}">${displayHome}</span>
+                <button class="vm-score-btn" onclick="adjustScore('${mid}','home',1)">+</button>
+            </div>
             <span class="vm-score-dash">–</span>
-            <input class="vm-score-input" type="number" min="0" max="20"
-                data-match-id="${mid}" data-team="away"
-                value="${savedAway}" placeholder="0">
-            <button class="vm-btn-sm" onclick="submitTip('${mid}')">Lagre</button>
+            <div class="vm-score-ctrl">
+                <button class="vm-score-btn" onclick="adjustScore('${mid}','away',-1)">−</button>
+                <span class="vm-score-val" id="score-away-${mid}">${displayAway}</span>
+                <button class="vm-score-btn" onclick="adjustScore('${mid}','away',1)">+</button>
+            </div>
         </div>
         <div class="vm-save-feedback" id="feedback-${mid}"></div>
     `;
@@ -889,44 +887,45 @@ function renderOdds(odds) {
 }
 
 // --- TIP SUBMISSION ---
-const tipDebounce = {};
+const scoreState = {};
+const autoSaveTimers = {};
 
-function onScoreInput(e) {
-    const input = e.target;
-    // Clamp value
-    if (input.value < 0) input.value = 0;
-    if (input.value > 20) input.value = 20;
-}
-
-window.submitTip = async function(matchId) {
-    const homeInput = document.querySelector(`.vm-score-input[data-match-id="${matchId}"][data-team="home"]`);
-    const awayInput = document.querySelector(`.vm-score-input[data-match-id="${matchId}"][data-team="away"]`);
-    const feedback = document.getElementById(`feedback-${matchId}`);
-
-    if (!homeInput || !awayInput) return;
-    const homeScore = homeInput.value;
-    const awayScore = awayInput.value;
-
-    if (homeScore === '' || awayScore === '' || homeScore === null || awayScore === null) {
-        if (feedback) { feedback.textContent = 'Fyll inn begge scorene.'; feedback.style.color = '#ef4444'; }
-        return;
+window.adjustScore = function(matchId, team, delta) {
+    if (!scoreState[matchId]) {
+        const t = userTips[String(matchId)];
+        scoreState[matchId] = {
+            home: t ? t.homeScore : null,
+            away: t ? t.awayScore : null
+        };
     }
-
-    const match = wcMatches.find(m => String(m.id) === String(matchId));
-    if (!match) return;
-
-    if (feedback) { feedback.textContent = 'Lagrer...'; feedback.style.color = 'var(--wc-muted)'; }
-
-    const ok = await saveTip(matchId, homeScore, awayScore, match.homeTeam, match.awayTeam, match.odds);
-
-    if (ok) {
-        if (feedback) {
-            feedback.textContent = '✓ Lagret!';
-            feedback.style.color = 'var(--wc-green)';
-            setTimeout(() => { if (feedback) feedback.textContent = ''; }, 2500);
-        }
+    const state = scoreState[matchId];
+    if (state[team] === null) {
+        state[team] = delta > 0 ? 1 : 0;
     } else {
-        if (feedback) { feedback.textContent = 'Kunne ikke lagre. Prøv igjen.'; feedback.style.color = '#ef4444'; }
+        state[team] = Math.max(0, state[team] + delta);
+    }
+    const el = document.getElementById(`score-${team}-${matchId}`);
+    if (el) el.textContent = state[team];
+
+    if (state.home !== null && state.away !== null) {
+        clearTimeout(autoSaveTimers[matchId]);
+        autoSaveTimers[matchId] = setTimeout(async () => {
+            const match = wcMatches.find(m => String(m.id) === String(matchId));
+            if (!match) return;
+            const feedback = document.getElementById(`feedback-${matchId}`);
+            if (feedback) { feedback.textContent = 'Lagrer...'; feedback.style.color = 'var(--wc-muted)'; }
+            const ok = await saveTip(matchId, state.home, state.away, match.homeTeam, match.awayTeam, match.odds);
+            if (feedback) {
+                if (ok) {
+                    feedback.textContent = '✓ Lagret';
+                    feedback.style.color = 'var(--wc-green)';
+                    setTimeout(() => { if (feedback) feedback.textContent = ''; }, 2000);
+                } else {
+                    feedback.textContent = 'Kunne ikke lagre.';
+                    feedback.style.color = '#ef4444';
+                }
+            }
+        }, 600);
     }
 };
 
