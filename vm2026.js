@@ -160,10 +160,11 @@ async function onLoggedIn(user) {
 }
 
 async function upsertUserProfile(user) {
-    const isGoogleUser = user.app_metadata?.provider === 'google';
-    const displayName = isGoogleUser
-        ? (user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Ukjent')
-        : (user.user_metadata?.display_name || user.email?.split('@')[0] || 'Ukjent');
+    const displayName = user.user_metadata?.full_name
+        || user.user_metadata?.name
+        || user.user_metadata?.display_name
+        || user.email?.split('@')[0]
+        || 'Ukjent';
     try {
         const r = await fetch(`${SUPABASE_URL}/rest/v1/users?on_conflict=id`, {
             method: 'POST',
@@ -193,10 +194,11 @@ function updateAuthUI(loggedIn, user) {
     const usernameEl = document.getElementById('vmUsername');
 
     if (loggedIn && user) {
-        const isGoogle = user.app_metadata?.provider === 'google';
-        const rawName = isGoogle
-            ? (user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Bruker')
-            : (user.user_metadata?.display_name || user.email?.split('@')[0] || 'Bruker');
+        const rawName = user.user_metadata?.full_name
+            || user.user_metadata?.name
+            || user.user_metadata?.display_name
+            || user.email?.split('@')[0]
+            || 'Bruker';
         const firstName = rawName.trim().split(/\s+/)[0];
         const name = firstName.charAt(0).toUpperCase() + firstName.slice(1);
         if (loginBtn) loginBtn.style.display = 'none';
