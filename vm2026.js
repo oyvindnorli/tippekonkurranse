@@ -194,7 +194,8 @@ function updateAuthUI(loggedIn, user) {
     const usernameEl = document.getElementById('vmUsername');
 
     if (loggedIn && user) {
-        const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Bruker';
+        const rawName = user.user_metadata?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Bruker';
+        const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
         if (loginBtn) loginBtn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'block';
         if (usernameEl) { usernameEl.textContent = name; usernameEl.style.display = 'block'; }
