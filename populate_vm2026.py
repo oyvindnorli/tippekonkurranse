@@ -92,16 +92,20 @@ def fetch_odds(fixture_id):
         for bookmaker in item.get('bookmakers', []):
             for bet in bookmaker.get('bets', []):
                 if bet.get('name') == 'Match Winner':
-                    vals = bet.get('values', [])
-                    if len(vals) >= 3:
+                    odds = {}
+                    for v in bet.get('values', []):
                         try:
-                            return {
-                                'H': round(float(vals[0]['odd']), 2),
-                                'U': round(float(vals[1]['odd']), 2),
-                                'B': round(float(vals[2]['odd']), 2)
-                            }
+                            label = v.get('value', '').lower()
+                            if label == 'home':
+                                odds['H'] = round(float(v['odd']), 2)
+                            elif label == 'draw':
+                                odds['U'] = round(float(v['odd']), 2)
+                            elif label == 'away':
+                                odds['B'] = round(float(v['odd']), 2)
                         except (ValueError, KeyError):
                             pass
+                    if len(odds) == 3:
+                        return odds
     return None
 
 
@@ -216,7 +220,17 @@ def print_summary(fixtures):
 def main():
     parser = argparse.ArgumentParser(description='Populate VM 2026 matches in Supabase')
     parser.add_argument('--odds', action='store_true', help='Hent odds fra API (bruker ekstra API-kall)')
+    parser.add_argument('--reset-odds', action='store_true', help='Nullstill eksisterende odds før henting (tvinger re-fetch)')
     args = parser.parse_args()
+
+    if args.reset_odds:
+        print("🔄 Nullstiller eksisterende odds...")
+        r = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/matches?league_id=eq.{WC_LEAGUE_ID}&season=eq.{WC_SEASON}&completed=eq.false",
+            headers=SUPABASE_HEADERS(),
+            json={'odds': None}
+        )
+        print(f"   Nullstilt odds for alle kommende VM-kamper (HTTP {r.status_code})")
 
     print("🏆 VM 2026 - Populate script")
     print("=" * 45)
