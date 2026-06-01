@@ -19,7 +19,7 @@ import io
 import json
 import argparse
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
 if sys.platform == 'win32':
@@ -44,6 +44,17 @@ SUPABASE_HEADERS = lambda: {
     'Authorization': f'Bearer {SUPABASE_SERVICE_KEY}',
     'Content-Type': 'application/json'
 }
+
+
+def within_24h(commence_time_str):
+    """Returnerer True hvis kampen starter innen 24 timer"""
+    try:
+        match_time = datetime.fromisoformat(commence_time_str.replace('Z', '+00:00'))
+        if match_time.tzinfo is None:
+            match_time = match_time.replace(tzinfo=timezone.utc)
+        return match_time <= datetime.now(timezone.utc) + timedelta(hours=24)
+    except Exception:
+        return False
 
 
 def check_env():
@@ -148,8 +159,8 @@ def upsert_matches(matches, fetch_odds_flag):
                     'elapsed': m.get('elapsed')
                 })
 
-            # Hent odds om flagget er satt og odds mangler
-            if fetch_odds_flag and ex.get('odds') is None and not m['completed']:
+            # Hent odds om flagget er satt, odds mangler, og kampen starter innen 24t
+            if fetch_odds_flag and ex.get('odds') is None and not m['completed'] and within_24h(m['commence_time']):
                 odds = fetch_odds(mid)
                 if odds:
                     updates['odds'] = odds
@@ -165,8 +176,8 @@ def upsert_matches(matches, fetch_odds_flag):
                 errors += 1
 
         else:
-            # Ny kamp — hent odds om aktuelt
-            if fetch_odds_flag and not m['completed']:
+            # Ny kamp — hent odds om aktuelt og innen 24t
+            if fetch_odds_flag and not m['completed'] and within_24h(m['commence_time']):
                 odds = fetch_odds(mid)
                 if odds:
                     m['odds'] = odds
