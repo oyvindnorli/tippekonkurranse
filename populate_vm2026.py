@@ -83,9 +83,22 @@ def fetch_fixtures():
     return fixtures
 
 
+NAME_ALIASES = {
+    'türkiye': 'turkey',
+    'cape verde islands': 'cape verde',
+    'congo dr': 'dr congo',
+    'democratic republic of congo': 'dr congo',
+    'republic of ireland': 'ireland',
+    'korea republic': 'south korea',
+    'korea dpr': 'north korea',
+    'usa': 'united states',
+    'ivory coast': 'cote d\'ivoire',
+}
+
 def normalize_name(name):
     """Normaliser lagnavn for matching"""
-    return name.lower().strip().replace('&', 'and').replace('-', ' ')
+    n = name.lower().strip().replace('&', 'and').replace('-', ' ')
+    return NAME_ALIASES.get(n, n)
 
 
 def fetch_all_odds():
