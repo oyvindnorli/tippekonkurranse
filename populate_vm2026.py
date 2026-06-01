@@ -30,6 +30,7 @@ load_dotenv()
 SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://ntbhjbstmbnfiaywfkkz.supabase.co')
 SUPABASE_SERVICE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
 API_FOOTBALL_KEY = os.getenv('API_FOOTBALL_KEY')
+ODDS_API_KEY = os.getenv('ODDS_API_KEY')
 
 WC_LEAGUE_ID = 1
 WC_SEASON = 2026
@@ -82,31 +83,73 @@ def fetch_fixtures():
     return fixtures
 
 
-def fetch_odds(fixture_id):
-    """Hent odds for én kamp"""
-    r = requests.get(f"{API_BASE}/odds", headers=API_HEADERS(), params={'fixture': fixture_id})
-    if r.status_code != 200:
-        return None
-    data = r.json()
-    for item in data.get('response', []):
-        for bookmaker in item.get('bookmakers', []):
-            for bet in bookmaker.get('bets', []):
-                if bet.get('name') == 'Match Winner':
-                    odds = {}
-                    for v in bet.get('values', []):
-                        try:
-                            label = v.get('value', '').lower()
-                            if label == 'home':
-                                odds['H'] = round(float(v['odd']), 2)
-                            elif label == 'draw':
-                                odds['U'] = round(float(v['odd']), 2)
-                            elif label == 'away':
-                                odds['B'] = round(float(v['odd']), 2)
-                        except (ValueError, KeyError):
-                            pass
-                    if len(odds) == 3:
-                        return odds
-    return None
+def normalize_name(name):
+    """Normaliser lagnavn for matching"""
+    return name.lower().strip().replace('&', 'and').replace('-', ' ')
+
+
+def fetch_all_odds():
+    """Hent alle VM 2026-odds fra The Odds API (én request for alle kamper)"""
+    if not ODDS_API_KEY:
+        print("   ⚠️  ODDS_API_KEY ikke satt – hopper over The Odds API")
+        return {}
+
+    sport_keys = ['soccer_fifa_world_cup', 'soccer_world_cup_2026', 'soccer_world_cup']
+
+    for sport_key in sport_keys:
+        r = requests.get(
+            f"https://api.the-odds-api.com/v4/sports/{sport_key}/odds",
+            params={
+                'apiKey': ODDS_API_KEY,
+                'regions': 'eu',
+                'markets': 'h2h',
+                'oddsFormat': 'decimal'
+            }
+        )
+        if r.status_code == 404:
+            continue
+        if r.status_code != 200:
+            print(f"   ❌ The Odds API feil: {r.status_code} – {r.text[:100]}")
+            return {}
+
+        data = r.json()
+        if not data:
+            continue
+
+        remaining = r.headers.get('x-requests-remaining', '?')
+        print(f"   ✅ The Odds API: {len(data)} kamper hentet ({sport_key}), {remaining} requests igjen")
+
+        odds_map = {}
+        for match in data:
+            if not match.get('bookmakers'):
+                continue
+            # Bruk snitt av alle tilgjengelige bookmakers
+            h_vals, u_vals, b_vals = [], [], []
+            home = match['home_team']
+            away = match['away_team']
+            for bm in match['bookmakers']:
+                for market in bm.get('markets', []):
+                    if market['key'] != 'h2h':
+                        continue
+                    for o in market['outcomes']:
+                        n = o['name']
+                        p = float(o['price'])
+                        if n == home:
+                            h_vals.append(p)
+                        elif n == away:
+                            b_vals.append(p)
+                        elif n == 'Draw':
+                            u_vals.append(p)
+            if h_vals and u_vals and b_vals:
+                odds_map[(normalize_name(home), normalize_name(away))] = {
+                    'H': round(sum(h_vals) / len(h_vals), 2),
+                    'U': round(sum(u_vals) / len(u_vals), 2),
+                    'B': round(sum(b_vals) / len(b_vals), 2)
+                }
+        return odds_map
+
+    print("   ⚠️  Ingen VM 2026-sport funnet på The Odds API ennå")
+    return {}
 
 
 def transform(fixture, odds=None):
@@ -143,6 +186,9 @@ def upsert_matches(matches, fetch_odds_flag):
     url = f"{SUPABASE_URL}/rest/v1/matches"
     saved = errors = 0
 
+    # Hent alle odds på én gang fra The Odds API
+    odds_map = fetch_all_odds() if fetch_odds_flag else {}
+
     for m in matches:
         mid = m['id']
 
@@ -164,13 +210,14 @@ def upsert_matches(matches, fetch_odds_flag):
                 })
 
             # Odds-logikk:
-            # > 24t unna → hent og oppdater løpende
+            # > 24t unna → oppdater løpende
             # < 24t unna → lås (oppdater kun hvis odds mangler)
             if fetch_odds_flag and not m['completed']:
                 locked = within_24h(m['commence_time'])
                 has_odds = ex.get('odds') is not None
                 if not locked or not has_odds:
-                    odds = fetch_odds(mid)
+                    key = (normalize_name(m['home_team']), normalize_name(m['away_team']))
+                    odds = odds_map.get(key)
                     if odds:
                         updates['odds'] = odds
                         status = '🔒 Låst' if locked else '📈 Oppdatert'
@@ -186,9 +233,10 @@ def upsert_matches(matches, fetch_odds_flag):
                 errors += 1
 
         else:
-            # Ny kamp — hent alltid odds om tilgjengelig
+            # Ny kamp — hent odds om tilgjengelig
             if fetch_odds_flag and not m['completed']:
-                odds = fetch_odds(mid)
+                key = (normalize_name(m['home_team']), normalize_name(m['away_team']))
+                odds = odds_map.get(key)
                 if odds:
                     m['odds'] = odds
                     print(f"   📈 Odds hentet: {m['home_team']} - {m['away_team']} | H{odds['H']} U{odds['U']} B{odds['B']}")
