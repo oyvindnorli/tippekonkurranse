@@ -483,8 +483,8 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: #f8fafc;
-    border: 1.5px dashed #cbd5e1;
+    background: #f0fdf4;
+    border: 1.5px dashed #86efac;
     border-radius: 10px;
     padding: 10px 14px;
 }
@@ -505,7 +505,7 @@ body {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid #86efac;
     background: #fff;
     font-size: 1.2rem;
     line-height: 1;
@@ -515,10 +515,11 @@ body {
     justify-content: center;
     font-family: inherit;
     transition: background 0.15s, border-color 0.15s;
-    color: #1e293b;
+    color: var(--wc-green);
+    font-weight: 700;
 }
-.vm-score-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
-.vm-score-btn:active { background: #e2e8f0; }
+.vm-score-btn:hover { background: #dcfce7; border-color: var(--wc-green); }
+.vm-score-btn:active { background: #bbf7d0; }
 
 .vm-score-val {
     font-size: 1.3rem;
