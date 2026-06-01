@@ -159,12 +159,18 @@ def upsert_matches(matches, fetch_odds_flag):
                     'elapsed': m.get('elapsed')
                 })
 
-            # Hent odds om flagget er satt, odds mangler, og kampen starter innen 24t
-            if fetch_odds_flag and ex.get('odds') is None and not m['completed'] and within_24h(m['commence_time']):
-                odds = fetch_odds(mid)
-                if odds:
-                    updates['odds'] = odds
-                    print(f"   📈 Odds lagt til: {m['home_team']} - {m['away_team']} | H{odds['H']} U{odds['U']} B{odds['B']}")
+            # Odds-logikk:
+            # > 24t unna → hent og oppdater løpende
+            # < 24t unna → lås (oppdater kun hvis odds mangler)
+            if fetch_odds_flag and not m['completed']:
+                locked = within_24h(m['commence_time'])
+                has_odds = ex.get('odds') is not None
+                if not locked or not has_odds:
+                    odds = fetch_odds(mid)
+                    if odds:
+                        updates['odds'] = odds
+                        status = '🔒 Låst' if locked else '📈 Oppdatert'
+                        print(f"   {status} odds: {m['home_team']} - {m['away_team']} | H{odds['H']} U{odds['U']} B{odds['B']}")
 
             r2 = requests.patch(f"{url}?id=eq.{mid}", headers=SUPABASE_HEADERS(), json=updates)
             if r2.status_code in [200, 204]:
@@ -176,8 +182,8 @@ def upsert_matches(matches, fetch_odds_flag):
                 errors += 1
 
         else:
-            # Ny kamp — hent odds om aktuelt og innen 24t
-            if fetch_odds_flag and not m['completed'] and within_24h(m['commence_time']):
+            # Ny kamp — hent alltid odds om tilgjengelig
+            if fetch_odds_flag and not m['completed']:
                 odds = fetch_odds(mid)
                 if odds:
                     m['odds'] = odds
