@@ -38,7 +38,7 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
-          python populate_vm2026.py --odds
+          python populate_vm2026.py
 
       - name: Run update_scores.py
         env:
