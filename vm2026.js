@@ -825,22 +825,17 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
     const displayAway = state ? (state.away !== null ? state.away : '–') : (tip ? tip.awayScore : '–');
     return `
         <div class="vm-tip-form">
-            <div class="vm-tip-side">
-                <span class="vm-tip-team">${escapeHtml(teamName(match.homeTeam))}</span>
-                <div class="vm-score-ctrl">
-                    <button class="vm-score-btn" onclick="adjustScore('${mid}','home',-1)">−</button>
-                    <span class="vm-score-val" id="score-home-${mid}">${displayHome}</span>
-                    <button class="vm-score-btn" onclick="adjustScore('${mid}','home',1)">+</button>
-                </div>
+            <span class="vm-tip-label">Ditt tips:</span>
+            <div class="vm-score-ctrl">
+                <button class="vm-score-btn" onclick="adjustScore('${mid}','home',-1)">−</button>
+                <span class="vm-score-val" id="score-home-${mid}">${displayHome}</span>
+                <button class="vm-score-btn" onclick="adjustScore('${mid}','home',1)">+</button>
             </div>
             <span class="vm-score-dash">–</span>
-            <div class="vm-tip-side">
-                <span class="vm-tip-team">${escapeHtml(teamName(match.awayTeam))}</span>
-                <div class="vm-score-ctrl">
-                    <button class="vm-score-btn" onclick="adjustScore('${mid}','away',-1)">−</button>
-                    <span class="vm-score-val" id="score-away-${mid}">${displayAway}</span>
-                    <button class="vm-score-btn" onclick="adjustScore('${mid}','away',1)">+</button>
-                </div>
+            <div class="vm-score-ctrl">
+                <button class="vm-score-btn" onclick="adjustScore('${mid}','away',-1)">−</button>
+                <span class="vm-score-val" id="score-away-${mid}">${displayAway}</span>
+                <button class="vm-score-btn" onclick="adjustScore('${mid}','away',1)">+</button>
             </div>
         </div>
         <div class="vm-save-feedback" id="feedback-${mid}"></div>
