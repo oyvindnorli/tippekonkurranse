@@ -824,6 +824,7 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
     const displayHome = state ? (state.home !== null ? state.home : '–') : (tip ? tip.homeScore : '–');
     const displayAway = state ? (state.away !== null ? state.away : '–') : (tip ? tip.awayScore : '–');
     return `
+        <p class="vm-tip-heading">Ditt tips</p>
         <div class="vm-tip-form">
             <div class="vm-tip-block">
                 <span class="vm-tip-block-lbl">Hjemme</span>
