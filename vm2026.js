@@ -1090,7 +1090,7 @@ function googleSvg() {
 
 // --- COUNTDOWN ---
 function startCountdown() {
-    const target = new Date('2026-06-11T18:00:00Z');
+    const target = new Date('2026-06-11T19:00:00Z');
     const el = document.getElementById('vm-countdown');
     if (!el) return;
 
