@@ -336,8 +336,8 @@ async function fetchMatchesFromSupabase() {
             status: row.status,
             round: row.round,
             league_id: row.league_id,
-            result: (row.home_score !== null && row.away_score !== null)
-                ? { home: row.home_score, away: row.away_score }
+            result: row.home_score !== null
+                ? { home: row.home_score, away: row.away_score ?? 0 }
                 : null,
             odds: row.odds,
             completed: row.completed,
