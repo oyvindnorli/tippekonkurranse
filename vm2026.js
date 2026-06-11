@@ -539,7 +539,7 @@ async function saveTip(matchId, homeScore, awayScore, homeTeam, awayTeam, odds) 
 // --- POINTS ---
 function calculatePoints(tip, match) {
     if (!match.result) return null;
-    const odds = tip.odds || match.odds || { H: 2.0, U: 3.0, B: 2.0 };
+    const odds = match.odds || { H: 2.0, U: 3.0, B: 2.0 };
     const tipOutcome = getOutcome(tip.homeScore, tip.awayScore);
     const resultOutcome = getOutcome(match.result.home, match.result.away);
     let points = 0;
