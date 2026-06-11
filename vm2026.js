@@ -586,10 +586,13 @@ async function loadLeaderboard() {
 
         const completedCount = wcMatches.filter(m => m.completed).length;
 
+        const EXCLUDED_USERS = new Set(['d4359cc6-3b0f-4464-bd5e-2f4a276441b3']);
+
         // Group by user
         const users = {};
         tips.forEach(tip => {
             const uid = tip.user_id;
+            if (EXCLUDED_USERS.has(uid)) return;
             if (!users[uid]) {
                 users[uid] = {
                     name: tip.users?.display_name || tip.users?.email?.split('@')[0] || 'Ukjent',
