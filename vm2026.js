@@ -631,7 +631,8 @@ async function loadLeaderboard() {
             : '';
 
         container.innerHTML = header + sorted.map((player, i) => {
-            const pos = i + 1;
+            const pos = i === 0 ? 1 : (player.totalPoints === sorted[i - 1].totalPoints ? sorted[i - 1]._pos : i + 1);
+            player._pos = pos;
             const medal = pos === 1 && !pretournament ? '🥇' : pos === 2 && !pretournament ? '🥈' : pos === 3 && !pretournament ? '🥉' : pos;
             const isCurrent = currentUser && player.uid === currentUser.id;
             const scoreText = pretournament
