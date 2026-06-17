@@ -18,6 +18,7 @@ let currentSession = null;
 let wcMatches = [];
 let userTips = {};      // matchId (string) → { homeScore, awayScore, odds, points }
 let allMatchTips = {}; // matchId (string) → [{userId, displayName, homeScore, awayScore}]
+let leaderboardUsers = {}; // uid → { name, totalPoints, tipsCount, tips: {matchId:{home,away,odds}} }
 let activeTab = 'matches';
 
 // --- INIT ---
@@ -597,10 +598,16 @@ async function loadLeaderboard() {
                 users[uid] = {
                     name: tip.users?.display_name || tip.users?.email?.split('@')[0] || 'Ukjent',
                     totalPoints: 0,
-                    tipsCount: 0
+                    tipsCount: 0,
+                    tips: {}   // matchId → { home, away, odds }
                 };
             }
             users[uid].tipsCount++;
+            users[uid].tips[tip.match_id] = {
+                home: tip.home_score,
+                away: tip.away_score,
+                odds: tip.odds
+            };
             const match = wcMatches.find(m => m.id === tip.match_id);
             if (match?.completed && match.result) {
                 users[uid].totalPoints += calculatePoints(
@@ -609,6 +616,9 @@ async function loadLeaderboard() {
                 );
             }
         });
+
+        // Store for the per-user detail page
+        leaderboardUsers = users;
 
         const sorted = Object.entries(users)
             .map(([uid, data]) => ({ uid, ...data }))
@@ -639,9 +649,9 @@ async function loadLeaderboard() {
                 ? `${player.tipsCount} tips`
                 : `${player.totalPoints.toFixed(1)} p`;
             return `
-                <div class="vm-leaderboard-row${isCurrent ? ' current-user' : ''}">
+                <div class="vm-leaderboard-row${isCurrent ? ' current-user' : ''}" role="button" tabindex="0" onclick="showUserPage('${player.uid}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showUserPage('${player.uid}')}">
                     <div class="vm-lb-pos">${medal}</div>
-                    <div class="vm-lb-name">${escapeHtml(player.displayName)}${isCurrent ? ' <span style="color:var(--wc-green);font-size:0.75rem">(deg)</span>' : ''}</div>
+                    <div class="vm-lb-name">${escapeHtml(player.displayName)}${isCurrent ? ' <span style="color:var(--wc-green);font-size:0.75rem">(deg)</span>' : ''}<span class="vm-lb-chevron">›</span></div>
                     <div class="vm-lb-score">${scoreText}</div>
                 </div>
             `;
@@ -651,6 +661,93 @@ async function loadLeaderboard() {
         console.error(e);
     }
 }
+
+// --- USER DETAIL PAGE (per-player tips & points) ---
+window.showUserPage = function(uid) {
+    const user = leaderboardUsers[uid];
+    if (!user) return;
+
+    const modal = document.getElementById('vmUserModal');
+    const body = document.getElementById('vmUserModalBody');
+    if (!modal || !body) return;
+
+    const fullName = user.name.trim();
+    const firstName = fullName.split(/\s+/)[0];
+    const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+    const isCurrent = currentUser && uid === currentUser.id;
+
+    // Completed matches, newest first (same ordering as the finished section)
+    const finished = wcMatches
+        .filter(m => m.completed && m.result)
+        .sort((a, b) => new Date(b.commence_time) - new Date(a.commence_time));
+
+    let tippedCount = 0;
+    const rows = finished.map(match => {
+        const tip = user.tips[match.id];
+        const homeName = escapeHtml(teamName(match.homeTeam));
+        const awayName = escapeHtml(teamName(match.awayTeam));
+        const resultStr = `${match.result.home}–${match.result.away}`;
+
+        if (!tip) {
+            return `
+                <div class="vm-up-row vm-up-row--notip">
+                    <div class="vm-up-match">
+                        <span class="vm-up-team">${homeName}</span>
+                        <span class="vm-up-result">${resultStr}</span>
+                        <span class="vm-up-team vm-up-team--away">${awayName}</span>
+                    </div>
+                    <div class="vm-up-tip">
+                        <span class="vm-up-notip">Ikke tippet</span>
+                        <span class="vm-up-pts vm-up-pts--zero">0 p</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        tippedCount++;
+        const pts = calculatePoints(
+            { homeScore: tip.home, awayScore: tip.away, odds: tip.odds },
+            { result: match.result, odds: match.odds }
+        );
+        const correctOutcome = getOutcome(tip.home, tip.away) === getOutcome(match.result.home, match.result.away);
+        const exact = tip.home === match.result.home && tip.away === match.result.away;
+        const tipClass = exact ? 'vm-up-tipscore--exact' : correctOutcome ? 'vm-up-tipscore--correct' : '';
+
+        return `
+            <div class="vm-up-row">
+                <div class="vm-up-match">
+                    <span class="vm-up-team">${homeName}</span>
+                    <span class="vm-up-result">${resultStr}</span>
+                    <span class="vm-up-team vm-up-team--away">${awayName}</span>
+                </div>
+                <div class="vm-up-tip">
+                    <span class="vm-up-tipscore ${tipClass}">${tip.home}–${tip.away}</span>
+                    <span class="vm-up-pts${pts > 0 ? '' : ' vm-up-pts--zero'}">${pts > 0 ? '+' + pts.toFixed(1) + ' p' : '0 p'}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    const summary = finished.length === 0
+        ? `<div class="vm-up-empty">Ingen kamper er ferdigspilt ennå.</div>`
+        : `<div class="vm-up-list">${rows}</div>`;
+
+    body.innerHTML = `
+        <div class="vm-up-header">
+            <div class="vm-up-name">${escapeHtml(displayName)}${isCurrent ? ' <span class="vm-up-you">(deg)</span>' : ''}</div>
+            <div class="vm-up-total">${user.totalPoints.toFixed(1)} p</div>
+        </div>
+        <div class="vm-up-sub">${tippedCount} av ${finished.length} ferdige kamper tippet</div>
+        ${summary}
+    `;
+
+    modal.style.display = 'flex';
+};
+
+window.closeUserPage = function() {
+    const modal = document.getElementById('vmUserModal');
+    if (modal) modal.style.display = 'none';
+};
 
 // --- RENDER MATCHES ---
 function renderMatches() {

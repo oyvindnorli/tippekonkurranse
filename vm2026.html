@@ -6,7 +6,7 @@
     <title>VM 2026 Tippekonkurranse</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="vm2026.css?v=22">
+    <link rel="stylesheet" href="vm2026.css?v=23">
 </head>
 <body>
 
@@ -169,11 +169,19 @@
         </div>
     </div>
 
+    <!-- USER DETAIL MODAL (tips & points per player) -->
+    <div id="vmUserModal" class="vm-modal-overlay" style="display:none" onclick="if(event.target===this)closeUserPage()">
+        <div class="vm-modal-box vm-modal-box--user">
+            <button class="vm-modal-close" onclick="closeUserPage()">×</button>
+            <div id="vmUserModalBody"></div>
+        </div>
+    </div>
+
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- VM 2026 app -->
-    <script type="module" src="vm2026.js?v=38"></script>
+    <script type="module" src="vm2026.js?v=39"></script>
 
     <script>
         function openAuthModal() {
