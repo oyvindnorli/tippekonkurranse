@@ -467,12 +467,10 @@ async function loadAllTipsForLiveAndFinished() {
     if (!targets.length) return;
     const filter = targets.map(m => `match_id.eq.${m.id}`).join(',');
     try {
-        const res = await fetch(
+        const tips = await fetchAllRows(
             `${SUPABASE_URL}/rest/v1/tips?or=(${filter})&select=match_id,home_score,away_score,user_id,users(display_name,email)`,
-            { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentSession.access_token}` } }
+            { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentSession.access_token}` }
         );
-        if (!res.ok) return;
-        const tips = await res.json();
         allMatchTips = {};
         tips.forEach(tip => {
             const mid = String(tip.match_id);
@@ -555,6 +553,24 @@ function getOutcome(home, away) {
     return 'U';
 }
 
+// Fetch all rows from a PostgREST endpoint, paginating past the 1000-row cap.
+async function fetchAllRows(url, headers) {
+    const pageSize = 1000;
+    let from = 0;
+    let all = [];
+    while (true) {
+        const res = await fetch(url, {
+            headers: { ...headers, 'Range-Unit': 'items', 'Range': `${from}-${from + pageSize - 1}` }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const batch = await res.json();
+        all = all.concat(batch);
+        if (batch.length < pageSize) break;
+        from += pageSize;
+    }
+    return all;
+}
+
 // --- LEADERBOARD ---
 async function loadLeaderboard() {
     const container = document.getElementById('vm-leaderboard-content');
@@ -569,12 +585,10 @@ async function loadLeaderboard() {
         }
 
         const filter = allMatchIds.map(id => `match_id.eq.${id}`).join(',');
-        const res = await fetch(
+        const tips = await fetchAllRows(
             `${SUPABASE_URL}/rest/v1/tips?or=(${filter})&select=*,users(id,display_name,email)`,
-            { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+            { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
         );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const tips = await res.json();
 
         if (new URLSearchParams(window.location.search).get('preview') === 'live') {
             tips.push(...getPreviewLeaderboardTips());
