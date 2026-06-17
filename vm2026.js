@@ -681,9 +681,9 @@ window.showUserPage = function(uid) {
     const user = leaderboardUsers[uid];
     if (!user) return;
 
-    const modal = document.getElementById('vmUserModal');
-    const body = document.getElementById('vmUserModalBody');
-    if (!modal || !body) return;
+    const page = document.getElementById('vm-user-page');
+    const body = document.getElementById('vmUserPageBody');
+    if (!page || !body) return;
 
     const fullName = user.name.trim();
     const firstName = fullName.split(/\s+/)[0];
@@ -755,13 +755,32 @@ window.showUserPage = function(uid) {
         ${summary}
     `;
 
-    modal.style.display = 'flex';
+    // Hide the tab UI and show the full-screen user page (scrolls with the page)
+    document.getElementById('vm-tabbar').style.display = 'none';
+    document.querySelectorAll('.vm-tab-content').forEach(el => el.style.display = 'none');
+    page.style.display = 'block';
+    window.scrollTo(0, 0);
+
+    // Add a history entry so the device/browser back button closes the page
+    history.pushState({ vmUserPage: true }, '');
 };
 
+// Restore the tab view (without touching history)
+function hideUserPage() {
+    const page = document.getElementById('vm-user-page');
+    if (!page || page.style.display === 'none') return;
+    page.style.display = 'none';
+    document.getElementById('vm-tabbar').style.display = 'block';
+    showTab('leaderboard');
+}
+
 window.closeUserPage = function() {
-    const modal = document.getElementById('vmUserModal');
-    if (modal) modal.style.display = 'none';
+    // Go back through history so hardware-back and the button share one path
+    if (history.state && history.state.vmUserPage) history.back();
+    else hideUserPage();
 };
+
+window.addEventListener('popstate', hideUserPage);
 
 // --- RENDER MATCHES ---
 function renderMatches() {

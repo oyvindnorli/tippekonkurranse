@@ -6,7 +6,7 @@
     <title>VM 2026 Tippekonkurranse</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="vm2026.css?v=24">
+    <link rel="stylesheet" href="vm2026.css?v=25">
 </head>
 <body>
 
@@ -33,7 +33,7 @@
     </header>
 
     <!-- TABS -->
-    <div style="background:#fff;border-bottom:1px solid #e5e7eb;">
+    <div id="vm-tabbar" style="background:#fff;border-bottom:1px solid #e5e7eb;">
         <div class="vm-tabs">
             <button class="vm-tab active" data-tab="matches" onclick="showTab('matches')">⚽ Kamper</button>
             <button class="vm-tab" data-tab="leaderboard" onclick="showTab('leaderboard')">🏆 Ledertabell</button>
@@ -169,19 +169,19 @@
         </div>
     </div>
 
-    <!-- USER DETAIL MODAL (tips & points per player) -->
-    <div id="vmUserModal" class="vm-modal-overlay" style="display:none" onclick="if(event.target===this)closeUserPage()">
-        <div class="vm-modal-box vm-modal-box--user">
-            <button class="vm-modal-close" onclick="closeUserPage()">×</button>
-            <div id="vmUserModalBody"></div>
+    <!-- USER DETAIL PAGE (tips & points per player) -->
+    <div id="vm-user-page" class="vm-userpage" style="display:none">
+        <div class="vm-userpage-bar">
+            <button class="vm-userpage-back" onclick="closeUserPage()">‹ Tilbake til ledertabell</button>
         </div>
+        <div class="vm-content" id="vmUserPageBody"></div>
     </div>
 
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- VM 2026 app -->
-    <script type="module" src="vm2026.js?v=40"></script>
+    <script type="module" src="vm2026.js?v=41"></script>
 
     <script>
         function openAuthModal() {

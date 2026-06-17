@@ -718,33 +718,37 @@ body {
     opacity: 0.5;
 }
 
-/* --- USER DETAIL PAGE (modal) --- */
-.vm-modal-box--user {
-    max-width: 460px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    padding: 24px 20px 20px;
+/* --- USER DETAIL PAGE (full-screen in-app view) --- */
+.vm-userpage {
+    background: #f5f5f5;
+    min-height: 100vh;
 }
 
-/* Body fills the box and lets the match list scroll (min-height:0 is
-   required for the flex child to shrink and scroll on mobile). */
-#vmUserModalBody {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
+.vm-userpage-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+    border-bottom: 1px solid var(--wc-border);
+    padding: 10px 16px;
 }
 
-.vm-up-header,
-.vm-up-sub { flex-shrink: 0; }
+.vm-userpage-back {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--wc-red);
+    padding: 4px 0;
+}
 
 .vm-up-header {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 12px;
-    padding-right: 28px;
 }
 .vm-up-name { font-size: 1.25rem; font-weight: 700; color: var(--wc-text); }
 .vm-up-you { color: var(--wc-green); font-size: 0.8rem; font-weight: 600; }
@@ -768,13 +772,10 @@ body {
 }
 
 .vm-up-list {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    margin: 0 -4px;
-    padding: 0 4px;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 4px 12px;
 }
 
 .vm-up-row {
@@ -1119,13 +1120,7 @@ body {
     .vm-countdown-unit { min-width: 42px; padding: 5px 7px; }
     .vm-countdown-num { font-size: 1.2rem; }
 
-    /* User detail page: more room + scrollable on small screens */
-    #vmUserModal { padding: 10px; align-items: flex-end; }
-    .vm-modal-box--user {
-        max-height: 90vh;
-        padding: 20px 14px 14px;
-        border-radius: 14px 14px 0 0;
-    }
+    /* User detail page: tighter rows on small screens */
     .vm-up-name, .vm-up-total { font-size: 1.1rem; }
     .vm-up-match { font-size: 0.8rem; gap: 5px; }
     .vm-up-row { gap: 6px; padding: 9px 2px; }
