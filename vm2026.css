@@ -727,6 +727,18 @@ body {
     padding: 24px 20px 20px;
 }
 
+/* Body fills the box and lets the match list scroll (min-height:0 is
+   required for the flex child to shrink and scroll on mobile). */
+#vmUserModalBody {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.vm-up-header,
+.vm-up-sub { flex-shrink: 0; }
+
 .vm-up-header {
     display: flex;
     align-items: baseline;
@@ -756,7 +768,11 @@ body {
 }
 
 .vm-up-list {
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     margin: 0 -4px;
     padding: 0 4px;
 }
@@ -1102,4 +1118,18 @@ body {
     .vm-countdown { gap: 8px; }
     .vm-countdown-unit { min-width: 42px; padding: 5px 7px; }
     .vm-countdown-num { font-size: 1.2rem; }
+
+    /* User detail page: more room + scrollable on small screens */
+    #vmUserModal { padding: 10px; align-items: flex-end; }
+    .vm-modal-box--user {
+        max-height: 90vh;
+        padding: 20px 14px 14px;
+        border-radius: 14px 14px 0 0;
+    }
+    .vm-up-name, .vm-up-total { font-size: 1.1rem; }
+    .vm-up-match { font-size: 0.8rem; gap: 5px; }
+    .vm-up-row { gap: 6px; padding: 9px 2px; }
+    .vm-up-tipscore, .vm-up-pts { font-size: 0.8rem; }
+    .vm-up-tip { gap: 5px; }
+    .vm-up-pts { min-width: 36px; }
 }
