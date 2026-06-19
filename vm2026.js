@@ -24,7 +24,6 @@ let activeTab = 'matches';
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
     initSupabase();
-    startCountdown();
 });
 
 // --- SUPABASE AUTH ---
@@ -784,6 +783,8 @@ window.addEventListener('popstate', hideUserPage);
 
 // --- RENDER MATCHES ---
 function renderMatches() {
+    renderProgressBanner();
+
     const container = document.getElementById('vm-matches-content');
     if (!container) return;
 
@@ -1222,30 +1223,26 @@ function googleSvg() {
     </svg>`;
 }
 
-// --- COUNTDOWN ---
-function startCountdown() {
-    const target = new Date('2026-06-11T19:00:00Z');
-    const el = document.getElementById('vm-countdown');
-    if (!el) return;
+// --- PROGRESS BANNER (matches played / remaining) ---
+function renderProgressBanner() {
+    const titleEl = document.getElementById('vm-progress-title');
+    const countEl = document.getElementById('vm-progress-count');
+    const fillEl = document.getElementById('vm-progress-fill');
+    if (!titleEl || !countEl || !fillEl) return;
 
-    function tick() {
-        const diff = target - new Date();
-        if (diff <= 0) {
-            el.innerHTML = '<span style="font-weight:700">VM ER I GANG! ⚽</span>';
-            return;
-        }
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff % 86400000) / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        el.innerHTML = `
-            <div class="vm-countdown-unit"><div class="vm-countdown-num">${d}</div><div class="vm-countdown-label">dager</div></div>
-            <div class="vm-countdown-unit"><div class="vm-countdown-num">${String(h).padStart(2,'0')}</div><div class="vm-countdown-label">timer</div></div>
-            <div class="vm-countdown-unit"><div class="vm-countdown-num">${String(m).padStart(2,'0')}</div><div class="vm-countdown-label">min</div></div>
-            <div class="vm-countdown-unit"><div class="vm-countdown-num">${String(s).padStart(2,'0')}</div><div class="vm-countdown-label">sek</div></div>
-        `;
+    const total = wcMatches.length;
+    if (!total) {
+        titleEl.textContent = 'Kamper lastes…';
+        countEl.textContent = '';
+        fillEl.style.width = '0%';
+        return;
     }
 
-    tick();
-    setInterval(tick, 1000);
+    const played = wcMatches.filter(m => m.completed).length;
+    const remaining = total - played;
+    const pct = Math.round((played / total) * 100);
+
+    titleEl.textContent = `${played} av ${total} kamper spilt`;
+    countEl.textContent = remaining > 0 ? `${remaining} igjen` : 'Ferdig! 🏆';
+    fillEl.style.width = pct + '%';
 }

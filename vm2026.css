@@ -185,37 +185,32 @@ body {
     margin-bottom: 4px;
 }
 
-.vm-banner-sub {
-    font-size: 0.82rem;
-    opacity: 0.75;
-}
-
-.vm-countdown {
+.vm-progress-top {
     display: flex;
+    align-items: baseline;
+    justify-content: space-between;
     gap: 12px;
-    margin-top: 10px;
+    margin-bottom: 8px;
 }
 
-.vm-countdown-unit {
-    text-align: center;
-    background: rgba(255,255,255,0.1);
-    border-radius: 6px;
-    padding: 6px 10px;
-    min-width: 52px;
+.vm-progress-count {
+    font-size: 0.78rem;
+    opacity: 0.8;
+    white-space: nowrap;
 }
 
-.vm-countdown-num {
-    font-size: 1.4rem;
-    font-weight: 700;
-    line-height: 1;
+.vm-progress-track {
+    height: 8px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 999px;
+    overflow: hidden;
 }
 
-.vm-countdown-label {
-    font-size: 0.65rem;
-    opacity: 0.7;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-top: 2px;
+.vm-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--wc-gold), #f0c040);
+    transition: width 0.5s ease;
 }
 
 /* --- LOGIN PROMPT --- */
@@ -1116,9 +1111,6 @@ body {
 @media (max-width: 500px) {
     .vm-brand-sub { display: none; }
     .vm-team { font-size: 0.82rem; }
-    .vm-countdown { gap: 8px; }
-    .vm-countdown-unit { min-width: 42px; padding: 5px 7px; }
-    .vm-countdown-num { font-size: 1.2rem; }
 
     /* User detail page: tighter rows on small screens */
     .vm-up-name, .vm-up-total { font-size: 1.1rem; }

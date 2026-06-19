@@ -6,7 +6,7 @@
     <title>VM 2026 Tippekonkurranse</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="vm2026.css?v=25">
+    <link rel="stylesheet" href="vm2026.css?v=26">
 </head>
 <body>
 
@@ -45,13 +45,17 @@
     <div id="tab-matches" class="vm-tab-content">
         <div class="vm-content">
 
-            <!-- Countdown banner -->
+            <!-- Progress banner: matches played / remaining -->
             <div class="vm-banner">
-                <div class="vm-banner-icon">🌍</div>
+                <div class="vm-banner-icon">⚽</div>
                 <div style="flex:1">
-                    <div class="vm-banner-title">Nedtelling til VM 2026</div>
-                    <div class="vm-banner-sub">11. juni – 19. juli 2026</div>
-                    <div id="vm-countdown" class="vm-countdown" style="margin-top:10px"></div>
+                    <div class="vm-progress-top">
+                        <span class="vm-banner-title" id="vm-progress-title">Laster kamper…</span>
+                        <span class="vm-progress-count" id="vm-progress-count"></span>
+                    </div>
+                    <div class="vm-progress-track">
+                        <div class="vm-progress-fill" id="vm-progress-fill" style="width:0%"></div>
+                    </div>
                 </div>
             </div>
 
@@ -181,7 +185,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- VM 2026 app -->
-    <script type="module" src="vm2026.js?v=41"></script>
+    <script type="module" src="vm2026.js?v=42"></script>
 
     <script>
         function openAuthModal() {
