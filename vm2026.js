@@ -1224,21 +1224,26 @@ function googleSvg() {
 }
 
 // --- PROGRESS BANNER (matches played / remaining) ---
+// VM 2026 har 104 kamper totalt (48 lag). Sluttspillkampene ligger ikke
+// nødvendigvis i basen ennå, så totalen er fast mens "spilt" telles fra
+// faktiske ferdige kamper.
+const WC_TOTAL_MATCHES = 104;
+
 function renderProgressBanner() {
     const titleEl = document.getElementById('vm-progress-title');
     const countEl = document.getElementById('vm-progress-count');
     const fillEl = document.getElementById('vm-progress-fill');
     if (!titleEl || !countEl || !fillEl) return;
 
-    const total = wcMatches.length;
-    if (!total) {
+    if (!wcMatches.length) {
         titleEl.textContent = 'Kamper lastes…';
         countEl.textContent = '';
         fillEl.style.width = '0%';
         return;
     }
 
-    const played = wcMatches.filter(m => m.completed).length;
+    const total = WC_TOTAL_MATCHES;
+    const played = Math.min(wcMatches.filter(m => m.completed).length, total);
     const remaining = total - played;
     const pct = Math.round((played / total) * 100);
 
