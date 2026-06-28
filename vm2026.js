@@ -949,7 +949,21 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
 
     if (isLive || (started && !isFinished)) {
         if (tip) {
-            return `<div class="vm-tip-locked">Ditt tips: ${tip.homeScore}–${tip.awayScore} (låst)</div>`;
+            const result = match.result;
+            const hasResult = isLive && !!result;
+            let pillClass = 'vm-others-pill';
+            if (hasResult) {
+                const exact = tip.homeScore === result.home && tip.awayScore === result.away;
+                const correct = getOutcome(tip.homeScore, tip.awayScore) === getOutcome(result.home, result.away);
+                if (exact) pillClass += ' exact';
+                else if (correct) pillClass += ' outcome';
+            }
+            return `
+                <div class="vm-mytip-live">
+                    <span class="vm-mytip-live-label">Ditt tips</span>
+                    <span class="${pillClass}"><strong>${tip.homeScore}–${tip.awayScore}</strong></span>
+                </div>
+            `;
         }
         return `<div class="vm-tip-locked">Kampen har startet – tipping er stengt.</div>`;
     }
