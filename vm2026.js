@@ -1014,15 +1014,10 @@ function renderOthersTips(match, isFinished, isLive) {
         return `<div class="${pillClass}">${escapeHtml(t.displayName)} <strong>${t.homeScore}–${t.awayScore}</strong>${extra}</div>`;
     }).join('');
 
-    const legend = (isLive && hasResult)
-        ? `<div class="vm-others-legend"><span class="vm-others-legend-item"><i class="vm-dot outcome"></i>riktig tegn</span><span class="vm-others-legend-item"><i class="vm-dot exact"></i>eksakt resultat</span></div>`
-        : '';
-
     return `
         <div class="vm-others-tips">
             <div class="vm-others-label">Andre tips${isLive && hasResult ? ' <span class="vm-others-live-tag">live</span>' : ''}</div>
             <div class="vm-others-list">${pills}</div>
-            ${legend}
         </div>
     `;
 }
