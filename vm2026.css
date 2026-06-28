@@ -646,6 +646,65 @@ body {
     font-weight: 700;
 }
 
+/* Riktig utgangstegn (H/U/B) – ligger an til poeng */
+.vm-others-pill.outcome {
+    background: #e8f5e9;
+    color: #1b5e20;
+}
+
+/* Eksakt resultat – ligger an til full pott */
+.vm-others-pill.exact {
+    background: #c8e6c9;
+    color: #14532d;
+    box-shadow: inset 0 0 0 1.5px var(--wc-green);
+    font-weight: 600;
+}
+
+.vm-others-live-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+}
+
+.vm-others-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.vm-others-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.68rem;
+    color: var(--wc-muted);
+}
+
+.vm-others-legend .vm-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.vm-others-legend .vm-dot.outcome {
+    background: #e8f5e9;
+    box-shadow: inset 0 0 0 1px #1b5e20;
+}
+
+.vm-others-legend .vm-dot.exact {
+    background: #c8e6c9;
+    box-shadow: inset 0 0 0 1.5px var(--wc-green);
+}
+
 /* --- LEADERBOARD --- */
 .vm-leaderboard-empty {
     text-align: center;

@@ -897,7 +897,7 @@ function renderMatchCard(match) {
 
     const tipSection = renderTipSection(match, tip, started, isFinished, isLive);
     const oddsSection = match.odds ? renderOdds(match.odds) : '';
-    const othersSection = (isFinished || isLive) ? renderOthersTips(match, isFinished) : '';
+    const othersSection = (isFinished || isLive) ? renderOthersTips(match, isFinished, isLive) : '';
 
     return `
         <div class="${cardClass}" data-match-id="${match.id}">
@@ -983,30 +983,46 @@ function renderTipSection(match, tip, started, isFinished, isLive) {
     `;
 }
 
-function renderOthersTips(match, isFinished) {
+function renderOthersTips(match, isFinished, isLive) {
     if (!currentUser) return '';
     const tips = allMatchTips[String(match.id)];
     if (!tips || !tips.length) return '';
     const others = tips.filter(t => t.userId !== currentUser.id);
     if (!others.length) return '';
 
+    const result = match.result;
+    const hasResult = (isFinished || isLive) && !!result;
+    const resultOutcome = hasResult ? getOutcome(result.home, result.away) : null;
+
     const pills = others.map(t => {
+        let pillClass = 'vm-others-pill';
         let extra = '';
-        if (isFinished && match.result) {
-            const pts = calculatePoints(
-                { homeScore: t.homeScore, awayScore: t.awayScore, odds: null },
-                { result: match.result, odds: match.odds }
-            );
-            const correct = getOutcome(t.homeScore, t.awayScore) === getOutcome(match.result.home, match.result.away);
-            extra = `<span class="vm-others-pts${correct ? ' correct' : ''}">${pts > 0 ? '+' + pts.toFixed(1) : '0'}</span>`;
+        if (hasResult) {
+            const exact = t.homeScore === result.home && t.awayScore === result.away;
+            const correct = getOutcome(t.homeScore, t.awayScore) === resultOutcome;
+            if (exact) pillClass += ' exact';
+            else if (correct) pillClass += ' outcome';
+
+            if (isFinished) {
+                const pts = calculatePoints(
+                    { homeScore: t.homeScore, awayScore: t.awayScore, odds: null },
+                    { result: result, odds: match.odds }
+                );
+                extra = `<span class="vm-others-pts${correct ? ' correct' : ''}">${pts > 0 ? '+' + pts.toFixed(1) : '0'}</span>`;
+            }
         }
-        return `<div class="vm-others-pill">${escapeHtml(t.displayName)} <strong>${t.homeScore}–${t.awayScore}</strong>${extra}</div>`;
+        return `<div class="${pillClass}">${escapeHtml(t.displayName)} <strong>${t.homeScore}–${t.awayScore}</strong>${extra}</div>`;
     }).join('');
+
+    const legend = (isLive && hasResult)
+        ? `<div class="vm-others-legend"><span class="vm-others-legend-item"><i class="vm-dot outcome"></i>riktig tegn</span><span class="vm-others-legend-item"><i class="vm-dot exact"></i>eksakt resultat</span></div>`
+        : '';
 
     return `
         <div class="vm-others-tips">
-            <div class="vm-others-label">Andre tips</div>
+            <div class="vm-others-label">Andre tips${isLive && hasResult ? ' <span class="vm-others-live-tag">live</span>' : ''}</div>
             <div class="vm-others-list">${pills}</div>
+            ${legend}
         </div>
     `;
 }
