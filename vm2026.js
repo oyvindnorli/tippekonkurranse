@@ -1030,7 +1030,7 @@ function renderOthersTips(match, isFinished, isLive) {
 
     return `
         <div class="vm-others-tips">
-            <div class="vm-others-label">Andre tips${isLive && hasResult ? ' <span class="vm-others-live-tag">live</span>' : ''}</div>
+            <div class="vm-others-label">Andre tips</div>
             <div class="vm-others-list">${pills}</div>
         </div>
     `;
