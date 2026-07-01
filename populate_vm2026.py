@@ -174,6 +174,17 @@ def transform(fixture, odds=None):
     status = f.get('status', {}).get('short', 'NS')
     completed = status in ['FT', 'AET', 'PEN', 'FT_PEN']
 
+    # Sluttspill: poeng gis på resultatet etter ordinær tid (90 min).
+    # API-Football sitt 'goals' inkluderer ekstraomganger, så for fullførte
+    # kamper snapper vi til score.fulltime (90-min-resultatet). Under live
+    # bruker vi 'goals' slik at livevisningen stemmer.
+    sc = fixture.get('score', {}) or {}
+    ft = sc.get('fulltime', {}) or {}
+    if completed and ft.get('home') is not None:
+        home_score, away_score = ft.get('home'), ft.get('away')
+    else:
+        home_score, away_score = g.get('home'), g.get('away')
+
     return {
         'id': f['id'],
         'home_team': t['home']['name'],
@@ -186,8 +197,8 @@ def transform(fixture, odds=None):
         'round': l.get('round'),
         'season': WC_SEASON,
         'status': status,
-        'home_score': g.get('home'),
-        'away_score': g.get('away'),
+        'home_score': home_score,
+        'away_score': away_score,
         'completed': completed,
         'elapsed': f.get('status', {}).get('elapsed'),
         'odds': odds
